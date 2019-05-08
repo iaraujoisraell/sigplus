@@ -1,0 +1,63 @@
+[
+    {
+        "name": "phpoffice/phpproject",
+        "version": "0.2.0",
+        "version_normalized": "0.2.0.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/PHPOffice/PHPProject.git",
+            "reference": "18920bb1f28c6d2181595cf3939d3d1dfa7cc1fe"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://api.github.com/repos/PHPOffice/PHPProject/zipball/18920bb1f28c6d2181595cf3939d3d1dfa7cc1fe",
+            "reference": "18920bb1f28c6d2181595cf3939d3d1dfa7cc1fe",
+            "shasum": ""
+        },
+        "require": {
+            "ext-xml": "*",
+            "php": ">=5.3.0"
+        },
+        "require-dev": {
+            "phpdocumentor/phpdocumentor": "2.*",
+            "phploc/phploc": "2.*",
+            "phpmd/phpmd": "2.*",
+            "phpunit/phpunit": "3.7.*",
+            "sebastian/phpcpd": "2.*",
+            "squizlabs/php_codesniffer": "1.*"
+        },
+        "time": "2014-08-13T15:17:11+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-0": {
+                "PHPProject": "src/"
+            },
+            "psr-4": {
+                "PhpOffice\\PhpProject\\": "src/PhpProject/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "LGPL"
+        ],
+        "authors": [
+            {
+                "name": "Mark Baker"
+            },
+            {
+                "name": "Franck Lefevre",
+                "homepage": "http://rootslabs.net"
+            }
+        ],
+        "description": "PHPProject - Read, Create and Write Project Management documents in PHP",
+        "homepage": "http://phpoffice.github.io",
+        "keywords": [
+            "GanttProject",
+            "gan",
+            "mpx",
+            "php",
+            "project"
+        ]
+    }
+]

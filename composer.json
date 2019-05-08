@@ -1,0 +1,15 @@
+{
+
+    "config":
+    {
+    "vendor-dir":"app/libraries"
+    },
+    
+    
+    
+    
+"require":
+{
+"phpoffice/phpproject": "^0.2.0"
+}
+}

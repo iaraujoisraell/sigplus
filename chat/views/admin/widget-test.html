@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title><?php echo $app->trans('widget.test') ?></title>
+
+        <!-- Styles -->
+
+        <link rel="icon" type="image/icon" href="<?php echo $app->asset('img/fav.ico') ?>">
+    </head>
+    <body>
+
+    	<?php echo $app->renderView('blocks/debugScripts.html'); ?>
+
+        <script type="text/javascript" src="<?php echo $app->path('Widget:init') ?>"></script>
+
+    </body>
+</html>
