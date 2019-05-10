@@ -30,6 +30,7 @@ h3 {
 .login-page .login-form-div {
   width: 100%;
   max-width: 360px;
+  
   margin: 0 auto;
 }
 .login-page .login-content,

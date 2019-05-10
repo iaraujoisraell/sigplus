@@ -172,11 +172,7 @@ $(function () {
         'class': 'tab-pane active'
     })
 
-    // Create the tab button
-    var $tabButton = $('<li />', {'class': 'active'})
-        .html('<a href=\'#control-sidebar-theme-demo-options-tab\' data-toggle=\'tab\'>'
-            + '<i class="fa fa-wrench"></i>'
-            + '</a>')
+ 
 
     // Add the tab button to the right sidebar tabs
     $('[href="#control-sidebar-home-tab"]')
@@ -342,13 +338,13 @@ $(function () {
                 + '<p class="text-center no-margin" style="font-size: 12px">Yellow Light</p>')
     $skinsList.append($skinYellowLight)
 
-    $demoSettings.append('<h4 class="control-sidebar-heading">Skins</h4>')
+ //   $demoSettings.append('<h4 class="control-sidebar-heading">Skins</h4>')
 //    $demoSettings.append($skinsList)
 
-    $tabPane.append($demoSettings)
-    $('#control-sidebar-home-tab').after($tabPane)
+  //  $tabPane.append($demoSettings)
+   // $('#control-sidebar-home-tab').after($tabPane)
 
-    setup()
+  //  setup()
 
-    $('[data-toggle="tooltip"]').tooltip()
+  //  $('[data-toggle="tooltip"]').tooltip()
 })

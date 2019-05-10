@@ -16,7 +16,7 @@ class Auth extends MY_Controller
 
     function index()
     {
-
+         
         if (!$this->loggedIn) {
             redirect('login');
         } else {
@@ -302,13 +302,36 @@ class Auth extends MY_Controller
             }
             $this->db->update('users', array('avatar' => NULL), array('id' => $id));
             $this->session->set_flashdata('message', lang("avatar_deleted"));
-            die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . $_SERVER["HTTP_REFERER"] . "'; }, 0);</script>");
+          //  die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . $_SERVER["HTTP_REFERER"] . "'; }, 0);</script>");
             redirect($_SERVER["HTTP_REFERER"]);
-            redirect("auth/profile/" . $id);
+            redirect("welcome/profile/" . $id);
         }
-        redirect("auth/profile/" . $id);
+        redirect("welcome/profile/" . $id);
     }
 
+    
+    function delete_capa($id = NULL, $avatar = NULL)
+    {
+
+        if (!$this->ion_auth->logged_in() || !$this->ion_auth->in_group('owner') && $id != $this->session->userdata('user_id')) {
+            $this->session->set_flashdata('warning', lang("access_denied"));
+            die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . $_SERVER["HTTP_REFERER"] . "'; }, 0);</script>");
+            redirect($_SERVER["HTTP_REFERER"]);
+        } else {
+            unlink('assets/uploads/avatars/' . $avatar);
+           
+            if ($id == $this->session->userdata('user_id')) {
+                $this->session->unset_userdata('foto_capa');
+            }
+            $this->db->update('users', array('foto_capa' => NULL), array('id' => $id));
+            $this->session->set_flashdata('message', lang("avatar_deleted"));
+          //  die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . $_SERVER["HTTP_REFERER"] . "'; }, 0);</script>");
+            redirect($_SERVER["HTTP_REFERER"]);
+            redirect("welcome/profile/" . $id);
+        }
+        redirect("welcome/profile/" . $id);
+    }
+    
     function profile($id = NULL)
     {
           $usuario = $this->session->userdata('user_id');
@@ -460,7 +483,6 @@ class Auth extends MY_Controller
 	ldap_set_option($ldap_connection, LDAP_OPT_PROTOCOL_VERSION, 3) or die('Unable to set LDAP protocol version');
 	ldap_set_option($ldap_connection, LDAP_OPT_REFERRALS, 0); 
 	if (!@ldap_bind($ldap_connection, $_mat . '@unimedmanaus.local', $_pw)) {
-            
 		echo json_decode(array('error' => 'Usuário ou Senha inválida')); 
                 $this->session->set_flashdata('error', lang('Usuário ou Senha inválida'));
                 // $this->load->view($this->theme . 'auth/login', $this->data);
@@ -500,7 +522,7 @@ class Auth extends MY_Controller
                 
                 
 	} else {
-                // ENCONTROU NO AD
+            
 		$ldap_base_dn = 'DC=unimedmanaus,DC=local';
 		$search_filter='samaccountname=' . $_mat;
 		
@@ -532,8 +554,7 @@ class Auth extends MY_Controller
                 /*
                  * VERIFICA SE EXISTE O CADASTRO DO MESMO NO SIG
                  */
-                //echo $matricula; exit;
-                $cadastroUsuario = $this->site->getUserbyMatricula($_mat);
+                $cadastroUsuario = $this->site->getUserbyemail($email);
                 $id_usuario = $cadastroUsuario->id;
                 $perfilAtualUsuario = $cadastroUsuario->group_id;
                 
@@ -578,7 +599,7 @@ class Auth extends MY_Controller
                     
                     redirect('login');
                     
-                    //
+                    
                     //    $this->site->updateMatriculaUser($id_usuario, $data);
                     /*
                      * FAZ O CADASTRO
@@ -598,7 +619,7 @@ class Auth extends MY_Controller
         //  $this->load->view($this->theme . 'auth/login', $this->data);
     }
     
-    function login($m = NULL)
+    function login_old_ad($m = NULL)
     {
       
       //  exit;
@@ -654,27 +675,15 @@ class Auth extends MY_Controller
         }
     }
 
-    function login_sig($m = NULL)
+    function login($m = NULL)
     {
+       
         
         
-        $usuario = $this->session->userdata('user_id');
-        $cadastroUsuario = $this->site->getPerfilAtualByID($usuario);
-        $perfilAtualUsuario = $cadastroUsuario->group_id;
-        
-        //echo $usuario; exit;
-        
-        if ($this->loggedIn) {
+         if ($this->loggedIn) {
             $this->session->set_flashdata('error', $this->session->flashdata('error'));
-            
-           if($perfilAtualUsuario==5){
-             
-               redirect('Welcome');
-           }else if($perfilAtualUsuario !=5){
-            redirect('Login_Projetos/menu');
-           }else{
-               
-           }
+            redirect('Welcome');
+        
         }
        
         $this->data['title'] = lang('login');
@@ -682,33 +691,33 @@ class Auth extends MY_Controller
         if ($this->Settings->captcha) {
             $this->form_validation->set_rules('captcha', lang('captcha'), 'required|callback_captcha_check');
         }
-
+        
         if ($this->form_validation->run() == true) {
 
             $remember = (bool)$this->input->post('remember');
-
+            
             if ($this->ion_auth->login($this->input->post('identity'), $this->input->post('password'), $remember)) {
+                
+                //QUANDO O SISTEMA ESTÁ EM MANUTENÇÃO
                 if ($this->Settings->mmode) {
                     if (!$this->ion_auth->in_group('owner')) {
                         $this->session->set_flashdata('error', lang('site_is_offline_plz_try_later'));
                         redirect('auth/logout');
                     }
                 }
-                if ($this->ion_auth->in_group('customer') || $this->ion_auth->in_group('supplier')) {
-                    redirect('auth/logout/1');
-                }
-                $usuario = $this->session->userdata('user_id');
-                $cadastroUsuario = $this->site->getPerfilAtualByID($usuario);
-                $perfilAtualUsuario = $cadastroUsuario->group_id;
+                
+                /*
+                 * REALIZA O LOG
+                 
+                $ldata = array('user_id' => $user->id, 'ip_address' => $this->input->ip_address(), 'login' => $this->input->post('identity'));
+                $this->db->insert('user_logins', $ldata);
+                 */
+               
                 $this->session->set_flashdata('message', $this->ion_auth->messages());
                 
-                if($perfilAtualUsuario==5){
-                $referrer = $this->session->userdata('requested_page') ? $this->session->userdata('requested_page') : 'Welcome';    
-                }else  if($perfilAtualUsuario != 5){
-                $referrer = $this->session->userdata('requested_page') ? $this->session->userdata('requested_page') : 'Login_Projetos/menu';    
-                }
-                
-              
+               
+                $referrer = $this->session->userdata('requested_page') ? $this->session->userdata('requested_page') : 'welcome';    
+               
                 redirect($referrer);
                  
             } else {
@@ -1019,6 +1028,7 @@ class Auth extends MY_Controller
 
         $this->data['title'] = "Create User";
         $this->form_validation->set_rules('username', lang("username"), 'trim|is_unique[users.username]');
+        $this->form_validation->set_rules('email', lang("email"), 'trim|is_unique[users.email]');
         $this->form_validation->set_rules('status', lang("status"), 'trim|required');
         $this->form_validation->set_rules('group[]', lang("Perfil"), 'trim|required');
 
@@ -1028,9 +1038,8 @@ class Auth extends MY_Controller
             //$empresa = $user_dados->empresa_id;
             
             $username = strtolower($this->input->post('username'));
-            $matricula = strtolower($this->input->post('matricula'));
             $email = strtolower($this->input->post('email'));
-            $password = 'Unimed*2019';// $this->input->post('password');
+            $password = $this->input->post('password');
             $notify = 1;
             
             $grupo_perfis = $this->input->post('group[]');
@@ -1039,13 +1048,12 @@ class Auth extends MY_Controller
             
             $additional_data = array(
                 'first_name' => $this->input->post('first_name'),
-             //   'last_name' => $this->input->post('last_name'),
+                'last_name' => $this->input->post('last_name'),
               //  'setor_id' => $this->input->post('setor'),
                 'phone' => $this->input->post('phone'),
                 'gender' => $this->input->post('gender'),
-                'group_id' => $grupo_id,
-                'username' => $username,
-                'matricula' => $matricula
+                'group_id' => $grupo_id
+               // 'biller_id' => $this->input->post('biller')
                // 'warehouse_id' => $this->input->post('warehouse'),
                // 'view_right' => $this->input->post('view_right'),
                // 'edit_right' => $this->input->post('edit_right'),
@@ -1117,12 +1125,20 @@ class Auth extends MY_Controller
             
             $data = array(
                 'username' => $this->input->post('username'),
-                'matricula' => $this->input->post('matricula'),
-                'email' => $this->input->post('email'),
+                 'email' => $this->input->post('email'),
                 'first_name' => $this->input->post('first_name'),
+                'last_name' => $this->input->post('last_name'),
+             //   'setor_id' => $this->input->post('company'),
                 'phone' => $this->input->post('phone'),
                 'gender' => $this->input->post('gender'),
                 'group_id' => $grupo_id,
+              //  'biller_id' => $this->input->post('biller'),
+              //  'warehouse_id' => $this->input->post('warehouse'),
+              //  'view_right' => $this->input->post('view_right'),
+              //  'edit_right' => $this->input->post('edit_right'),
+              //  'award_points' => $this->input->post('award_points'),
+                'gestor' => $this->input->post('gestor'),
+             //   'allow_discount' => $this->input->post('allow_discount'),
                 'active' => $this->input->post('status'),
                 //'empresa_id' => $empresa,
             );
@@ -1211,9 +1227,10 @@ class Auth extends MY_Controller
             $this->session->set_flashdata('warning', lang("access_denied"));
             redirect($_SERVER["HTTP_REFERER"]);
         }
-
+           
         //validate form input
         $this->form_validation->set_rules('avatar', lang("avatar"), 'trim');
+        
 
         if ($this->form_validation->run() == true) {
 
@@ -1229,7 +1246,7 @@ class Auth extends MY_Controller
                 $config['overwrite'] = FALSE;
                 $config['encrypt_name'] = TRUE;
                 $config['max_filename'] = 25;
-
+             
                 $this->upload->initialize($config);
 
                 if (!$this->upload->do_upload('avatar')) {
@@ -1267,13 +1284,74 @@ class Auth extends MY_Controller
             unlink('assets/uploads/avatars/thumbs/' . $user->avatar);
             $this->session->set_userdata('avatar', $photo);
             $this->session->set_flashdata('message', lang("avatar_updated"));
-            redirect("auth/profile/" . $id);
+            redirect("welcome/profile/" . $id);
         } else {
             $this->session->set_flashdata('error', validation_errors());
-            redirect("auth/profile/" . $id);
+            redirect("welcome/profile/" . $id);
         }
     }
+    
+       function update_foto_capa($id = NULL)
+    {
+        if ($this->input->post('id')) {
+            $id = $this->input->post('id');
+        }
+       
+        if (!$this->ion_auth->logged_in() || !$this->Owner && $id != $this->session->userdata('user_id')) {
+            $this->session->set_flashdata('warning', lang("access_denied"));
+            redirect($_SERVER["HTTP_REFERER"]);
+        }
+           
+        //validate form input
+        $this->form_validation->set_rules('capa', lang("avatar"), 'trim');
+        
 
+        if ($this->form_validation->run() == true) {
+           
+            if ($_FILES['capa']['size'] > 0) {
+                 
+                $this->load->library('upload');
+
+                $config['upload_path'] = 'assets/uploads/avatars';
+                $config['allowed_types'] = 'gif|jpg|png';
+                //$config['max_size'] = '500';
+               // $config['max_width'] = $this->Settings->iwidth;
+               // $config['max_height'] = $this->Settings->iheight;
+                $config['overwrite'] = FALSE;
+                $config['encrypt_name'] = TRUE;
+                $config['max_filename'] = 25;
+             
+                $this->upload->initialize($config);
+
+                if (!$this->upload->do_upload('capa')) {
+
+                    $error = $this->upload->display_errors();
+                    $this->session->set_flashdata('error', $error);
+                    redirect($_SERVER["HTTP_REFERER"]);
+                }
+
+                $photo = $this->upload->file_name;
+
+                
+
+              
+            } else {
+                $this->form_validation->set_rules('avatar', lang("avatar"), 'required');
+            }
+        }
+
+        if ($this->form_validation->run() == true && $this->auth_model->updateCapa($id, $photo)) {
+            unlink('assets/uploads/avatars/' . $user->foto_capa);
+            unlink('assets/uploads/avatars/thumbs/' . $user->foto_capa);
+            $this->session->set_userdata('foto_capa', $photo);
+            $this->session->set_flashdata('message', lang("avatar_updated"));
+            redirect("welcome/profile/" . $id);
+        } else {
+            $this->session->set_flashdata('error', validation_errors());
+            redirect("welcome/profile/" . $id);
+        }
+    }
+   
     function register()
     {
         

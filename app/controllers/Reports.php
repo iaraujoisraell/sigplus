@@ -134,50 +134,9 @@ class Reports extends MY_Controller
            if (($hora >= '08:00:00') && ($hora < '08:05:00')) {
             //    $this->enviaEmailControle('O SISTEMA VERIFICOU SE TEM ATA COM CONVOCAÇÃO ABERTA E REENVIOU O CONVITE DE CONVOCAÇÃO, PARA QUEM AINDA NÃO CONFIRMOU PRESENÇA');
                 $this->reenviar_convocacao();
-               // $this->desempenhoInfomedTasy();
+                
             }
             
-            
-            
-             if (($dia_da_semana != "Sábado")||($dia_da_semana == "Domingo")) {
-            
-            if (($hora >= '08:00:00') && ($hora < '08:05:00')) {
-            //    $this->enviaEmailControle('O SISTEMA VERIFICOU SE TEM ATA COM CONVOCAÇÃO ABERTA E REENVIOU O CONVITE DE CONVOCAÇÃO, PARA QUEM AINDA NÃO CONFIRMOU PRESENÇA');
-            //    $this->reenviar_convocacao();
-                $this->desempenhoInfomedTasy();
-            }
-            
-            if (($hora >= '10:00:00') && ($hora < '10:05:00')) {
-            //    $this->enviaEmailControle('O SISTEMA VERIFICOU SE TEM ATA COM CONVOCAÇÃO ABERTA E REENVIOU O CONVITE DE CONVOCAÇÃO, PARA QUEM AINDA NÃO CONFIRMOU PRESENÇA');
-            //    $this->reenviar_convocacao();
-                $this->desempenhoInfomedTasy();
-            }
-            
-            if (($hora >= '12:00:00') && ($hora < '12:05:00')) {
-            //    $this->enviaEmailControle('O SISTEMA VERIFICOU SE TEM ATA COM CONVOCAÇÃO ABERTA E REENVIOU O CONVITE DE CONVOCAÇÃO, PARA QUEM AINDA NÃO CONFIRMOU PRESENÇA');
-            //    $this->reenviar_convocacao();
-                $this->desempenhoInfomedTasy();
-            }
-            
-            if (($hora >= '14:00:00') && ($hora < '14:05:00')) {
-            //    $this->enviaEmailControle('O SISTEMA VERIFICOU SE TEM ATA COM CONVOCAÇÃO ABERTA E REENVIOU O CONVITE DE CONVOCAÇÃO, PARA QUEM AINDA NÃO CONFIRMOU PRESENÇA');
-            //    $this->reenviar_convocacao();
-                $this->desempenhoInfomedTasy();
-            }
-            
-            if (($hora >= '16:00:00') && ($hora < '16:05:00')) {
-            //    $this->enviaEmailControle('O SISTEMA VERIFICOU SE TEM ATA COM CONVOCAÇÃO ABERTA E REENVIOU O CONVITE DE CONVOCAÇÃO, PARA QUEM AINDA NÃO CONFIRMOU PRESENÇA');
-            //    $this->reenviar_convocacao();
-                $this->desempenhoInfomedTasy();
-            }
-            
-            if (($hora >= '18:00:00') && ($hora < '18:05:00')) {
-            //    $this->enviaEmailControle('O SISTEMA VERIFICOU SE TEM ATA COM CONVOCAÇÃO ABERTA E REENVIOU O CONVITE DE CONVOCAÇÃO, PARA QUEM AINDA NÃO CONFIRMOU PRESENÇA');
-            //    $this->reenviar_convocacao();
-                $this->desempenhoInfomedTasy();
-            }
-            
-             }
             
             /*
              * 6 - ENVIA EMAIL PARA QUEM PARTICIPOU DO TREINAMENTO E AINDA NÃO RESPONDEU O FORMULÁRIO
@@ -186,8 +145,6 @@ class Reports extends MY_Controller
                // $this->enviaEmailControle('O SISTEMA REENVIOU FORMULÁRIO DE AVALIAÇÃO DE TREINAMENTO PARA QUEM AINDA NÃO PREENCHEU.');
                // $this->reenviar_avaliacao_treinamento();
             }
-            
-            
            /*
             * 7 - ATUALIZA AS ORDEM DE SERVIÇO DO GLPI NO SIG
             */
@@ -461,7 +418,7 @@ class Reports extends MY_Controller
      */
     public function enviaEmailControle($texto)
     {
-        $this->sma->checkPermissions();
+      //  $this->sma->checkPermissions();
            
         
         $date_hoje = date('Y-m-d H:i:s');
@@ -563,38 +520,6 @@ class Reports extends MY_Controller
     return mktime(0, 0, 0, $partes[1], $partes[0], $partes[2]);
     }
 
-    public function desempenhoInfomedTasy(){
-       
-        include './conexao_stage.php';
-        $query = "select tasy,
-        infomed,
-       (tasy - infomed ) as diferenca
-        from (select (select count(*) from pls_segurado@tasy_prod s
-        where s.dt_rescisao is null) as tasy,
-              (select count(*) from inf_beneficiarios@infomed b
-        where b.ben_status = 'A' ) as INFOMED
-        from dual)";
-        $result_migracao = oci_parse($ora_conexao,$query);
-        oci_execute($result_migracao, OCI_NO_AUTO_COMMIT);
-        while (($row_q = oci_fetch_array($result_migracao, OCI_BOTH)) != false)
-        {
-            $infomed = $row_q[1];  
-            $tasy = $row_q[0];
-            $diferenca = $row_q[2];
-        
-          //  echo 'Infomed : '.$infomed;
-        } 
-        
-        $data_registro = array(
-            'data_registro' => date('Y-m-d H:i:s'),
-            'infomed' => $infomed, 
-            'tasy' => $tasy
-        );
-      //  print_r($data_registro); exit;
-       $this->atas_model->add_Registro_Migracao($data_registro);
-        
-    }
-    
     public function salvaDesempenhoAcoesProjetos()
     {
       //  $this->sma->checkPermissions();
@@ -1943,20 +1868,19 @@ class Reports extends MY_Controller
      /*
       * PERÍODO HORA EXTRA
       */
-     public function criaNovoPeriodoHoraExtra(){
+    public function criaNovoPeriodoHoraExtra(){
          
           $dia = date('d');
           $mes = date('m');
           $ano = date('Y');
           $prox_mes = $mes+1;
-          $dez_mes = 12;
           
        // if($dia == 11){
                    
           
           $equipes_projeto = $this->atas_model->getAllEquipesMembrosDistinct(4);
           foreach ($equipes_projeto as $equipe_projeto) {
-                  $id_usuario =  $equipe_projeto->user_id;
+                  $id_usuario = $equipe_projeto->user_id;
                   
                 //VERIFICA SE JA TEM CADASTRADO NO BANCO O PERÍODO DESEJADO.
                 $priodo = $this->reports_model->getPeriodoByCompetencia($prox_mes, $ano, $id_usuario);
@@ -1985,7 +1909,7 @@ class Reports extends MY_Controller
 
                    
                      //verifica o número de dias do mês
-                     $numero = cal_days_in_month(CAL_GREGORIAN, 12, 2018); 
+                     $numero = cal_days_in_month(CAL_GREGORIAN, $mes, $ano); 
                     
                      $cont = 0;
                      for($dia =12; $dia <= $numero; $dia++){
@@ -2023,7 +1947,7 @@ class Reports extends MY_Controller
                 }
 
                 }
-              //    echo 'concluído'; exit;
+                  
           }        
          
         //}
@@ -2032,98 +1956,6 @@ class Reports extends MY_Controller
         
      }
     
-     /*
-      *   public function criaNovoPeriodoHoraExtra(){
-         
-          $dia = date('d');
-          $mes = date('m');
-          $ano = date('Y');
-          $prox_mes = $mes+1;
-          $dez_mes = 12;
-          
-       // if($dia == 11){
-                   
-          
-          $equipes_projeto = $this->atas_model->getAllEquipesMembrosDistinct(4);
-          foreach ($equipes_projeto as $equipe_projeto) {
-                  $id_usuario =  $equipe_projeto->user_id;
-                  
-                //VERIFICA SE JA TEM CADASTRADO NO BANCO O PERÍODO DESEJADO.
-                $priodo = $this->reports_model->getPeriodoByCompetencia($mes, $ano, $id_usuario);
-                $qtde = $priodo->quantidade;
-                  
-                if($qtde == 0){
-              
-                   $dados_novo_periodo = array(
-                       'mes' => $mes,
-                       'ano' => $ano,
-                       'de' => '12/12',
-                       'ate' => '11/01',
-                       'user_id' => $id_usuario
-                    );
-                 
-                   $id_periodo =  $this->reports_model->addPeriodo_he($dados_novo_periodo);
-                    
-                    $data_inicial = '2018-12-12';
-                    $data_final   = '2019-01-11';
-                  // $data_inicial = $ano.'-'.$mes.'-'.'12';
-                  //  $data_final = $ano.'-'.$prox_mes.'-'.'11';
-
-                     // Calcula a diferença em segundos entre as datas
-                     $diferenca = strtotime($data_final) - strtotime($data_inicial);
-
-                     //Calcula a diferença em dias
-                     $dias_data = floor($diferenca / (60 * 60 * 24));
-                     
-                   
-                     //verifica o número de dias do mês
-                     $numero = cal_days_in_month(CAL_GREGORIAN, 12, 2018); 
-                    
-                     $cont = 0;
-                     for($dia =12; $dia <= $numero; $dia++){
-                         
-                         if ($cont <= $dias_data) {
-                         
-                             if($dia >= 12){
-                               
-                                $dados_detalhe_periodo = array(
-                                   'id_periodo' => $id_periodo,
-                                   'dia' => $dia,
-                                   'mes' => $dez_mes
-                                );
-                             }else{
-                         
-                                 $dados_detalhe_periodo = array(
-                                   'id_periodo' => $id_periodo,
-                                   'dia' => $dia,
-                                   'mes' => $mes
-                                );
-                             }
-
-                             $this->reports_model->addPeriodo_he_detalhes($dados_detalhe_periodo);
-                             
-                             
-                            if (($dia == $numero) && ($cont <= $dias_data)) {
-                                $dia = 0;
-                            }
-                             $cont++;
-
-                           
-                        } else {
-                           // exit;
-                        }
-                }
-
-                }
-               //   echo 'concluído'; exit;
-          }        
-         
-        //}
-          
-          
-        
-     }
-      */
    
     
     public function enviaSMSSobreAviso($numero, $texto){
@@ -2183,7 +2015,6 @@ class Reports extends MY_Controller
     {
      
         include 'conexao_rh3.php';
-       // echo 'teste conexao'; exit;
         //OBTEM SALDO DE BANCO DE HORAS POR DIA
         $dia = 18;// date('d');
         $hoje =  date('d');
@@ -2197,7 +2028,6 @@ class Reports extends MY_Controller
             $mes_Selecionado = $prox_mes; 
         }
         
-       
       
         $periodos = $this->user_model->getPeriodoHEByAnoAndMes($mes_Selecionado, $ano);
             foreach ($periodos as $periodo) {
@@ -2223,17 +2053,11 @@ class Reports extends MY_Controller
                        $detalhe_mes = $detalhes->mes;
                    }
                    
-               //    if(($detalhe_dia >= 12)&&($detalhe_dia <= 31)){
-                 //      $data = "$detalhe_dia-$detalhe_mes-2018";
-                 //  }else{
-                       $data = "$detalhe_dia-$detalhe_mes-$periodo->ano";
-                 //  }
-                      // echo $data; exit;
-                  // 
+                   $data = "$detalhe_dia-$detalhe_mes-$periodo->ano";
                    
                   //echo 'Id Período :'.$id_periodo.' - usuario: '.$id_user.' - CPF : '.$cpf.'<br>';
                   //echo 'Id dia :'.$detalhes->id.'<br>';
-                  //echo 'Data :'.$data.'<br>'; exit;
+                //  echo 'Data :'.$data.'<br>';
                   
                  
                   
@@ -2373,51 +2197,5 @@ class Reports extends MY_Controller
             }    
     }
      
-    
-    public function testeEmail(){
-      //  echo 'aqui'; exit;
-     $this->enviaEmailControle('ENVIOU EMAIL');
-    }
-    
-    public function testeUsuario(){
-    
-         $usuarios = $this->site->getAllUser();
-         $cont = 1;
-         foreach ($usuarios as $user) {
-           $id_user = $user->id;   
-           
-           $nome = $user->first_name;
-           $email = $user->email;  
-           $matricula = $user->matricula;  
-           
-           $usuario = strstr($email, '@', TRUE); // Resultado: contato
-           
-           if($matricula){
-           echo $nome.' - '.$matricula. '<br>';
-           }
-           /*
-           $data_ata = array(
-               
-                'username' => $usuario
-            );
-            * 
-            */
-           
-         
-        //    $this->atas_model->atualizaUser($id_user, $data_ata);
-           
-           
-         }
-        
-        
-   //  $email = "israel.araujo@gmail.com";
-  //   $dominio = strstr($email, '@');
-  //  echo $dominio.'<br />'; // Resultado: @mauricioprogramador.com.br
 
-    
-     exit;
-    // 
-    }
-    
-    
 }

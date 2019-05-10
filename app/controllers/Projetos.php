@@ -2816,17 +2816,10 @@ class Projetos extends MY_Controller
                    $dia_ponto_tratado = $dia_ponto;
                }
                
-                if($periodo->mes == 12){
-                $ano_anterior = $ano-1;    
-                $data_oracle = "$dia_ponto_tratado/$periodo->mes/$ano_anterior";
-                }else{
-                    $data_oracle = "$dia_ponto_tratado/$periodo->mes/$ano";
-                }
-               
-               
+               $data_oracle = "$dia_ponto_tratado/$periodo->mes/$ano";
              
                  $this->projetos_model->updateDadosHoraExtraRH3($data_oracle,$tempo_decimos, $cpf, $periodo->dia, $tempo_decimos_credito, $justificativa, $hora_liberado, $hora_dif_tratado);   
-                $this->projetos_model->insertDadosHoraExtraRH3($data_oracle,$tempo_decimos, $cpf, $periodo->dia, $tempo_decimos_credito, $justificativa, $hora_liberado, $hora_dif_tratado);
+                 $this->projetos_model->insertDadosHoraExtraRH3($data_oracle,$tempo_decimos, $cpf, $periodo->dia, $tempo_decimos_credito, $justificativa, $hora_liberado, $hora_dif_tratado);
               
                 
             }else{
@@ -2852,7 +2845,7 @@ class Projetos extends MY_Controller
               
                       
              
-              
+                
             $this->session->set_flashdata('message', lang("Concluídos com Sucesso!!!"));
             
              redirect("projetos/competencia_usuario/$mes/$ano");

@@ -21,7 +21,12 @@
                                 </div>
                             </div>
 
-                            
+                            <div class="form-group">
+                                <?php echo lang('last_name', 'last_name'); ?>
+                                <div class="controls">
+                                    <?php echo form_input('last_name', $user->last_name, 'class="form-control" id="last_name" '); ?>
+                                </div>
+                            </div>
                             <div class="form-group">
                                 <?= lang('gender', 'gender'); ?>
                                 <?php
@@ -59,7 +64,7 @@
                                 <?php echo lang('email', 'email'); ?>
                                 <div class="controls">
                                     <input type="email" id="email" name="email" value="<?php echo $user->email; ?>" class="form-control"
-                                          />
+                                           required="required"/>
                                     <?php /* echo form_input('email', '', 'class="form-control" id="email" required="required"'); */ ?>
                                 </div>
                             </div>
@@ -67,21 +72,18 @@
                         </div>
                         <div class="col-md-5 col-md-offset-1">
                             <div class="form-group">
-                                <?php echo lang('Username', 'username'); ?>
+                                <?php echo lang('username', 'username'); ?>
                                 <div class="controls">
                                     <input type="text" id="username" name="username" value="<?php echo $user->username; ?>" class="form-control"
                                            required="required" pattern=".{4,20}"/>
                                 </div>
                             </div>
-                            
                             <div class="form-group">
-                                <?php echo lang('Matricula', 'matricula'); ?>
+                                <?php echo lang('Mudar Senha ( se não for alterar, deixe em branco)', 'password'); ?>
                                 <div class="controls">
-                                    <input type="text" id="matricula" name="matricula" value="<?php echo $user->matricula; ?>" class="form-control"
-                                           pattern=".{4,20}"/>
+                                    <?php echo form_password('password', '', 'class="form-control" id="confirm_password" data-bv-identical="true" data-bv-identical-field="password" data-bv-identical-message="' . lang('pw_not_same') . '"'); ?>
                                 </div>
                             </div>
-                            
                             <div class="form-group">
                                 <?= lang('status', 'status'); ?>
                                 <?php

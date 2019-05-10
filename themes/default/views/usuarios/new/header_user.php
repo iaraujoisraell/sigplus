@@ -87,11 +87,11 @@
  * TOPO
  */
 
-$this->load->view($this->theme . 'usuarios/new/topo'); 
+//$this->load->view($this->theme . 'usuarios/new/topo'); 
 /*
  * MENU ESQUERDO
  */
-$this->load->view($this->theme . 'usuarios/new/menu_esquerdo'); 
+//$this->load->view($this->theme . 'usuarios/new/menu_esquerdo'); 
 ?>
 
     

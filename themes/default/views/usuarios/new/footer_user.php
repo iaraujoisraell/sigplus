@@ -1,7 +1,7 @@
 
 <?php
 //$this->load->view($this->theme . 'usuarios/new/footer_rodape');
-       $this->load->view($this->theme . 'usuarios/new/menu_direito'); 
+    //   $this->load->view($this->theme . 'usuarios/new/menu_direito'); 
 ?>
 
 

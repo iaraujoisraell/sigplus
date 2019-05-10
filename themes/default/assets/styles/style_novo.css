@@ -4,21 +4,8 @@
     padding: 0;
     margin: 0;
 }
-html {
-    overflow-y:scroll;
-    height: 100%;
-}
-body {
-    background: #F3F3F3;
-    color: #333;
-    border: none;
-    font-weight: 400;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    min-height: 100% !important;
-    height: 100%;
-}
+
+
 h1 {
     font-size: 32px;
     line-height: 32px;
@@ -76,11 +63,7 @@ h6 {
 .sidebar-minified .lt td.sidebar-con { 
     width: 0px;
 }
-#content {
-    background-color: #F3F3F3;
-    padding: 0 15px;
-    transition: transform 0.2s ease-in-out 0s, margin 0.2s ease-in-out 0s;
-}
+
 #sidebar-left {
     background-color: #4cae4c;
     padding: 10px;
@@ -96,24 +79,7 @@ h6 {
     padding-bottom: 0;
     margin-bottom: 0;
 }
-.content-with-fixed {
-    margin-left: 0;
-}
-#content.sidebar-minified {
-    width: 100% !important;
-    border-left: 40px solid #000;
-    margin-left: 0 !important;
-    float: left !important;
-}
-#sidebar-left.minified {
-    float: left !important;
-}
-#content.full {
-    width: 100% !important;
-    margin-left: 0px !important;
-    margin-right: 0px !important;
-    border: none !important;
-}
+
 .well {
     border: 1px solid #ddd;
     background-color: #f6f6f6;
@@ -156,139 +122,7 @@ h6 {
 .noPadding {
     padding: 0px !important;
 }
-.box {
-    border: 1px solid #dbdee0;
-    margin-bottom: 15px;
-}
-.box .box-content .panel ol, .box .box-content .panel ul {
-    padding-left: 20px;
-}
-.box.noOverflow {
-    overflow: hidden;
-}
-.box .box-header {
-    background: white;
-    color: #34383c;
-    font-size: 16px;
-    background: #f7f7f8;
-    border-bottom: 1px solid #dbdee0;
-    height: 40px;
-}
-.box .box-header h2 {
-    float: left;
-    padding: 10px 0px;
-    margin: 0px 0px 0px 20px;
-}
-.box .box-header h2 i {
-    border-right: 1px solid #dbdee0;
-    padding: 12px 0px;
-    height: 40px;
-    width: 40px;
-    display: inline-block;
-    text-align: center;
-    margin: -10px 20px -10px -20px;
-    font-size: 16px;
-}
-.box .box-header h2 i.nb {
-    border-right: 0;
-    margin-right: 0;
-}
-.box .box-header .box-icon {
-    float: right;
-}
-.box .box-header .box-icon a:hover {
-    text-decoration: none;
-}
-.box .box-header .box-icon i.icon {
-    display: inline-block;
-    text-align: center;
-    height: 40px;
-    width: 40px;
-    padding: 12px 0px;
-    border-left: 1px solid #ced1d4;
-    text-decoration: none;
-}
-.box-icon .choose-date {
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-top-colors: none;
-    border-color: -moz-use-text-color -moz-use-text-color -moz-use-text-color #DBDEE0;
-    border-image: none;
-    border-style: none none none solid;
-    border-width: 0 0 0 1px;
-    height: 40px;
-    padding: 3px 10px;
-    width: 350px;
-}
-.box-icon .choose-date .input-group-addon, .box-icon .choose-date input {
-    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
-    border: 0 none;
-    box-shadow: none;
-}
-.box-icon .choose-date .input-group-addon {
-    font-size: 12px;
-    padding: 0;
-}
-.box-icon .choose-date .input-group-addon i { border: 0; }
-.box-icon .choose-date input {
-    font-weight: 300;
-}
-.box-icon .choose-date input:focus {
-    box-shadow: none;
-    outline: 0 none;
-}
-.box .btn-tasks {
-    list-style: none;
-    margin-bottom: 0;
-}
-.box .btn-tasks li {
-    float: right;
-}
-.box .btn-tasks li li {
-    float: none;
-}
-.box .box-content {
-    padding: 20px;
-    background: white;
-}
-.box .box-content p.introtext{
-    background: #F9F9F9;
-    margin: -20px -20px 20px -20px;
-    padding: 10px;
-    border-bottom: 1px solid #DBDEE0;
-}
-.box .box-content.no-padding {
-    background: white;
-    padding: 1px 0;
-}
-.small-box {
-    margin-bottom: 20px;
-    -webkit-box-shadow: 1px 1px 2px 0px rgba(50, 50, 50, 0.75);
-    -moz-box-shadow:    1px 1px 2px 0px rgba(50, 50, 50, 0.75);
-    box-shadow:         1px 1px 2px 0px rgba(50, 50, 50, 0.75);
-}
-.small-box h3, .small-box a, .small-box p {
-    text-align: center;
-    text-decoration: none;
-    color: #FFF;
-}
-.small-box h3 {
-    font-size: 30px;
-    line-height: 30px;
-    text-shadow: 1px 1px 1px rgba(0, 0, 0, 1);
-}
-.small-box h4 {
-    color: rgba(255, 255, 255, 0.4);
-    font-weight: normal;
-}
-.small-box i {
-    position: absolute;
-    top:-10px;
-    right: -5px;
-    font-size: 155px;
-    color: rgba(255, 255, 255, 0.2);
-}
+
 .avatar {
     border: 5px solid #FFF;
     outline: 1px solid #DBDEE0;
@@ -305,6 +139,8 @@ h6 {
     width: 50px;
     margin-left: -40px;
 }
+
+
 /* Bootstrap Overwrites
 =================================================================== */
 input { box-shadow: none; }
@@ -643,61 +479,11 @@ a#main-menu-act i:hover {
 /*.box .select2-container { width: 100%; }*/
 /* Footer Styles
 =================================================================== */
-footer {
-    background: #000;
-    color: white;
-    height: 40px;
-    padding: 12px 20px 18px 20px !important;
-    margin: 0 !important;
-    /*position: absolute;
-    bottom: 0;*/
-    width: 100%;
-    font-size: 12px;
-}
-footer a {
-    color: white;
-    font-weight: bold;
-}
+
 
 /* Quick Links Styles
 =================================================================== */
-.quick-button {
-    margin-bottom: -1px;
-    padding: 30px 0px 10px 0px;
-    font-size: 14px;
-    display: block;
-    text-align: center;
-    cursor: pointer;
-    position: relative;
-    transition: all 0.3s ease;
-    opacity: 0.9;
-}
-.quick-button:hover {
-    text-decoration: none;
-    opacity: 1;
-}
-.quick-button .notification {
-    border-radius: 2px;
-    top: -1px;
-    right: -1px;
-    font-size: 10px;
-}
-.quick-button i {
-    font-size: 32px;
-}
-.quick-button.small {
-    padding: 15px 0px 1px 0px;
-    font-size: 10px;
-}
-.quick-button.small i {
-    font-size: 20px;
-}
-.quick-button.small .notification {
-    top: -1px;
-    right: -1px;
-    font-size: 7px;
-    padding: 4px 5px;
-}
+
 
 /* Table Styles
 =================================================================== */
@@ -875,10 +661,12 @@ div.DTFC_LeftFootWrapper table {
     margin: 0px !important;
 }
 
+
+
 /* Page loader and Misc Styles
 =================================================================== */
 
-.content-scroll { width: 450px; color:; #333; padding: 0; }
+
 .top-menu-scroll { position: relative; overflow: hidden; max-height: 400px; height: auto; background: #FFF; padding: 0; }
 .oe { list-style: none; }
 .oe li { border-bottom: 1px solid #ddd; padding: 10px; color: #333; }
@@ -1400,7 +1188,7 @@ animation: blink 1s steps(2, start) infinite;
     .lt td.sidebar-con { 
         width: 40px;
     }
-    .content-scroll { width: 300px; }
+   
 }
 /* All Mobile Sizes (devices and browser)
 ====================================================================== */

@@ -38,6 +38,8 @@
                                 <?php $attrib = array('class' => 'form-horizontal', 'data-toggle' => 'validator', 'role' => 'form');
                                 echo form_open('auth/edit_profile/' . $user->id, $attrib);
                                 ?>
+                                
+                                
                                 <div class="row">
                                     <div class="col-md-12">
                                         <div class="col-md-5">
