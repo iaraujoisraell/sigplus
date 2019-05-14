@@ -1,11 +1,24 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed.');
 
-$config['useragent']        = 'PHPMailer';              // Mail engine switcher: 'CodeIgniter' or 'PHPMailer'
-$config['protocol']         = 'mail';                   // 'mail', 'sendmail', or 'smtp'
-$config['mailpath']         = '/usr/sbin/sendmail';
-$config['smtp_host']        = 'smtp.office365.com';
-$config['smtp_user']        = 'webmaster@unimedmanaus.com.br';
-$config['smtp_pass']        = '@unimed*';
+
+
+$config['smtp_host'] = 'mail.sigplus.online';
+$config['smtp_port'] = 465;
+$config['smtp_user'] = 'noreply@sigplus.online';
+$config['smtp_pass'] = 's1gplu$2019';
+$config['protocol']  = 'smtp';
+$config['validate']  = TRUE;
+$config['mailtype']  = 'html';
+$config['charset']   = 'utf-8';
+$config['newline']   = "\r\n";
+/*
+
+//$config['useragent']        = 'PHPMailer';              // Mail engine switcher: 'CodeIgniter' or 'PHPMailer'
+$config['protocol']         = 'smtp';                   // 'mail', 'sendmail', or 'smtp'
+//$config['mailpath']         = '/usr/sbin/sendmail';
+$config['smtp_host']        = 'mail.sigplus.online';
+$config['smtp_user']        = 'noreply@sigplus.online';
+$config['smtp_pass']        = 's1gplu$2019';
 $config['smtp_port']        = 587;
 $config['smtp_timeout']     = 30;                       // (in seconds)
 $config['smtp_crypto']      = 'tls';                       // '' or 'tls' or 'ssl'
@@ -24,7 +37,7 @@ $config['newline']          = "\n";                     // "\r\n" or "\n" or "\r
 $config['bcc_batch_mode']   = false;
 $config['bcc_batch_size']   = 200;
 $config['encoding']         = '8bit';                   // The body encoding. For CodeIgniter: '8bit' or '7bit'. For PHPMailer: '8bit', '7bit', 'binary', 'base64', or 'quoted-printable'.
-
+*/
 // DKIM Signing
 // See https://yomotherboard.com/how-to-setup-email-server-dkim-keys/
 // See http://stackoverflow.com/questions/24463425/send-mail-in-phpmailer-using-dkim-keys

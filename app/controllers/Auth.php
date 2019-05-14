@@ -675,7 +675,7 @@ class Auth extends MY_Controller
         }
     }
 
-    function login($m = NULL)
+   function login($m = NULL)
     {
        
         
@@ -698,14 +698,14 @@ class Auth extends MY_Controller
             
             if ($this->ion_auth->login($this->input->post('identity'), $this->input->post('password'), $remember)) {
                 
-                //QUANDO O SISTEMA ESTÁ EM MANUTENÇÃO
+                //QUANDO O SISTEMA ESTÃ� EM MANUTENÃ‡ÃƒO
                 if ($this->Settings->mmode) {
                     if (!$this->ion_auth->in_group('owner')) {
                         $this->session->set_flashdata('error', lang('site_is_offline_plz_try_later'));
                         redirect('auth/logout');
                     }
                 }
-                
+               
                 /*
                  * REALIZA O LOG
                  
@@ -716,7 +716,7 @@ class Auth extends MY_Controller
                 $this->session->set_flashdata('message', $this->ion_auth->messages());
                 
                
-                $referrer = $this->session->userdata('requested_page') ? $this->session->userdata('requested_page') : 'welcome';    
+                $referrer = $this->session->userdata('requested_page') ? $this->session->userdata('requested_page') : 'Welcome';    
                
                 redirect($referrer);
                  

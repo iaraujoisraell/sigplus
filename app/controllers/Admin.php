@@ -92,7 +92,7 @@ class Admin extends MY_Controller
        $pagina_home = $modulo_dados->home;
       
           
-        $this->page_construct_admin($pagina_home, $meta, $this->data);
+         $this->page_construct_admin($pagina_home, $meta, $this->data);
        
     }
     
@@ -316,6 +316,7 @@ class Admin extends MY_Controller
                     $this->owner_model->addLog($logdata); 
             
             $this->data['usuarios'] = $this->owner_model->getAllUsersByEmpresa();
+            
             //$this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
             //$this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
             

@@ -9,14 +9,49 @@ class Projetos_model extends CI_Model
         
         
     }
-
     
-        public function addProjetos($data)
+    /*
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        //$empresa = $users_dados->empresa_id;
+        //$empresa_dados = $this->owner_model->getEmpresaById($empresa);
+        //$tabela_empresa = $empresa_dados->tabela_cliente;
+      * 
+      */
+    
+    
+    //RETORNA O CLIENTE
+     public function getClienteByIdAndEmpresa($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $q = $this->db->get_where('clientes', array('id' => $id, 'empresa_id' => $empresa), 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+
+    //RETORNA A CATEGORIA DO PROJETO
+     public function getCategoriaByIdAndEmpresa($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $q = $this->db->get_where('categoria', array('id' => $id, 'empresa_id' => $empresa), 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * CRIA UM NOVO PROJETO
+     */
+    public function addProjetos($data)
     {
             if ($this->db->insert('projetos', $data)) {
-                 $this->db->insert_id();
+                $id_projeto = $this->db->insert_id();
                  
-               return true;
+               return $id_projeto;
         }
           
         return false;
@@ -62,9 +97,835 @@ class Projetos_model extends CI_Model
         return FALSE;
     }
     
-    /*
-     *                                                   DASHBOARD
+      /*
+     * RETORNAO ULTIMO NUMERO SEQUENCIAL POR EMPRESA
      */
+     public function getSequencialPlanosAcao()
+    {
+    $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT max(sequencial)+1 as sequencial FROM sig_plano_acao where empresa = $empresa";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * PROJETOS QUE EU TENHO ACESSO por status
+     */
+     public function getAllProjetosAtivoAcesso($status) {
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        $empresa = $users_dados->empresa_id;
+        $empresa_dados = $this->owner_model->getEmpresaById($empresa);
+        $tabela_empresa = $empresa_dados->tabela_cliente;
+        //echo $tabela_empresa;
+       //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT p.id as id, p.projeto as nome_projeto, dt_inicio, dt_final,gerente_area, p.status as status FROM sig_projetos p 
+           inner join sig_users_projetos up on up.projeto = p. id
+                    where up.users = $usuario and p.status = '$status' and empresa_id = $empresa";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * PROJETOS QUE EU TENHO ACESSO
+     */
+     public function getAllProjetosLiberadoByser(){
+        $usuario = $this->session->userdata('user_id');
+         $empresa = $this->session->userdata('empresa');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        $empresa = $users_dados->empresa_id;
+     
+        //echo $tabela_empresa;
+       //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT p.projeto as projeto, p.* "
+               . " FROM sig_projetos p 
+                      inner join sig_users_projetos up on up.projeto = p.id
+                    where up.users = $usuario and p.empresa_id = $empresa ";
+     //  echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    //REMOVE O ACESSO AO PROJETO
+    public function deleteAcessoProjeto($id)
+    {         
+       // $sale_items = $this->resetSaleActions($id);
+        if ($this->db->delete('users_projetos', array('id' => $id))){
+            
+            return true;
+        }
+        return FALSE;
+    }
+    
+     //REMOVE O MARCO AO PROJETO
+    public function deleteMarcosProjeto($id)
+    {         
+       // $sale_items = $this->resetSaleActions($id);
+        if ($this->db->delete('projetos_marcos', array('id' => $id))){
+            
+            return true;
+        }
+        return FALSE;
+    }
+    
+      //REMOVE O EQUIPE AO PROJETO
+    public function deleteEquipeProjeto($id)
+    {         
+       // $sale_items = $this->resetSaleActions($id);
+        if ($this->db->delete('projetos_equipes', array('id' => $id))){
+            
+            return true;
+        }
+        return FALSE;
+    }
+    
+    //REMOVE O ARQUIVO DO PROJETO
+    public function deleteArquivoProjeto($id)
+    {         
+       // $sale_items = $this->resetSaleActions($id);
+        if ($this->db->delete('projetos_arquivos', array('id' => $id))){
+            
+            return true;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * FASES DO PROJETOS SELECIONADO
+     */
+     public function getAllFasesProjetos(){
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        $projeto_atual = $users_dados->projeto_atual;
+     
+        //echo $tabela_empresa;
+       //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT * FROM sig_fases_projeto p 
+                    where id_projeto = $projeto_atual ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    public function getFaseByID($id)
+    {
+        $q = $this->db->get_where('fases_projeto', array('id' => $id), 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    public function updateProjetoUsuario($id, $data  = array())
+    {  
+        //echo $id;
+        // print_r($data); exit;
+        if ($this->db->update('users', $data, array('id' => $id))) {
+         return true;
+        }
+        return false;
+    }
+    
+    
+    public function getAllProjetosUsers($id)
+    {
+        $q = $this->db->get_where('users_projetos', array('users' => $id));
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+     public function getProjetoAtualByID_completo()
+    {
+     
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        $empresa = $users_dados->empresa_id;
+        $empresa_dados = $this->owner_model->getEmpresaById($empresa);
+        $tabela_empresa = $empresa_dados->tabela_cliente;
+        //echo $tabela_empresa;
+       //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT p.id as id, p.projeto as nome_projeto, dt_inicio, dt_final, gerente_area, gerente_edp, analista,p.status as status 
+           FROM sig_projetos p 
+                    inner join sig_users u on u.projeto_atual = p. id
+                    where u.id = $usuario";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+      
+        
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+         
+    }
+    
+    /*
+     * CLIENTES
+     */
+     public function getAllClientesByEmpresa(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT * FROM sig_clientes where empresa_id = $empresa ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * CATEGORIAS DE PROJETO
+     */
+     public function getAllCategoriaProjetoByEmpresa(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT * FROM sig_categoria where empresa_id = $empresa ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * USUÁRIOS COM ACESSO AO PROJETO
+     */
+     public function getAllUsuarioAcessoByProjeto($projeto){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT up.id as id_cadastro, up.criador as criador, u.* FROM sig_users_projetos up
+        inner join sig_users u on u.id = up.users
+        where up.projeto = $projeto
+        order by first_name asc";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * EQUIPES DO PROJETO
+     */
+     public function getAllEquipesProjetoByEmpresaByProjeto($projeto){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "select e.id as id_equipe, e.*, u.* from sig_projetos_equipes e "
+               . " inner join sig_users u on u.id = e.user_responsavel "
+               . " where e.empresa_id = $empresa and e.projeto_id = $projeto order by e.id asc";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * ARVUIOS DO PROJETO
+     */
+     public function getAllArquivosProjetoByEmpresaByProjeto($projeto){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT *  FROM sig_projetos_arquivos e "
+               . " where empresa_id = $empresa and projeto_id = $projeto order by id asc";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * MARCOS DO PROJETO
+     */
+     public function getAllMarcosProjetoByEmpresaByProjeto($projeto){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT * FROM sig_projetos_marcos where empresa_id = $empresa and projetos_id = $projeto order by data_prevista asc";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+     /*
+     * HISTÓRICOS DO PROJETO
+     */
+     public function getAllHistoricoProjetoByEmpresa($projeto){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT * FROM sig_projetos_historico where projetos_id = $projeto and empresa_id = $empresa ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    /*
+     * PARTES INTERESSADAS DO PROJETO
+     */
+     public function getAllPArtesInteressadasProjetoByEmpresa($projeto){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT * FROM sig_projetos_partes_interessadas where projetos_id = $projeto and empresa_id = $empresa ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+     /*
+     * LOGS DO PROJETO
+     */
+     public function getAllLogProjetoByEmpresa($projeto){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+       $statement = "SELECT * FROM sig_projetos_log where projetos_id = $projeto and empresa = $empresa order by id desc";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /**********************************************************
+     ************************* A T A S ************************
+     ********************************************************/
+    public function getAllAtasByProjetoAtual(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        $projeto_atual_id = $users_dados->projeto_atual;
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT atas.id as id, atas.id as ata,  data_ata, pauta,  tipo, responsavel_elaboracao, atas.status, atas.anexo, atas.sequencia as sequencia "
+               . " FROM sig_atas atas where projetos = $projeto_atual_id and empresa = $empresa ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+     /**********************************************************
+     ************************* PLANO DE AÇÃO ************************
+     ********************************************************/
+    public function getAllPlanoAcaoByProjetoAtual(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        $projeto_atual_id = $users_dados->projeto_atual;
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT * FROM sig_plano_acao where projeto = $projeto_atual_id and empresa = $empresa ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+     /**********************************************************
+     ************************* LISTA DE AÇÃO ************************
+     ********************************************************/
+    public function getAllAcoesByProjetoAtual(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $users_dados = $this->site->geUserByID($usuario);
+        $modulo_atual_id = $users_dados->modulo_atual;
+        $projeto_atual_id = $users_dados->projeto_atual;
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT * FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status IN('PENDENTE','CONCLUÍDO','CANECLADO');";
+     //  echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+     
+    /***************************************************************************
+     **********************D A S H B O A R D ***********************************
+     **************************************************************************/
+    
+    /*
+     * QTDE EQUIPE por PROJETO
+     */
+     public function getQtdeEquipeByProjeto($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(distinct(responsavel)) as responsavel
+                    FROM sig_planos
+                    where projeto = $id and empresa = $empresa ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * QTDE ATA por PROJETO
+     */
+    public function getAtaByProjeto($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as ata
+                    FROM sig_atas
+                    where projetos = $id and empresa = $empresa ";
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QTDE AÇÕES POR PROJETOS
+     */
+     public function getQtdeAcoesByProjeto($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as total_acoes
+                    FROM sig_planos
+                    where projeto = $id and empresa = $empresa and status not in ('ABERTO', 'CANCELADO')";
+        $q = $this->db->query($statement);
+         
+        
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QTDE AÇÕES CONCLUÍDAS
+     */
+     public function getQtdeAcoesConcluidasByProjeto($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as quantidade_concluida
+                    FROM sig_planos
+                    where projeto = $id and empresa = $empresa and status = 'CONCLUÍDO'";
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * QTDE AÇÕES PENDENTES 
+     */
+     public function getQtdeAcoesPendentesByProjeto($id)
+    {
+        $date_hoje = date('Y-m-d H:i:s');
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as pendente
+                    FROM sig_planos
+                    where projeto = $id and empresa = $empresa and status = 'PENDENTE' and data_termino >= '$date_hoje'";
+        //ECHO $statement; EXIT;
+        $q = $this->db->query($statement);
+        
+              
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * QTDE AÇÕES AGUARDANDO VALIDAÇÃO
+     */
+    
+     public function getAcoesAguardandoValidacaoByProjeto($id)
+    {
+        $date_hoje = date('Y-m-d H:i:s');
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as aguardando_validacao
+                    FROM sig_planos
+                    where projeto = $id and empresa = $empresa and status = 'AGUARDANDO VALIDAÇÃO' ";
+        //ECHO $statement; EXIT;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /* 
+     * QTDE AÇÕES ATRASADAS
+     */
+    public function getQtdeAcoesAtrasadasByProjeto($id)
+    {
+        $date_hoje = date('Y-m-d H:i:s');
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as atrasadas
+                    FROM sig_planos
+                    where projeto = $id and empresa = $empresa and status = 'PENDENTE' and data_termino < '$date_hoje'";
+        //ECHO $statement; EXIT;
+        $q = $this->db->query($statement);
+        
+           
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * PEGA TODOS OS EVENTOS DE UM PROJETO
+     */
+     public function getAllEventosProjeto($id)
+    {
+     
+    
+          $statement = "SELECT e.id as evento_id, f.id as fase_id, e.data_inicio as data_inicio, e.data_fim as data_fim, e.projeto as projeto, f.nome_fase as tipo, nome_evento FROM sig_eventos e
+                        inner join sig_fases_projeto f on f.id = e.fase_id
+                        where e.projeto = $id order by f.id asc ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+    
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    // Desempenho geral da equipe do projeto pelo status das ações
+     public function getAllitemStatusPlanosLinhaTempo($projeto_atual)
+    {
+
+         $q = $this->db->get_where('historico_acoes', array('resumo' => 1,'projeto' => $projeto_atual));
+         
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * PEGA TODOS OS TIPOS DE EVENTOS DE UM PROJETO
+     */
+     public function getAllFaseByProjeto()
+    {
+    $usuario = $this->session->userdata('user_id');
+    $users_dados = $this->site->geUserByID($usuario);
+    $projeto_atual = $users_dados->projeto_atual;
+    
+    $statement = "SELECT * from sig_fases_projeto where id_projeto = $projeto_atual order by ordem asc ";
+    $q = $this->db->query($statement);
+        
+            
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * AS ÁREAS QUE TEM AÇÕES NO PROJETO, SUPERINTENDENCIA OU PRESTADORES
+     */
+    
+     public function getAreasByProjeto()
+    {
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+        $statement = "select distinct pai.id as id_pai, pai.nome as descricao from sig_planos p
+                    inner join sig_users_setor us on us.users_id = p.responsavel
+                    inner join sig_setores s      on s.id = us.setores_id
+                    inner join sig_setores pai    on pai.id = s.pai
+                    where projeto = $projeto_atual and pai.pai is null ";
+        
+        $q = $this->db->query($statement);
+      
+         
+       
+      if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QTDE AÇÕES POR SUPERINTENDENCIA
+     */
+    
+     public function getAcoesSetorPaiByProjeto($area)
+    {
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+         $statement = "select count(*) as qtde from sig_planos p
+                    inner join sig_users_setor us on us.users_id = p.responsavel
+                    inner join sig_setores s      on s.id = us.setores_id
+                    inner join sig_setores pai    on pai.id = s.pai
+                    where pai.id = $area and projeto = $projeto_atual  ";
+        $q = $this->db->query($statement);
+        
+            if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QTDE AÇÕES DE TODAS AS SUPERINTENDENCIA DE UM PROJETO
+     */
+    
+     public function getTotalAcoesSetoresPaiByProjeto()
+    {
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        $statement = "select count(*) as qtde from sig_planos p
+                    inner join sig_users_setor us on us.users_id = p.responsavel
+                    inner join sig_setores s      on s.id = us.setores_id
+                    inner join sig_setores pai    on pai.id = s.pai
+                    where projeto = $projeto_atual  ";
+        
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QTDE AÇÕES CONCLUIDAS DE UM SETOR PAI
+     */
+    
+     public function getAcoesConcluidasSetorPaiByProjeto($area)
+    {
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual; 
+        $statement = "select count(*) as qtde from sig_planos p
+                    inner join sig_users_setor us on us.users_id = p.responsavel
+                    inner join sig_setores s      on s.id = us.setores_id
+                    inner join sig_setores pai    on pai.id = s.pai
+                    where pai.id = $area and projeto = $projeto_atual and p.status = 'CONCLUÍDO'  ";
+        $q = $this->db->query($statement);
+        
+       
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * QTDE AÇÕES PENDENTES POR SUPERINTENDENCIA
+     * 
+     */
+    
+     public function getAcoesPendenteSetorPaiByProjeto($area, $tipo)
+    {
+        $date_hoje = date('Y-m-d H:i:s');
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual; 
+        $statement = "select count(*) as qtde from sig_planos p
+                    inner join sig_users_setor us on us.users_id = p.responsavel
+                    inner join sig_setores s      on s.id = us.setores_id
+                    inner join sig_setores pai    on pai.id = s.pai
+                    where pai.id = $area and projeto = $projeto_atual and p.status = 'PENDENTE'  ";
+        
+        if($tipo == 1){
+            //PENDENTE
+            $statement .= " and data_termino >= '$date_hoje' ";
+            
+        }else if($tipo == 2){
+            // ATRASADO
+            $statement .= " and data_termino < '$date_hoje' ";
+           
+        }
+      $q = $this->db->query($statement);
+      
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * PEGA TODOS OS PLANOS DE UM PROJETO e de uma área
+     */
+     public function getAllitemPlanosProjetoArea($id, $area)
+    {
+         
+         $this->db->select('planos.idplanos,planos.descricao, planos.data_termino,planos.data_retorno_usuario, users.username,planos.status,users.company,users.gestor,users.award_points,setores.nome as setor, superintendencia.responsavel as superintendencia')
+            ->join('users', 'planos.responsavel = users.id', 'left')
+            ->join('setores', 'planos.setor = setores.id', 'left') 
+            ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')     
+            ->join('atas', 'planos.idatas = atas.id', 'left')
+         ->order_by('setores.id', 'asc');
+         $q = $this->db->get_where('planos', array('atas.projetos' => $id,'superintendencia.id' => $area));
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /***************************************************************************
+     ***************  F I M ** D A S H O B O A R D *****************************
+     ***************************************************************************/
+    
+    
+    
+    
     
     
     /*
@@ -230,174 +1091,18 @@ class Projetos_model extends CI_Model
         return FALSE;
     }
     
-    /*
-     * QTDE AÇÕES DE TODAS AS SUPERINTENDENCIA DE UM PROJETO
-     * 
-     * 
-     */
     
-     public function getAcoesTodasSuperintendenciaByProjeto($id)
-    {
+    
+    
+    
+    
+    
+    
+    
 
-         $this->db->select("COUNT(idplanos) as qtde")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-        ->join('projetos', 'atas.projetos = projetos.id', 'left')
-        ->join('users', 'planos.responsavel = users.id', 'left')
-        ->join('setores', 'planos.setor = setores.id', 'left')
-         ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left');
-         
-        $q = $this->db->get_where('planos', array('projetos.id' => $id), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
     
     
-    /*
-     * AS ÁREAS QUE TEM AÇÕES NO PROJETO, SUPERINTENDENCIA OU PRESTADORES
-     */
-    
-     public function getAreasByProjeto($id)
-    {
-        $select =   array(
-             ' superintendencia.id as id_superintendencia',
-             'superintendencia.nome as superintendencia',
-            
-            'projetos.id as projeto'
-);
-       $this->db->select($select)
-        ->distinct()
-        ->join('atas',             'planos.idatas = atas.id', 'left')
-        ->join('projetos',         'atas.projetos = projetos.id', 'left')
-         
-        ->join('users',            'planos.responsavel = users.id', 'left')
-        ->join('setores',          'planos.setor = setores.id', 'left')         
-       // ->join('prestadores',      'setores.prestador = prestadores.id', 'left')
-        ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')
-                ->order_by('id_superintendencia', 'asc');
-       
-      $q = $this->db->get_where('planos', array('projetos.id' => $id));    
-      
-         
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-    
-    
-    /*
-     * QTDE AÇÕES POR SUPERINTENDENCIA
-     * 
-     * 
-     */
-    
-     public function getAcoesSuperintendenciaByProjeto($id, $area)
-    {
-
-         $this->db->select("COUNT(idplanos) as qtde")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-        ->join('projetos', 'atas.projetos = projetos.id', 'left')
-        ->join('users', 'planos.responsavel = users.id', 'left')
-        ->join('setores', 'planos.setor = setores.id', 'left')
-         ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left');
-         
-        $q = $this->db->get_where('planos', array('projetos.id' => $id, 'superintendencia.id' => $area), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    
-     /*
-     * QTDE AÇÕES CONCLUIDAS POR SUPERINTENDENCIA
-     * 
-     * 
-     */
-    
-     public function getAcoesConcluidasSuperintendenciaByProjeto($id, $area)
-    {
-
-         $this->db->select("COUNT(idplanos) as qtde")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-        ->join('projetos', 'atas.projetos = projetos.id', 'left')
-        ->join('users', 'planos.responsavel = users.id', 'left')
-        ->join('setores', 'planos.setor = setores.id', 'left')
-         ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left');
-         
-        $q = $this->db->get_where('planos', array('projetos.id' => $id, 'superintendencia.id' => $area,'planos.status' => 'CONCLUÍDO'), 1);
-         
-       
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /*
-     * QTDE AÇÕES PENDENTES POR SUPERINTENDENCIA
-     * 
-     * 
-     */
-    
-     public function getAcoesPendenteSuperintendenciaByProjeto($status,$id, $area)
-    {
-         $date_hoje = date('Y-m-d H:i:s');
-         
-         $this->db->select("COUNT(idplanos) as qtde")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-        ->join('projetos', 'atas.projetos = projetos.id', 'left')
-        ->join('users', 'planos.responsavel = users.id', 'left')
-        ->join('setores', 'planos.setor = setores.id', 'left')
-         ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left');
-         
-        //$q = $this->db->get_where('planos', array('projetos.id' => $id, 'superintendencia.id' => $area,'planos.status' => 'CONCLUÍDO'), 1);
-              if ($status == 'PENDENTE') {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => 'PENDENTE', 'superintendencia.id' => $area, 'planos.data_termino >' => $date_hoje), 1);
-              }else
-                if ($status == 'ATRASADO') {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => 'PENDENTE', 'superintendencia.id' => $area, 'planos.data_termino <' => $date_hoje), 1);
-            }
-        
-       
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /*
-     * PEGA TODOS OS PLANOS DE UM PROJETO e de uma área
-     */
-     public function getAllitemPlanosProjetoArea($id, $area)
-    {
-         
-         $this->db->select('planos.idplanos,planos.descricao, planos.data_termino,planos.data_retorno_usuario, users.username,planos.status,users.company,users.gestor,users.award_points,setores.nome as setor, superintendencia.responsavel as superintendencia')
-            ->join('users', 'planos.responsavel = users.id', 'left')
-            ->join('setores', 'planos.setor = setores.id', 'left') 
-            ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')     
-            ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->order_by('setores.id', 'asc');
-         $q = $this->db->get_where('planos', array('atas.projetos' => $id,'superintendencia.id' => $area));
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
+     
     
     /*
      * PEGA AS ÁREAS  DO USUÁRIO
@@ -604,156 +1309,13 @@ class Projetos_model extends CI_Model
      * PERFIL EDP
      */
     
-    /*
-     * QTDE EQUIPE por PROJETO
-     */
-     public function getEquipeByProjeto($id)
-    {
-         $this->db->select("COUNT( DISTINCT (responsavel)) as responsavel")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->join('projetos', 'atas.projetos = projetos.id', 'left');
-         
-        $q = $this->db->get_where('planos', array('projetos.id' => $id), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
     
-    /*
-     * QTDE ATA por PROJETO
-     */
-     public function getAtaByProjeto($id)
-    {
-         $this->db->select("COUNT( DISTINCT (id)) as ata");
-        //->join('atas', 'planos.idatas = atas.id', 'left')
-         //->join('projetos', 'atas.projetos = projetos.id', 'left');
-         
-        $q = $this->db->get_where('atas', array('atas.projetos' => $id), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    
-    /*
-     * QTDE AÇÕES POR PROJETOS
-     */
-     public function getQtdeAcoesByProjeto($id)
-    {
-         $this->db->select("COUNT( idplanos) as total_acoes")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->join('projetos', 'atas.projetos = projetos.id', 'left');
-         
-        $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status !=' => 'ABERTO'), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    
-    /*
-     * QTDE AÇÕES CONCLUÍDAS
-     */
-     public function getStatusAcoesByProjeto($id,$status)
-    {
-         $this->db->select("COUNT( idplanos) as status")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->join('projetos', 'atas.projetos = projetos.id', 'left');
-         
-        $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /*
-     * QTDE AÇÕES PENDENTES 
-     */
-    
-     public function getAcoesPendentesByProjeto($id,$status)
-    {
-        $date_hoje = date('Y-m-d H:i:s');
-         
-         $this->db->select("COUNT( idplanos) as pendente")
-        // $this->db->where('planos.status', 'AGUARDANDO VALIDAÇÃO')
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->join('projetos', 'atas.projetos = projetos.id', 'left');
-        
-        $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status,   'planos.data_termino >' => $date_hoje), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /*
-     * QTDE AÇÕES PENDENTES 
-     */
-    
-     public function getAcoesAguardandoValidacaoByProjeto($id,$status)
-    {
-        $date_hoje = date('Y-m-d H:i:s');
-         
-         $this->db->select("COUNT( idplanos) as avalidacao")
-        // $this->db->where('planos.status', 'AGUARDANDO VALIDAÇÃO')
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->join('projetos', 'atas.projetos = projetos.id', 'left');
-        
-        $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /* 
-     * QTDE AÇÕES ATRASADAS
-     */
-    
-     public function getAcoesAtrasadasByProjeto($id,$status)
-    {
-          $date_hoje = date('Y-m-d H:i:s');
-         
-         $this->db->select("COUNT( idplanos) as atrasadas")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->join('projetos', 'atas.projetos = projetos.id', 'left');
-         
-        $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status, 'planos.data_termino <' => $date_hoje), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
     
      
     
     
     
-     public function getAllitemStatusPlanosLinhaTempo($id)
-    {
-         
-         $q = $this->db->get_where('historico_acoes', array('resumo' => 1,'projeto' => $id));
-         
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
+    
     
     /*
      * retorna todos os usuarios com acoes atrasadas de um projeto. objtivo é enviar emails para esses usuários.
@@ -840,12 +1402,16 @@ class Projetos_model extends CI_Model
     /*
      * PEGA TODOS OS TIPOS DE EVENTOS DE UM PROJETO
      */
-     public function getAllFasesProjeto($projeto)
+     public function getAllFasesProjeto()
     {
-       
+       $usuario = $this->session->userdata('user_id');
+       $users_dados = $this->site->geUserByID($usuario);
+       $projeto_atual = $users_dados->projeto_atual;
+    
+    
         $this->db->select('*')
         ->order_by('ordem', 'asc');
-        $q = $this->db->get_where('fases_projeto', array('id_projeto' => $projeto));
+        $q = $this->db->get_where('fases_projeto', array('id_projeto' => $projeto_atual));
         
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -856,55 +1422,21 @@ class Projetos_model extends CI_Model
         return FALSE;
     }
     
-    /*
-     * PEGA TODOS OS TIPOS DE EVENTOS DE UM PROJETO
-     */
-     public function getAllTipoEventosProjeto($id, $campo, $ordem)
-    {
-         if(!$ordem){
-             $ordem = 'asc';
-         }
-         $this->db->select('*')
-          ->group_by('tipo', 'asc')      
-           ->order_by($campo, $ordem);
-       $q = $this->db->get_where('eventos', array('eventos.projeto' => $id));
-         
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
+    
     
      /*
-     * PEGA TODOS OS EVENTOS DE UM PROJETO PELO TIPO
+     * PEGA TODOS OS EVENTOS DE UM PROJETO PELA FASE
      */
-     public function getAllEventosProjetoByTipo($id, $projeto, $campo, $ordem)
+     public function getAllEventosProjetoByFase($fase)
     {
+     $usuario = $this->session->userdata('user_id');
+     $users_dados = $this->site->geUserByID($usuario);
+     $projeto_atual_id = $users_dados->projeto_atual;
+        
+        $this->db->select('*')
+        ->order_by('ordem', 'asc');      
+        $q = $this->db->get_where('eventos', array('fase_id' => $fase, 'projeto' => $projeto_atual_id));
        
-      
-         if(!$ordem){
-             $ordem = 'asc';
-         }
-         
-         if($campo == null){
-             $campo = 'id';
-         }
-         
-         $this->db->select('*')
-           // ->join('users', 'planos.responsavel = users.id', 'left')
-           // ->join('setores', 'users.setor_id = setores.id', 'left')  
-           // ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')        
-           // ->join('atas', 'planos.idatas = atas.id', 'left')
-         
-          // ->order_by('tipo', 'asc')      
-           ->order_by($campo, $ordem);
-      
-        
-         $q = $this->db->get_where('eventos', array('tipo' => $id, 'eventos.projeto' => $projeto));
-        
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;
@@ -914,53 +1446,20 @@ class Projetos_model extends CI_Model
         return FALSE;
     }
     
-    /*
-     * PEGA TODOS OS EVENTOS DE UM PROJETO
-     */
-     public function getAllEventosProjeto($id, $campo, $ordem)
-    {
-         if(!$campo){
-             $campo = 'id';
-         }
-         
-         if(!$ordem){
-             $ordem = 'asc';
-         }
-         $this->db->select('*')
-           // ->join('users', 'planos.responsavel = users.id', 'left')
-           // ->join('setores', 'users.setor_id = setores.id', 'left')  
-           // ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')        
-           // ->join('atas', 'planos.idatas = atas.id', 'left')
-         
-          // ->order_by('tipo', 'asc')      
-           ->order_by($campo, $ordem);
-      
-        
-         $q = $this->db->get_where('eventos', array('eventos.projeto' => $id));
-         
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
+    
     
      /*
      * PEGA TODOS OS EVENTOS  E ITENS DE EVENTO DE UM PROJETO
      */
-     public function getAllEventosItemEventoByProjeto($id, $campo, $ordem)
+     public function getAllEventosItemEventoByProjeto($projeto, $campo, $ordem)
     {
-         if(!$ordem){
-             $ordem = 'asc';
-         }
-         $this->db->select('item_evento.id as id_item, eventos.nome_evento as evento, eventos.tipo as tipo, item_evento.descricao as descricao, item_evento.dt_inicio as inicio, item_evento.dt_fim as fim')
-            ->join('item_evento', 'eventos.id = item_evento.evento', 'inner')
-            ->order_by($campo, $ordem);
-      
-        
-         $q = $this->db->get_where('eventos', array('eventos.projeto' => $id));
+    
+        $statement = "SELECT i.id as id, nome_fase, nome_evento, descricao, i.dt_inicio as dt_inicio, i.dt_fim as dt_fim
+            FROM sig_fases_projeto f
+        inner join sig_eventos e on e.fase_id = f.id
+        inner join sig_item_evento i on i.evento = e.id where f.id_projeto = $projeto order by nome_fase asc";
+       // echo $statement; exit;
+        $q = $this->db->query($statement);
          
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -1238,9 +1737,9 @@ order by su.nome asc
         return FALSE;
     }
     
-    /*******************************************************
-     * ****************** I T E N S   D O    EVENTOS
-     *******************************************************/
+    /****************************************************************************
+     * ****************** I T E N S   D O    EVENTOS ****************************
+     *****************************************************************************/
     
        public function addItensventos($data_evento)
     {
@@ -1258,9 +1757,9 @@ order by su.nome asc
     /*
      * PEGA TODOS OS EVENTOS DE UM PROJETO
      */
-     public function getAllItemEventosProjeto($id)
+     public function getAllItemEventosProjeto($evento)
     {
-        
+         
          $this->db->select('*')
            // ->join('users', 'planos.responsavel = users.id', 'left')
            // ->join('setores', 'users.setor_id = setores.id', 'left')  
@@ -1268,7 +1767,7 @@ order by su.nome asc
            // ->join('atas', 'planos.idatas = atas.id', 'left')
          ->order_by('id', 'ASC');
         
-         $q = $this->db->get_where('item_evento', array('evento' => $id));
+         $q = $this->db->get_where('item_evento', array('evento' => $evento));
          
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -1283,6 +1782,31 @@ order by su.nome asc
     public function getItemEventoByID($id)
     {
         $q = $this->db->get_where('item_evento', array('id' => $id), 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    public function getItemEventoByEvento($evento)
+    {
+        $statement = "SELECT count(*) as quantidade from sig_item_evento
+                    where evento = '$evento'";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    // VERIFICA SE TEM AÇÃO VINCULADO AOS ITENS DE EVENTO DE UM EVENTO
+     public function getIAcoestemEventoByEvento($evento)
+    {
+        $statement = "SELECT count(*) as quantidade from sig_item_evento i
+                        inner join sig_planos p on p.eventos = i.id where evento = '$evento'";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -1309,6 +1833,109 @@ order by su.nome asc
         }
         return FALSE;
     }
+    
+    public function deleteItemEventoByEvento($evento)
+    {         
+       // $sale_items = $this->resetSaleActions($id);
+        if ($this->db->delete('item_evento', array('evento' => $evento))){
+            
+            return true;
+        }
+        return FALSE;
+    }
+    
+    
+    
+    /*
+     * QUANTIDADE DE AÇÕES POR ITEM
+     */
+     public function getQuantidadeAcaoByItemEvento($id)
+    {
+        $statement = "SELECT count(*) as quantidade from sig_planos
+                    where eventoS = '$id' and status not in ('ABERTO', 'CANCELADO')";
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * QTDE AÇÕES CONCLUÍDAS POR ITEM DE EVENTO
+     */
+     public function getAcoesConcluidasByPItemEvento($eventos)
+    {
+        $statement = "SELECT count(*) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'CONCLUÍDO'";
+        $q = $this->db->query($statement); 
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * QTDE AÇÕES PENDENTES POR ITEM
+     */
+    
+     public function getAcoesPendentesByItemEvento($eventos)
+    {
+        $date_hoje = date('Y-m-d H:i:s');
+        $statement = "SELECT count(*) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'PENDENTE' and data_termino > '$date_hoje'";
+        $q = $this->db->query($statement); 
+      
+          
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * QTDE AÇÕES PENDENTES 
+     */
+    
+     public function getAcoesAguardandoValidacaoByItemEvento($eventos)
+    {
+        $statement = "SELECT count(*) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'AGUARDANDO VALIDAÇÃO'";
+        $q = $this->db->query($statement); 
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /* 
+     * QTDE AÇÕES ATRASADAS
+     */
+    
+     public function getAcoesAtrasadasByItemEvento($eventos)
+    {
+          
+        $date_hoje = date('Y-m-d H:i:s');
+        $statement = "SELECT count(*) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'PENDENTE' and data_termino < '$date_hoje'";
+        $q = $this->db->query($statement); 
+        
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    
+    
+   /******************************************************************************
+    ***************** F I M  * * E S C O P O ************************************
+    *****************************************************************************/
+    
     
     
     /*
@@ -1553,82 +2180,6 @@ order by su.nome asc
     }
     
     
-    /*
-     * QUANTIDADE DE AÇÕES POR ITEM
-     */
-     public function getQuantidadeAcaoByItemEvento($id)
-    {
-         $this->db->select('count(*) as quantidade');
-         $q = $this->db->get_where('planos', array('eventos' => $id, 'planos.status !=' => 'ABERTO', 'planos.status !=' => 'CANCELADO'), 1);
-        
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /*
-     * QTDE AÇÕES CONCLUÍDAS POR ITEM DE EVENTO
-     */
-     public function getAcoesConcluidasByPItemEvento($eventos)
-    {
-         $this->db->select("COUNT(*) as quantidade");       
-        $q = $this->db->get_where('planos', array('planos.eventos' => $eventos, 'planos.status' => 'CONCLUÍDO'), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-     /*
-     * QTDE AÇÕES PENDENTES POR ITEM
-     */
-    
-     public function getAcoesPendentesByItemEvento($eventos)
-    {
-        $date_hoje = date('Y-m-d H:i:s');
-         
-           $this->db->select("COUNT(*) as quantidade");  
-            $q = $this->db->get_where('planos', array('planos.eventos' => $eventos, 'planos.status' => 'PENDENTE',  'planos.data_termino >' => $date_hoje), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-     /*
-     * QTDE AÇÕES PENDENTES 
-     */
-    
-     public function getAcoesAguardandoValidacaoByItemEvento($eventos)
-    {
-        $this->db->select("COUNT(*) as quantidade");  
-        $q = $this->db->get_where('planos', array('planos.eventos' => $eventos, 'planos.status' => 'AGUARDANDO VALIDAÇÃO'), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-     /* 
-     * QTDE AÇÕES ATRASADAS
-     */
-    
-     public function getAcoesAtrasadasByItemEvento($eventos)
-    {
-          $date_hoje = date('Y-m-d H:i:s');
-         
-         $this->db->select("COUNT(*) as quantidade");  
-        $q = $this->db->get_where('planos', array('planos.eventos' => $eventos, 'planos.status' => 'PENDENTE', 'planos.data_termino <' => $date_hoje), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
     
     /*
      * TREINAMENTOS COM ALGUMA AVALIAÇÃO
@@ -2424,9 +2975,6 @@ VALUES (
        
 
     }
-    
-    
-    
     
     
     

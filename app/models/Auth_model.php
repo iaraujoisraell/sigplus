@@ -588,41 +588,47 @@ class Auth_model extends CI_Model
         return $id;
     }
 
-    public function login($identity, $password, $remember = FALSE)
+   public function login($identity, $password, $remember = FALSE)
     {
-         
+        
+    // echo $identity.'<br>';
+    // echo $password.'<br>';
+  // exit;
         $this->trigger_events('pre_login');
 
-        if (empty($identity)) {
+        if (empty($identity) || empty($password)) {
             $this->set_error('login_unsuccessful');
             return FALSE;
         }
-        
+        $sigplus = 1;
         $this->trigger_events('extra_where');
         $this->load->helper('email');
-        $this->identity_column = valid_email($identity) ? 'username' : 'matricula' ;
-        $query = $this->db->select($this->identity_column . ', username, email, matricula, id, password, active, last_login, last_ip_address, avatar, gender, group_id, warehouse_id, biller_id, company_id, view_right, edit_right, allow_discount, show_cost, show_price')
+        $this->identity_column = valid_email($identity) ? 'email' : 'username';
+        $query = $this->db->select($this->identity_column . ', username, email, id, password, active, last_login, last_ip_address, avatar, gender, group_id,  company_id, empresa_id, foto_capa')
             ->where($this->identity_column, $this->db->escape_str($identity))
+          //  ->where('consultor', 1)    
             ->limit(1)
             ->get($this->tables['users']);
+      //  echo $query->num_rows(); exit;
 
         if ($this->is_time_locked_out($identity)) {
+           
             //Hash something anyway, just to take up time
-            //$this->hash_password($password);
+            $this->hash_password($password);
 
             $this->trigger_events('post_login_unsuccessful');
             $this->set_error('login_timeout');
 
             return FALSE;
         }
-
+       
         if ($query->num_rows() === 1) {
             $user = $query->row();
-          //echo $user->id; exit;
             
-           // $password = $this->hash_password_db($user->id, $password);
+            $password = $this->hash_password_db($user->id, $password);
 
-          //  if ($password === TRUE) {
+            if ($password === TRUE) {
+               
                 if (!isset($this->Settings->single_login)) {
                     $this->Settings->single_login = 0;
                 }
@@ -641,15 +647,39 @@ class Auth_model extends CI_Model
                         }
                     }
                 }
-
+                // VERIFICA SE O USUÃ�RIO ESTÃ� ATIVO
                 if ($user->active != 1) {
                     $this->trigger_events('post_login_unsuccessful');
                     $this->set_error('login_unsuccessful_not_active');
                     return FALSE;
                 }
-
+               
+                // VERIFICA SE PERTENCE A UMA EMPRESA
+                if(!$user->empresa_id){
+                    $this->trigger_events('post_login_unsuccessful');
+                    $this->set_error('Procure o Adminstrador do SIG PLUS!');
+                    $logdata = array('date' => date('Y-m-d H:i:s'), 'type' => 'LOGIN SEM SUCESSO - USUÃ�RIO SEM EMPRESA', 'description' => 'O usuÃ¡rio nÃ£o conseguiu reaizar o login pois nÃ£o estÃ¡ ligado a uma empresa.',  'userid' => $user->id, 'ip_address' => $this->input->ip_address(), 'tabela' => 'users', 'funcao' => 'login',  'empresa' => $sigplus);
+                    $this->db->insert('logs', $logdata);
+                    return FALSE;
+                }
+                //VERIFICA SE A EMPRESA DELE ESTÃ� ATIVA
+                $q_empresa = $this->db->get_where('empresa', array('id' => $user->empresa_id), 1);
+             //  echo $user->empresa_id;
+                if ($q_empresa->num_rows() > 0) {
+                    $empresa = $q_empresa->row();
+                    $status_empresa = $empresa->status; 
+                }
+              //   echo 'empresa : '.$empresa->id.'-'.$status_empresa;
+              //  exit;
+                if($status_empresa != 1){
+                    $this->trigger_events('post_login_unsuccessful');
+                    $this->set_error('Procure o Adminstrador do SIG PLUS!');
+                    $logdata = array('date' => date('Y-m-d H:i:s'), 'type' => 'LOGIN SEM SUCESSO - EMPRESA INATIVA', 'description' => 'O usuÃ¡rio nÃ£o conseguiu reaizar o login pois a empresa nÃ£o estÃ¡ ativa.',  'userid' => $user->id, 'ip_address' => $this->input->ip_address(), 'tabela' => 'users', 'funcao' => 'login',  'empresa' => $sigplus);
+                    $this->db->insert('logs', $logdata);
+                    return FALSE;
+                }
                 $this->set_session($user);
-
+                
                 $this->update_last_login($user->id);
                 $this->update_last_login_ip($user->id);
                 $ldata = array('user_id' => $user->id, 'ip_address' => $this->input->ip_address(), 'login' => $identity);
@@ -662,11 +692,13 @@ class Auth_model extends CI_Model
 
                 $this->trigger_events(array('post_login', 'post_login_successful'));
                 $this->set_message('login_successful');
-
+                   $logdata = array('date' => date('Y-m-d H:i:s'), 'type' => 'LOGIN COM SUCESSO ', 'description' => 'O usuÃ¡rio realizou o login.',  'userid' => $user->id, 'ip_address' => $this->input->ip_address(), 'tabela' => 'users', 'funcao' => 'login',  'empresa' => $this->session->userdata('empresa'));
+                  $this->db->insert('logs', $logdata);
                 return TRUE;
-           // }
+            }
+            // se a senhar nÃ£o for a verdadeira e errar 3X espera por 10 min
         }
-
+        
         //Hash something anyway, just to take up time
         $this->hash_password($password);
 
@@ -682,14 +714,14 @@ class Auth_model extends CI_Model
     
     public function login_original($identity, $password, $remember = FALSE)
     {
-       // echo 'aqui'; exit;
+        
         $this->trigger_events('pre_login');
 
         if (empty($identity) || empty($password)) {
             $this->set_error('login_unsuccessful');
             return FALSE;
         }
-
+        echo $identity; exit;
         $this->trigger_events('extra_where');
         $this->load->helper('email');
         $this->identity_column = valid_email($identity) ? 'email' : 'username';
@@ -708,7 +740,7 @@ class Auth_model extends CI_Model
 
             return FALSE;
         }
-
+        echo 'aqui '.$query->num_rows(); exit;
         if ($query->num_rows() === 1) {
             $user = $query->row();
 
@@ -1323,7 +1355,7 @@ class Auth_model extends CI_Model
 
         $this->trigger_events('pre_set_session');
 
-        $session_data = array(
+         $session_data = array(
             'identity' => $user->{$this->identity_column},
             'username' => $user->username,
             'email' => $user->email,
@@ -1333,14 +1365,9 @@ class Auth_model extends CI_Model
             'avatar' => $user->avatar,
             'gender' => $user->gender,
             'group_id' => $user->group_id,
-            'warehouse_id' => $user->warehouse_id,
-            'view_right' => $user->view_right,
-            'edit_right' => $user->edit_right,
-            'allow_discount' => $user->allow_discount,
-            'biller_id' => $user->biller_id,
             'company_id' => $user->company_id,
-            'show_cost' => $user->show_cost,
-            'show_price' => $user->show_price,
+            'empresa' => $user->empresa_id
+            
         );
 
         $this->session->set_userdata($session_data);

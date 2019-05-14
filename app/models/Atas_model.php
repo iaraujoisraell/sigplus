@@ -9,26 +9,19 @@ class Atas_model extends CI_Model
     }
 
     
-        public function addAtas($data,$usuario_ata,$participantes)
+    public function addAtas($data,$participantes)
     {
            // print_r($data); exit;
             
             if ($this->db->insert('atas', $data)) {
                  $id_ata = $this->db->insert_id();
-                 
+                
                 // print_r($usuario_ata); exit;
-                 
-                  foreach ($usuario_ata as $item) {
-                        $data_ata_usuario = array('id_ata' => $id_ata,
-                            'id_usuario' => $item);      
-                        
-                        $this->db->insert('ata_usuario', $data_ata_usuario);
-                 }
-                 
-                 
+                
                   foreach ($participantes as $item_participante) {
-                        $data_participante = array('id_ata' => $id_ata,
-                            'id_participante' => $item_participante);      
+                        $data_participante = array('atas_id' => $id_ata,
+                                                   'participante' => 1,
+                                             'id_usuario' => $item_participante);      
                         
                         $this->db->insert('ata_usuario', $data_participante);
                  }
@@ -41,7 +34,7 @@ class Atas_model extends CI_Model
     
     
     
-         public function add_Atas_usuario($ata_usuario)
+    public function add_Atas_usuario($ata_usuario)
     {
              
             if ($this->db->insert('ata_usuario', $ata_usuario)) {
@@ -90,6 +83,17 @@ class Atas_model extends CI_Model
          
     }
     
+    public function getPlanoAcaoByID($id)
+    {
+        $q = $this->db->get_where('plano_acao', array('id' => $id), 1);
+     
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+         
+    }
+    
      public function getAtaProjetoByID_ATARetornoUsuario($id)
     {
      
@@ -121,7 +125,7 @@ class Atas_model extends CI_Model
     }
     
     
-       public function getParticipante_Treinamento($id)
+     public function getParticipante_Treinamento($id)
     {
          $this->db->select("count(id) as quantidade");
          //   ->join('projetos', 'atas.projetos = projetos.id', 'left');
@@ -168,9 +172,75 @@ class Atas_model extends CI_Model
          
     }
     
+    /*
+     * 
+     */
+     /**********************************************************
+     ***** RETORNA AS ATAS QUE O USUÁRIO TA VINCULADO ***********
+     ********************************************************/
+    public function getAllVinculoAtasByUser(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+      //  $users_dados = $this->site->geUserByID($usuario);
+      //  $modulo_atual_id = $users_dados->modulo_atual;
+      //  $projeto_atual_id = $users_dados->projeto_atual;
+        
+       $statement = "SELECT a.id as id, a.id as ata, data_ata, pauta, tipo, responsavel_elaboracao, a.status, a.anexo, a.sequencia as sequencia
+                    FROM sig_ata_usuario s
+                    inner join sig_atas a on a.id = s.atas_id
+                    inner join sig_users_setor t on t.id = s.id_usuario
+                    inner join sig_users u on u.id = t.users_id
+                    where u.id = $usuario and u.empresa_id = $empresa order by a.id desc";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /**********************************************************
+     ***** RETORNA AS ATAS QUE O USUÁRIO CRIOU. NÃO TEM PROJETO ***********
+     ********************************************************/
+    public function getAllMinhasAtasByUser(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+      //  $users_dados = $this->site->geUserByID($usuario);
+      //  $modulo_atual_id = $users_dados->modulo_atual;
+      //  $projeto_atual_id = $users_dados->projeto_atual;
+        
+       $statement = "SELECT * FROM sig_atas "
+                 . " WHERE usuario_criacao = $usuario and projetos IS NULL and networking = 1
+                     and empresa = $empresa order by id desc";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
      public function getAtaUserByID_ATA($id)
     {
-        $q = $this->db->get_where('ata_usuario', array('id_ata' => $id, 'id_usuario !=' => ""));
+         $statement = "select us.id as id, first_name as nome, s.nome as setor
+        from sig_ata_usuario au
+        inner join sig_users_setor us on us.id = au.id_usuario
+        inner join sig_users u on u.id = us.users_id
+        inner join sig_setores s on s.id = us.setores_id
+        where au.atas_id = $id
+        order by nome";    
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+     //   $q = $this->db->get_where('ata_usuario', array('atas_id' => $id, 'id_usuario !=' => ""));
     
         if ($q->num_rows() > 0) {
             
@@ -187,13 +257,92 @@ class Atas_model extends CI_Model
          
     }
     
+    //usuário adicionados como participantes na ata e ainda não confirmado - usado na tela de convite
+     public function getConvitesAtaUserByID_ATA($id)
+    {
+         $statement = "select us.id as id, first_name as nome, s.nome as setor, i.ciente as ciente, i.confirmacao as confirmacao, au.participante as participante, au.vinculo as vinculo
+                    from sig_ata_usuario au
+                    inner join sig_users_setor us on us.id = au.id_usuario
+                    inner join sig_atas a on a.id = au.atas_id
+                    inner join sig_users u on u.id = us.users_id
+                    inner join sig_setores s on s.id = us.setores_id
+                    left join sig_invites i on i.ata = au.atas_id
+                    where au.atas_id = $id and a.status != 2 and i.confirmacao IS NULL and ciente is NULL
+                    order by nome";    
+       
+        $q = $this->db->query($statement);
+     //   $q = $this->db->get_where('ata_usuario', array('atas_id' => $id, 'id_usuario !=' => ""));
+    
+        if ($q->num_rows() > 0) {
+            
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+            
+          //  return $q->row();
+            
+            
+        }
+        return FALSE;
+         
+    }
+    
+    /****************************************************************************
+     **************************** I N V I T E S ********************************* 
+     ***************************************************************************/
+    
+    //LISTA OS INVITES DE UMA ATA
+    public function getAllInvitesByAta($ata){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT i.id as id, ciente, u.first_name as nome, s.nome as setor, i.data_criacao as data_criacao,  i.data_confirmacao as data_confirmacao, data_evento, hora_inicio, hora_fim, titulo, local, confirmacao,obrigatorio, i.status as status FROM sig_invites i
+                    inner join sig_users_setor us on us.id = i.user_destino
+                    inner join sig_users u on u.id = us.users_id
+                    inner join sig_setores s on s.id = us.setores_id
+                    where i.empresa = $empresa and i.ata = $ata ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * ADICIONA INVITE
+     */
+    public function addInviteAta($data_ata_usuario)
+    {  
+            if($this->db->insert('invites', $data_ata_usuario)){
+                  
+                  return true;
+            }
+            
+      
+    }
+    
     
      public function getAtaUserParticipante_ByID_ATA($id)
     {
-      // echo $participante; 
-       //  $this->db->select("*")
-       //  ->order_by('idplanos', 'desc');
-        $q = $this->db->get_where('ata_usuario', array('id_ata' => $id, 'id_participante !=' => ""));
+      
+          $statement = "select distinct us.id as id, first_name as nome, s.nome as setor, au.participante as participante, au.vinculo as vinculo, confirmacao
+                        from sig_ata_usuario au
+                        inner join sig_users_setor us on us.id = au.id_usuario
+                        inner join sig_users u on u.id = us.users_id
+                        inner join sig_setores s on s.id = us.setores_id
+                        left join sig_invites i on i.user_destino = au.id_usuario and i.ata = $id
+                        where au.atas_id = $id
+                        order by nome";    
+       
+        $q = $this->db->query($statement);
+         
+       // $q = $this->db->get_where('ata_usuario', array('atas_id' => $id, 'id_participante !=' => ""));
        // echo 'aquiii'.  $q->num_rows(); exit;
         if ($q->num_rows() > 0) {
             
@@ -245,7 +394,7 @@ class Atas_model extends CI_Model
                   // $this->db->delete('ata_usuario', array('id_ata' => $id, 'id_participante !=' => ""));
             
                
-                        $data_ata_usuario = array('id_ata' => $id, 'id_participante' => $participante);      
+                        $data_ata_usuario = array('id_ata' => $id, 'id_usuario' => $participante, 'participante' => 1);      
                         $this->db->insert('ata_usuario', $data_ata_usuario);
                   return true;
             }
@@ -257,19 +406,29 @@ class Atas_model extends CI_Model
         return false;
     }
     
-         public function deleteParticipanteAta($participante)
+         public function deleteParticipanteAta($participante, $ata)
     {  
-        
-     
-            
-            if($participante){
-                   $this->db->delete('ata_usuario', array('id' => $participante));
-            
+           
+            $this->db->delete('ata_usuario', array('id_usuario' => $participante, 'atas_id' => $ata));
+            return true;
+           
+             /*
+             
+            if($tipo == 1){
+                   $this->db->delete('ata_usuario', array('id_participante' => $participante, 'atas_id' => $ata));
+               
+                  //      $data_ata_usuario = array('id_ata' => $id, 'id_participante' => $participante);      
+                  //      $this->db->insert('ata_usuario', $data_ata_usuario);
+                  return true;
+            }else if($tipo == 2){
+                   $this->db->delete('ata_usuario', array('id_usuario' => $participante, 'atas_id' => $ata));
                
                   //      $data_ata_usuario = array('id_ata' => $id, 'id_participante' => $participante);      
                   //      $this->db->insert('ata_usuario', $data_ata_usuario);
                   return true;
             }
+              * 
+              */
             
          
             
@@ -278,28 +437,21 @@ class Atas_model extends CI_Model
         return false;
     }
     
-     public function updateAta($id, $data  = array(), $participantes_ata= array(), $usuario_ata= array())
+     public function updateAta($id, $data  = array(), $participantes_ata= array())
     {  
         
         if ($this->db->update('atas', $data, array('id' => $id))) {
             
             if($participantes_ata){
-                 // $this->db->delete('ata_usuario', array('id_ata' => $id, 'id_participante !=' => ""));
+                  //$this->db->delete('ata_usuario', array('id_usuario' => $item, 'atas_id ' => $id));
             
                 foreach ($participantes_ata as $item) {
-                        $data_ata_usuario = array('id_ata' => $id, 'id_participante' => $item);      
+                        $data_ata_usuario = array('atas_id' => $id, 'participante' => 1, 'id_usuario' => $item);      
                         $this->db->insert('ata_usuario', $data_ata_usuario);
                  }
             }
             
-            if($usuario_ata){
-                $this->db->delete('ata_usuario', array('id_ata' => $id, 'id_usuario !=' => ""));
-            
-                foreach ($usuario_ata as $item) {
-                        $data_ata_usuario = array('id_ata' => $id, 'id_usuario' => $item);      
-                        $this->db->insert('ata_usuario', $data_ata_usuario);
-                 }
-            }
+           
             
          return true;
         }
@@ -309,30 +461,39 @@ class Atas_model extends CI_Model
     /*
      * ATUALIZA NO PLANO DE AÇÃO OS PARTICIPANTES
      */
-     public function updateParticipantesAta($id, $participantes= array())
+     public function updateParticipantesAta($id, $participante,  $valor)
     {  
-        
-             
-            if($participantes){
-                
-                foreach ($participantes as $item) {
-                    $this->db->delete('ata_usuario', array('id_ata' => $id, 'id_participante !=' => null));
-                }
-                
-                foreach ($participantes as $item) {
-                        $data_ata_usuario = array('id_ata' => $id, 'id_participante' => $item);      
-                        $this->db->insert('ata_usuario', $data_ata_usuario);
-                 }
-                 
+        if ($valor == 1) {
+            $data_participante = array('participante' => 1);
+        } else if ($valor == 0) {
+            $data_participante = array('participante' => 0);
+        }
+
+             if ($this->db->update('ata_usuario', $data_participante, array('atas_id' => $id, 'id_usuario' => $participante))) {
                  return true;
-                 
             }
-            
-         
-        
-        return false;
+       
+
+       
     }
     
+     public function updateVinculoAta($id, $participante, $valor)
+    {  
+         //print_r($participar); exit;
+       
+        if($valor == 1){
+            $data_vinculo = array('vinculo' => 1);       
+        }else if($valor == 0){
+            $data_vinculo = array('vinculo' => 0);       
+        }
+        
+       if ($this->db->update('ata_usuario', $data_vinculo, array('atas_id' => $id, 'id_usuario' => $participante))) {
+                 return true;
+            }
+                
+
+        
+    }
     
     /*
      * ATUALIZA NO PLANO DE AÇÃO OS USUÁRIOS VINCULADOS
@@ -361,33 +522,27 @@ class Atas_model extends CI_Model
         return false;
     }
      
-    
-     public function finalizaAta($id, $data  = array())
+    // FINALIZA A ATA
+    public function finalizaAta($id, $data  = array())
     {  
         
         if ($this->db->update('atas', $data, array('id' => $id))) {
-            
-         
-            
             
          return true;
         }
         return false;
     }
     
-    
-     public function atualizaUser($id, $data  = array())
+    // FINALIZA O PLANO DE AÇÃO
+     public function updatePlanoAcao($id, $data  = array())
     {  
         
-        if ($this->db->update('users', $data, array('id' => $id))) {
-            
-         
-            
+        if ($this->db->update('plano_acao', $data, array('id' => $id))) {
             
          return true;
         }
         return false;
-    } 
+    }
     
     public function deleteAta($id)
     {
@@ -399,7 +554,26 @@ class Atas_model extends CI_Model
         return FALSE;
     }
 
+    /*
+     * ADICIONAR VINCULO
+     */
     
+     public function AdicionarAudioAta($data_audio= array())
+    {  
+         /*
+         * ações vinculadas
+         */
+           
+            if ($this->db->insert('atas_audios', $data_audio)) {
+                $this->db->insert_id();
+                 return true;
+            }
+           
+            
+            
+         
+        return false;
+    }
     
     
     public function getAllProjetos()
@@ -415,410 +589,6 @@ class Atas_model extends CI_Model
     }
     
     
-    public function getAllServicosSai()
-    {
-        $statement = "SELECT * from sma_sai_servicos order by descricao asc";
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-     public function getAllPrestadoresSai()
-    {
-        $statement = "SELECT * from sma_sai_prestadores p ";
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-     public function getAllPrestadoresSaiByEspecialidade($especialidade)
-    {
-        $statement = "SELECT p.id as id_prestador, p.*, e.* from sma_sai_prestadores p "
-                . " INNER JOIN sma_sai_prestadores_especialidades e ON e.codigo = p.codigo where e.especialidade = '$especialidade' ";
-       
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-     public function getAllEspecialidadesSai()
-    {
-        $statement = "SELECT DISTINCT especialidade from sma_sai_prestadores_especialidades order by especialidade asc ";
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-    
-    public function getAllTelefonesPrestadoresSai($codigo)
-    {
-        $statement = "SELECT * from sma_sai_prestadores_telefone where prestador = $codigo ";
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-      public function getAllEspecialidadesPrestadoresSai($codigo)
-    {
-        $statement = "SELECT * from sma_sai_prestadores_especialidades where codigo = $codigo ";
-         $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-      public function getAllServicosPrestadoresSai($codigo)
-    {
-        $statement = "SELECT * from sma_sai_prestadores_servicos where codigo = $codigo ";
-         $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-   public function getAllListaEspera($servicos, $especialidades, $status)
-    {
-        $statement = "SELECT * from sma_sai_lista_espera where beneficiario is not null ";
-        
-        if($servicos != ""){
-            $statement .=" and servico = '$servicos'";
-        }
-        
-        if($especialidades != ""){
-            $statement .=" and especialidade = '$especialidades'";
-        }
-        
-        if($status != ""){
-            $statement .=" and status = $status";
-        }
-        
-        $statement .=" order by data_criacao desc";
-        //echo $statement; exit; 
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-    public function getQtdePrestadoresSai()
-    {
-        $statement = "SELECT count(*) as qtde_prestadores from sma_sai_prestadores p ";
-        $q = $this->db->query($statement);
-        
-       if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    public function getQtdeEspecialidadesSai()
-    {
-        $statement = "SELECT count(distinct(especialidade)) as qtde_especialidade from sma_sai_prestadores_especialidades p ";
-        $q = $this->db->query($statement);
-        
-       if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    public function getQtdeServicosSai()
-    {
-        $statement = "SELECT count(*) as qtde_servicos from sma_sai_servicos ";
-        $q = $this->db->query($statement);
-        
-       if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    
-    public function getQtdeListaEsperaSai()
-    {
-        $statement = "SELECT count(*) as qtde_espera from sma_sai_lista_espera where status = 0";
-        $q = $this->db->query($statement);
-        
-       if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-       public function add_lista_espera($data_lista)
-    {
-            
-            if ($this->db->insert('sai_lista_espera', $data_lista)) {
-               $id_acao =  $this->db->insert_id();
-                 
-           
-                 
-                return true;
-        }
-          
-        return false;
-    }
-    
-        public function add_prestador($data_lista)
-    {
-            
-            if ($this->db->insert('sai_prestadores', $data_lista)) {
-               $id_acao =  $this->db->insert_id();
-               return $id_acao;
-        }
-          
-        return false;
-    }
-    
-    public function getRegistroListaByID($id)
-    {
-          
-        $q = $this->db->get_where('sai_lista_espera', array('id' => $id), 1);
-     
-        
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-         
-    }
-    
-    public function getRegistroPrestadorByID($id)
-    {
-          
-        $q = $this->db->get_where('sai_prestadores', array('id' => $id), 1);
-     
-        
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-         
-    }
-    
-    public function updateLista($id, $data  = array())
-    {  
-        
-        if ($this->db->update('sai_lista_espera', $data, array('id' => $id))) {
-            
-         return true;
-        }
-        return false;
-    }
-    
-    
-    public function updatePrestador($id, $data  = array())
-    {  
-        
-        if ($this->db->update('sai_prestadores', $data, array('id' => $id))) {
-            
-         return true;
-        }
-        return false;
-    }
-    
-     public function deleteTelefonePrestador($id)
-    {
-       // $sale_items = $this->resetSaleActions($id);
-        if ($this->db->delete('sai_prestadores_telefone', array('id' => $id))){
-            return true;
-        }
-        return FALSE;
-    }
-    
-       public function add_telefone_prestador($data_lista)
-    {
-            
-            if ($this->db->insert('sai_prestadores_telefone', $data_lista)) {
-               $id_acao =  $this->db->insert_id();
-                 
-           
-                 
-                return true;
-        }
-          
-        return false;
-    }
-    
-    public function getAllEspecialidadesPrestadoresSaiByPrestador($codigo)
-    {
-        $statement = "SELECT * from sma_sai_prestadores_especialidades where codigo = '$codigo' ";
-        
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    public function add_especialidade_prestador($data_lista)
-    {
-            
-            if ($this->db->insert('sai_prestadores_especialidades', $data_lista)) {
-               $id_acao =  $this->db->insert_id();
-                 
-           
-                 
-                return true;
-        }
-          
-        return false;
-    }
-    
-     public function deleteEspecialidadePrestador($id)
-    {
-       // $sale_items = $this->resetSaleActions($id);
-        if ($this->db->delete('sai_prestadores_especialidades', array('id' => $id))){
-            return true;
-        }
-        return FALSE;
-    }
-    
-    public function add_servicosSai($data_lista)
-    {
-            
-            if ($this->db->insert('sai_servicos', $data_lista)) {
-               $id_acao =  $this->db->insert_id();
-                 
-           
-                 
-                return true;
-        }
-          
-        return false;
-    }
-    
-    public function getAllServicosPrestadoresSaiByPrestador($codigo)
-    {
-        $statement = "SELECT * from sma_sai_prestadores_servicos where codigo = '$codigo' ";
-        
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    public function add_servico_prestador($data_lista)
-    {
-            
-            if ($this->db->insert('sai_prestadores_servicos', $data_lista)) {
-               $id_acao =  $this->db->insert_id();
-                 
-           
-                 
-                return true;
-        }
-          
-        return false;
-    }
-    
-    public function deleteServicosPrestador($id)
-    {
-       // $sale_items = $this->resetSaleActions($id);
-        if ($this->db->delete('sai_prestadores_servicos', array('id' => $id))){
-            return true;
-        }
-        return FALSE;
-    }
-    
-    public function deleteServicos($id)
-    {
-       // $sale_items = $this->resetSaleActions($id);
-        if ($this->db->delete('sai_servicos', array('id' => $id))){
-            return true;
-        }
-        return FALSE;
-    }
-    
-    /***********************************************************************************
-     ************************* F I M * * A T E N D I M E N T O   S A I ****************
-    ***************************************************************************************/
-
-     public function getAllRegistroMigracao()
-    {
-        $statement = "SELECT * from sma_migracao_beneficiarios order by data_registro asc ";
-        $q = $this->db->query($statement);
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-       public function add_Registro_Migracao($historico_acoes)
-    {
-          
-            if ($this->db->insert('migracao_beneficiarios', $historico_acoes)) {
-                $this->db->insert_id();
-                 
-                return true;
-        }
-          
-        return false;
-    }
-    
-    /*****************************************************************************
-     ************************ F I M * * M I G R A Ç Ã O ************************* 
-     ******************************************************************************/
     
     public function getProjetoByID($id)
     {
@@ -836,31 +606,52 @@ class Atas_model extends CI_Model
     /*
      * PLANOS E AÇÕES
      */
-    public function add_planoAcao($ata_plano,$data_vinculo,$avulsa,$responsavel)
+       public function add_planoAcao($ata_plano,$vinculo,$tipo,$responsavel)
     {
-            
+          //  print_r($ata_plano); exit;
             if ($this->db->insert('planos', $ata_plano)) {
                $id_acao =  $this->db->insert_id();
-                 
-                
+              
+              // echo $id_acao;
                 // ADCIONA TODOS OS vinculos SELECIONADOS
-               if($data_vinculo){
-                  foreach ($data_vinculo as $item_vinculo) {
-                        $vinculo= array('id_acao' => $id_acao,
-                                        'id_vinculo' => $item_vinculo);      
-                        $this->db->insert('acao_vinculos', $vinculo);
-                 }
-               }
+               if($vinculo){
+                     $data_vinculo= array('planos_idplanos' => $id_acao,
+                            'id_vinculo' => $vinculo,
+                            'tipo' => $tipo); 
+                     
+                  $this->db->insert('acao_vinculos', $data_vinculo);
+                  
+                 
+             
+                }
                
                if($avulsa == 'SIM'){
-                $this->ion_auth->emailAtaUsuario($responsavel, $id_acao);
+               // $this->ion_auth->emailAtaUsuario($responsavel, $id_acao);
              }
+                 
+                return $id_acao;
+        }
+          
+        return false;
+    }
+    
+     /*
+     * PLANOS E AÇÕES
+     */
+       public function add_logPlano($ata_plano)
+    {
+          //  print_r($ata_plano); exit;
+            if ($this->db->insert('plano_log', $ata_plano)) {
+               $this->db->insert_id();
+              
+         
                  
                 return true;
         }
           
         return false;
     }
+    
     /*
      * ALTERA TODAS AS AÇÕES DE UMA ATA
      */
@@ -874,6 +665,21 @@ class Atas_model extends CI_Model
         }
         return false;
     }
+    
+    /*
+     * ALTERA TODAS AS AÇÕES DE UM PLANO DE AÇÃO
+     */
+    
+     public function updateAcoesPlanoAcao($id, $data  = array())
+    {  
+        
+        if ($this->db->update('planos', $data, array('idplano' => $id))) {
+            
+         return true;
+        }
+        return false;
+    }
+    
     
      public function getStatusAllPlanosBYAta($id)
     {
@@ -1210,6 +1016,37 @@ order by su.nome asc
         return FALSE;
     }
     
+    
+    /*
+     * PEGA TODOS OS PLANOS DE UM PLANO DE AÇÃO
+     */
+     public function getAllAcaoPlanoAcaoById($id)
+    {
+          $statement = "SELECT p.idplanos as id, p.descricao as descricao, p.categoria_plano as categoria_plano, c.descricao as categoria, sequencial, p.status as status, u.first_name as responsavel,  s.nome as setor, data_entrega_demanda, data_termino, como, porque,onde,custo, p.anexo as anexo, valor_custo, horas_previstas, peso  FROM sig_planos p
+            inner join sig_users u on u.id = p.responsavel
+            inner join sig_setores s on s.id = p.setor
+            inner join sig_plano_acao_categoria c on c.id = p.categoria_plano
+            where p.idplano = $id order by c.ordem asc";
+          // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+      /*   $this->db->select('planos.*, users.*, setores.*')
+            ->join('users', 'planos.responsavel = users.id', 'left')
+             ->join('setores', 'planos.setor = setores.id', 'left')      
+             
+         ->order_by('idplanos', 'desc');
+         $q = $this->db->get_where('planos', array('idplano' => $id));
+       * 
+       */
+         
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
     /*
      * PEGA TODOS OS PLANOS DE UMA ATA
      */
@@ -1238,6 +1075,70 @@ order by su.nome asc
          ->order_by('idplanos', 'desc');
          $q = $this->db->get_where('planos', array('atas.evento' => $evento,'planos.status' => 'PENDENTE'));
          
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    // TODAS AS AÇÕES DO USUÁRIOS > NETWORK
+     public function getAllAcoesUserById_User($usuario, $projeto, $status)
+    {
+       $empresa = $this->session->userdata('empresa');
+       $dataHoje = date('Y-m-d H:i:s');
+
+       $statement = "SELECT * FROM sig_planos p
+                     where responsavel = $usuario and status != 'ABERTO' and empresa = $empresa";
+            if($projeto){
+                $statement .= " and projeto = '$projeto'";
+            }
+            
+            if($status){
+               
+                if($status == "PENDENTE"){
+                     $statement .= " and status = '$status' and '$dataHoje' <= data_termino ";
+                }else if($status == "ATRASADO"){
+                     $statement .= " and status = 'PENDENTE' and '$dataHoje' > data_termino ";
+                }else{
+                     $statement .= " and status = '$status'";
+                }
+            }
+        $statement .= " order by idplanos desc ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    // RETORNA TODOS OS PROJETOS QUE O USUÁRIO TEM AÇÃO; NETWORK > MINHAS AÇÕES
+     public function getAllProjetosUserById_User($usuario)
+    {
+       $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT distinct j.id as id, j.projeto as projeto
+                    FROM sig_planos p
+                    left join sig_atas a on a.id = p.idatas
+                    left join sig_projetos j on j.id = a.projetos
+                    where responsavel = $usuario and p.empresa = $empresa and p.status != 'ABERTO' and p.idatas != ''
+
+                    UNION
+
+                    SELECT distinct pj.id as id, pj.projeto as projeto
+                    FROM sig_planos p
+                    left join sig_projetos pj on pj.id = p.projeto
+                    where responsavel = $usuario and p.empresa = $empresa and p.status != 'ABERTO' and p.projeto != '' ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;
@@ -1327,10 +1228,43 @@ order by su.nome asc
         }
         return FALSE;
     }
+    // $this->db->delete('acao_vinculos', array('id_acao' => $id));
+    
+    /*
+     * APAGA O A AÇÃO VÍNCULO DA AÇÃO
+     */
+     public function deleteVinculo($id)
+    {
+        
+       // $sale_items = $this->resetSaleActions($id);
+        
+        if ($this->db->delete('acao_vinculos', array('id' => $id))){
+           
+            return true;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * APAGA O ARQUIVO DA AÇÃO
+     */
+     public function deleteArquivoAcao($id)
+    {
+        
+       // $sale_items = $this->resetSaleActions($id);
+        
+        if ($this->db->delete('plano_arquivo', array('id' => $id))){
+           
+            return true;
+        }
+        return FALSE;
+    }
     
     public function deletePlano($id)
     {
+        
        // $sale_items = $this->resetSaleActions($id);
+        $this->db->delete('acao_vinculos', array('planos_idplanos' => $id));
         if ($this->db->delete('planos', array('idplanos' => $id))){
            
             return true;
@@ -1338,13 +1272,40 @@ order by su.nome asc
         return FALSE;
     }
     
-     public function getAllAcoesProjeto($id)
+     public function getAllAcoesProjeto($id, $id_acao)
     {
-       
-        $this->db->select('planos.*')
-                ->join('atas', 'planos.idatas = atas.id', 'left')
-                ->order_by('idplanos', 'desc');
-          $q = $this->db->get_where('planos', array('atas.projetos' => $id));
+       $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT idplanos, sequencial, idatas, p.data_entrega_demanda as dt_inicio, p.data_termino as dt_termino, p.descricao as descricao, i.descricao as item, nome_evento, nome_fase FROM sig_planos p
+                    inner join sig_item_evento i on i.id = p.eventos
+                    inner join sig_eventos e on e.id = i.evento
+                    inner join sig_fases_projeto f on f.id = e.fase_id
+                    left join sig_atas a on a.id = p.idatas
+                    where a.projetos = $id and a.empresa = $empresa and p.empresa = $empresa and idplanos not in($id_acao) and idplanos not in(select id_vinculo from sig_acao_vinculos where planos_idplanos = $id_acao) ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    // todas as ações de um projeto da empresa
+     public function getAllAcoesVinculoCadastro($id)
+    {
+          $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT idplanos, sequencial, idatas, p.data_entrega_demanda as dt_inicio, p.data_termino as dt_termino, p.descricao as descricao, i.descricao as item, nome_evento, nome_fase FROM sig_planos p
+                    inner join sig_item_evento i on i.id = p.eventos
+                    inner join sig_eventos e on e.id = i.evento
+                    inner join sig_fases_projeto f on f.id = e.fase_id
+                    inner join sig_atas a on a.id = p.idatas
+                    where a.projetos = $id and a.empresa = $empresa and p.empresa = $empresa ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
         
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -1375,12 +1336,46 @@ order by su.nome asc
         return FALSE;
     }
     
+     public function getAllAcoesVinculadasAta($id)
+    {
+       //  echo $id; exit;
+         
+        $q = $this->db->get_where('acao_vinculos', array('planos_idplanos' => $id));
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /*
+     * RETORNA OS ARQUIVOS CADASTRADO PARA ESSA AÇÃO
+     */
+    public function getAllArquivosByAcao($id)
+    {
+       //  echo $id; exit;
+         
+        $q = $this->db->get_where('plano_arquivo', array('plano_id' => $id));
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
      public function getAllAcoesVinculadas($id)
     {
+         
         $this->db->select('*')
-       ->join('planos', 'acao_vinculos.id_acao = planos.idplanos', 'left')
-        ->order_by('idplanos', 'desc');
-        $q = $this->db->get_where('acao_vinculos', array('id_acao' => $id));
+       ->join('planos', 'acao_vinculos.planos_idplanos = planos.idplanos', 'left')
+        ->order_by('planos.idplanos', 'desc');
+        $q = $this->db->get_where('acao_vinculos', array('planos_idplanos' => $id));
         
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -1458,13 +1453,14 @@ order by su.nome asc
         return FALSE;
     }
     
-     public function getAllHistoricoAcoes($idplano)
+    //RETORNA TODOS OS HISTÓRICOS DE UMA AÇÃO
+    public function getAllHistoricoAcoes($idplano)
     {
         
-         $this->db->select('users.id as user, observacao, plano, data_envio, username,anexo')
+         $this->db->select('users.id as user, observacao, idplanos, tipo, data_envio, username, first_name,anexo')
          ->join('users', 'usuario = users.id', 'left')
-         ->order_by('historico_acao_usuario.id', 'asc');
-         $q = $this->db->get_where('historico_acao_usuario', array('plano' => $idplano));
+         ->order_by('sig_planos_historico.id', 'desc');
+         $q = $this->db->get_where('planos_historico', array('idplanos' => $idplano));
           
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -1475,16 +1471,100 @@ order by su.nome asc
         return FALSE;
     }
     
-     public function getPlanoByID($id)
+    //RETORNA TODAS AS RATS DE UMA AÇÃO
+    public function getAllRatsAcoes($idplano)
     {
         
-        $q = $this->db->get_where('planos', array('idplanos' => $id), 1);
+          $statement = "SELECT * from sig_planos_rat
+                    where planoid = $idplano order by id asc";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+          
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+     public function getCountAllHistoricoAcoes($idplano)
+    {
+        $statement = "SELECT count(*) as total from sig_planos_historico
+                    where idplanos = $idplano ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+      
+         if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     public function getPlanoByID($id)
+    {
+         $empresa = $this->session->userdata('empresa');
+        $q = $this->db->get_where('planos', array('idplanos' => $id, 'empresa' => $empresa), 1);
        
         if ($q->num_rows() > 0) {
             return $q->row();
         }
         return FALSE;
          
+    }
+    
+    // USADO QUANDO ENVIA UMA NOTIFICAÇÃO DA AÇÃO
+    public function getResponsavelFasePlanoByID($id_acao)
+    {
+        $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT idplanos, responsavel_aprovacao
+                    FROM sig_planos p
+                    inner join sig_item_evento i on i.id = p.eventos
+                    inner join sig_eventos e on e.id = i.evento
+                    inner join sig_fases_projeto f on f.id = e.fase_id
+                    where p.empresa = $empresa and idplanos = $id_acao ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+       
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+         
+    }
+    
+    /*
+     * RETORNAO ULTIMO NUMERO SEQUENCIAL POR EMPRESA
+     */
+     public function getSequencialPlanosEmpresa()
+    {
+    $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT max(sequencial)+1 as sequencial FROM sig_planos where empresa = $empresa";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+          /*
+     * RETORNAO ULTIMO NUMERO SEQUENCIAL POR EMPRESA
+     */
+     public function getSequencialAta()
+    {
+    $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT max(sequencia)+1 as sequencial FROM sig_atas where empresa = $empresa";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
     }
     
     /*
@@ -1507,25 +1587,75 @@ order by su.nome asc
          
     }
     
-     public function updatePlano($id, $data  = array(),$data_vinculo= array())
+     public function updatePlano($id, $data  = array(),$data_vinculo= array(), $id_vinculo)
     {  
-       
+      // print_r($data_vinculo); exit;
         if ($this->db->update('planos', $data, array('idplanos' => $id))) {
             
             /*
              * ações vinculadas
              */
-            $this->db->delete('acao_vinculos', array('id_acao' => $id));
+            if($id_vinculo){
+                if ($this->db->insert('acao_vinculos', $data_vinculo)) {
+                    $this->db->insert_id();
+                }
+            }
+            
+            
+          //  $this->db->delete('acao_vinculos', array('id_acao' => $id));
            // ADCIONA TODOS OS MÓDULOS SELECIONADOS
-                  foreach ($data_vinculo as $item_vinculo) {
-                        $vinculo= array('id_acao' => $id,
-                            'id_vinculo' => $item_vinculo);      
+                 // foreach ($data_vinculo as $item_vinculo) {
+                      
                         
-                        $this->db->insert('acao_vinculos', $vinculo);
-                 }
+                       
+                // }
             
          return true;
         }
+        return false;
+    }
+    
+    
+    /*
+     * ADICIONAR VINCULO
+     */
+    
+     public function AdicionarVinculoAcao($data_vinculo= array())
+    {  
+         /*
+         * ações vinculadas
+         */
+           
+            if ($this->db->insert('acao_vinculos', $data_vinculo)) {
+                $this->db->insert_id();
+                 return true;
+            }
+           
+            
+            
+         
+        return false;
+    }
+    
+    
+    /*
+     * ADICIONAR ARQUIVO A AÇÃO
+     */
+    
+     public function AdicionarArquivoAcao($data_vinculo= array())
+    {  
+         /*
+         * ações com arquivo
+         */
+           
+            if ($this->db->insert('plano_arquivo', $data_vinculo)) {
+                $this->db->insert_id();
+                 return true;
+            }
+           
+            
+            
+         
         return false;
     }
     
@@ -1614,11 +1744,44 @@ order by su.nome asc
          
     }
     
-        public function add_historicoPlanoAcao($data_HistoricoPlano)
+    public function add_historicoPlanoAcao($data_HistoricoPlano)
     {
             //print_r($data_HistoricoPlano); exit;
             
-            if ($this->db->insert('historico_acao_usuario', $data_HistoricoPlano)) {
+            if ($this->db->insert('planos_historico', $data_HistoricoPlano)) {
+                $this->db->insert_id();
+                 
+                return true;
+        }
+          
+        return false;
+    }
+    
+    
+    /*
+     * REGISTRA AS NOTIFICAÇÕES
+     */
+    public function add_email($data_email)
+    {
+            //print_r($data_HistoricoPlano); exit;
+            
+            if ($this->db->insert('emails', $data_email)) {
+                $this->db->insert_id();
+                 
+                return true;
+        }
+          
+        return false;
+    }
+    
+    /*
+     * REGISTRA OS EMAILS
+     */
+    public function add_notificacoes($data_notificacoes)
+    {
+            //print_r($data_HistoricoPlano); exit;
+            
+            if ($this->db->insert('notifications', $data_notificacoes)) {
                 $this->db->insert_id();
                  
                 return true;
@@ -1662,6 +1825,18 @@ order by su.nome asc
             return $data;
         }
         return FALSE;
+    }
+    
+    
+    public function getUserSetorByUserID($id)
+    {
+        $q = $this->db->get_where('users_setor', array('users_id' => $id), 1);
+     
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+         
     }
     
     public function getSetorByID($id)
@@ -2174,7 +2349,7 @@ order by su.nome asc
     {
            // print_r($data); exit;
             
-            if ($this->db->insert('users_setores', $data)) {
+            if ($this->db->insert('users_setor', $data)) {
                  $id_ata = $this->db->insert_id();
                  
                  
@@ -2190,11 +2365,15 @@ order by su.nome asc
      */
     public function getAllUsersSetores()
     {
-         $this->db->select('users_setores.id as id, setores.nome as setor,users.first_name as nome, users.last_name as last, users.id as user_id')
-        ->join('users', 'users_setores.usuario = users.id', 'inner')
-        ->join('setores', 'users_setores.setor = setores.id', 'inner')
-        ->order_by('users.first_name', 'asc');         
-        $q = $this->db->get('users_setores');
+        $empresa = $this->session->userdata('empresa');
+        $statement = "select us.id as id, u.id as id_user, first_name as nome, s.nome as setor 
+                    from sig_users u
+                    inner join sig_users_setor us on us.users_id = u.id
+                    inner join sig_setores s on s.id = us.setores_id "
+                 . " where active = 1 and u.empresa_id = $empresa order by first_name ";    
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;
@@ -2204,9 +2383,46 @@ order by su.nome asc
         return FALSE;
     }
     
+     /*
+     * USUÁRIO - SETOR BY ID
+     */
+    public function getAllUsersSetoresById($usuario)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "select us.id as id, u.id as id_user, first_name as nome, s.nome as setor 
+                    from sig_users u
+                    inner join sig_users_setor us on us.users_id = u.id
+                    inner join sig_setores s on s.id = us.setores_id "
+                 . " where active = 1 and u.empresa_id = $empresa and us.id = $usuario order by first_name ";    
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+       if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     public function getUserSetorByUserSetor($id_user)
+    {
+        $statement = "select us.id as id, first_name as nome, s.nome as setor from sig_users u
+                    inner join sig_users_setor us on us.users_id = u.id
+                    inner join sig_setores s on s.id = us.setores_id "
+                 . " where us.id = $id_user";    
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    
      public function getUserSetorBYid($id)
     {
-         $q = $this->db->get_where('users_setores', array('id' => $id), 1);
+         $q = $this->db->get_where('users_setor', array('id' => $id), 1);
        
         if ($q->num_rows() > 0) {
             return $q->row();
@@ -2245,7 +2461,7 @@ order by su.nome asc
     
      public function getUserSetorByUsuarioAndSetor($usuario, $setor)
     {
-         $q = $this->db->get_where('users_setores', array('usuario' => $usuario, 'setor' => $setor), 1);
+         $q = $this->db->get_where('users_setor', array('users_id' => $usuario, 'setores_id' => $setor), 1);
        
         if ($q->num_rows() > 0) {
             return $q->row();
@@ -2957,6 +3173,45 @@ order by su.nome asc
     /*
      * PEGA AS RATS DE UM MEMBRO DE UMA EQUIPE
      */
+     public function getRaByAcao($id)
+    {
+        // echo 'aqui'. $data_inicio; exit;
+         $this->db->select('*')
+         ->order_by('id', 'asc');
+         $q = $this->db->get_where('planos_rat', array('planoid' => $id));    
+        
+          if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+         
+    }
+    
+    /*
+     * PEGA OS LOG DE UMA AÇÃO
+     */
+     public function getLogByAcao($id)
+    {
+        // echo 'aqui'. $data_inicio; exit;
+         $this->db->select('*')
+         ->order_by('id', 'asc');
+         $q = $this->db->get_where('plano_log', array('idplano' => $id));    
+        
+          if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+         
+    }
+    /*
+     * PEGA AS RATS DE UM MEMBRO DE UMA EQUIPE
+     */
      public function getRatMebrosEquipeByIdMembro($id, $data_inicio, $data_fim)
     {
         // echo 'aqui'. $data_inicio; exit;
@@ -3170,6 +3425,340 @@ order by su.nome asc
         }
         return FALSE;
          
+    }
+    
+    /*
+     * PESOS DE AÇÕES - ATA/ PLANO AÇÃO
+     */
+    
+    
+    
+     /*
+     * TOTAL DE AÇÕES DE UMA ATA
+     */
+     public function getTotalAcoesByAta($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as total_acoes FROM sig_planos where idatas = $idata and empresa = $empresa ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES DE UMA ATA
+     */
+     public function getTotalPesoAcoesByAta($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as total_peso FROM sig_planos where idatas = $idata and empresa = $empresa and status != 'ABERTO'";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES ATRASADAS DE UMA ATA
+     */
+     public function getTotalPesoAcoesAtrasadasByAta($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as atrasado_peso FROM sig_planos where idatas = $idata and empresa = $empresa and data_termino < NOW() and status IN ('PENDENTE','AGUARDANDO VALIDAÇÃO')";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES PENDENTE DE UMA ATA
+     */
+     public function getTotalPesoAcoesPendentesByAta($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as pendente_peso FROM sig_planos where idatas = $idata and empresa = $empresa and data_termino >= NOW() and status IN ('PENDENTE','AGUARDANDO VALIDAÇÃO')";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES PENDENTE DE UMA ATA
+     */
+     public function getTotalPesoAcoesConcluidoByAta($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as conclusao_peso FROM sig_planos where idatas = $idata and empresa = $empresa and status = 'CONCLUÍDO'";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * -------------------------------------- plano de ação ----------------------------------------------
+     */
+    
+    /*
+     * TOTAL DE AÇÕES DE UM PLANO DE AÇÃO
+     */
+     public function getTotalAcoesByPlanoAcao($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT count(*) as total_acoes FROM sig_planos where idplano = $idata and empresa = $empresa ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES DE UMA ATA
+     */
+     public function getTotalPesoAcoesByPlanoAcao($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as total_peso FROM sig_planos where idplano = $idata and empresa = $empresa and status != 'ABERTO'";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES ATRASADAS DE UMA ATA
+     */
+     public function getTotalPesoAcoesAtrasadasByPlanoAcao($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as atrasado_peso FROM sig_planos where idplano = $idata and empresa = $empresa and data_termino < NOW() and status IN ('PENDENTE','AGUARDANDO VALIDAÇÃO')";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+     /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES PENDENTE DE UMA ATA
+     */
+     public function getTotalPesoAcoesPendentesByPlanoAcao($idata)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as pendente_peso FROM sig_planos where idplano = $idata and empresa = $empresa and data_termino >= NOW() and status in ('PENDENTE', 'AGUARDANDO VALIDAÇÃO')";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * RETORNAO O TOTAL DO PESO DAS AÇÕES PENDENTE DE UMA ATA
+     */
+     public function getTotalPesoAcoesConcluidoByPlanoAcao($idata)
+    { 
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as conclusao_peso FROM sig_planos where idplano = $idata and empresa = $empresa and status = 'CONCLUÍDO'";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /********************************************************************************************************
+     *************************** GRÁFICO DE GANTT ******************************************************** 
+     *****************************************************************************************************/
+    //FASES PROJETO
+     public function getAllFasePlano($id, $tipo)
+    {
+       $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT distinct e.fase_id as fase_id, f.nome_fase, f.data_inicio as inicio, f.data_fim as fim, f.status  FROM sig_planos p
+                    inner join sig_item_evento i on i.id = p.eventos
+                    inner join sig_eventos e on e.id = i.evento
+                    inner join sig_fases_projeto f on f.id = e.fase_id  where  p.empresa = $empresa";
+       if($tipo == 1){
+           $statement .= " and idatas = $id";
+       }else if($tipo == 2){
+           $statement .= " and idplano = $id ";
+       }
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    //EVENTOS PROJETO DE UMA FASE - GANTT
+    public function getAllEventosPlano($id, $tipo, $fase)
+    {
+       $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT distinct i.evento as evento, e.data_inicio as inicio, e.data_fim as fim, e.nome_evento as nome_evento, e.fase_id  
+                    FROM sig_planos p
+                    inner join sig_item_evento i on i.id = p.eventos
+                    inner join sig_eventos e on e.id = i.evento
+                    where  p.empresa = $empresa  and fase_id = $fase";
+       if($tipo == 1){
+           $statement .= " and idatas = $id";
+       }else if($tipo == 2){
+           $statement .= " and idplano = $id ";
+       }
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    //RETORNA TODOS OS ITENS DE EVENTOS DE UM EVENTO DO PROJETO, PODENDO SER ATA OU P.A.
+    public function getAllItensEventosPlano($id, $tipo, $evento)
+    {
+       $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT distinct p.eventos as item_id, i.descricao as item, i.dt_inicio as inicio, i.dt_fim as fim, i.evento as evento  FROM sig_planos p
+                    inner join sig_item_evento i on i.id = p.eventos
+                    where  p.empresa = $empresa and evento = $evento";
+       if($tipo == 1){
+           $statement .= " and idatas = $id";
+       }else if($tipo == 2){
+           $statement .= " and idplano = $id ";
+       }
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    //RETORNA TODAS AS AÇÕES DE UM ITEM DE EVENTOS DO PROJETO
+    public function getAllPlanosItensEventosPlano($id, $tipo, $item_evento)
+    {
+       $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT *  FROM sig_planos p where  p.empresa = $empresa and eventos = $item_evento ";
+       
+       if($tipo == 1){
+           $statement .= " and idatas = $id";
+       }else if($tipo == 2){
+           $statement .= " and idplano = $id ";
+       }
+       //$statement .= " limit 8 ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+     //FASES PROJETO
+     public function getAllFaseProjeto()
+    {
+       $empresa = $this->session->userdata('empresa');
+       $usuario = $this->session->userdata('user_id');
+       $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+           $statement = "SELECT distinct f.id as fase_id, f.nome_fase, f.data_inicio as inicio, f.data_fim as fim, f.status
+                    FROM sig_fases_projeto f
+                    where f.id_projeto = $projetos_usuario->projeto_atual";
+       
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    //EVENTOS PROJETO DE UMA FASE - GANTT
+    public function getAllEventosProjeto($fase)
+    {
+       $empresa = $this->session->userdata('empresa');
+       
+            $statement = "SELECT id, e.data_inicio as inicio, e.data_fim as fim, e.nome_evento as nome_evento, e.fase_id  
+                    FROM sig_eventos e
+                    where fase_id = $fase";
+     
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+     //EVENTOS PROJETO DE UMA FASE - GANTT
+    public function getAllItensEventosProjeto($fase)
+    {
+       $empresa = $this->session->userdata('empresa');
+       
+            $statement = "SELECT id, i.dt_inicio as inicio, i.dt_fim as fim, i.descricao as item  
+                    FROM sig_item_evento i
+                    where evento = $fase";
+     
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
     }
     
 }

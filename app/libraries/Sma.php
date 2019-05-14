@@ -211,59 +211,18 @@ class Sma
     public function send_email($to, $subject, $message, $from , $from_name = null, $attachment = null, $cc = null, $bcc = null, $headers= null)
     {
         
-        require_once(APPPATH . 'third_party/phpmailer/class.phpmailer.php');
-        require_once(APPPATH . 'third_party/phpmailer/class.smtp.php');
-        //echo APPPATH;
+        $this->email->from("$from", "$from_name");
+        $this->email->subject("$subject");
+        //$this->email->reply_to("email_de_resposta@dominio.com");
+        $this->email->to("$to"); 
+        $this->email->cc("$cc");
+        $this->email->bcc("$bcc");
+        $this->email->message("$message");
+        $enviado = $this->email->send(); 
+        
 
 
-        $mail = new PHPMailer();
-      
-       
-
-        
-        // Define os dados do servidor e tipo de conexão
-        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        $mail->IsSMTP(true); // Define que a mensagem será SMTP
-        $mail->Host = gethostbyname("smtp.office365.com"); // Endereço do servidor SMTP
-        $mail->Port = 587;
-        $mail->SMTPAuth = true; // Usa autenticação SMTP? (opcional)
-        $mail->SMTPSecure = 'tls';
-        $mail->Username = 'sig@unimedmanaus.coop.br'; // 'webmaster@unimedmanaus.coop.br'; // Usuário do servidor SMTP
-        $mail->Password = 'S!g@2018';//'@unimed*'; // Senha do servidor SMTP
-
-        $mail->From = "sig@unimedmanaus.coop.br"; // Seu e-mail
-        $mail->FromName = "Sistema de Gestão Integrada - Unimed Manaus"; // Seu nome
-        
-        
-        $mail->addCustomHeader($headers);
-        
-        // Define os destinatário(s)
-        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        $mail->AddAddress($to, $to);
-        $mail->AddAddress($cc);
-        //$mail->AddCC('ciclano@site.net', 'Ciclano'); // Copia
-        //$mail->AddBCC('fulano@dominio.com.br', 'Fulano da Silva'); // Cópia Oculta
-        //
-        //
-        // Define os dados técnicos da Mensagem
-        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        $mail->IsHTML(true); // Define que o e-mail será enviado como HTML
-        $mail->CharSet = 'utf-8'; // Charset da mensagem (opcional)
-        //
-        // Define a mensagem (Texto e Assunto)
-        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        $mail->Subject  = $subject; // Assunto da mensagem
-        $mail->Body = $message;
-        $mail->AltBody = $message;
-        
-        // Define os anexos (opcional)
-        // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-        //$mail->AddAttachment("c:/temp/documento.pdf", "novo_nome.pdf");  // Insere um anexo
-        // Envia o e-mail
-        $enviado = $mail->Send();
-        // Limpa os destinatários e os anexos
-        $mail->ClearAllRecipients();
-        $mail->ClearAttachments();
+   
         // Exibe uma mensagem de resultado
         if ($enviado) {
           echo "E-mail enviado com sucesso!";

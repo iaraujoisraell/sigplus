@@ -735,9 +735,10 @@ class Ion_auth
             /*
              * ENVIAR EMAIL
              */
-        
-            $email = 'israel.araujo@unimedmanaus.coop.br'; //'iaraujo.israel@gmail.com'.//'';
-          //  $cc = 'gabriel.rando@unimedmanaus.coop.br';//'alice.cabral@unimedmanaus.coop.br';
+            $from = 'noreply@sigplus.online';
+            $from_name = "SigPlus";
+            $email = 'iaraujo.israel@gmail.com';
+           //  $cc = 'gabriel.rando@unimedmanaus.coop.br';//'alice.cabral@unimedmanaus.coop.br';
            // $email = $users->email;
             
             $this->load->library('parser');
@@ -752,7 +753,7 @@ class Ion_auth
             $subject = $this->lang->line('Aviso de Controle do Servidor');
           
             //
-             if ($this->sma->send_email($email, $subject, $message,null, null,null,$cc)) {
+             if ($this->sma->send_email($email, $subject, $message, $from, $from_name,null,$cc)) {
                     return true;
                 }
             

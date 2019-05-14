@@ -483,8 +483,9 @@
 
                             $posts_profile = $this->networking_model->getLastPostInstitucionalByEmpresa();
                              foreach ($posts_profile as $posts) {    
-
+                                 
                                  $dados_user = $this->site->getUserSetorByUser($posts->user_de);
+                                 
                                  $user_id = $dados_user->user_id; 
                                  $nome = $dados_user->first_name; 
                                  $avatar = $dados_user->avatar;

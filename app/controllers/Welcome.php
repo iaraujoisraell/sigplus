@@ -2,7 +2,7 @@
 
 class Welcome extends MY_Controller
 {
-  
+ 
     function __construct()
     {
         
@@ -38,12 +38,12 @@ class Welcome extends MY_Controller
             $this->session->set_flashdata('warning', 'Please complete your update by synchronizing your database.');
             redirect('sync');
         }
-
+        
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
        
         $usuario = $this->session->userdata('user_id');                     
-       // $this->data['planos'] = $this->atas_model->getAllPlanosUser($usuario);
-       $users = $this->site->geUserByID($usuario);
+        // $this->data['planos'] = $this->atas_model->getAllPlanosUser($usuario);
+        $users = $this->site->geUserByID($usuario);
         $bc = array(array('link' => '#', 'page' => lang('NOME : '.$users->first_name .' '. $users->last_name .' | SETOR : '.$users->company)));
         $meta = array('page_title' => lang('Ações'), 'bc' => $bc);
         //$this->page_construct('usuarios/index', $meta, $this->data);

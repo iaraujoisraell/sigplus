@@ -758,6 +758,22 @@ class Site extends CI_Model
         return FALSE;
     }
     
+     public function getUserSetorByUser($id_user)
+    {
+        $statement = "select us.id as id, u.id as user_id, u.first_name as first_name, u.avatar as avatar, u.gender as gender, us.setores_id as setor_id, s.nome as setor, u.empresa_id as empresa_id
+                    from sig_users u
+                    inner join sig_users_setor us on us.users_id = u.id
+                    inner join sig_setores s on s.id = us.setores_id "
+                 . " where us.users_id = $id_user";    
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
     public function getNFe($id = NULL) {
         
         $q = $this->db->get_where('nfe', array('id' => $id), 1);

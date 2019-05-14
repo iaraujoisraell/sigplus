@@ -9,7 +9,7 @@ class Reports extends MY_Controller
         parent::__construct();
         $this->lang->load('auth', $this->Settings->user_language);
         $this->load->library('form_validation');
-         $glpi = $this->load->database('glpi', TRUE);
+     
         $this->form_validation->set_error_delimiters($this->config->item('error_start_delimiter', 'ion_auth'), $this->config->item('error_end_delimiter', 'ion_auth'));
         
         $this->load->library('ion_auth');
@@ -416,7 +416,7 @@ class Reports extends MY_Controller
     /*
      **********************ELE ME ENVIA UM EMAIL TODA VEZ QUE O SERVIDOR DISPARA ALGUM EMAIL ************************************************************************************************* 
      */
-    public function enviaEmailControle($texto)
+    public function enviaEmailControle()
     {
       //  $this->sma->checkPermissions();
            
@@ -424,7 +424,8 @@ class Reports extends MY_Controller
         $date_hoje = date('Y-m-d H:i:s');
         $date_2 = date('Y-m-d');
         
-        $this->ion_auth->emailControleServidor($date_hoje,$texto);
+               // echo 'aqui'; exit;
+        $this->ion_auth->emailControleServidor($date_hoje,"teste");
         
                    
     }
