@@ -226,12 +226,51 @@ class Sma
         // Exibe uma mensagem de resultado
         if ($enviado) {
           echo "E-mail enviado com sucesso!";
+          echo "<script>alert('E-mail enviado com sucesso.')</script>";
+          echo "<script>history.go(-1)</script>"; exit;
           return true;
         } else {
+          echo "<script>alert('Não foi possível enviar o e-mail. $mail->ErrorInfo;')</script>";
+          echo "<script>history.go(-1)</script>"; exit;
           echo "Não foi possível enviar o e-mail.";
           echo "<b>Informações do erro:</b> " . $mail->ErrorInfo;
           return false;
         }
+
+    }
+    
+    public function send_email_credencial($to, $subject, $message, $from , $from_name = null, $attachment = null, $cc = null, $bcc = null, $headers= null)
+    {
+        
+        $this->email->from("$from", "$from_name");
+        $this->email->subject("$subject");
+        //$this->email->reply_to("email_de_resposta@dominio.com");
+        $this->email->to("$to"); 
+        $this->email->cc("$cc");
+        $this->email->bcc("$bcc");
+        $this->email->message("$message");
+        $enviado = $this->email->send(); 
+        
+
+
+   
+        // Exibe uma mensagem de resultado
+        /*
+        if ($enviado) {
+          echo "E-mail enviado com sucesso!";
+          echo "<script>alert('E-mail enviado com sucesso.'); window.close();</script>";
+           echo "<script>window.close();</script>";
+          echo "<script>history.go(-1)</script>"; 
+          return true;
+        } else {
+          echo "<script>alert('Não foi possível enviar o e-mail. $mail->ErrorInfo;')</script>";
+          echo "<script>history.go(-1)</script>"; 
+          echo "Não foi possível enviar o e-mail.";
+          echo "<b>Informações do erro:</b> " . $mail->ErrorInfo;
+          return false;
+        }
+         * 
+         */
 
     }
 

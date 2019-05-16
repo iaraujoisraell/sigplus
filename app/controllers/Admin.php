@@ -317,17 +317,208 @@ class Admin extends MY_Controller
             
             $this->data['usuarios'] = $this->owner_model->getAllUsersByEmpresa();
             
-            //$this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            //$this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            
-           // $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
             $this->page_construct_admin('admin/cadastros/usuarios/index', $meta, $this->data);
-           // $this->page_construct_user('owner/empresas/index', $meta, $this->data);
+         }
+    }
+   
+    function gerar_senha($tamanho, $maiusculas, $minusculas, $numeros, $simbolos){
+      $ma = "ABCDEFGHIJKLMNOPQRSTUVYXWZ"; // $ma contem as letras maiúsculas
+      $mi = "abcdefghijklmnopqrstuvyxwz"; // $mi contem as letras minusculas
+      $nu = "0123456789"; // $nu contem os números
+      $si = "!@#$%¨&*()_+="; // $si contem os símbolos
+
+      if ($maiusculas){
+            // se $maiusculas for "true", a variável $ma é embaralhada e adicionada para a variável $senha
+            $senha .= str_shuffle($ma);
+      }
+
+        if ($minusculas){
+            // se $minusculas for "true", a variável $mi é embaralhada e adicionada para a variável $senha
+            $senha .= str_shuffle($mi);
+        }
+
+        if ($numeros){
+            // se $numeros for "true", a variável $nu é embaralhada e adicionada para a variável $senha
+            $senha .= str_shuffle($nu);
+        }
+
+        if ($simbolos){
+            // se $simbolos for "true", a variável $si é embaralhada e adicionada para a variável $senha
+            $senha .= str_shuffle($si);
+        }
+
+        // retorna a senha embaralhada com "str_shuffle" com o tamanho definido pela variável $tamanho
+        return substr(str_shuffle($senha),0,$tamanho);
+    }
+    
+    public function novo_usuario()
+    {
+     
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+        
+        $this->form_validation->set_rules('novo_usuario', lang("id_cadastro"), 'required');
+         $this->form_validation->set_rules('nome', lang("Nome"), 'required');
+        //$this->form_validation->set_rules('email', lang("email"), 'trim|is_unique[users.email]');
+        
+         if ($this->form_validation->run() == true) {
+           
+             $nome = $this->input->post('nome');
+             $email = $this->input->post('email');
+             $consultor = $this->input->post('consultor');
+             $cargo = $this->input->post('cargo');
+             $setor = $this->input->post('setor');
+             $genero = $this->input->post('genero');
+             $data_admissao = $this->input->post('data_admissao');
+             $data_nascimento = $this->input->post('data_nascimento');
+             $ramal = $this->input->post('ramal');
+             $celular1 = $this->input->post('celular1');
+             $celular_corportativo = $this->input->post('celular_corportativo');
+             $networking = 1;// $this->input->post('networking');
+             $project = $this->input->post('project');
+             $admin = $this->input->post('admin');
+             $administrador = $this->input->post('administrador');
+             $criar_projetos = $this->input->post('criar_projetos');
+             $publicacoes_institucionais = $this->input->post('publicacoes_institucionais');
+             $password_provisorio = $this->gerar_senha(8, true, true, true, false);
+             
+           if (!isset($nome) || empty($nome)) {
+            $valor = 0;
+            $erro = 'Informe seu nome.';
+            echo "<script>alert('Informe seu nome.')</script>";
+                echo "<script>history.go(-1)</script>"; exit;
+            } else{
+                $valor = 1;
+            }
+
+            // EMAIL
+            /*
+             * VALIDA O EMAIL
+             */
+            $conta = "^[a-zA-Z0-9\._-]+@";
+            $domino = "[a-zA-Z0-9\._-]+.";
+            $extensao = "([a-zA-Z]{2,4})$";
+            $pattern = $conta . $domino . $extensao;
+
+             if (!ereg($pattern, $email)){
+                $erro = 'Informe um email válido.';
+                $this->data['error'] = $erro;
+                $this->session->set_flashdata('message', $this->ion_auth->messages());
+                 echo "<script>history.go(-1)</script>";
+            }
+            $empresa = $this->session->userdata('empresa');
+            $dados = $this->site->getUserbyemail($email, $empresa);
+            $email_cadastrado = $dados->email;
+
+            // Também verifica se não existe nenhum erro anterior
+            if ($email_cadastrado) {
+                $valor = 0;
+                $erro = 'Este E-mail já existe.';
+                $this->data['error'] = $erro;
+                $this->session->set_flashdata('error', $this->ion_auth->messages());
+                $this->session->set_flashdata('error', lang("Este E-mail já existe!"));
+                $this->session->set_flashdata('error', $erro);
+                echo "<script>alert('Este E-mail já existe.')</script>";
+                echo "<script>history.go(-1)</script>"; exit;
+            }
+               
+             
+             
+            $data_user = array(
+                'first_name' => $nome,
+                'email' => $email,
+                'username' => $email,
+                'consultor' => $consultor,
+                'cargo' => $cargo,
+                'gender' => $genero,
+                'data_admissao' => $data_admissao,
+                'data_aniversario' => $data_nascimento,
+                'ramal' => $ramal,
+                'corporativo' => $celular_corportativo,
+                'phone' => $celular1,
+                'networking' => $networking,
+                'projetct' => $project,
+                'admin' => $admin,
+                'administrador' => $administrador,
+                'publicacoes_institucionais' => $publicacoes_institucionais,
+                'criar_projetos' => $criar_projetos,
+                'active' => 0,
+                'confirmou_email' => 0,
+                'mudar_senha' => 1,
+                'empresa_id' => $this->session->userdata('empresa')
+          //      'password' => $password_provisorio
+            );
+            
+            //print_r($data_user); exit;
+           
+           $id_usuario =  $this->ion_auth->register($password_provisorio, $email,   $data_user, $setor, $notify = TRUE);
+            
+           // $tabela_sig = 'fases_projeto';
+           // $this->owner_model->updateCadastro($id_fase, $tabela_sig, $data_evento);
+           
+           // $this->auth_model->update($id_usuario, $data_user, $setor);
+            
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'UPDATE', 
+                'description' => 'Alterou o Usuário Id: '.$id_usuario,  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => 'sig_users',
+                'row' => $id_usuario,
+                'depois' => json_encode($data_user), 
+                'modulo' => 'admin',
+                'funcao' => 'admin/editar_usuario',  
+                'empresa' => $this->session->userdata('empresa'));
+           
+               $this->owner_model->addLog($logdata);  
+           // exit;
+            $tabela = 55;
+            $id_menu = 27;
+            $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
+            redirect("admin/usuarios/$tabela/$id_menu");
+            
+         }else{
+             
+          
+            $this->data['submenu'] = "modulo";
+            
+                // registra o log de movimentação
+
+                $date_hoje = date('Y-m-d H:i:s');    
+                $usuario = $this->session->userdata('user_id');
+                $empresa = $this->session->userdata('empresa');
+                $ip = $_SERVER["REMOTE_ADDR"];
+
+                $logdata = array('date' => date('Y-m-d H:i:s'), 
+                    'type' => 'ACESSO', 
+                    'description' => "Acessou o menu: Editar Fase do projeto",  
+                    'userid' => $this->session->userdata('user_id'), 
+                    'ip_address' => $_SERVER["REMOTE_ADDR"],
+                    'tabela' => '',
+                    'row' => '',
+                    'depois' => '', 
+                    'modulo' => 'owner',
+                    'funcao' => 'owner/cadastro',  
+                    'empresa' => $this->session->userdata('empresa'));
+                    $this->owner_model->addLog($logdata); 
+            
+                //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
+               // $dados = $this->site->getUser($usuario_selecionado);
+              //  $this->data['dados'] = $dados;
+              //  $this->data['usuario_id'] = $usuario_selecionado;    
+            
+            $this->page_construct_admin('admin/cadastros/usuarios/novo_usuario', $meta, $this->data);
+            
          }
          
          
     }
-    
    
     public function editar_usuario($usuario_selecionado)
     {
@@ -336,47 +527,60 @@ class Admin extends MY_Controller
             $id = $this->input->get('id');
         }
         
-        $this->form_validation->set_rules('id_Editar_fase', lang("id_cadastro"), 'required');
-         
+        $this->form_validation->set_rules('id_cadastro', lang("id_cadastro"), 'required');
+        $this->form_validation->set_rules('usuario_id', lang("Usuário"), 'required');
+        //$this->form_validation->set_rules('email', lang("email"), 'trim|is_unique[users.email]');
+        
          if ($this->form_validation->run() == true) {
            
+             //echo 'aqui'; exit;
+             $id_usuario = $this->input->post('usuario_id');
              
-             $evento = $this->input->post('evento');
-             $periodo_evento = $this->input->post('periodo_evento');
-             $responsavel = $this->input->post('responsavel');
-             $id_fase = $this->input->post('fase');
+             $nome = $this->input->post('nome');
+             $email = $this->input->post('email');
+             $consultor = $this->input->post('consultor');
+             $cargo = $this->input->post('cargo');
+             $setor = $this->input->post('setor');
+             $genero = $this->input->post('genero');
+             $data_admissao = $this->input->post('data_admissao');
+             $data_nascimento = $this->input->post('data_nascimento');
+             $ramal = $this->input->post('ramal');
+             $celular1 = $this->input->post('celular1');
+             $celular_corportativo = $this->input->post('celular_corportativo');
+             $networking = $this->input->post('networking');
+             $project = $this->input->post('project');
+             $admin = $this->input->post('admin');
+             $administrador = $this->input->post('administrador');
+             $criar_projetos = $this->input->post('criar_projetos');
+             $publicacoes_institucionais = $this->input->post('publicacoes_institucionais');
              
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
              
-             $evento_periodo_de = substr($periodo_evento, 0, 10);
-             $partes_data_inicio = explode("/", $evento_periodo_de);
-             $ano = $partes_data_inicio[2];
-             $mes = $partes_data_inicio[1];
-             $dia = $partes_data_inicio[0];
-             $data_tratado_de = $ano.'-'.$mes.'-'.$dia;
-             
-             $evento_periodo_ate = substr($periodo_evento, 13, 24);
-             $partes_data_fim = explode("/", $evento_periodo_ate);
-             $anof = $partes_data_fim[2];
-             $mesf = $partes_data_fim[1];
-             $diaf = $partes_data_fim[0];
-             $data_tratado_ate = $anof.'-'.$mesf.'-'.$diaf;
-             
-             $tabela_id = 21;
-             $tabela_nome = $this->input->post('tabela_nome');
-            // echo $tabela_nome.'<br>';
-             
-            $data_evento = array(
-                'data_inicio' => $data_tratado_de,
-                'data_fim' => $data_tratado_ate,
-                'nome_fase' => $evento,
-                'responsavel_aprovacao' => $responsavel
+            $data_user = array(
+                'first_name' => $nome,
+                'email' => $email,
+                'consultor' => $consultor,
+                'cargo' => $cargo,
+                'gender' => $genero,
+                'data_admissao' => $data_admissao,
+                'data_aniversario' => $data_nascimento,
+                'ramal' => $ramal,
+                'corporativo' => $celular_corportativo,
+                'phone' => $celular1,
+                'networking' => $networking,
+                'projetct' => $project,
+                'admin' => $admin,
+                'administrador' => $administrador,
+                'publicacoes_institucionais' => $publicacoes_institucionais,
+                'criar_projetos' => $criar_projetos
             );
+            
+            //print_r($data_user); exit;
            
-            $tabela_sig = 'fases_projeto';
-            $this->owner_model->updateCadastro($id_fase, $tabela_sig, $data_evento);
-              
+           // $tabela_sig = 'fases_projeto';
+           // $this->owner_model->updateCadastro($id_fase, $tabela_sig, $data_evento);
+           
+            $this->auth_model->update($id_usuario, $data_user, $setor);
+            
             $date_hoje = date('Y-m-d H:i:s');    
             $usuario = $this->session->userdata('user_id');
             $empresa = $this->session->userdata('empresa');
@@ -384,21 +588,22 @@ class Admin extends MY_Controller
 
             $logdata = array('date' => date('Y-m-d H:i:s'), 
                 'type' => 'UPDATE', 
-                'description' => 'Alterou a fase de projeto Id: '.$id_fase,  
+                'description' => 'Alterou o Usuário Id: '.$id_usuario,  
                 'userid' => $this->session->userdata('user_id'), 
                 'ip_address' => $_SERVER["REMOTE_ADDR"],
-                'tabela' => $tabela_sig,
-                'row' => $id_fase,
-                'depois' => json_encode($data_evento), 
-                'modulo' => 'project',
-                'funcao' => 'project/editar_fases_projetos',  
+                'tabela' => 'sig_users',
+                'row' => $id_usuario,
+                'depois' => json_encode($data_user), 
+                'modulo' => 'admin',
+                'funcao' => 'admin/editar_usuario',  
                 'empresa' => $this->session->userdata('empresa'));
            
                $this->owner_model->addLog($logdata);  
            // exit;
-            
+            $tabela = 55;
+            $id_menu = 27;
             $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
-            redirect("project/$funcao/$tabela_id/$menu_id");
+            redirect("admin/usuarios/$tabela/$id_menu");
             
          }else{
              
@@ -430,6 +635,7 @@ class Admin extends MY_Controller
                 //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
                 $dados = $this->site->getUser($usuario_selecionado);
                 $this->data['dados'] = $dados;
+                $this->data['usuario_id'] = $usuario_selecionado;    
             
             $this->page_construct_admin('admin/cadastros/usuarios/edit_usuario', $meta, $this->data);
             
@@ -437,5 +643,91 @@ class Admin extends MY_Controller
          
          
     }
+    
+    public function reenviaEmailCredenciais($id_usuario)
+    {
+      //  $this->sma->checkPermissions();
+           
+        
+        $date_hoje = date('Y-m-d H:i:s');
+        $date_2 = date('Y-m-d');
+        
+        $password_provisorio = $this->gerar_senha(8, true, true, true, false);
+        
+        $this->ion_auth->reenviarCredencialNovoUsuario($id_usuario, $password_provisorio);
+        $tabela = 55;
+        $id_menu = 27;
+        $this->session->set_flashdata('message', lang("E-mail Enviado com Sucesso!."));
+        redirect("admin/usuarios/$tabela/$id_menu");
+                   
+    }
+    
+    
+     public function alterarSenhaUsuario($id_usuario)
+    {
+        
+        $this->form_validation->set_rules('id_usuario', lang("id_cadastro"), 'required');
+        $this->form_validation->set_rules('nova_Senha', lang("Nova Senha"), 'required');
+        $this->form_validation->set_rules('confirmar_senha', lang("Confirmar Senha"), 'required');
+         
+        if ($this->form_validation->run() == true) {
+          
+             $nova_Senha = $this->input->post('nova_Senha');
+             $confirmar_senha = $this->input->post('confirmar_senha');
+             $id_usuario = $this->input->post('id_usuario');
+            
+             echo 'aqui'; exit;
+            
+            $data_evento = array(
+                'data_inicio' => $data_tratado_de,
+                'data_fim' => $data_tratado_ate,
+                'nome_fase' => $evento,
+                'id_projeto' => $projeto_atual_id,
+                'responsavel_aprovacao' => $responsavel
+            );
+            
+            $tabela_sig = 'fases_projeto';
+            $id_cadastro =  $this->owner_model->addCadastro($tabela_sig, $data_evento);
+              
+              
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'INSERT', 
+                'description' => 'Cadastro de uma nova Fase',  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => 'sig_fases_projeto',
+                'row' => $id_cadastro,
+                'depois' => json_encode($data_evento), 
+                'modulo' => 'project',
+                'funcao' => 'project/novoCadastroFase',  
+                'empresa' => $this->session->userdata('empresa'));
+           
+               $this->owner_model->addLog($logdata);  
+           // exit;
+            
+            $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
+            redirect("project/fases_projetos/$tabela_id/$menu_id");
+            
+         }else{
+        
+        $date_cadastro = date('Y-m-d H:i:s');                           
+        
+       
+        $dados = $this->site->getUser($id_usuario);
+        $this->data['dados'] = $dados;
+       
+        //$this->load->view($this->theme . 'projetos/documentacao/add', $this->data);
+        $this->load->view($this->theme . 'admin/cadastros/usuarios/alterar_senha', $this->data);
+           
+         }
+            
+    }
+    
+    
     
 }

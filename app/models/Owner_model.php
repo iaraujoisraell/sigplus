@@ -862,7 +862,8 @@ class Owner_model extends CI_Model
    
     
     //Retorna todos os módulos da empresa
-    public function getAllSetorByEmpresa($empresa) {
+    public function getAllSetorByEmpresa() {
+        $empresa = $this->session->userdata('empresa'); 
         $q = $this->db->get_where('setores', array('empresa_id' => $empresa));
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -905,9 +906,18 @@ class Owner_model extends CI_Model
     
     
     /******************************************* USER ***********/
-     public function  getAllUsersByEmpresa($id)
+     public function  getAllUsersByEmpresa()
     {
-        $q = $this->db->get_where('users', array('empresa_id' => $id));
+        $empresa = $this->session->userdata('empresa'); 
+         $statement = "SELECT u.id as id, u.first_name, s.nome as setor, u.email, u.active, u.consultor, u.cargo, u.confirmou_email FROM sig_users u
+                    left join sig_users_setor us on us.users_id = u.id
+                    left join sig_setores s on s.id = us.setores_id
+                    where u.empresa_id = $empresa
+                    order by first_name asc";
+       // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+       // $q = $this->db->get_where('users', array('empresa_id' => $id));
      
          if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {

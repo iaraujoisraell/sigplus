@@ -188,9 +188,9 @@ class MY_Controller extends CI_Controller {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
-        $meta['info'] = $this->site->getNotifications();
-        $meta['events'] = $this->site->getUpcomingEvents();
-        $meta['ip_address'] = $this->input->ip_address();
+      //  $meta['info'] = $this->site->getNotifications();
+      //  $meta['events'] = $this->site->getUpcomingEvents();
+      //  $meta['ip_address'] = $this->input->ip_address();
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
         $meta['assets'] = $data['assets'];

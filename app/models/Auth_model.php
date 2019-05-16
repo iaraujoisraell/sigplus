@@ -173,15 +173,18 @@ class Auth_model extends CI_Model
     public function activate($id, $code = false)
     {
         $this->trigger_events('pre_activate');
-
+       // echo $this->identity_column.'<br>';
+       // echo $id.'<br>';
+       // echo $code.'<br>'; 
+        
         if ($code !== FALSE) {
+            
             $query = $this->db->select($this->identity_column)
                 ->where('activation_code', $code)
                 ->limit(1)
                 ->get($this->tables['users']);
-
             $result = $query->row();
-
+           
             if ($query->num_rows() !== 1) {
                 $this->trigger_events(array('post_activate', 'post_activate_unsuccessful'));
                 $this->set_error('activate_unsuccessful');
@@ -192,17 +195,21 @@ class Auth_model extends CI_Model
 
             $data = array(
                 'activation_code' => NULL,
-                'active' => '-1'
+                'active' => '1',
+                'confirmou_email' => '1'
             );
 
             $this->trigger_events('extra_where');
             $this->db->update($this->tables['users'], $data, array($this->identity_column => $identity));
         } else {
+            //echo $id; exit;
+            
             $user = $this->user($id)->row();
 
             $data = array(
                 'activation_code' => NULL,
-                'active' => '1'
+                'active' => '1',
+                'confirmou_email' => '1'
             );
 
 
@@ -497,49 +504,29 @@ class Auth_model extends CI_Model
         return FALSE;
     }
 
-    public function register($username, $password, $email, $additional_data = array(),$perfil_data = array(),$setor_data = array(), $active = 1, $notify = FALSE)
+    
+    public function register($email, $password_provisoria, $additional_data, $setor_data ,  $notify)
     {
-       
+     //print_r($additional_data); exit;  
         $this->trigger_events('pre_register');
        
-        $manual_activation = $this->config->item('manual_activation', 'ion_auth');
-        //
-        if ($this->identity_column == 'email' && $this->email_check($email)) {
-            $this->set_error('Este email já etá cadastrado');
-            return FALSE;
-        } elseif ($this->identity_column == 'username' && $this->username_check($username)) {
-            $this->set_error('este login já está cadastrado');
-            return FALSE;
-        }
-       
-        // If username is taken, use username1 or username2, etc.
-        if ($this->identity_column != 'username') {
-            $original_username = $username;
-            for ($i = 0; $this->username_check($username); $i++) {
-                if ($i > 0) {
-                    $username = $original_username . $i;
-                }
-            }
-        }
-        
-        
         // IP Address
         $ip_address = $this->_prepare_ip($this->input->ip_address());
         $salt = $this->store_salt ? $this->salt() : FALSE;
-        $password = $this->hash_password($password, $salt);
+        $password = $this->hash_password($password_provisoria, $salt);
           
         // Users table.
         $data = array(
-            'username' => $username,
+      //      'username' => $username,
             'password' => $password,
-            'email' => $email,
-            'matricula' => $username,
+       //     'email' => $email,
+       //     'matricula' => $username,
             'ip_address' => $ip_address,
             'created_on' => time(),
-            'last_login' => time(),
-            'active' => '1'//($active ? 1 : (($manual_activation === false) ? 1 : 0))
+            'last_login' => time()
+           // 'active' => $active//($active ? 1 : (($manual_activation === false) ? 1 : 0))
         );
-       // print_r($data);exit;
+        //print_r($data);exit;
        
         if ($this->store_salt) {
             $data['salt'] = $salt;
@@ -549,43 +536,33 @@ class Auth_model extends CI_Model
         //filter out any data passed that doesnt have a matching column in the users table
         //and merge the set user data and the additional data
         $user_data = array_merge($this->_filter_data($this->tables['users'], $additional_data), $data);
-
         $this->trigger_events('extra_set');
-        
-       
-       date_default_timezone_set('America/Manaus');
-       $date = date('Y-m-d H:i:s');
-       
-        
-        
-        
+        date_default_timezone_set('America/Manaus');
+        $date = date('Y-m-d H:i:s');
       
         $this->db->insert($this->tables['users'], $user_data);
-        $id = $this->db->insert_id();
+        $id_usuario = $this->db->insert_id();
         
-       // print_r($additional_data['group_id']); exit;
+        // print_r($additional_data['group_id']); exit;
       
-         if ($id) {
+         if ($id_usuario) {
              $cont = 0;
-              foreach ($perfil_data as $item) {
-                        $data_perfil_usuario = array('grupo_id' => $item, 'user_id' => $id);    
-                        $this->db->insert('perfil_usuario', $data_perfil_usuario);
-                        $cont++;
-                 }
-            
-                 /*
-                  * SALVA O SETOR
-                  */
-                foreach ($setor_data as $item_setor) {
-                        $data_setor_usuario = array('setor' => $item_setor, 'usuario' => $id);    
-                        $this->db->insert('users_setores', $data_setor_usuario);
-                 }
+                /** SALVA O SETOR */
+                $data_setor_usuario = array('setores_id' => $setor_data, 'users_id' => $id_usuario);    
+                $this->db->insert('users_setor', $data_setor_usuario);
+                
+                
+                // envia o email de notificação
+        
+              
         }
        
-        //$this->trigger_events('post_register');
+      //  $this->trigger_events('post_register');
        
+        //if($notify)
         
-        return $id;
+        
+        return $id_usuario;
     }
 
    public function login($identity, $password, $remember = FALSE)
@@ -1215,10 +1192,9 @@ class Auth_model extends CI_Model
 
    
     
-    public function update($id, array $data, array $data_perfis = array(),  array $data_setor, $upgs = array())
+    public function update($id, array $data,  $setor, $upgs = array())
     {
         
-      
         // Filter the data passed
       
         $data = $this->_filter_data($this->tables['users'], $data);
@@ -1238,25 +1214,16 @@ class Auth_model extends CI_Model
         
         $this->db->update($this->tables['users'], $data, array('id' => $id));
 
-        $this->db->delete('perfil_usuario', array('user_id' => $id));
-            
-                foreach ($data_perfis as $item) {
-                        $data_perfil_usuario = array('grupo_id' => $item, 'user_id' => $id);      
-                        
-                        $this->db->insert('perfil_usuario', $data_perfil_usuario );
-                 }
-                 
+                  
                  /*
                   * ATUALIZA OS SETORES
                   */
-                  $this->db->delete('users_setores', array('usuario' => $id));
+                  $this->db->delete('users_setor', array('users_id' => $id));
             
-                foreach ($data_setor as $item_setor) {
-                        
-                    
-                        $data_setor_usuario = array('setor' => $item_setor, 'usuario' => $id);    
-                        $this->db->insert('users_setores', $data_setor_usuario);
-                 }
+                  $data_setor_usuario = array('setores_id' => $setor, 'users_id' => $id);  
+                  $this->db->insert('users_setor', $data_setor_usuario);
+                 
+                 // print_r($data_setor_usuario); exit;
                  
       
         if ($this->db->trans_status() === FALSE) {

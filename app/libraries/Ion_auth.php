@@ -175,47 +175,14 @@ class Ion_auth
         }
     }
 
-    public function register($username, $password, $email, $additional_data = array(),$setor_data = array(), $active = 1, $notify = FALSE)
+    public function register($password, $email, $additional_data = array(),$setor_data, $notify)
     { //need to test email activation
-      //echo 'aqui --';
-        $this->auth_model->trigger_events('pre_account_creation');
+    
+        //$this->auth_model->trigger_events('pre_account_creation');
 
-        $email_activation = $this->config->item('email_activation', 'ion_auth');
-        
-       
-        if (!$email_activation || $active != '1') {
-            
-            $id = $this->auth_model->register($username, $password, $email, $additional_data, $setor_data, $active);
-            
-            if ($id !== FALSE) {
-                if ($notify) {
-                    $this->load->library('parser');
-                    $parse_data = array(
-                        'client_name' => $additional_data['first_name'] . ' ' . $additional_data['last_name'],
-                        'site_link' => site_url(),
-                        'site_name' => $this->Settings->site_name,
-                        'email' => $username,
-                        'password' => $password,
-                        'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
-                    );
-                    
-                    $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/credentials.html');
-                    $message = $this->parser->parse_string($msg, $parse_data);
-                    $subject = $this->lang->line('new_user_created') . ' - ' . $this->Settings->site_name;
-                    $this->sma->send_email($email, $subject, $message);
-                }
-
-                $this->set_message('Conta Criada com Sucesso!!!');
-                $this->auth_model->trigger_events(array('post_account_creation', 'post_account_creation_successful'));
-                return $id;
-            } else {
-                $this->set_error('Não foi possível criar sua conta');
-                $this->auth_model->trigger_events(array('post_account_creation', 'post_account_creation_unsuccessful'));
-                return FALSE;
-            }
-        } else {
-            
-            $id = $this->auth_model->register($username, $password, $email, $additional_data, $setor_data, $active);
+        //$email_activation = $this->config->item('email_activation', 'ion_auth');
+           
+            $id = $this->auth_model->register($password, $email,   $additional_data, $setor_data, $notify);
 
             if (!$id) {
                 $this->set_error('Esta conta não pode ser criada.');
@@ -223,7 +190,7 @@ class Ion_auth
             }
 
             $deactivate = $this->auth_model->deactivate($id);
-
+            
             if (!$deactivate) {
                 $this->set_error('deactivate_unsuccessful');
                 $this->auth_model->trigger_events(array('post_account_creation', 'post_account_creation_unsuccessful'));
@@ -245,7 +212,70 @@ class Ion_auth
                 $this->set_message('activation_email_successful');
                 return $data;
             } else {
-
+               
+                 
+                
+                   if ($notify) {
+                      
+                     $this->load->library('parser');
+       // $dados = $this->site->getUserbyemail($email, $empresa);
+       // $id_usuario = $dados->id;
+       
+         $parse_data = array(
+            'client_name' => $additional_data['first_name'],
+            'site_link' => site_url(),
+        //    'confirma_email' => site_url('auth/activate/'.$id),
+            'activation_link' => anchor('auth/activate/' . $data['id'] . '/' . $data['activation'], lang('Ativar E-mail')),
+            'site_name' => $this->Settings->site_name,
+            'email' => $email,
+            'password' => $password,
+            'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
+        );
+         //print_r($parse_data); exit;
+        $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/credentials.php');
+        $message = $this->parser->parse_string($msg, $parse_data);
+        $subject = $this->lang->line('Detalhes conta') . ' - ' . $this->Settings->site_name;
+       // $this->sma->send_email($email, $subject, $message);
+        $from = 'noreply@sigplus.online';
+        $from_name = "SigPlus";
+        
+        
+        $this->sma->send_email_credencial($email, $subject, $message, $from, $from_name,null,$cc);  
+                    
+        
+                   }
+        
+                  /*     
+                    $this->load->library('parser');
+                    $parse_data = array(
+                        'client_name' => $additional_data['first_name'],
+                        'site_link' => site_url(),
+                        'confirma_email' => site_url('auth/activate/'.$id),
+                        'activation_link' => anchor('auth/activate/' . $data['id'] . '/' . $data['activation'], lang('email_activate_link')),
+                        'site_name' => $this->Settings->site_name,
+                        'email' => $email,
+                        'password' => $password,
+                        'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
+                    );
+                    
+                    $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/credentials.php');
+                    $message = $this->parser->parse_string($msg, $parse_data);
+                    $subject = $this->lang->line('new_user_created') . ' - ' . $this->Settings->site_name;
+                   // $this->sma->send_email($email, $subject, $message);
+                    $from = 'noreply@sigplus.online';
+                    $from_name = "SigPlus";
+                    $this->sma->send_email_credencial($email, $subject, $message, $from, $from_name,null,$cc);
+                   
+                }
+                
+                
+                 * 
+                 *        
+                 * 
+                 * 
+                 * 
+                 * 
+                 * 
                 $this->load->library('parser');
                 $parse_data = array(
                     'client_name' => $additional_data['first_name'] . ' ' . $additional_data['last_name'],
@@ -259,19 +289,24 @@ class Ion_auth
                 $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/activate_email.html');
                 $message = $this->parser->parse_string($msg, $parse_data);
                 $subject = $this->lang->line('email_activation_subject') . ' - ' . $this->Settings->site_name;
-                $this->sma->send_email($email, $subject, $message);
+              //  $this->sma->send_email($email, $subject, $message);
+                 $from = 'noreply@sigplus.online';
+                    $from_name = "SigPlus";
+                    $this->sma->send_email($email, $subject, $message, $from, $from_name,null,$cc);
 
-                if ($this->sma->send_email($email, $subject, $message)) {
+                if ($this->sma->send_email($email, $subject, $message, $from, $from_name,null,$cc)) {
                     $this->auth_model->trigger_events(array('post_account_creation', 'post_account_creation_successful', 'activation_email_successful'));
                     $this->set_message('activation_email_successful');
                     return $id;
                 }
+                 * 
+                 */
             }
 
             $this->auth_model->trigger_events(array('post_account_creation', 'post_account_creation_unsuccessful', 'activation_email_unsuccessful'));
             $this->set_error('activation_email_unsuccessful');
             return FALSE;
-        }
+        
     }
 
     public function retornoUsuario($id = null){
@@ -724,6 +759,51 @@ class Ion_auth
                     return true;
                 }
             
+    }
+    
+    public function reenviarCredencialNovoUsuario($id, $nova_senha){
+        
+        $this->load->library('parser');
+        $dados = $this->site->getUser($id);
+        $id_usuario = $dados->id;
+        $nome = $dados->first_name;
+        $code = $dados->activation_code;
+        $email = $dados->email;
+        
+       // echo $nova_senha; exit;
+        // MUDA A SENHA
+        
+        /*
+          $data = array(
+                'password' => $nova_senha
+            );
+            $this->db->update($this->tables['users'], $data, array('id' => $id_usuario));
+         * 
+         */
+        $this->ion_auth->reset_password($email, $nova_senha);
+            
+        $parse_data = array(
+            'client_name' => $nome,
+            'site_link' => site_url(),
+        //    'confirma_email' => site_url('auth/activate/'.$id),
+            'activation_link' => anchor('auth/activate/' . $id_usuario . '/' . $code, lang('Ativar E-mail')),
+            'site_name' => $this->Settings->site_name,
+            'email' => $email,
+            'password' => $nova_senha,
+            'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
+        );
+        // print_r($parse_data); exit;
+        
+        $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/credentials.php');
+        $message = $this->parser->parse_string($msg, $parse_data);
+        $subject = $this->lang->line('Detalhes conta') . ' - ' . $this->Settings->site_name;
+       // $this->sma->send_email($email, $subject, $message);
+        $from = 'noreply@sigplus.online';
+        $from_name = "SigPlus";
+        $this->sma->send_email_credencial($email, $subject, $message, $from, $from_name,null,$cc);  
+        
+         
+        
     }
     
     

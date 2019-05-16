@@ -727,9 +727,9 @@ class Site extends CI_Model
         return FALSE;
     }
     
-      public function getUserbyemail($email = NULL) {
-       
-        $q = $this->db->get_where('users', array('email' => $email), 1);
+      public function getUserbyemail($email = NULL, $empresa) {
+      
+        $q = $this->db->get_where('users', array('email' => $email, 'empresa_id' => $empresa), 1);
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -748,10 +748,11 @@ class Site extends CI_Model
     }
     
     public function getUser($id = NULL) {
+        $empresa = $this->session->userdata('empresa');
         if (!$id) {
             $id = $this->session->userdata('user_id');
         }
-        $q = $this->db->get_where('users', array('id' => $id), 1);
+        $q = $this->db->get_where('users', array('id' => $id, 'empresa_id' => $empresa), 1);
         if ($q->num_rows() > 0) {
             return $q->row();
         }

@@ -445,6 +445,7 @@ class Auth extends MY_Controller
             redirect($_SERVER["HTTP_REFERER"]);
         }
     }
+    
     public function captcha_check($cap)
     {
         $expiration = time() - 300; // 5 minutes limit
@@ -462,7 +463,6 @@ class Auth extends MY_Controller
             return FALSE;
         }
     }
-
 
     function login_ad($m = NULL)
     {
@@ -963,19 +963,26 @@ class Auth extends MY_Controller
     {
 
         if ($code !== false) {
+           
             $activation = $this->ion_auth->activate($id, $code);
-        } else if ($this->Owner) {
+        } else {
             $activation = $this->ion_auth->activate($id);
         }
 
         if ($activation) {
-            $this->session->set_flashdata('message', $this->ion_auth->messages());
+            $this->session->set_flashdata('message', lang("E-mail Ativado com Sucesso! Faça o Login."));
+           // $this->session->set_flashdata('message', $this->ion_auth->messages());
+             redirect("auth/login");
+           /*
             if ($this->Owner) {
                 redirect($_SERVER["HTTP_REFERER"]);
             } else {
                 redirect("auth/login");
             }
+            * 
+            */
         } else {
+            
             $this->session->set_flashdata('error', $this->ion_auth->errors());
             redirect("forgot_password");
         }
