@@ -22,14 +22,13 @@
                 <div class="col-md-12">
                     <div class="form-group company">
                          <?= lang("Nova Senha", "nova_Senha"); ?>
-                          <?php echo form_input('nova_Senha', '', 'class="form-control input" title="Informar a nova senha" maxlength="15" id="nova_Senha"  required="required" '); ?>
-                    
+                        <input type="password" name="nova_Senha" id="nova_Senha" class="form-control input" title="Informar a nova senha" maxlength="15" required="true">
                     </div>
                     
                     <div class="form-group company">
                          <?= lang("Confirmar Senha", "confirmar_senha"); ?>
-                          <?php echo form_input('confirmar_senha', '', 'class="form-control input" title="Confirmar Senha" maxlength="15" id="confirmar_senha"  required="required" '); ?>
-                    
+                        <input type="password" name="confirmar_senha" id="confirmar_senha" class="form-control input" title="Confirmar a nova senha" maxlength="15" required="true">
+                      
                     </div>
                     
                     </div>

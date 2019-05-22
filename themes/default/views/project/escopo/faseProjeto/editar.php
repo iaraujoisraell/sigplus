@@ -123,11 +123,11 @@
             <!-- /.modal-content -->
 </div>
 
-<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="<?= $assets ?>bi/bower_components/jquery/dist/jquery.min.js"></script>
 <!-- Bootstrap 3.3.7 -->
-<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="<?= $assets ?>bi/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <!-- Select2 -->
-<script src="bower_components/select2/dist/js/select2.full.min.js"></script>
+<script src="<?= $assets ?>bi/bower_components/select2/dist/js/select2.full.min.js"></script>
 <!-- InputMask -->
 <script src="<?= $assets ?>bi/plugins/input-mask/jquery.inputmask.js"></script>
 <script src="<?= $assets ?>bi/plugins/input-mask/jquery.inputmask.date.extensions.js"></script>

@@ -208,9 +208,9 @@ class MY_Controller extends CI_Controller {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
-        $meta['info'] = $this->site->getNotifications();
-        $meta['events'] = $this->site->getUpcomingEvents();
-        $meta['ip_address'] = $this->input->ip_address();
+      //  $meta['info'] = $this->site->getNotifications();
+      //  $meta['events'] = $this->site->getUpcomingEvents();
+      //  $meta['ip_address'] = $this->input->ip_address();
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
         $meta['assets'] = $data['assets'];
@@ -228,8 +228,8 @@ class MY_Controller extends CI_Controller {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
-        $meta['info'] = $this->site->getNotifications();
-        $meta['events'] = $this->site->getUpcomingEvents();
+       // $meta['info'] = $this->site->getNotifications();
+       // $meta['events'] = $this->site->getUpcomingEvents();
         $meta['ip_address'] = $this->input->ip_address();
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
@@ -250,7 +250,7 @@ class MY_Controller extends CI_Controller {
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
       //  $meta['info'] = $this->site->getNotifications();
       //  $meta['events'] = $this->site->getUpcomingEvents();
-        $meta['ip_address'] = $this->input->ip_address();
+       // $meta['ip_address'] = $this->input->ip_address();
         
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
@@ -259,7 +259,7 @@ class MY_Controller extends CI_Controller {
         //$meta['qty_alert_num'] = $this->site->get_total_qty_alerts();
         //$meta['exp_alert_num'] = $this->site->get_expiring_qty_alerts();
         
-        $this->load->view($this->theme . 'header_project_collapse', $meta);
+        $this->load->view($this->theme . 'header_project_collapse_portifolio', $meta);
        // $this->load->view($this->theme . $page, $data);
           $this->load->view($this->theme . $page, $data); 
         $this->load->view($this->theme . 'footer_projeto');
@@ -312,8 +312,8 @@ class MY_Controller extends CI_Controller {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
-        $meta['info'] = $this->site->getNotifications();
-        $meta['events'] = $this->site->getUpcomingEvents();
+       // $meta['info'] = $this->site->getNotifications();
+       // $meta['events'] = $this->site->getUpcomingEvents();
         $meta['ip_address'] = $this->input->ip_address();
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
@@ -332,9 +332,9 @@ class MY_Controller extends CI_Controller {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
-        $meta['info'] = $this->site->getNotifications();
-        $meta['events'] = $this->site->getUpcomingEvents();
-        $meta['ip_address'] = $this->input->ip_address();
+       // $meta['info'] = $this->site->getNotifications();
+       // $meta['events'] = $this->site->getUpcomingEvents();
+      //  $meta['ip_address'] = $this->input->ip_address();
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
         $meta['assets'] = $data['assets'];
@@ -352,8 +352,8 @@ class MY_Controller extends CI_Controller {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
-        $meta['info'] = $this->site->getNotifications();
-        $meta['events'] = $this->site->getUpcomingEvents();
+       // $meta['info'] = $this->site->getNotifications();
+      //  $meta['events'] = $this->site->getUpcomingEvents();
         $meta['ip_address'] = $this->input->ip_address();
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
@@ -373,16 +373,16 @@ class MY_Controller extends CI_Controller {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
-        $meta['info'] = $this->site->getNotifications();
-        $meta['events'] = $this->site->getUpcomingEvents();
+      //  $meta['info'] = $this->site->getNotifications();
+     //   $meta['events'] = $this->site->getUpcomingEvents();
         $meta['ip_address'] = $this->input->ip_address();
         
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
         $meta['assets'] = $data['assets'];
         $meta['GP'] = $data['GP'];
-        $meta['qty_alert_num'] = $this->site->get_total_qty_alerts();
-        $meta['exp_alert_num'] = $this->site->get_expiring_qty_alerts();
+      //  $meta['qty_alert_num'] = $this->site->get_total_qty_alerts();
+      //  $meta['exp_alert_num'] = $this->site->get_expiring_qty_alerts();
         $this->load->view($this->theme . 'usuarios/new/header_user_sem_menu', $meta);
        // $this->load->view($this->theme . $page, $data);
           $this->load->view($this->theme . $page, $data); 

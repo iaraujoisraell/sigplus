@@ -286,12 +286,12 @@ class Auth_model extends CI_Model
     public function reset_password($identity, $new)
     {
         $this->trigger_events('pre_change_password');
-
+       
         if (!$this->identity_check($identity)) {
             $this->trigger_events(array('post_change_password', 'post_change_password_unsuccessful'));
             return FALSE;
         }
-
+        
         $this->trigger_events('extra_where');
 
         $query = $this->db->select('id, password, salt')
@@ -306,7 +306,6 @@ class Auth_model extends CI_Model
         }
 
         $result = $query->row();
-
         $new = $this->hash_password($new, $result->salt);
 
         //store the new password and reset the remember code so all remembered instances have to re-login
@@ -317,7 +316,7 @@ class Auth_model extends CI_Model
             'forgotten_password_code' => NULL,
             'forgotten_password_time' => NULL,
         );
-
+       // print_r($data); exit;
         $this->trigger_events('extra_where');
         $this->db->update($this->tables['users'], $data, array($this->identity_column => $identity));
 
@@ -505,7 +504,7 @@ class Auth_model extends CI_Model
     }
 
     
-    public function register($email, $password_provisoria, $additional_data, $setor_data ,  $notify)
+    public function register($password_provisoria, $email, $additional_data, $setor_data ,  $notify)
     {
      //print_r($additional_data); exit;  
         $this->trigger_events('pre_register');
@@ -519,7 +518,7 @@ class Auth_model extends CI_Model
         $data = array(
       //      'username' => $username,
             'password' => $password,
-       //     'email' => $email,
+            'senha' => $password_provisoria,
        //     'matricula' => $username,
             'ip_address' => $ip_address,
             'created_on' => time(),
@@ -568,26 +567,27 @@ class Auth_model extends CI_Model
    public function login($identity, $password, $remember = FALSE)
     {
         
-    // echo $identity.'<br>';
-    // echo $password.'<br>';
-  // exit;
+     //echo $identity.'<br>';
+     //echo $password.'<br>';
+     //exit;
         $this->trigger_events('pre_login');
 
         if (empty($identity) || empty($password)) {
             $this->set_error('login_unsuccessful');
             return FALSE;
         }
+        
         $sigplus = 1;
         $this->trigger_events('extra_where');
         $this->load->helper('email');
-        $this->identity_column = valid_email($identity) ? 'email' : 'username';
+        $this->identity_column = valid_email($identity) ? 'email' : 'email';
         $query = $this->db->select($this->identity_column . ', username, email, id, password, active, last_login, last_ip_address, avatar, gender, group_id,  company_id, empresa_id, foto_capa')
             ->where($this->identity_column, $this->db->escape_str($identity))
           //  ->where('consultor', 1)    
             ->limit(1)
             ->get($this->tables['users']);
-      //  echo $query->num_rows(); exit;
-
+        //echo $query->num_rows(); exit;
+        
         if ($this->is_time_locked_out($identity)) {
            
             //Hash something anyway, just to take up time

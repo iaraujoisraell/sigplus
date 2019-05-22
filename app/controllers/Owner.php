@@ -407,8 +407,7 @@ class Owner extends MY_Controller
             $tabela_nome = $tabela_cadastro->tabela;
           
             $menu_dados = $this->owner_model->getMenuById($menu);
-             $restrito = $menu_dados->restrito;
-             
+            $restrito = $menu_dados->restrito;
             
             $this->data['tabela_nome'] = $tabela_nome;
             $this->data['tabela_id'] = $tabela;
@@ -449,14 +448,17 @@ class Owner extends MY_Controller
                  $modulo = "owner";
                  $funcao = "owner/cadastro";
                  $this->registraLog($tipo, $texto, $tabela_log, $row, $depois, $modulo, $funcao);
-              
-       
+             
+                 
+                
+                 
             $this->data['menu_id'] = $menu;
             //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
-            $this->data['cadastros'] = $this->owner_model->getTablesCadastroBasico($tabela_nome, $restrito);
+            $this->data['cadastros'] = $this->owner_model->getTablesCadastroBasico($tabela_nome, $restrito, 0); 
             $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
             $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
             $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
+            
            //echo 'aqui '.$tabela_nome; exit;
             $this->page_construct_owner('owner/cadastro_basico_modelo/index', $meta, $this->data);
            // $this->page_construct_owner_sortable('owner/cadastro_basico_modelo/sortable', $meta, $this->data);
@@ -613,6 +615,7 @@ class Owner extends MY_Controller
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
         }
+        
         $tabela_cadastro = $this->owner_model->getTableById($tabela);
         $tabela_nome = $tabela_cadastro->tabela;
        $this->data['tabela_nome'] = $tabela_nome;

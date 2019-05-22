@@ -23,6 +23,7 @@
        folder instead of downloading all of them to reduce the load. -->
   <link rel="stylesheet" href="<?= $assets ?>bi/dist/css/skins/_all-skins.min.css">
   
+  
 <?php 
     
     $usuario =  $this->session->userdata('user_id'); 
@@ -117,6 +118,12 @@
             <!-- /.modal-content -->
 </div>
 
+  
+  <script src="<?= $assets ?>bi/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="<?= $assets ?>bi/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- Select2 -->
+<script src="<?= $assets ?>bi/bower_components/select2/dist/js/select2.full.min.js"></script>
 
 <!-- InputMask -->
 <script src="<?= $assets ?>bi/plugins/input-mask/jquery.inputmask.js"></script>

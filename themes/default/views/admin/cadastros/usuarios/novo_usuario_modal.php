@@ -1,5 +1,5 @@
 
-<div style="background-color: #f2f2f2" class="content-wrapper">
+<div  class="modal-dialog">
      <section  class="content">
     <div class="col-lg-12">
     <div class="row">    
@@ -49,7 +49,7 @@
             <h4 class="modal-title" id="myModalLabel"><?php echo lang('Cadastro de Usuário'); ?></h4>
         </div>
         <?php $attrib = array('data-toggle' => 'validator', 'role' => 'form', 'id' => 'add-customer-form');
-            echo form_open_multipart("admin/novo_usuario", $attrib); 
+            echo form_open_multipart("admin/novo_usuario_modal", $attrib); 
             echo form_hidden('novo_usuario', '1'); 
             
         ?>
@@ -70,11 +70,12 @@
                     <div class="col-md-6">
                         <div class="form-group">
                             <?= lang("Tipo", "tipo_func"); ?>
-                            
                             <br>
-                            <input type="radio"  checked="true"  value="0" name="consultor" id="consultor" class="form-control" > Funcionário 
-                            <input type="radio"  value="1" name="consultor" id="consultor" class="form-control " > Consultor
-                           
+                            <select name="consultor" id="consultor"  class="form-control">
+                                <option value="0">Funcionário</option>
+                                <option value="1">Consultor</option>
+                            </select>
+                            
                         </div>
                     </div>
                     
@@ -82,8 +83,11 @@
                         <div class="form-group">
                             <?= lang("Gênero", "genero"); ?>
                             <br>
-                            <input type="radio"  checked="true"  value="male" name="genero" id="genero" class="form-control" > Masculino 
-                            <input type="radio"  value="female" name="genero" id="genero" class="form-control " > Feminino
+                            <select name="genero" id="genero" class="form-control">
+                                <option value="male">Masculino</option>
+                                <option value="female">Feminino</option>
+                            </select>
+                            
                             <?php
                             /*
                             $pst[''] = '';
@@ -261,7 +265,7 @@
                 <center>
                     <div class="col-md-12">
                     <?php echo form_submit('add_item', lang("Salvar"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
-                                <a  class="btn btn-danger"  onclick="history.go(-1)"><?= lang('Voltar') ?></a>
+                                <a  class="btn btn-danger"  onclick="history.go(0)"><?= lang('Voltar') ?></a>
                      </div>
                 </center> 
             </div>

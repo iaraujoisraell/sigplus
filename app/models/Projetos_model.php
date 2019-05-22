@@ -59,7 +59,8 @@ class Projetos_model extends CI_Model
     
      public function getProjetoByID($id)
     {
-        $q = $this->db->get_where('projetos', array('id' => $id), 1);
+        $empresa = $this->session->userdata('empresa'); 
+        $q = $this->db->get_where('projetos', array('id' => $id, 'empresa_id' => $empresa), 1);
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -774,7 +775,7 @@ class Projetos_model extends CI_Model
                     inner join sig_setores s      on s.id = us.setores_id
                     inner join sig_setores pai    on pai.id = s.pai
                     where projeto = $projeto_atual and pai.pai is null ";
-        
+        //echo $statement; exit;
         $q = $this->db->query($statement);
       
          
@@ -1581,11 +1582,14 @@ order by su.nome asc
      */
     public function getAllSetorArea($id)
     {
-        $this->db->select('setores.id as setor_id,setores.nome as setor, superintendencia.nome as superintendencia, superintendencia.id as id_area')
-        ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')
-        ->order_by('superintendencia.nome', 'asc');
+     //   $this->db->select('setores.id as setor_id,setores.nome as setor, superintendencia.nome as superintendencia, superintendencia.id as id_area')
+     //   ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')
+     //   ->order_by('superintendencia.nome', 'asc');
+        $statement = "SELECT * from sig_setores s where pai = $id order by nome asc";
+     //   echo $statement; exit;
+        $q = $this->db->query($statement);
         
-        $q = $this->db->get_where('setores', array('id_area' => $id));
+        //$q = $this->db->get_where('setores', array('id_area' => $id));
         
         
         if ($q->num_rows() > 0) {

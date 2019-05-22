@@ -226,9 +226,7 @@ class Admin extends MY_Controller
     public function usuarios($tabela, $menu)
     {
      
-          if ( ! $this->loggedIn) {
-            redirect('login');
-        }
+         $this->sma->checkPermissions();
         
         $this->form_validation->set_rules('id_cadastro', lang("id_cadastro"), 'required');
          
@@ -383,6 +381,20 @@ class Admin extends MY_Controller
              $publicacoes_institucionais = $this->input->post('publicacoes_institucionais');
              $password_provisorio = $this->gerar_senha(8, true, true, true, false);
              
+             // GRUPO
+             // ADMINISTRADOR = 1
+             // CONSULTOR = 2
+             // FUNCINIONARIO = 5
+             if($administrador == 1){
+                 $grupo = 1;
+             }else{
+                 if($consultor == 0){
+                  $grupo = 5;   
+                 }else{
+                  $grupo = 2;
+                 }
+             }
+             
            if (!isset($nome) || empty($nome)) {
             $valor = 0;
             $erro = 'Informe seu nome.';
@@ -438,7 +450,7 @@ class Admin extends MY_Controller
                 'corporativo' => $celular_corportativo,
                 'phone' => $celular1,
                 'networking' => $networking,
-                'projetct' => $project,
+                'project' => $project,
                 'admin' => $admin,
                 'administrador' => $administrador,
                 'publicacoes_institucionais' => $publicacoes_institucionais,
@@ -446,6 +458,7 @@ class Admin extends MY_Controller
                 'active' => 0,
                 'confirmou_email' => 0,
                 'mudar_senha' => 1,
+                'group_id' => 1,
                 'empresa_id' => $this->session->userdata('empresa')
           //      'password' => $password_provisorio
             );
@@ -519,6 +532,178 @@ class Admin extends MY_Controller
          
          
     }
+    
+     public function novo_usuario_modal()
+    {
+     
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+        
+        $this->form_validation->set_rules('novo_usuario', lang("id_cadastro"), 'required');
+         $this->form_validation->set_rules('nome', lang("Nome"), 'required');
+        //$this->form_validation->set_rules('email', lang("email"), 'trim|is_unique[users.email]');
+        
+         if ($this->form_validation->run() == true) {
+           
+             $nome = $this->input->post('nome');
+             $email = $this->input->post('email');
+             $consultor = $this->input->post('consultor');
+             $cargo = $this->input->post('cargo');
+             $setor = $this->input->post('setor');
+             $genero = $this->input->post('genero');
+             $data_admissao = $this->input->post('data_admissao');
+             $data_nascimento = $this->input->post('data_nascimento');
+             $ramal = $this->input->post('ramal');
+             $celular1 = $this->input->post('celular1');
+             $celular_corportativo = $this->input->post('celular_corportativo');
+             $networking = 1;// $this->input->post('networking');
+             $project = $this->input->post('project');
+             $admin = $this->input->post('admin');
+             $administrador = $this->input->post('administrador');
+             $criar_projetos = $this->input->post('criar_projetos');
+             $publicacoes_institucionais = $this->input->post('publicacoes_institucionais');
+             $password_provisorio = $this->gerar_senha(8, true, true, true, false);
+             
+           if (!isset($nome) || empty($nome)) {
+            $valor = 0;
+            $erro = 'Informe seu nome.';
+            echo "<script>alert('Informe seu nome.')</script>";
+                echo "<script>history.go(-1)</script>"; exit;
+            } else{
+                $valor = 1;
+            }
+
+            // EMAIL
+            /*
+             * VALIDA O EMAIL
+             */
+            $conta = "^[a-zA-Z0-9\._-]+@";
+            $domino = "[a-zA-Z0-9\._-]+.";
+            $extensao = "([a-zA-Z]{2,4})$";
+            $pattern = $conta . $domino . $extensao;
+
+             if (!ereg($pattern, $email)){
+                $erro = 'Informe um email válido.';
+                $this->data['error'] = $erro;
+                $this->session->set_flashdata('message', $this->ion_auth->messages());
+                 echo "<script>history.go(-1)</script>";
+            }
+            $empresa = $this->session->userdata('empresa');
+            $dados = $this->site->getUserbyemail($email, $empresa);
+            $email_cadastrado = $dados->email;
+
+            // Também verifica se não existe nenhum erro anterior
+            if ($email_cadastrado) {
+                $valor = 0;
+                $erro = 'Este E-mail já existe.';
+                $this->data['error'] = $erro;
+                $this->session->set_flashdata('error', $this->ion_auth->messages());
+                $this->session->set_flashdata('error', lang("Este E-mail já existe!"));
+                $this->session->set_flashdata('error', $erro);
+                echo "<script>alert('Este E-mail já existe.')</script>";
+                echo "<script>history.go(-1)</script>"; exit;
+            }
+               
+             
+             
+            $data_user = array(
+                'first_name' => $nome,
+                'email' => $email,
+                'username' => $email,
+                'consultor' => $consultor,
+                'cargo' => $cargo,
+                'gender' => $genero,
+                'data_admissao' => $data_admissao,
+                'data_aniversario' => $data_nascimento,
+                'ramal' => $ramal,
+                'corporativo' => $celular_corportativo,
+                'phone' => $celular1,
+                'networking' => $networking,
+                'project' => $project,
+                'admin' => $admin,
+                'administrador' => $administrador,
+                'publicacoes_institucionais' => $publicacoes_institucionais,
+                'criar_projetos' => $criar_projetos,
+                'active' => 0,
+                'confirmou_email' => 0,
+                'mudar_senha' => 1,
+                'empresa_id' => $this->session->userdata('empresa')
+          //      'password' => $password_provisorio
+            );
+            
+            //print_r($data_user); exit;
+           
+           $id_usuario =  $this->ion_auth->register($password_provisorio, $email,   $data_user, $setor, $notify = TRUE);
+            
+           // $tabela_sig = 'fases_projeto';
+           // $this->owner_model->updateCadastro($id_fase, $tabela_sig, $data_evento);
+           
+           // $this->auth_model->update($id_usuario, $data_user, $setor);
+            
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'UPDATE', 
+                'description' => 'Alterou o Usuário Id: '.$id_usuario,  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => 'sig_users',
+                'row' => $id_usuario,
+                'depois' => json_encode($data_user), 
+                'modulo' => 'admin',
+                'funcao' => 'admin/editar_usuario',  
+                'empresa' => $this->session->userdata('empresa'));
+           
+               $this->owner_model->addLog($logdata);  
+           // exit;
+            $tabela = 55;
+            $id_menu = 27;
+            $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
+           // redirect("project/cadastro/$tabela_id/$menu_id");
+             echo "<script>history.go(-1)</script>";
+                exit;
+          //  redirect("admin/usuarios/$tabela/$id_menu");
+            
+         }else{
+             
+          
+            $this->data['submenu'] = "modulo";
+            
+                // registra o log de movimentação
+
+                $date_hoje = date('Y-m-d H:i:s');    
+                $usuario = $this->session->userdata('user_id');
+                $empresa = $this->session->userdata('empresa');
+                $ip = $_SERVER["REMOTE_ADDR"];
+
+                $logdata = array('date' => date('Y-m-d H:i:s'), 
+                    'type' => 'ACESSO', 
+                    'description' => "Acessou o menu: Editar Fase do projeto",  
+                    'userid' => $this->session->userdata('user_id'), 
+                    'ip_address' => $_SERVER["REMOTE_ADDR"],
+                    'tabela' => '',
+                    'row' => '',
+                    'depois' => '', 
+                    'modulo' => 'owner',
+                    'funcao' => 'owner/cadastro',  
+                    'empresa' => $this->session->userdata('empresa'));
+                    $this->owner_model->addLog($logdata); 
+            
+                //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
+               // $dados = $this->site->getUser($usuario_selecionado);
+              //  $this->data['dados'] = $dados;
+              //  $this->data['usuario_id'] = $usuario_selecionado;    
+            
+           // $this->page_construct_admin('admin/cadastros/usuarios/novo_usuario', $meta, $this->data);
+              $this->load->view($this->theme . 'admin/cadastros/usuarios/novo_usuario_modal', $this->data);
+         }
+         
+         
+    }
    
     public function editar_usuario($usuario_selecionado)
     {
@@ -554,6 +739,19 @@ class Admin extends MY_Controller
              $criar_projetos = $this->input->post('criar_projetos');
              $publicacoes_institucionais = $this->input->post('publicacoes_institucionais');
              
+              // GRUPO
+             // ADMINISTRADOR = 1
+             // CONSULTOR = 2
+             // FUNCINIONARIO = 5
+             if($administrador == 1){
+                 $grupo = 1;
+             }else{
+                 if($consultor == 0){
+                  $grupo = 5;   
+                 }else{
+                  $grupo = 2;
+                 }
+             }
              
             $data_user = array(
                 'first_name' => $nome,
@@ -672,23 +870,26 @@ class Admin extends MY_Controller
          
         if ($this->form_validation->run() == true) {
           
-             $nova_Senha = $this->input->post('nova_Senha');
+             $nova_senha = $this->input->post('nova_Senha');
              $confirmar_senha = $this->input->post('confirmar_senha');
-             $id_usuario = $this->input->post('id_usuario');
+             $usuario_id = $this->input->post('id_usuario');
             
-             echo 'aqui'; exit;
             
-            $data_evento = array(
-                'data_inicio' => $data_tratado_de,
-                'data_fim' => $data_tratado_ate,
-                'nome_fase' => $evento,
-                'id_projeto' => $projeto_atual_id,
-                'responsavel_aprovacao' => $responsavel
-            );
+             
+             if($nova_senha == $confirmar_senha){
+                 
+                $dados = $this->site->getUser($usuario_id);
+                $email = $dados->email;
+             
             
-            $tabela_sig = 'fases_projeto';
-            $id_cadastro =  $this->owner_model->addCadastro($tabela_sig, $data_evento);
-              
+             $this->ion_auth->reset_password($email, $nova_senha);
+             }
+             
+            
+            
+             
+             
+           
               
             $date_hoje = date('Y-m-d H:i:s');    
             $usuario = $this->session->userdata('user_id');
@@ -709,9 +910,10 @@ class Admin extends MY_Controller
            
                $this->owner_model->addLog($logdata);  
            // exit;
-            
+            $tabela_id = 55;
+            $menu_id = 27;
             $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
-            redirect("project/fases_projetos/$tabela_id/$menu_id");
+            redirect("admin/usuarios/$tabela_id/$menu_id");
             
          }else{
         

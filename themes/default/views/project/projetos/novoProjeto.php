@@ -150,14 +150,13 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                 <div  class="nav-tabs-custom">
                     <ul style="background-color: #d2d6de; " class="nav nav-tabs">
                         <li class="active"><a href="#cadastro"  data-toggle="tab"><b>Dados Cadastrais<i class="fa fa-file-text-o"></i></b></a></li>  
-                        <li><a title="Esta ABA liberada após o cadastro do projeto." ><b>Partes Interessadas <i class="fa fa-group"></i></b></a></li>                         
-                        <li><a title="Esta ABA liberada após o cadastro do projeto." ><b>Equipe <i class="fa fa-user-circle-o"></i></b></a></li>
-                        <li><a title="Esta ABA liberada após o cadastro do projeto." ><b>Marcos <i class="fa fa-calendar-check-o"></i></b></a></li>
-                        <li><a title="Esta ABA liberada após o cadastro do projeto." ><b>Arquivos <i class="fa fa-folder-open"></i></b></a></li>
-                        <li><a title="Esta ABA liberada após o cadastro do projeto." ><b>Acesso <i class="fa fa-user-secret"></i></b></a></li>
-                        <li><a title="Esta ABA liberada após o cadastro do projeto."><b>Histórico <i class="fa fa-comments-o"></i></b></a></li>
-                        <li><a title="Esta ABA liberada após o cadastro do projeto." ><b>Log <i class="fa fa-search"></i></b></a></li>
-
+                        <li><a title="Esta aba será liberada após o cadastro do projeto." ><b>Partes Interessadas <i class="fa fa-group"></i></b></a></li>                         
+                        <li><a title="Esta aba será liberada após o cadastro do projeto." ><b>Equipe <i class="fa fa-user-circle-o"></i></b></a></li>
+                        <li><a title="Esta aba será liberada após o cadastro do projeto." ><b>Marcos <i class="fa fa-calendar-check-o"></i></b></a></li>
+                        <li><a title="Esta aba será liberada após o cadastro do projeto." ><b>Arquivos <i class="fa fa-folder-open"></i></b></a></li>
+                        <li><a title="Esta aba será liberada após o cadastro do projeto." ><b>Acesso <i class="fa fa-user-secret"></i></b></a></li>
+                        <li><a title="Esta aba será liberada após o cadastro do projeto."><b>Histórico <i class="fa fa-comments-o"></i></b></a></li>
+                        <li><a title="Esta aba será liberada após o cadastro do projeto." ><b>Log <i class="fa fa-search"></i></b></a></li>
                     </ul>
                     
                     <div class="tab-content">
@@ -176,7 +175,6 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                 <?php
                 $attrib = array('data-toggle' => 'validator', 'role' => 'form');
                 echo form_open_multipart("project/novoProjeto/", $attrib);
-               
                 ?>
                 <div class="col-md-12">
                 <!-- ITEM EVENTO -->
@@ -247,6 +245,9 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                 <div class="col-sm-6">
                     <div class="form-group">
                         <?= lang("Gerente do Projeto", "gerente"); ?> <i title="É o responsável por conduzir o projeto e alcançar seus objetivos." class="fa fa-info-circle"> </i> <small> </small>
+                    <!--      <a  title="Novo Usuário" class="btn btn-primary pull-right" href="<?= site_url('admin/novo_usuario_modal/'); ?>" data-toggle="modal" data-target="#myModal">  
+                            <i class="fa fa-plus"></i> 
+                        </a> -->
                         <?php
                         $wu4[''] = '';
                         foreach ($users as $user) {

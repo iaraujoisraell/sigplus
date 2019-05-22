@@ -52,7 +52,58 @@
                     <?php } ?>
             </div>
         </div>
-    </div>           
+    </div>
+    
+    <!-- FILTRO  -->
+<div class="col-lg-12">
+    <div class="box">
+        
+        <section class="content-header">
+            <small><?php echo 'Filtro'; ?> </small>
+       </section>
+          <?php
+            $attrib = array('data-toggle' => 'validator', 'role' => 'form');
+            echo form_open_multipart("welcome/minhasAcoes", $attrib);
+            echo form_hidden('idprojeto', $projeto->id);
+            ?>
+        
+        <div class="col-md-3">
+          <div class="form-group">
+            <?php
+            $wu_setores[''] = '';
+            $setores = $this->owner_model->getAllSetorByEmpresa();
+            foreach ($setores as $setor) {
+                $wu_setores[$setor->id] = $setor->nome;
+            }
+            echo form_dropdown('setor', $wu_setores, (isset($_POST['setor']) ? $_POST['setor'] : ""), 'id="setores" required="required" class="form-control selectpicker  select" data-placeholder="' . lang("Setor") . ' "  style="width:100%;" ');
+            ?>
+                                
+          </div>
+        </div>
+       <div class="col-md-3">
+          <div class="form-group">
+          <?php 
+              $pst['1'] = lang('ATIVOS');
+              $pst['0'] = lang('INATIVOS');
+              $pst['2'] = lang('TODOS');
+            ?>
+             <?php  
+                  echo form_dropdown('status_filtro', $pst, (isset($_POST['status_filtro']) ? $_POST['status_filtro'] : $status_filtro), 'id="tipo"  class="form-control " data-placeholder="' .  lang("Status") . '"    style="width:100%;" ');
+                 ?> 
+          </div>
+        </div>
+        
+        
+        
+        <?php echo form_submit('add_marco', lang("Pesquisar"), 'id="add_item" class="btn btn-primary "  '); ?>
+        
+        <?php echo form_close(); ?>
+    <br>
+    </div>
+    
+    </div>
+<br>
+    
     <!-- Main content -->
     <section  class="content">
         <div class="col-lg-12">
@@ -107,18 +158,18 @@
                                     <tr  >
 
                                         <td style="width: 1%;  "><?php echo $cont++; ?></td> 
-                                        <td style="width: 35%; "><small ><?php echo $user->first_name.' - '.$user->setor; if($user->consultor == 1){ ?> <label class="label label-warning" >Consultor</label> <?php }else{ ?> <label class="label label-primary" ><?php echo $user->cargo; ?></label> <?php } ?></small></td>
+                                        <td style="width: 35%; "><small ><?php echo $user->first_name; ?> <?php if($user->setor){ echo ' - '.$user->setor; }if($user->consultor == 1){ ?> <label class="label label-warning" >Consultor</label> <?php }else{ ?> <label class="label label-primary" ><?php echo $user->cargo; ?></label> <?php } ?></small></td>
                                         <td style="width: 24%; "><small ><?php echo $user->email; ?></small></td> 
                                         <td style="width: 10%;  "><small ><?php echo $confirmou; ?></small></td>
                                         <td style="width: 10%;  text-align: center;"><small class="label label-<?php echo $label; ?>" ><?php echo $status_ata; ?></small></td> 
-                                        <td style="width: 5%; font-size: 12;">
+                                        <td style="width: 5%; font-size: 12; text-align: center;">
                                             <?php  if($status == 0){ ?>
                                             <a title="Reenviar E-mail para Validação de Cadastro?" class="btn btn-primary"  href="<?= site_url('admin/reenviaEmailCredenciais/'.$user->id); ?>"><i class="fa fa-envelope"></i></a>
                                             <?php } ?>
                                         </td>
-                                        <td style="width: 5%; font-size: 12;"><a title="Alterar Senha" class="btn bg-gray"  href="<?= site_url('admin/alterarSenhaUsuario/'.$user->id); ?>" data-toggle="modal" data-target="#myModal"><i class="fa fa-key"></i></a></td> 
-                                        <td style="width: 10%; font-size: 12;">
-                                            <a title="Editar Registro" class="btn btn-default"  href="<?= site_url('admin/editar_usuario/'.$user->id); ?>"><i class="fa fa-edit"></i>  ABRIR </a>
+                                        <td style="width: 5%; font-size: 12; text-align: center;"><a title="Alterar Senha" class="btn bg-gray"  href="<?= site_url('admin/alterarSenhaUsuario/'.$user->id); ?>" data-toggle="modal" data-target="#myModal"><i class="fa fa-key"></i></a></td> 
+                                        <td style="width: 10%; font-size: 12; text-align: center;">
+                                            <a title="Editar Registro" class="btn btn-warning"  href="<?= site_url('admin/editar_usuario/'.$user->id); ?>"><i class="fa fa-edit"></i>   </a>
                                         </td>    
                                     </tr>
                                     <?php

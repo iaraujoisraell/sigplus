@@ -752,10 +752,25 @@ class Atas_model extends CI_Model
     
     
      /*
-     * PEGA TODOS OS PLANOS DE UM PROJETO , de um setor e por usuario
+     * PEGA TODAS AS AÇÕES DE UM PROJETO , de um setor e por usuario
      */
-     public function getAllitemPlanosProjetoSetorUser($id, $setor, $usuario)
+     public function getAllitemPlanosProjetoSetorUser($setor, $usuario_acoes)
     {
+        $empresa = $this->session->userdata('empresa'); 
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+        $statement = "SELECT p.idplanos, p.data_termino as data_termino,p.data_retorno_usuario,p.descricao as descricao, u.first_name, p.status, s.nome as setor
+                    from sig_planos p
+                    inner join sig_users u on u.id = p.responsavel
+                    inner join sig_users_setor us on us.users_id = u.id
+                    inner join sig_setores s on s.id = us.setores_id
+                    where us.setores_id = $setor and p.projeto = $projeto_atual and p.empresa = $empresa and u.id = $usuario_acoes ";
+       // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        /*
          $this->db->select('planos.idplanos, planos.data_termino as data_termino,eventos.nome_evento as eventos,item_evento.descricao as item, planos.data_retorno_usuario,planos.descricao as descricao, users.username,planos.status,setores.nome as setor, superintendencia.responsavel as superintendencia')
             ->join('users', 'planos.responsavel = users.id', 'left')
             ->join('setores', 'planos.setor = setores.id', 'left') 
@@ -765,6 +780,8 @@ class Atas_model extends CI_Model
             ->join('atas', 'planos.idatas = atas.id', 'left')
          ->order_by('idplanos', 'DESC');
          $q = $this->db->get_where('planos', array('atas.projetos' => $id,'planos.setor' => $setor, 'users.id' => $usuario));
+         * 
+         */
         
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -778,9 +795,22 @@ class Atas_model extends CI_Model
     /*
      * PEGA TODOS OS USUÁRIOS COM AÇÕES DE UM PROJETO e de um setor
      */
-     public function getAllUserPlanosProjetoSetor($id, $setor)
+     public function getAllUserPlanosProjetoSetor($setor)
     {
-        // echo $setor; exit;
+        $empresa = $this->session->userdata('empresa'); 
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+        $statement = "SELECT distinct  u.id as id,u.first_name as nome
+                     from sig_planos p
+                     inner join sig_users u on u.id = p.responsavel
+                     inner join sig_users_setor us on us.users_id = u.id
+                     where us.setores_id = $setor and p.projeto = $projeto_atual and p.empresa = $empresa ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+       
+        /*
          $this->db->select('users.id as id,users.first_name as nome,users.last_name as sobrenome ')
             ->join('users', 'planos.responsavel = users.id', 'left')
             ->join('setores', 'planos.setor = setores.id', 'left') 
@@ -789,6 +819,8 @@ class Atas_model extends CI_Model
             ->distinct()
          ->order_by('users.first_name', 'ASC');
          $q = $this->db->get_where('planos', array('atas.projetos' => $id,'planos.setor' => $setor));
+         * 
+         */
         
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -802,9 +834,18 @@ class Atas_model extends CI_Model
     /*
      * PEGA TODOS OS PLANOS DE UM PROJETO e de um setor
      */
-     public function getAllitemPlanosProjetoSetorCont($id, $setor)
+     public function getAllitemPlanosProjetoSetorCont($setor)
     {
-         
+        $empresa = $this->session->userdata('empresa'); 
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        $statement = "SELECT count(*) as quantidade from sig_planos p
+                     inner join sig_users_setor us on us.users_id = p.responsavel
+                     where us.setores_id = $setor and p.projeto = $projeto_atual and p.empresa = $empresa";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         /*
          $this->db->select('count(idplanos) as quantidade')
             ->join('users', 'planos.responsavel = users.id', 'left')
             ->join('setores', 'planos.setor = setores.id', 'left') 
@@ -812,6 +853,8 @@ class Atas_model extends CI_Model
             ->join('atas', 'planos.idatas = atas.id', 'left')
          ->order_by('idplanos', 'desc');
            $q = $this->db->get_where('planos', array('atas.projetos' => $id,'planos.setor' => $setor), 1);
+          * 
+          */
      
         if ($q->num_rows() > 0) {
             return $q->row();
@@ -823,9 +866,19 @@ class Atas_model extends CI_Model
     /*
      * PEGA TODAS AS AÇÕES CONCLUÍDAS DE UM PROJETO e de um setor
      */
-     public function getAllitemPlanosProjetoSetorContConcluido($id, $setor)
+     public function getAllitemPlanosProjetoSetorContConcluido($setor)
     {
-         
+        $empresa = $this->session->userdata('empresa'); 
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+        $statement = "SELECT count(*) as quantidade from sig_planos p
+                     inner join sig_users_setor us on us.users_id = p.responsavel
+                     where us.setores_id = $setor and p.projeto = $projeto_atual and p.empresa = $empresa and p.status = 'CONCLUÍDO'";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         /*
          $this->db->select('count(idplanos) as quantidade')
             ->join('users', 'planos.responsavel = users.id', 'left')
             ->join('setores', 'planos.setor = setores.id', 'left') 
@@ -833,6 +886,8 @@ class Atas_model extends CI_Model
             ->join('atas', 'planos.idatas = atas.id', 'left')
          ->order_by('idplanos', 'desc');
            $q = $this->db->get_where('planos', array('atas.projetos' => $id,'planos.status' => 'CONCLUÍDO','planos.setor' => $setor), 1);
+          * 
+          */
      
         if ($q->num_rows() > 0) {
             return $q->row();
@@ -844,9 +899,27 @@ class Atas_model extends CI_Model
     /*
      * PEGA TODAS AS AÇÕES PENDENTES DE UM PROJETO e de um setor
      */
-     public function getAllitemPlanosProjetoSetorContPendente($status,$id, $setor)
+     public function getAllitemPlanosProjetoSetorContPendente($status, $setor)
     {
-          $date_hoje = date('Y-m-d H:i:s');
+        $date_hoje = date('Y-m-d');
+        $empresa = $this->session->userdata('empresa'); 
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+        $statement = "SELECT count(*) as quantidade from sig_planos p
+                     inner join sig_users_setor us on us.users_id = p.responsavel
+                     where us.setores_id = $setor and p.projeto = $projeto_atual and p.empresa = $empresa and p.status = 'PENDENTE'";
+        
+        if ($status == 'PENDENTE') {
+            $statement .= " and p.data_termino >= '$date_hoje' ";
+        }else
+            if ($status == 'ATRASADO') {
+            $statement .= " and p.data_termino < '$date_hoje' ";    
+        }
+        //echo $statement; exit;
+        $q = $this->db->query($statement); 
+       /*
          $this->db->select('count(idplanos) as quantidade')
             ->join('users', 'planos.responsavel = users.id', 'left')
             ->join('setores', 'planos.setor = setores.id', 'left') 
@@ -861,6 +934,8 @@ class Atas_model extends CI_Model
                 if ($status == 'ATRASADO') {
                 $q = $this->db->get_where('planos', array('atas.projetos' => $id, 'planos.status' => 'PENDENTE', 'planos.setor' => $setor, 'planos.data_termino <' => $date_hoje), 1);
             }
+        * 
+        */
         
            
            
@@ -875,9 +950,20 @@ class Atas_model extends CI_Model
     /*
      * PEGA TODAS AS AÇÕES PENDENTES DE UM PROJETO e de um setor
      */
-     public function getAllitemPlanosProjetoSetorContAguardandoValidacao($id, $setor)
+     public function getAllitemPlanosProjetoSetorContAguardandoValidacao($setor)
     {
-          $date_hoje = date('Y-m-d H:i:s');
+        $empresa = $this->session->userdata('empresa'); 
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+        $statement = "SELECT count(*) as quantidade from sig_planos p
+                     inner join sig_users_setor us on us.users_id = p.responsavel
+                     where us.setores_id = $setor and p.projeto = $projeto_atual and p.empresa = $empresa and p.status = 'AGUARDANDO VALIDAÇÃO'";
+       // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        /*
          $this->db->select('count(idplanos) as quantidade')
             ->join('users', 'planos.responsavel = users.id', 'left')
             ->join('setores', 'planos.setor = setores.id', 'left') 
@@ -887,13 +973,9 @@ class Atas_model extends CI_Model
            
          
          $q = $this->db->get_where('planos', array('atas.projetos' => $id,'planos.status' => 'AGUARDANDO VALIDAÇÃO','planos.setor' => $setor), 1);
+         * 
+         */
      
-            //  $q = $this->db->get_where('planos', array('atas.projetos' => $id, 'planos.status' => 'PENDENTE', 'users.setor_id' => $setor, 'planos.data_termino >' => $date_hoje), 1);
-             
-        
-           
-           
-           
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -952,8 +1034,22 @@ inner join sma_atas a on a.id = p.idatas
  WHERE a.projetos = 1
 order by su.nome asc
      */
-    public function getAllSetorArea($projeto, $id_area)
+    public function getAllSetorArea($id)
     {
+        
+        $empresa = $this->session->userdata('empresa');
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        $statement = "SELECT distinct s.id as id, s.nome as nome
+                    from sig_planos p
+                    inner join sig_users u on u.id = p.responsavel
+                    inner join sig_users_setor us on us.users_id = u.id
+                    inner join sig_setores s on s.id = us.setores_id
+                    where s.pai = $id and p.projeto = $projeto_atual and s.empresa_id = $empresa order by nome asc";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        /*
         $this->db->select('setores.id as setor_id,setores.nome as setor, superintendencia.nome as superintendencia, superintendencia.id as id_area')
         ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')
         //->join('users', 'planos.responsavel = users.id', 'left')
@@ -963,6 +1059,8 @@ order by su.nome asc
         ->order_by('superintendencia.nome', 'asc');
         
         $q = $this->db->get_where('setores', array('superintendencia.id' => $id_area, 'atas.projetos' => $projeto));
+         * 
+         */
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;

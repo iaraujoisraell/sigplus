@@ -288,32 +288,66 @@ class Sma
 
     public function actionPermissions($action = null, $module = null)
     {
+       
          $usuario = $this->session->userdata('user_id');
-         $projetos = $this->site->getProjetoAtualByID_completo($usuario);
-         $cadastroUsuario = $this->site->getPerfilAtualByID($usuario);
-         $perfilAtualUsuario = $cadastroUsuario->group_id;
-                     
-        if (($perfilAtualUsuario == '1') || ($perfilAtualUsuario == '2')|| ($perfilAtualUsuario == '3')) {
-            if ($perfilAtualUsuario == '2' && stripos($action, 'delete') !== false) {
-                return false;
+         $empresa = $this->session->userdata('empresa');
+         
+         $dados = $this->site->getUser($usuario);
+         $id_usuario = $dados->id;
+         $projeto_atual = $dados->projeto_atual;
+         $empresa_usuario = $dados->empresa_id;
+         $modulo_atual = $dados->modulo_atual;
+         $permissao_project = $dados->project;
+         
+        
+         $cont_log = 0;
+            
+        if($usuario != $id_usuario){
+             return false;
+             //bloqueia usuário
+             // gerar 
+            }else       
+            if($empresa != $empresa_usuario){
+                 return false;
+                 // bloquear usuário
+                 // gerar alerta
             }
-            return true;
-        } elseif ($perfilAtualUsuario == '5') {
-            return false;
-        } else {
-            if (!$module) {
-                $module = $this->m;
-            }
-            if (!$action) {
-                $action = $this->v;
-            }
-            //$gp = $this->site->checkPermissions();
-            if ($this->GP[$module . '-' . $action] == 1) {
-                return true;
-            } else {
-                return false;
-            }
+         
+        // PROJECT
+        if($modulo_atual == 4){
+       //  echo $permissao_project;exit;
+          if($permissao_project == 1){
+           // validações do módulo project
+              
+              //1 - verifica se o projeto que esta acessando é da empresa dele.
+              $projeto_cadastro = $this->projetos_model->getProjetoByID($projeto_atual);
+              $empresa_cadastro_projeto = $projeto_cadastro->empresa_id;
+             
+              if($empresa_cadastro_projeto == $empresa){
+                  return true;
+              }else{
+                  // email de alerta
+                  return true;
+              }
+              
+              return true;
+              
+          }else{
+              return false;
+          }
+            
         }
+         
+         
+        if($cont_log == 0){
+           return true;
+            //$gp = $this->site->checkPermissions();
+           
+        } 
+         
+         
+       
+        
     }
 
     public function save_barcode($text = null, $bcs = 'code128', $height = 56, $stext = 1, $sq = null)

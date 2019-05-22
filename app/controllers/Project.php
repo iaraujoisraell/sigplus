@@ -34,19 +34,33 @@ class Project extends MY_Controller
     
      public function verificarProjeto($tabela, $menu)
     {
+        $usuario = $this->session->userdata('user_id'); 
+        $empresa = $this->session->userdata('empresa');
+        $data_modulo = array('modulo_atual' => 4, 'menu_atual' => 24);
+        $this->owner_model->updateModuloAtual($usuario, $data_modulo); 
         $this->sma->checkPermissions();
       //echo 'aqui'.$id; exit;
-        $usuario = $this->session->userdata('user_id');
+        
         $users_dados = $this->site->geUserByID($usuario);
         $modulo_atual = $users_dados->modulo_atual;
         $menu_atual = $users_dados->menu_atual;
         $projeto_atual = $users_dados->projeto_atual;
         
         $this->data['tabela_id'] = $tabela;
-            $this->data['menu_id'] = $menu;
+        $this->data['menu_id'] = $menu;
+       
         
         if($projeto_atual){
-         redirect("project/homeProjeto");
+            
+            $projeto_cadastro = $this->projetos_model->getProjetoByID($projeto_atual);
+            $empresa_cadastro_projeto = $projeto_cadastro->empresa_id;
+            if($empresa_cadastro_projeto == $empresa){
+                redirect("project/homeProjeto");
+            }else{
+                redirect("project/index");
+            } 
+            
+         
         }else{
          redirect("project/index");
         }
@@ -54,23 +68,20 @@ class Project extends MY_Controller
     
     public function index()
     {
-       
         $this->sma->checkPermissions();
         
         if ($this->Settings->version == '2.3') {
             $this->session->set_flashdata('warning', 'Please complete your update by synchronizing your database.');
             redirect('sync');
         }
-
+        
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         
         $usuario = $this->session->userdata('user_id');                     
-        $this->data['planos'] = $this->atas_model->getAllPlanosUser($usuario);
-       
-        
+       // $this->data['planos'] = $this->atas_model->getAllPlanosUser($usuario);
        
         // SALVA O MÓDULO ATUAL do usuário
-         $data_modulo = array('modulo_atual' => 4, 'menu_atual' => 28);
+         $data_modulo = array('modulo_atual' => 4, 'menu_atual' => 84);
          $this->owner_model->updateModuloAtual($usuario, $data_modulo);
                     
         // registra o log de movimentação
@@ -82,7 +93,7 @@ class Project extends MY_Controller
 
         $logdata = array('date' => date('Y-m-d H:i:s'), 
             'type' => 'PROJECT', 
-            'description' => 'Acessou o menu HOME do Módulo PROJECT - da empresa '.$empresa,  
+            'description' => 'Acessou o menu PORTIFÓLIO do Módulo PROJECT - da empresa '.$empresa,  
             'userid' => $this->session->userdata('user_id'), 
             'ip_address' => $_SERVER["REMOTE_ADDR"],
             'tabela' => '',
@@ -97,15 +108,16 @@ class Project extends MY_Controller
          $modulo_atual = $users_dados->modulo_atual;
          $menu_atual = $users_dados->menu_atual;
          $projeto_atual = $users_dados->projeto_atual;
-         
+         $criar_projetos = $users_dados->criar_projetos;
         
+        $this->data['criar_projetos'] = $criar_projetos;
          
        $modulo_dados = $this->owner_model->getModuloById($modulo_atual);
        $controle = $modulo_dados->controle;
        $pagina_home = 'project/index';
       
        
-       
+        
        $this->page_construct_project_collapse($pagina_home, $meta, $this->data);
        
     }
@@ -363,7 +375,7 @@ class Project extends MY_Controller
     
     public function dashboard_setor($tabela, $menu)
     {
-     //   $this->sma->checkPermissions();
+        $this->sma->checkPermissions();
       
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
@@ -3812,7 +3824,7 @@ class Project extends MY_Controller
     
     public function novoCadastroBasico($tabela, $menu, $funcao)
     {
-        $date_cadastro = date('Y-m-d H:i:s');                           
+        $date_cadastro = date('Y-m-d H:i:s');                            
         
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
@@ -4142,7 +4154,9 @@ class Project extends MY_Controller
              $usuario = $this->session->userdata('user_id');    
              $data_modulo = array('menu_atual' => $menu);
              $this->owner_model->updateModuloAtual($usuario, $data_modulo);        
-                    
+             
+            $this->data['menu'] = $menu;
+            $this->data['tabela_id'] = $tabela;
             //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
             $this->data['cadastros'] = $this->projetos_model->getAllFasesProjetos();
             $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);

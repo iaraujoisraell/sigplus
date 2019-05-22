@@ -272,6 +272,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                     <?php
                                     $cont++;
                                 }
+                                
                                 ?>
                                 </ul>
                                 <div id="myTabContent" class="tab-content">
@@ -315,9 +316,9 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                         $cont_caixa = 1;
                                         foreach ($setores_areas as $setor_area) {
 
-                                            $id_setor = $setor_area->id_setor;
-                                            $nome_setor = $setor_area->descricao;
-
+                                            $id_setor = $setor_area->id;
+                                            $nome_setor = $setor_area->nome;
+                                           
 
                                             // PEGA A QTDE DE AÇÕES POR AREAS E POR PROJETO
                                             $quantidade_acoes_setor = $this->atas_model->getAllitemPlanosProjetoSetorCont($id_setor);
@@ -344,7 +345,8 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                             //CALCULA A PERCENTAGEM PENDENTES
                                             $calc_pendente = $total_pendentes * 100;
                                             $perc_pendente_setor = ($calc_pendente / $qtde_total_acoes_setor);
-
+                                            
+                                           
                                             ?>
                                                 <!-- 
                                             AQUI MOSTRA AS CAIXAS COM AS 
@@ -379,8 +381,11 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                   
 
 
-                                        <?php   }
-
+                                        <?php   
+                                           
+                                            
+                                        }
+                                       
                                         ?>   
 
                                         <div class="row">
@@ -389,14 +394,14 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                        <div class="portlet-body">
                                                             <ul class="nav nav-tabs">
                                                         <?php
-
+                                                            
                                                             $cont_setor_area2 = 1;
                                                             // PEGA OS SETORES POR AREAS E POR PROJETO  $projeto,
 
                                                             $setores_areas = $this->atas_model->getAllSetorArea($id_pai);
                                                             foreach ($setores_areas as $setor_area2) {
-                                                                $id_setor = $setor_area2->id_setor;
-                                                                $nome_setor2 = $setor_area2->descricao;
+                                                                $id_setor = $setor_area2->id;
+                                                                $nome_setor2 = $setor_area2->nome;
                                                                 // AKI CARREGA O NOME DO SETOR NA ABA
                                                                 ?>
                                                                     <li class="<?php if ($cont_setor_area2++ == 1) { ?> active <?php } ?>">
@@ -409,14 +414,15 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
 
                                                         <div id="myPillsContent" class="tab-content">
                                                             <?php
+                                                           
                                                             $cont_setor_area3 = 1;
                                                             $setores_areas2 = $this->atas_model->getAllSetorArea($id_pai);
-
+                                                            
                                                           // print_r($setores_areas2);
                                                             foreach ($setores_areas2 as $setor_area3) {
-                                                                    $id_setor2 = $setor_area3->id_setor;
+                                                                    $id_setor2 = $setor_area3->id;
                                                                     //echo $id_setor;
-                                                                    $nome_setor3 = $setor_area3->descricao;
+                                                                    $nome_setor3 = $setor_area3->nome;
 
                                                                     // }
                                                                     ?>
@@ -435,7 +441,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                             <?php
                                                                                             $cont_user_setor_area = 1;
                                                                                             // PEGA OS SETORES POR AREAS E POR PROJETO  $projeto,
-
+                                                                                            
                                                                                             $user_setores = $this->atas_model->getAllUserPlanosProjetoSetor($id_setor2); //$this->projetos_model->getAllSetorArea($id_superintendente);
                                                                                            // ECHO $setor_area3->setor_id;
                                                                                             foreach ($user_setores as $user_setor) {
@@ -478,17 +484,18 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                         $cont_quantidade_atrasado_acoes = 0;
                                                                                                         $cont_quantidade_pendente_acoes = 0;
                                                                                                         $cont_quantidade_av_acoes = 0;
+                                                                                                        $cont_quantidade_cancelados = 0;
                                                                                                         $cont_quantidade_concluido_acoes = 0;
                                                                                                         $acoes_setor = $this->atas_model->getAllitemPlanosProjetoSetorUser($id_setor2, $id1);
 
                                                                                                         foreach ($acoes_setor as $plano_precidencia) {
                                                                                                             $cont_presidencia ++;
-                                                                                                            $data_prazo = $plano_precidencia->data_termino;
-                                                                                                            $data_entrega = $plano_precidencia->data_retorno_usuario;
-                                                                                                            $status = $plano_precidencia->status;
-                                                                                                            $descricao = $plano_precidencia->descricao;
+                                                                                                          //  $data_prazo = $plano_precidencia->data_termino;
+                                                                                                          //  $data_entrega = $plano_precidencia->data_retorno_usuario;
+                                                                                                            $status2 = $plano_precidencia->status;
+                                                                                                           // $descricao = $plano_precidencia->descricao;
 
-                                                                                                            if ($status == 'CONCLUÍDO') {
+                                                                                                            if ($status2 == 'CONCLUÍDO') {
                                                                                                                 $cont_quantidade_concluido_acoes++;
                                                                                                                 /*
                                                                                                                  * SE A DATA DE CONLUSÃO FOR <= A DATA DO PRAZO
@@ -509,7 +516,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                                 }
                                                                                                             } else
 
-                                                                                                            if ($status == 'PENDENTE') {
+                                                                                                            if ($status2 == 'PENDENTE') {
                                                                                                                 $dataHoje = date('Y-m-d H:i:s');
                                                                                                                 /*
                                                                                                                  * SE A DATA ATUAL FOR < A DATA DO PRAZO
@@ -549,9 +556,14 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                                 }
                                                                                                             } else 
 
-                                                                                                            if ($status == 'AGUARDANDO VALIDAÇÃO') {
+                                                                                                            if ($status2 == 'AGUARDANDO VALIDAÇÃO') {
                                                                                                                 $novo_status = 'AGUARDANDO VALIDAÇÃO';
                                                                                                                 $cont_quantidade_av_acoes++;
+                                                                                                            }else 
+
+                                                                                                            if ($status2 == 'CANCELADO') {
+                                                                                                                $novo_status = 'CANCELADO';
+                                                                                                                $cont_quantidade_cancelados++;
                                                                                                             }
                                                                                                             ?>   
 
@@ -565,6 +577,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                      <label class="label label-success">Ações Concluídas: <?php echo $cont_quantidade_concluido_acoes; ?></label>
                                                                                                      <label class="label label-warning">Ações Pendentes: <?php echo $cont_quantidade_pendente_acoes + $cont_quantidade_av_acoes; ?></label>
                                                                                                      <label class="label label-danger">Ações Atrasadas: <?php echo $cont_quantidade_atrasado_acoes; ?></label>
+                                                                                                     <label class="label bg-black">Ações Canceladas: <?php echo $cont_quantidade_cancelados; ?></label>
                                                                                                     <br><br>
                                                                                                     
                                                                                                     
@@ -575,7 +588,6 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                             <thead>
                                                                                                                 <tr>
                                                                                                                     <th>-</th>
-                                                                                                                    <th>Id</th>
                                                                                                                    
                                                                                                                     <th>Descrição</th>
                                                                                                                     <th>Dt Prazo</th>
@@ -597,14 +609,15 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                                          */
 
                                                                                                                         $acoes_setor2 = $this->atas_model->getAllitemPlanosProjetoSetorUser($id_setor2, $id1);
-                                                                                                                        foreach ($acoes_setor2 as $plano_precidencia) {
+                                                                                                                        foreach ($acoes_setor2 as $plano_precidencia2) {
                                                                                                                             $cont_presidencia ++;
-                                                                                                                            $data_prazo = $plano_precidencia->data_termino;
-                                                                                                                            $data_entrega_demanda = $plano_precidencia->data_entrega_demanda;
-                                                                                                                            $data_entrega = $plano_precidencia->data_retorno_usuario;
-                                                                                                                            $status = $plano_precidencia->status;
-                                                                                                                            $descricao = $plano_precidencia->descricao; //
-
+                                                                                                                            $id_plano = $plano_precidencia2->idplanos;
+                                                                                                                            $data_prazo = $plano_precidencia2->data_termino;
+                                                                                                                            $data_entrega_demanda = $plano_precidencia2->data_entrega_demanda;
+                                                                                                                            $data_entrega = $plano_precidencia2->data_retorno_usuario;
+                                                                                                                            $status = $plano_precidencia2->status;
+                                                                                                                            $descricao = $plano_precidencia2->descricao; //
+                                                                                                                            
                                                                                                                             if ($status == 'CONCLUÍDO') {
 
                                                                                                                                 /*
@@ -661,37 +674,41 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                                                         $qtde_dias = '+15';
                                                                                                                                     }
                                                                                                                                 }
-                                                                                                                            } else
-
-                                                                                                                            if ($status == 'AGUARDANDO VALIDAÇÃO') {
+                                                                                                                            } 
+                                                                                                                            else if ($status == 'AGUARDANDO VALIDAÇÃO') {
                                                                                                                                 $novo_status = 'AGUARDANDO VALIDAÇÃO';
+                                                                                                                                
+                                                                                                                            }else if ($status == 'CANCELADO') {
+                                                                                                                                $novo_status = 'CANCELADO';
+                                                                                                                               
                                                                                                                             }
                                                                                                                             ?>   
                                                                                                                     <tr >
                                                                                                                         <td><font style="font-size: 12px;"><?php echo $cont_presidencia; ?></font></td>
-                                                                                                                        <td><font style="font-size: 12px;"><?php echo $plano_precidencia->idplanos; ?></font></td>
+                                                                                                                      
                                                                                                                        
-                                                                                                                        <td class="center"><font style="font-size: 12px;"><?php echo $plano_precidencia->descricao; ?> </font></td>
-                                                                                                                        <td class="center"><font style="font-size: 12px;"><?php echo 'De : ' .date('d/m/Y', strtotime($data_prazo)). '<br> Até : '. date('d/m/Y', strtotime($data_entrega_demanda)); ?></font></td>
-                                                                                                                        <td class="center"><font style="font-size: 12px;"> 
-                                                                                                                            <?php
-                                                                                                                    if ($plano_precidencia->status == 'CONCLUÍDO') {
-                                                                                                                        echo date('d/m/Y', strtotime($plano_precidencia->data_retorno_usuario));
-                                                                                                                    }?></font></td>
-                                                                                                                        <td class="center"><font style="width: 10%;font-size: 12px;"> <?php echo $plano_precidencia->username; ?></font></td>
-                                                                                                                        <td class="center"><font style="width: 10%;font-size: 12px;"> <?php echo $plano_precidencia->setor ?> </font></td>
+                                                                                                                        <td ><font style="font-size: 12px;"><?php echo $id_plano.' - '.$descricao; ?> </font></td>
+                                                                                                                        <td class="center"><font style="font-size: 10px;"><?php echo date('d/m/Y', strtotime($data_prazo)); ?></font></td>
+                                                                                                                        <td class="center">
+                                                                                                                            <font style="font-size: 10px;"> 
+                                                                                                                                <?php
+                                                                                                                                if ($status == 'CONCLUÍDO') {
+                                                                                                                                    echo date('d/m/Y', strtotime($plano_precidencia2->data_retorno_usuario));
+                                                                                                                                }?>
+                                                                                                                            </font>
+                                                                                                                        </td>
+                                                                                                                        <td class="center"><font style="width: 10%;font-size: 12px;"> <?php echo $plano_precidencia2->first_name; ?></font></td>
+                                                                                                                        <td class="center"><font style="width: 10%;font-size: 12px;"> <?php echo $plano_precidencia2->setor ?> </font></td>
+                                                                                                                   
                                                                                                                     <?php if ($novo_status == 'CONCLUÍDO') { ?>
                                                                                                                             <td style="width: 10%;background-color: #007700;color: #ffffff" class="center"><font style="font-size: 12px;"><?php echo $novo_status; ?></font></td>
                                                                                                                     <?php } else if ($novo_status == 'CONCLUÍDO FORA DO PRAZO') {
                                                                                                                         ?>
                                                                                                                             <td style="width: 10%;background-color: #99ca63" class="center"><font style="font-size: 12px;"><?php echo $novo_status; ?></font></td>
-                                                                                                                                <?php } else if ($novo_status == 'PENDENTE') {
-                                                                                                                                    ?>
+                                                                                                                           <?php } else if ($novo_status == 'PENDENTE') {  ?>
                                                                                                                             <td style="width: 10%;background-color: #CB3500;color: #ffffff" class="center"><font style="font-size: 12px;"><?php echo $novo_status; ?></font></td>
-
-                                                                                                                                <?php
+                                                                                                                       <?php
                                                                                                                             } else if ($novo_status == 'ATRASADO') {
-
                                                                                                                                 if ($dias >= '-5') {
                                                                                                                                     ?>
                                                                                                                                 <td style=" background-color: #c7254e; color: #ffffff;" class="center"><font style="font-size: 12px;"><?php echo $novo_status . '  (' . $qtde_dias . ' dias ) '; ?></font></td>
@@ -699,20 +716,18 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                                                                                 <td style="width: 10%; background-color: #d2322d; color: #ffffff;" class="center"><font style="font-size: 12px;"><?php echo $novo_status . '  (' . $qtde_dias . ' dias ) '; ?></font></td>
 
                                                                                                                             <?php } else if ($dias < '-10') { ?> 
-                                                                                                                                <td style="width: 10%; background-color: #000000; color: #ffffff;" class="center"><font style="font-size: 12px;"><?php echo $novo_status . '  (' . $qtde_dias . ' dias ) '; ?></font></td>
+                                                                                                                                <td style="width: 10%; background-color: gray; color: #ffffff;" class="center"><font style="font-size: 12px;"><?php echo $novo_status . '  (' . $qtde_dias . ' dias ) '; ?></font></td>
 
                                                                                                                             <?php } ?> 
 
 
                                                                                                                         <?php } else if ($novo_status == 'AGUARDANDO VALIDAÇÃO') { ?>
                                                                                                                             <td style="width: 10%; background-color: orange; color: #ffffff;" class="center"><font style="font-size: 12px;"><?php echo $novo_status; ?></font></td>
-
-
-
-                                                                                                                        <?php }else{ ?> 
-                                                                                                                            <td style=" background-color: orange; color: #ffffff;" class="center"><font style="font-size: 12px;">-</font></td>
-                                                                                                                        <?php } ?>     
-                                                                                                                            <td style="width: 10%;"><a title="Visualizar Registro" class="btn btn-dropbox"  href="<?= site_url('project/consultar_acao/' .$plano_precidencia->idplanos); ?>"><i class="fa fa-edit"></i>  ABRIR </a></td> 
+                                                                                                                       <?php } else if ($novo_status == 'CANCELADO') { ?>
+                                                                                                                            <td style="width: 10%; background-color: #000000; color: #ffffff;" class="center"><font style="font-size: 12px;"><?php echo $novo_status; ?></font></td>
+                                                                                                                            
+                                                                                                                        <?php }?>     
+                                                                                                                            <td style="width: 10%;"><a title="Visualizar Registro" class="btn btn-dropbox"  href="<?= site_url('project/consultar_acao/' .$id_plano); ?>"><i class="fa fa-edit"></i>  ABRIR </a></td> 
                                                                                                                     </tr>
                                                                                                                         <?php
                                                                                                                     }

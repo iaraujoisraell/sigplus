@@ -747,12 +747,12 @@ class Site extends CI_Model
         return FALSE;
     }
     
-    public function getUser($id = NULL) {
+    public function getUser($id_user) {
         $empresa = $this->session->userdata('empresa');
-        if (!$id) {
-            $id = $this->session->userdata('user_id');
-        }
-        $q = $this->db->get_where('users', array('id' => $id, 'empresa_id' => $empresa), 1);
+      //  $statement = "select * from sig_users where id = $id_user and empresa_id = $empresa ";    
+      //  $q = $this->db->query($statement);
+        $q = $this->db->get_where('users', array('id' => $id_user, 'empresa_id' => $empresa), 1);
+      
         if ($q->num_rows() > 0) {
             return $q->row();
         }

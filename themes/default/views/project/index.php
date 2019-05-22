@@ -1,31 +1,10 @@
-<?php
-
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-
-?>
-
-
-    
-    <?php 
-    $usuario =  $this->session->userdata('user_id'); 
-
-    ?>
     <div class="box-body">
     <!-- Content Header (Page header) -->
-     <?php
-        $projetos = $this->projetos_model->getProjetoAtualByID_completo();
-        $id_projeto = $projetos->id;
-        $nome_projeto = $projetos->nome_projeto;
-     ?>
     
     <div class="box">   
         
      <section class="content-header">
-        <h1>PORTIFÓLIO DE PROJETOS<small>Selecione o projeto desejado</small></h1>    
+        <h1>PORTIFÓLIO DE PROJETOS<small></small></h1>    
 
       <ol class="breadcrumb">
         <li><a href="<?= site_url('project'); ?>"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -34,39 +13,42 @@
     </section>
     
      <div class="box-header">
-                    <span class="pull-right-container">
-                       <div class=" clearfix no-border">
-                           <a  title="Editar Registro" class="btn btn-default pull-right" href="<?= site_url('project/novoProjeto'); ?>">  
-                           <i class="fa fa-plus"></i>  Novo Projeto 
-                           </a> 
-                       </div>
-                    </span>
-                </div>
+         <?php if($criar_projetos == 1) { ?>
+        <span class="pull-right-container">
+           <div class=" clearfix no-border">
+               <a  title="Criar novo Projeto" class="btn btn-primary pull-right" href="<?= site_url('project/novoProjeto'); ?>">  
+               <i class="fa fa-plus"></i>  Novo Projeto 
+               </a> 
+           </div>
+        </span>
+         <?php } ?>    
+    </div>
+    
     <!-- Main content -->
      </div>
     <div class="row">  
     <div class="col-lg-12">
         <div class="col-lg-12">
             <?php if ($Settings->mmode) { ?>
-                        <div class="alert alert-warning">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <?= lang('site_is_offline') ?>
-                        </div>
-                    <?php }
-                    if ($error) { ?>
-                        <div class="alert alert-danger">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <ul class="list-group"><?= $error; ?></ul>
-                        </div>
-                    <?php }
-                    if ($message) { ?>
-                        <div class="alert alert-success">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <ul class="list-group"><?= $message; ?></ul>
-                        </div>
-                    <?php } ?>
+                    <div class="alert alert-warning">
+                        <button data-dismiss="alert" class="close" type="button">×</button>
+                        <?= lang('site_is_offline') ?>
                     </div>
-       </div> 
+                <?php }
+                if ($error) { ?>
+                    <div class="alert alert-danger">
+                        <button data-dismiss="alert" class="close" type="button">×</button>
+                        <ul class="list-group"><?= $error; ?></ul>
+                    </div>
+                <?php }
+                if ($message) { ?>
+                    <div class="alert alert-success">
+                        <button data-dismiss="alert" class="close" type="button">×</button>
+                        <ul class="list-group"><?= $message; ?></ul>
+                    </div>
+                <?php } ?>
+        </div>
+    </div> 
     </div>
      <?php
      $projetos = $this->owner_model->getQtdeProjetosByUser();
@@ -242,8 +224,8 @@
                               <th style="">Fim</th>
 
                               <th style="">Gerente</th>
-                              <th style="width: 30px">Selecionar</th>
-                              <th style="width: 30px">Opções</th>
+                              <th style="width: 30px">opção</th>
+                              
                             </tr>
                             <?php foreach ($projetos_ativos as $projeto) {
                                 $projeto_id = $projeto->id;
@@ -280,20 +262,9 @@
 
 
                               <td><a title="Para acessar as informações do projeto, deve selecionar o projeto." href="<?= site_url('Project/selecionarProjeto/'.$projeto_id); ?>" class="btn  btn-instagram"> Selecionar <i class="fa fa-sign-in"></i></a></td>
-                              <td> 
-                                <div class="text-center"><div class="btn-group text-left">
-                                        <button  type="button" class="btn btn-default  dropdown-toggle" data-toggle="dropdown">
-                                    Opções <span class="caret"></span></button>
-                                    <ul class="dropdown-menu pull-right" role="menu">
-                                        
-                                          <li><a title="Cancelar o Projeto. Todas as Ações em aberto serão canceladas." href="#"><i class="fa fa-ban"></i>Cancelar</a></li>  
-                                          <li><a title="Colocar o Projeto em Aguardo. Todas as Ações em aberto serão suspensas." href="#"><i class="fa fa-clock-o"></i>Em Aguardo</a></li>  
-                                    </ul>
-                                </div>
-                                </div>
-                               </td>   
+                              
 
-                               </td>   
+                                 
                             </tr>
                             <?php } ?> 
                           </table>

@@ -223,7 +223,7 @@ class Owner_model extends CI_Model
         if($sortable == 1){
             $statement .= " and pai = '' ";
         }
-        $statement .= " order by pai = '', nome asc";
+        $statement .= " order by id asc";
         //echo $statement; exit;
         $q = $this->db->query($statement);
        // $q = $this->db->get('SHOW TABLES');
@@ -493,7 +493,7 @@ class Owner_model extends CI_Model
         }
         return FALSE;
     }
-    
+    // usuários ativos sem setor
     public function getDadosTablesUsers() {
         $empresa = $this->session->userdata('empresa');
         $statement = "select * from sig_users "

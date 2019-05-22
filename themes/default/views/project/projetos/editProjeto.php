@@ -41,7 +41,8 @@
           </h1>
           <ol class="breadcrumb">
             <li><a href="<?= site_url('project'); ?>"><i class="fa fa-home"></i> Home</a></li>
-            <li class="active">Projetos</li>
+            <li >Projetos</li>
+            <li class="active">Editar Projeto</li>
           </ol>
 
         </section>
@@ -285,9 +286,9 @@
                                 </div>
                                 
                                 <div class="col-md-12">
-                                  <div class="box box-default collapsed-box box-solid">
+                                  <div class="box box-primary collapsed-box box-solid">
                                     <div class="box-header with-border">
-                                      <h3 class="box-title text-bold">Nova equipe</h3>
+                                      <h3 class="box-title text-bold">Cadastrar equipe</h3>
 
                                       <div class="box-tools pull-right">
                                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -326,7 +327,7 @@
                                     </div>
                                     <center>
                                         <div class="col-md-12">
-                                            <?php echo form_submit('add_equipe', lang("Adcionar Equipe"), 'id="add_item" class="btn btn-primary " style="padding: 6px 15px; margin:15px 0;"  " '); ?>
+                                            <?php echo form_submit('add_equipe', lang("Adicionar Equipe"), 'id="add_item" class="btn btn-primary " style="padding: 6px 15px; margin:15px 0;"  " '); ?>
                                             <?php echo form_close(); ?>
                                         </div>
                                     </center>
@@ -359,9 +360,9 @@
                                                       ?>
                                                       <tr class="odd gradeX">
                                                           <td style="width: 5%;"><?php echo $cont_equipe++; ?></td>
-                                                          <td style="width: 20%; font-size: 12px;"><?php echo $equipe->first_name; ?></td>
-                                                           <td style="width: 20%;  font-size: 12px;"><?php echo $equipe->funcao; ?></td>
-                                                           <td style="width: 30%;  font-size: 12px;"><?php echo $equipe->descricao; ?></td>
+                                                          <td style="width: 20%; font-size: 14px;"><?php echo $equipe->first_name; ?></td>
+                                                           <td style="width: 20%;  font-size: 14px;"><?php echo $equipe->funcao; ?></td>
+                                                           <td style="width: 30%;  font-size: 14px;"><?php echo $equipe->descricao; ?></td>
                                                           <td class="center" style="width: 10%; ">
                                                           <a style="color: #ffffff;"  title="Remover Equipe do Projeto." href="<?= site_url('project/removerEquipeProjeto/' . $equipe->id_equipe); ?>" class="btn btn-danger"><i class="fa fa-trash-o"></i> </a>
                                                           </td>
@@ -387,15 +388,15 @@
                              <div class="col-md-12">
                                     <div class="form-group">
                                         <center>
-                                            <h2> PRINCIPAIS MARCOS PROJETO   </h2>
+                                            <h2> PRINCIPAIS MARCOS PROJETO <i class="fa fa-info-circle" title="Datas Importantes para o projeto"></i>  </h2>
                                         </center>
                                     </div>
                                 </div>
                                 
                              <div class="col-md-12">
-                              <div class="box box-default collapsed-box box-solid">
+                              <div class="box box-primary collapsed-box box-solid">
                                 <div class="box-header with-border">
-                                  <h3 class="box-title text-bold ">Novo Marco</h3>
+                                  <h3 class="box-title text-bold ">Cadastrar Marco do projeto</h3>
 
                                   <div class="box-tools pull-right">
                                     <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -487,9 +488,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12">
-                                  <div class="box box-default collapsed-box box-solid">
+                                  <div class="box box-primary collapsed-box box-solid">
                                     <div class="box-header with-border">
-                                      <h3 class="box-title text-bold">Novo Arquivo</h3>
+                                      <h3 class="box-title text-bold">Cadastrar Arquivo</h3>
 
                                       <div class="box-tools pull-right">
                                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -580,9 +581,9 @@
                                     </div>
                                 </div>
                                 <div class="col-md-12">
-                                  <div class="box box-default collapsed-box box-solid">
+                                  <div class="box box-primary collapsed-box box-solid">
                                     <div class="box-header with-border">
-                                      <h3 class="box-title text-bold">Novo Registro</h3>
+                                      <h3 class="box-title text-bold">Cadastrar Parte Interessada</h3>
 
                                       <div class="box-tools pull-right">
                                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -732,14 +733,14 @@
                              <div class="col-md-12">
                                     <div class="form-group">
                                         <center>
-                                            <h2> PESSOAS QUE TEM ACESSO AO PROJETO   </h2>
+                                            <h2> PESSOAS QUE TEM AUTORIZAÇÃO PARA ACESSAR O PROJETO   </h2>
                                         </center>
                                     </div>
                                 </div>
                                 <div class="col-md-12">
-                                  <div class="box box-default collapsed-box box-solid">
+                                  <div class="box box-primary collapsed-box box-solid">
                                     <div class="box-header with-border">
-                                      <h3 class="box-title text-bold">Novo Cadastro</h3>
+                                      <h3 class="box-title text-bold">Cadastrar nova autorização de acesso</h3>
 
                                       <div class="box-tools pull-right">
                                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>
@@ -838,9 +839,9 @@
                                 </div>
                                  
                                 <div class="col-md-12">
-                                  <div class="box box-default collapsed-box box-solid">
+                                  <div class="box box-primary collapsed-box box-solid">
                                     <div class="box-header with-border">
-                                      <h3 class="box-title text-bold">Novo Registro</h3>
+                                      <h3 class="box-title text-bold">Cadastrar novo Registro</h3>
 
                                       <div class="box-tools pull-right">
                                         <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-plus"></i>

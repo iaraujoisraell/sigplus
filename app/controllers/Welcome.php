@@ -33,7 +33,7 @@ class Welcome extends MY_Controller
 
     public function index()
     {
-         
+        
         if ($this->Settings->version == '2.3') {
             $this->session->set_flashdata('warning', 'Please complete your update by synchronizing your database.');
             redirect('sync');

@@ -698,6 +698,8 @@ class Auth extends MY_Controller
             
             if ($this->ion_auth->login($this->input->post('identity'), $this->input->post('password'), $remember)) {
                 
+                 //
+                
                 //QUANDO O SISTEMA ESTÃ� EM MANUTENÃ‡ÃƒO
                 if ($this->Settings->mmode) {
                     if (!$this->ion_auth->in_group('owner')) {
@@ -705,7 +707,6 @@ class Auth extends MY_Controller
                         redirect('auth/logout');
                     }
                 }
-               
                 /*
                  * REALIZA O LOG
                  

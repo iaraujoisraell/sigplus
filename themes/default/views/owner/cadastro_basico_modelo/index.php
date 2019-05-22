@@ -45,7 +45,7 @@
                 <div class="box-header">
                     <span class="pull-right-container">
                        <div class=" clearfix no-border">
-                           <a style="background-color: green; color: #ffffff;" title="Editar Registro" class="btn btn-default pull-right" href="<?= site_url('owner/novoCadastroBasico/'.$tabela_id."/".$menu_id); ?>" data-toggle="modal" data-target="#myModal">  
+                           <a title="Novo Registro" class="btn btn-primary pull-right" href="<?= site_url('owner/novoCadastroBasico/'.$tabela_id."/".$menu_id); ?>" data-toggle="modal" data-target="#myModal">  
                            <i class="fa fa-plus"></i>  Novo Cadastro 
                            </a> 
                          
