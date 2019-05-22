@@ -109,11 +109,12 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                         $tabela_evento = $tabela_id;
                                     ?>               
                                     <li>
-                                       <div class="box box-danger collapsed box-solid">
+                                       <div class="box box-success collapsed box-solid">
                                                 <div class="box-header with-border">
                                                     <h3 class="box-title"><?php echo $nome_fase; ?></h3>
-                                                    <small class="label label-primary"> <i class="fa fa-calendar"></i><?php echo '  De :  ' . exibirData($cadastro->data_inicio) ?> </small> <small class="label label-primary"><i class="fa fa-calendar"></i> <?php echo ' Até :  ' . exibirData($cadastro->data_fim); ?> </small> 
-                                                    <small class="label label-success"> <i class="fa fa-user"></i><?php echo ' '.$resp_fase; ?> </small>
+                                                    <small class="label label-default"> <i class="fa fa-calendar"></i><?php echo '  De :  ' . exibirData($cadastro->data_inicio) ?> </small> 
+                                                    <small class="label label-default"><i class="fa fa-calendar"></i> <?php echo ' Até :  ' . exibirData($cadastro->data_fim); ?> </small> 
+                                                    <small class="label label-default"> <i class="fa fa-user"></i><?php echo ' '.$resp_fase; ?> </small>
                                                     <div style="margin-right: 30px;" class="tools">
                                                         <small  ><a style="color: #ffffff;" title="<?php echo 'Editar Fase'; ?>" class="btn btn-warning fa fa-edit" href="<?= site_url($controler_fase.'/'.$funcao_edit_evento.'/'.$tabela_evento_id.'/'.$id_fase.'/'.$menu_id_evento.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal">  </a></small>
                                                         <small  ><a style="color: #ffffff;" title="<?php echo 'Deletar Fase'; ?>" class="btn btn-danger fa fa-trash" href="<?= site_url($controler_fase.'/'.$funcao_excluir_evento.'/'.$tabela_evento_id.'/'.$id_fase.'/'.$menu_id_evento.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal">  </a></small>
@@ -158,14 +159,14 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                             ?>
                                                             <li>
                                                                 
-                                                                <div class="box box-warning collapsed-box box-solid">
+                                                                <div class="box box-primary collapsed-box box-solid">
                                                                    
                                                                     <div class="box-header with-border">
                                                                          
                                                                         <font style="font-size: 14px;"><?php echo $cont_evento . ' - ' . $evento->nome_evento; ?> 
                                                                         <small class="label label-default"> <i class="fa fa-calendar"></i><?php echo '  De :  ' . exibirData(substr($data_inicio_evento, 0, 10)) ?> </small> 
                                                                         <small class="label label-default"> <i class="fa fa-calendar"></i><?php echo ' Até :  ' . exibirData(substr($data_fim_evento, 0, 10)); ?> </small>  
-                                                                             <small class="label label-success"> <i class="fa fa-user"></i> <?php echo ' '.$resp_tecnico->first_name; ?> </small></font>
+                                                                             <small class="label label-default"> <i class="fa fa-user"></i> <?php echo ' '.$resp_tecnico->first_name; ?> </small></font>
                                                                         <div style="margin-right: 30px;" class="tools">
                                                                                 <small  ><a style=" color: #ffffff;" title="Editar Evento" class="btn btn-warning fa fa-edit" href="<?= site_url($controler_edit_evento.'/'.$funcao_edit_evento.'/'.$tabela_evento_id.'/'.$id_evento.'/'.$menu_id_evento.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal"></a></small>
                                                                                 <small  ><a style=" color: #ffffff;" title="Excluir Evento" class="btn btn-danger fa fa-trash" href="<?= site_url($controler_edit_evento.'/'.$funcao_excluir_evento.'/'.$tabela_evento_id.'/'.$id_evento.'/'.$menu_id_evento.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal">  </a></small>
@@ -178,7 +179,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                                     </div>
                                                                     <br>
                                                                     <div class="col-lg-12">
-                                                                    <a style="color: <?php echo '#ffffff'; ?>;" title="<?php echo 'Novo Item do Evento'; ?>" class="btn btn-primary fa fa-plus pull-right" href="<?= site_url($controler_fase.'/'.$funcao_add_item_evento.'/'.$tabela_evento.'/'.$id_evento.'/'.$menu_id_evento.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal"> Adicionar Item </a>
+                                                                    <a style="color: <?php echo '#ffffff'; ?>;" title="<?php echo 'Novo Item do Evento'; ?>" class="btn btn-instagram fa fa-plus pull-right" href="<?= site_url($controler_fase.'/'.$funcao_add_item_evento.'/'.$tabela_evento.'/'.$id_evento.'/'.$menu_id_evento.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal"> Adicionar Item </a>
                                                                     </div>
                                                                     <br><br>
                                                                     
