@@ -224,6 +224,26 @@ class MY_Controller extends CI_Controller {
         
     }
     
+    function page_construct_project_fases($page, $meta = array(), $data = array()) {
+        $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
+        $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
+        $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
+      //  $meta['info'] = $this->site->getNotifications();
+      //  $meta['events'] = $this->site->getUpcomingEvents();
+      //  $meta['ip_address'] = $this->input->ip_address();
+        $meta['Settings'] = $data['Settings'];
+        $meta['dateFormats'] = $data['dateFormats'];
+        $meta['assets'] = $data['assets'];
+        $meta['GP'] = $data['GP'];
+       // $meta['qty_alert_num'] = $this->site->get_total_qty_alerts();
+       // $meta['exp_alert_num'] = $this->site->get_expiring_qty_alerts();
+        $this->load->view($this->theme . 'header_project', $meta);
+        $this->load->view($this->theme . $page, $data);    
+        $this->load->view($this->theme . 'footer_projeto');
+          //$this->load->view($this->theme . 'footer');
+        
+    }
+    
     function page_construct_ata($page, $meta = array(), $data = array()) {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');

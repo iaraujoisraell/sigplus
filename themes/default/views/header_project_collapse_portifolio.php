@@ -58,7 +58,7 @@
 <?php
 
 $this->load->view($this->theme . 'topo'); 
-//$this->load->view($this->theme . 'menu_esquerdo'); 
+
 ?>
 
           <?php

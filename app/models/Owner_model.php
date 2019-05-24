@@ -496,9 +496,13 @@ class Owner_model extends CI_Model
     // usuários ativos sem setor
     public function getDadosTablesUsers() {
         $empresa = $this->session->userdata('empresa');
-        $statement = "select * from sig_users "
-                . " "
-                . " where active = 1 and empresa_id = $empresa ";    
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual_id = $users_dados->projeto_atual;
+             
+        $statement = "select u.id, u.first_name, funcao from sig_users u "
+                . " inner join sig_projetos_equipes e on e.user_responsavel = u.id "
+                . " where u.active = 1 and u.empresa_id = $empresa and e.projeto_id = $projeto_atual_id";    
         
       
        //echo $statement; exit;

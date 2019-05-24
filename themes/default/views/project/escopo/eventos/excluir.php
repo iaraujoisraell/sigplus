@@ -45,7 +45,7 @@
             $fim_fase = $dadosfase->data_fim;
             $responsavel = $dadosfase->responsavel;
             $id_fase = $dadosfase->fase_id;
-          
+           $validar_acoes_fase = $dadosfase->validar_acoes_evento;
             
             $fases = $this->projetos_model->getFaseByID($id_fase);
             $dt_inicio = $fases->data_inicio;
@@ -59,15 +59,11 @@
         <?php $attrib = array('data-toggle' => 'validator', 'role' => 'form', 'id' => 'add-customer-form');
             echo form_open_multipart("project/excluir_evento_projetos", $attrib); 
             echo form_hidden('id_cadastroEvento', '1'); 
-            echo form_hidden('menu_id', $menu_id); 
+           
             echo form_hidden('evento_id', $evento); 
-            echo form_hidden('tabela_id', $tabela_id); 
-            echo form_hidden('tabela_nome', $tabela_nome);
-            echo form_hidden('funcao', $funcao);
             echo form_hidden('itemevento', $itemevento);
             echo form_hidden('acoesitem', $acoesitem);
             
-            echo form_hidden('cadastrosHabilitados', $cadastrosHabilitados);
             
         ?>
         <div class="modal-body">
@@ -108,7 +104,14 @@
                               ?>
                         
                     </div>
-                    
+                    <div class="form-group company">
+                       <?= lang("Este responsável irá validar as ações deste evento ?", "validar_acoes"); ?>
+                        <br>
+                        
+                        <input type="radio" disabled="true" name="validar_acoes" value="1" <?php if($validar_acoes_fase == 1){ ?> checked="true" <?php } ?> >SIM
+                        
+                        <input type="radio" disabled="true" name="validar_acoes" value="0" <?php if($validar_acoes_fase == 0){ ?> checked="true" <?php } ?> >NÃO
+                    </div>
                   
                     
                     

@@ -38,8 +38,8 @@
 <div  class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-2x">&times;</i>
-            </button>
+            <a type="button" class="close" onclick="history.go(-1)" aria-hidden="true"><i class="fa fa-2x">&times;</i>
+            </a>
             <?php $dadosEvento  = $this->projetos_model->getEventoByID($fase);
             $nome_evento = $dadosEvento->nome_evento;
             $inicio_evento = $dadosEvento->data_inicio;
@@ -51,13 +51,8 @@
         <?php $attrib = array('data-toggle' => 'validator', 'role' => 'form', 'id' => 'add-customer-form');
             echo form_open_multipart("project/novoItemEvento", $attrib); 
             echo form_hidden('id_itemEvento', '1'); 
-            echo form_hidden('menu_id', $menu_id); 
             echo form_hidden('fase', $fase); 
-            echo form_hidden('tabela_id', $tabela_id); 
-            echo form_hidden('tabela_nome', $tabela_nome);
-            echo form_hidden('funcao', $funcao);
-            
-            echo form_hidden('cadastrosHabilitados', $cadastrosHabilitados);
+      
             
         ?>
         <div class="modal-body">
@@ -80,10 +75,36 @@
                             <input type="text" value="<?php echo exibirData($inicio_evento) ?> - <?php echo exibirData($fim_evento) ?>" required="true" title="O período de data do item, não pode estar fora do período de datas do Evento."  name="periodo_evento" class="form-control pull-right" id="reservation">
                         </div>
                     </div>
+                    
+                    <div class="form-group company">
+                       <?= lang("Responsável ", "responsavel"); ?>
+                            <?php 
+                              $dados_tabelas_fk = $this->owner_model->getDadosTablesUsers();// retorna os dados da tabela escolhida
+                              
+                              $pst_fk_campo = "";
+                              $pst_fk_campo[''] = "Selecione";
+                              foreach ($dados_tabelas_fk as $tabela_campo) {
+                                  
+                                  $pst_fk_campo[$tabela_campo->id] = $tabela_campo->first_name.' - '. $tabela_campo->funcao;
+                                 
+                                    
+                                }
+                              echo form_dropdown('responsavel', $pst_fk_campo, (isset($_POST['reacao']) ? $_POST['reacao'] : ""), 'id="responsavel"  required="true" title="O Responsável pelo item, é a pessoa que irá responder ou representar por este Item do evento. Irá fornecer informações sobre o anadamento do Item." class="form-control selectpicker  select" data-placeholder="' . lang("N/A") . ' "  style="width:100%;" ');
+                              
+                              ?>
+                        
+                    </div>
+                    <div class="form-group company">
+                       <?= lang("O responsável irá validar as ações deste Item?", "validar_acoes"); ?>
+                        <br>
+                        <input type="radio" name="validar_acoes" value="1" checked="true" >SIM
+                        
+                        <input type="radio" name="validar_acoes" value="0" >NÃO
+                    </div>
+                    
                     <div class="form-group company">
                          <?= lang("Horas Previstas", "evento"); ?>
                         <input name="horas_previstas" class="form-control" type="number" maxlength="6" title="Horas previstas para a execução do item."  >
-                      
                     </div>
                     
                 </div>
@@ -94,6 +115,7 @@
         </div>
         <div class="modal-footer">
             <?php echo form_submit('add_customer', lang('Salvar'), 'class="btn btn-primary"'); ?>
+            <a class="btn btn-danger " onclick="history.go(-1)" > Fechar</a>
         </div>
     </div>
     <?php echo form_close(); ?>
@@ -101,6 +123,11 @@
 </div>
 
 
+  <script src="<?= $assets ?>bi/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="<?= $assets ?>bi/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- Select2 -->
+<script src="<?= $assets ?>bi/bower_components/select2/dist/js/select2.full.min.js"></script>
 <!-- InputMask -->
 <script src="<?= $assets ?>bi/plugins/input-mask/jquery.inputmask.js"></script>
 <script src="<?= $assets ?>bi/plugins/input-mask/jquery.inputmask.date.extensions.js"></script>

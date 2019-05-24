@@ -535,21 +535,18 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
     
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
-                    google.charts.load("current", {packages:["timeline"]});
-                    google.charts.setOnLoadCallback(drawChart);
-                            function drawChart() {
-                                    var container = document.getElementById('timeline');
-                            var chart = new google.visualization.Timeline(container);
-                            var dataTable = new google.visualization.DataTable();
-                            dataTable.addColumn({ type: 'string', id: 'Term' });
-                            dataTable.addColumn({ type: 'string', id: 'Name' });
-                            dataTable.addColumn({ type: 'date', id: 'Start' });
-                                dataTable.addColumn({ type: 'date', id: 'End' });
+        google.charts.load("current", {packages:["timeline"]});
+        google.charts.setOnLoadCallback(drawChart);
+        function drawChart() {
+                var container = document.getElementById('timeline');
+        var chart = new google.visualization.Timeline(container);
+        var dataTable = new google.visualization.DataTable();
+        dataTable.addColumn({ type: 'string', id: 'Term' });
+        dataTable.addColumn({ type: 'string', id: 'Name' });
+        dataTable.addColumn({ type: 'date', id: 'Start' });
+        dataTable.addColumn({ type: 'date', id: 'End' });
 
-
-
-
-                            dataTable.addRows([
+        dataTable.addRows([
     <?php
         $cont = 1;
 
@@ -572,7 +569,6 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
             $mes_fim_n = $partes_fim_n[1] - 1;
             $ano_fim_n = $partes_fim_n[0];
             $nova_data_fim = $ano_fim_n . ',' . $mes_fim_n . ',' . $dia_fim_n;
-
 
             ?>    
                 [ "<?php echo $evento->tipo; ?>", "<?php  echo  $evento->nome_evento; ?>",  new Date("<?php echo $nova_data_ini; ?>"), new Date("<?php echo $data_fim_n; ?>") ],
@@ -623,15 +619,15 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                             $coma_total_acoes_itens = 0;
                             $coma_total_acoes_concluidas_itens = 0;
                             $soma_valores_zerado = 0;
-
+                            $cont_qtde_evento = 0;
 
                              $ordem = 'ordem';
                              $eventos = $this->projetos_model->getAllEventosProjetoByFase($fase_id);
                              foreach ($eventos as $evento) {
 
-
+                                  $cont_qtde_item_evento = 0;
                                    $soma_acoes_evento = 0;
-                                   $cont_qtde_item_evento = 0;
+                                   
                                    $intes_eventos2 = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
                                    foreach ($intes_eventos2 as $item2) {
 
@@ -660,15 +656,22 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                              if ($quantidade_acoes_item->quantidade == 0){
                                                 //$cont_qtde_item_fase += 1;
                                             }
+                                            
+                                            
                                         }
+                                        
                                      if($cont_qtde_item_evento == 0){
                                          $soma_valores_zerado += 1;
                                     }else{
                                      //   $soma_itens_sem_acao += $cont_qtde_item_evento;
                                     }
-
+                                    
+                                    $cont_qtde_evento++;
                              }
-
+                            
+                             if($cont_qtde_evento == 0){
+                                     $soma_valores_zerado += 1;
+                                }
                           //   echo 'total : '.$soma_acoes_evento.' Conc :'.$coma_total_acoes_concluidas_itens;
 
                              $total_acoes_projeto = $cont_qtde_item_fase + $soma_itens_sem_acao + $soma_valores_zerado;

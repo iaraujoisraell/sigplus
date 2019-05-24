@@ -36,8 +36,8 @@
 <div  class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-2x">&times;</i>
-            </button>
+            <a type="button" class="close" onclick="history.go(-1)" aria-hidden="true"><i class="fa fa-2x">&times;</i>
+            </a>
             <?php 
             $dadosfase  = $this->projetos_model->getEventoByID($evento);
             $nome_fase = $dadosfase->nome_evento;
@@ -45,7 +45,7 @@
             $fim_fase = $dadosfase->data_fim;
             $responsavel = $dadosfase->responsavel;
             $id_fase = $dadosfase->fase_id;
-          
+            $validar_acoes_fase = $dadosfase->validar_acoes_evento;
             
             $fases = $this->projetos_model->getFaseByID($id_fase);
             $dt_inicio = $fases->data_inicio;
@@ -97,7 +97,7 @@
                               $pst_fk_campo[''] = "Selecione um Responsável";
                               foreach ($dados_tabelas_fk as $tabela_campo) {
                                   
-                                  $pst_fk_campo[$tabela_campo->id] = $tabela_campo->first_name;
+                                  $pst_fk_campo[$tabela_campo->id] = $tabela_campo->first_name.' - '. $tabela_campo->funcao;
                                  
                                     
                                 }
@@ -105,6 +105,15 @@
                               
                               ?>
                         
+                    </div>
+                    
+                    <div class="form-group company">
+                       <?= lang("Este responsável irá validar as ações deste evento ?", "validar_acoes"); ?>
+                        <br>
+                        
+                        <input type="radio" name="validar_acoes" value="1" <?php if($validar_acoes_fase == 1){ ?> checked="true" <?php } ?> >SIM
+                        
+                        <input type="radio" name="validar_acoes" value="0" <?php if($validar_acoes_fase == 0){ ?> checked="true" <?php } ?> >NÃO
                     </div>
                     
                   
@@ -120,6 +129,7 @@
         </div>
         <div class="modal-footer">
             <?php echo form_submit('add_customer', lang('Salvar'), 'class="btn btn-primary"'); ?>
+            <a class="btn btn-danger " onclick="history.go(-1)" > Fechar</a>
         </div>
     </div>
     <?php echo form_close(); ?>

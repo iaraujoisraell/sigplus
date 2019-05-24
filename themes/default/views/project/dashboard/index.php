@@ -344,77 +344,75 @@
                                     $coma_total_acoes_itens = 0;
                                     $coma_total_acoes_concluidas_itens = 0;
                                     $soma_valores_zerado = 0;
+                                    $cont_qtde_item_evento = 0;
 
-
-                                     $ordem = 'ordem';
                                      $eventos = $this->projetos_model->getAllEventosProjetoByFase($fase_id);
                                      foreach ($eventos as $evento) {
 
+                                       $soma_acoes_evento = 0;
+                                       
+                                       $intes_eventos2 = $this->projetos_model->getAllItemEventosProjeto($evento->id);
+                                       foreach ($intes_eventos2 as $item2) {
 
-                                           $soma_acoes_evento = 0;
-                                           $cont_qtde_item_evento = 0;
-                                           $intes_eventos2 = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
-                                           foreach ($intes_eventos2 as $item2) {
+                                                $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item2->id);
 
-                                                    $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item2->id);
+                                                //Qtde de Ações concluídas
+                                                $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item2->id);
+                                                $quantidade_acoes_concluidas_item =  $concluido->quantidade;
+                                                $coma_total_acoes_concluidas_itens += $quantidade_acoes_concluidas_item;
 
-                                                    //Qtde de Ações concluídas
-                                                    $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item2->id);
-                                                    $quantidade_acoes_concluidas_item =  $concluido->quantidade;
-                                                    $coma_total_acoes_concluidas_itens += $quantidade_acoes_concluidas_item;
+                                                //Qtde de ações Pendentes
+                                                $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item2->id);
+                                                $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item2->id);
+                                                $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
+                                                $soma_porc_acoes_pendentes_fase += $itens_pendentes;
 
-                                                    //Qtde de ações Pendentes
-                                                    $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item2->id);
-                                                    $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item2->id);
-                                                    $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
-                                                    $soma_porc_acoes_pendentes_fase += $itens_pendentes;
+                                                $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item2->id);
+                                                $acoes_atrasadas = $atrasadas->quantidade;
+                                                $soma_porc_acoes_atrasadas_fase += $acoes_atrasadas;
 
-                                                    $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item2->id);
-                                                    $acoes_atrasadas = $atrasadas->quantidade;
-                                                    $soma_porc_acoes_atrasadas_fase += $acoes_atrasadas;
-
-                                                    $cont_qtde_item_fase += $quantidade_acoes_item->quantidade;
-
-
-
-                                                   /*
-                                                     *  SOMA AS PORCENTAGENS DO ÍTEM PARA GERAR A MÉDIA DO EVENTO
-                                                     */
-
-
-                                                    $cont_qtde_item_evento ++;
-                                                   // $soma_valores_zerado ++;
-                                                   $cont_qtde_item_evento_fase ++;
-
-                                                     if ($quantidade_acoes_item->quantidade == 0){
-                                                        //$cont_qtde_item_fase += 1;
-
-                                                    }
-
-                                                 //   echo 'TIPO'.$tipo_evento.' / '.$evento->nome_evento.' / '.$item2->descricao.'; Conc : '.$quantidade_acoes_concluidas_item.'; Pend : '.$itens_pendentes.'; Atra : '.$soma_porc_acoes_atrasadas_fase.'; Total : '.$cont_qtde_item_fase;
-
-                                                   // echo '<br>';
-
-                                           }
-
-
-                                             if($cont_qtde_item_evento == 0){
-
-                                                 $soma_valores_zerado += 1;
-
-
-                                            }else{
-                                             //   $soma_itens_sem_acao += $cont_qtde_item_evento;
-                                            }
+                                                $cont_qtde_item_fase += $quantidade_acoes_item->quantidade;
 
 
 
+                                               /*
+                                                 *  SOMA AS PORCENTAGENS DO ÍTEM PARA GERAR A MÉDIA DO EVENTO
+                                                 */
 
+
+                                                $cont_qtde_item_evento ++;
+                                               // $soma_valores_zerado ++;
+                                               $cont_qtde_item_evento_fase ++;
+
+                                                 if ($quantidade_acoes_item->quantidade == 0){
+                                                    //$cont_qtde_item_fase += 1;
+
+                                                }
+
+                                             //   echo 'TIPO'.$tipo_evento.' / '.$evento->nome_evento.' / '.$item2->descricao.'; Conc : '.$quantidade_acoes_concluidas_item.'; Pend : '.$itens_pendentes.'; Atra : '.$soma_porc_acoes_atrasadas_fase.'; Total : '.$cont_qtde_item_fase;
+
+                                               // echo '<br>';
+
+                                       }
+
+
+                                        if($cont_qtde_item_evento == 0){
+
+                                             $soma_valores_zerado += 1;
+
+                                        }else{
+                                         //   $soma_itens_sem_acao += $cont_qtde_item_evento;
+                                        }
 
                                      }
-
+                                     
+                                     if($cont_qtde_item_evento == 0){
+                                             $soma_valores_zerado += 1;
+                                        }else{
+                                         //   $soma_itens_sem_acao += $cont_qtde_item_evento;
+                                        }
                                   //   echo 'total : '.$soma_acoes_evento.' Conc :'.$coma_total_acoes_concluidas_itens;
-
+                                       
                                      $total_acoes_projeto = $cont_qtde_item_fase + $soma_itens_sem_acao + $soma_valores_zerado;
                                      $total_acoes_pendentes =  $soma_porc_acoes_pendentes_fase + $soma_valores_zerado + $soma_itens_sem_acao;
 

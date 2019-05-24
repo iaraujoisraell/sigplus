@@ -704,8 +704,9 @@ class Projetos_model extends CI_Model
      public function getAllEventosProjeto($id)
     {
      
-    
-          $statement = "SELECT e.id as evento_id, f.id as fase_id, e.data_inicio as data_inicio, e.data_fim as data_fim, e.projeto as projeto, f.nome_fase as tipo, nome_evento FROM sig_eventos e
+         
+          $statement = "SELECT e.id as evento_id, f.id as fase_id, e.data_inicio as data_inicio, e.data_fim as data_fim, e.projeto as projeto, f.nome_fase as tipo, nome_evento 
+                        FROM sig_eventos e
                         inner join sig_fases_projeto f on f.id = e.fase_id
                         where e.projeto = $id order by f.id asc ";
        //echo $statement; exit;
@@ -1758,7 +1759,7 @@ order by su.nome asc
         return false;
     }
     
-    /*
+    /* getAcoesConcluidasByPItemEvento
      * PEGA TODOS OS EVENTOS DE UM PROJETO
      */
      public function getAllItemEventosProjeto($evento)
@@ -1855,8 +1856,9 @@ order by su.nome asc
      */
      public function getQuantidadeAcaoByItemEvento($id)
     {
-        $statement = "SELECT count(*) as quantidade from sig_planos
-                    where eventoS = '$id' and status not in ('ABERTO', 'CANCELADO')";
+        $empresa = $this->session->userdata('empresa'); 
+        $statement = "SELECT sum(peso) as quantidade from sig_planos
+                    where eventoS = '$id' and status not in ('ABERTO', 'CANCELADO') and empresa = $empresa";
         $q = $this->db->query($statement);
         
         if ($q->num_rows() > 0) {
@@ -1870,8 +1872,9 @@ order by su.nome asc
      */
      public function getAcoesConcluidasByPItemEvento($eventos)
     {
-        $statement = "SELECT count(*) as quantidade from sig_planos
-                    where eventoS = '$eventos' and status = 'CONCLUÍDO'";
+        $empresa = $this->session->userdata('empresa'); 
+        $statement = "SELECT sum(peso) as quantidade from sig_planos
+                    where eventos = '$eventos' and status = 'CONCLUÍDO' and empresa = $empresa";
         $q = $this->db->query($statement); 
          
         if ($q->num_rows() > 0) {
@@ -1887,8 +1890,9 @@ order by su.nome asc
      public function getAcoesPendentesByItemEvento($eventos)
     {
         $date_hoje = date('Y-m-d H:i:s');
-        $statement = "SELECT count(*) as quantidade from sig_planos
-                    where eventoS = '$eventos' and status = 'PENDENTE' and data_termino > '$date_hoje'";
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT sum(peso) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'PENDENTE' and data_termino > '$date_hoje' and empresa = $empresa";
         $q = $this->db->query($statement); 
       
           
@@ -1904,8 +1908,9 @@ order by su.nome asc
     
      public function getAcoesAguardandoValidacaoByItemEvento($eventos)
     {
-        $statement = "SELECT count(*) as quantidade from sig_planos
-                    where eventoS = '$eventos' and status = 'AGUARDANDO VALIDAÇÃO'";
+        $empresa = $this->session->userdata('empresa'); 
+        $statement = "SELECT sum(peso) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'AGUARDANDO VALIDAÇÃO' and empresa = $empresa";
         $q = $this->db->query($statement); 
          
         if ($q->num_rows() > 0) {
@@ -1920,10 +1925,10 @@ order by su.nome asc
     
      public function getAcoesAtrasadasByItemEvento($eventos)
     {
-          
+        $empresa = $this->session->userdata('empresa');   
         $date_hoje = date('Y-m-d H:i:s');
-        $statement = "SELECT count(*) as quantidade from sig_planos
-                    where eventoS = '$eventos' and status = 'PENDENTE' and data_termino < '$date_hoje'";
+        $statement = "SELECT sum(peso) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'PENDENTE' and data_termino < '$date_hoje' and empresa = $empresa";
         $q = $this->db->query($statement); 
         
          

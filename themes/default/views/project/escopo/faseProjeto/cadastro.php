@@ -1,5 +1,5 @@
 
-  <!-- iCheck for checkboxes and radio inputs -->
+   <!-- iCheck for checkboxes and radio inputs -->
   <link rel="stylesheet" href="<?= $assets ?>bi/bower_components/bootstrap/dist/css/bootstrap.min.css">
   <!-- Font Awesome -->
   <link rel="stylesheet" href="<?= $assets ?>bi/bower_components/font-awesome/css/font-awesome.min.css">
@@ -34,11 +34,11 @@
    }
 ?>
   
-<div  class="modal-dialog">
+  <div  class="modal-dialog">
     <div class="modal-content">
         <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-2x">&times;</i>
-            </button>
+            <a type="button" class="close" onclick="history.go(-1)" aria-hidden="true"><i class="fa fa-2x">&times;</i>
+            </a>
             <?php $dadosfase  = $this->projetos_model->getProjetoAtualByID_completo();
             $nome_fase = $dadosfase->nome_projeto;
             $inicio_fase = $dadosfase->dt_inicio;
@@ -50,14 +50,8 @@
         <?php $attrib = array('data-toggle' => 'validator', 'role' => 'form', 'id' => 'add-customer-form');
             echo form_open_multipart("project/novoCadastroFase", $attrib); 
             echo form_hidden('id_cadastroEvento', '1'); 
-            echo form_hidden('menu_id', $menu_id); 
             echo form_hidden('projeto_id', $id); 
-            echo form_hidden('fase', $nome_fase); 
-            echo form_hidden('tabela_id', $tabela_id); 
-            echo form_hidden('tabela_nome', $tabela_nome);
-            echo form_hidden('funcao', $funcao);
             
-            echo form_hidden('cadastrosHabilitados', $cadastrosHabilitados);
             
         ?>
         <div class="modal-body">
@@ -67,7 +61,7 @@
                 <div class="col-md-12">
                     <div class="form-group company">
                          <?= lang("Nome da Fase", "evento"); ?>
-                          <?php echo form_input('evento', $dados_tabela->$campo_banco, 'class="form-control input" title="Nome do Evento da Fase" maxlength="250" id="evento"  required="required" '); ?>
+                          <?php echo form_input('evento', "", 'class="form-control input" title="Nome do Evento da Fase" maxlength="250" id="evento"  required="required" '); ?>
                     
                     </div>
                     <div class="form-group company">
@@ -89,20 +83,22 @@
                               $pst_fk_campo[''] = "Selecione um Responsável";
                               foreach ($dados_tabelas_fk as $tabela_campo) {
                                   
-                                  $pst_fk_campo[$tabela_campo->id] = $tabela_campo->first_name;
+                                  $pst_fk_campo[$tabela_campo->id] = $tabela_campo->first_name.' - '. $tabela_campo->funcao;
                                  
                                     
                                 }
-                              echo form_dropdown('responsavel', $pst_fk_campo, (isset($_POST['reacao']) ? $_POST['reacao'] : ""), 'id="responsavel"  required="true" title="O Responsável pelo Evento, é a pessoa que irá responder ou representar por este evento. Irá fornecer informações sobre o anadamento do evento." class="form-control selectpicker  select" data-placeholder="' . lang("N/A") . ' "  style="width:100%;" ');
+                              echo form_dropdown('responsavel', $pst_fk_campo, (isset($_POST['reacao']) ? $_POST['reacao'] : ""), 'id="responsavel"  required="true" title="O Responsável pela Fase, é a pessoa que irá responder ou representar por esta Fase. Irá fornecer informações sobre o anadamento do evento." class="form-control selectpicker  select" data-placeholder="' . lang("N/A") . ' "  style="width:100%;" ');
                               
                               ?>
                         
                     </div>
-                    
-                  
-                    
-                    
-                    
+                    <div class="form-group company">
+                       <?= lang("Este responsável irá validar as ações desta fase ?", "validar_acoes"); ?>
+                        <br>
+                        <input type="radio" name="validar_acoes" value="1" checked="true" >SIM
+                        
+                        <input type="radio" name="validar_acoes" value="0" >NÃO
+                    </div>
                     
                 </div>
                 
@@ -112,13 +108,15 @@
         </div>
         <div class="modal-footer">
             <?php echo form_submit('add_customer', lang('Salvar'), 'class="btn btn-primary"'); ?>
+            <a class="btn btn-danger " onclick="history.go(-1)" > Fechar</a>
         </div>
     </div>
     <?php echo form_close(); ?>
             <!-- /.modal-content -->
-</div>
+     </div>       
 
   
+
   <script src="<?= $assets ?>bi/bower_components/jquery/dist/jquery.min.js"></script>
 <!-- Bootstrap 3.3.7 -->
 <script src="<?= $assets ?>bi/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
@@ -148,6 +146,7 @@
 <script src="<?= $assets ?>bi/dist/js/adminlte.min.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="<?= $assets ?>bi/dist/js/demo.js"></script>
+<!-- Page script -->
 <!-- Page script -->
 <script>
   $(function () {

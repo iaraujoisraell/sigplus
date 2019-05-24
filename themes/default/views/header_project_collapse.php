@@ -73,25 +73,12 @@ $this->load->view($this->theme . 'topo');
 //$this->load->view($this->theme . 'menu_esquerdo'); 
 ?>
 
-          <?php
-$projetos = $this->projetos_model->getProjetoAtualByID_completo();
-$id_projeto = $projetos->id;
-$nome_projeto = $projetos->nome_projeto;
-$gerente = $projetos->gerente_area;
-$resp_tecnico_fase = $this->atas_model->getUserSetorByUserSetor($gerente);
-$gerente_projeto = $resp_tecnico_fase->nome;
-?>
+
 <div class="content-wrapper">
     
     
     <br>
-        <div class="col-lg-12">
-          <ol class="breadcrumb">
-              <li ><i class="fa fa-bookmark"></i>  Projeto:    <?php echo $nome_projeto; ?></li>
-              <li ><i class="fa fa-user"></i>  Gerente:    <?php echo $gerente_projeto; ?></li>
-              <li  ><i class="fa fa-calendar"></i> Início : <?php echo date("d/m/Y", strtotime($projetos->dt_inicio)); ?> </li>
-              <li ><i class="fa fa-flag-checkered"></i> Fim : <?php echo date("d/m/Y", strtotime($projetos->dt_final)); ?> </li>
-
-          </ol>
-            </div>
+         <?php
+    $this->load->view($this->theme . 'header_project_cabecalho'); 
+    ?> 
           

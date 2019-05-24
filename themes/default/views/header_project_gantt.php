@@ -100,13 +100,11 @@ $gerente_projeto = $resp_tecnico_fase->nome;
 ?>
     
     
-    <br>
+   
         <div class="col-lg-12">
           <ol class="breadcrumb">
               <i  class="fa fa-bookmark "></i> <h1>  <?php echo $nome_projeto; ?> </h1>
-              <i class="fa fa-user"></i>  Gerente:    <?php echo $gerente_projeto; ?> /
-              <i class="fa fa-calendar"></i> Início : <?php echo date("d/m/Y", strtotime($projetos->dt_inicio)); ?> /
-              <i class="fa fa-flag-checkered"></i> Fim : <?php echo date("d/m/Y", strtotime($projetos->dt_final)); ?> 
+             
 
           </ol>
             </div>

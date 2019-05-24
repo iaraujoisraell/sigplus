@@ -4128,7 +4128,7 @@ class Project extends MY_Controller
             $this->data['menu'] = "cadastro";
             $this->data['submenu'] = "modulo";
             
-                
+             
 
                 // registra o log de movimentação
 
@@ -4154,14 +4154,12 @@ class Project extends MY_Controller
              $usuario = $this->session->userdata('user_id');    
              $data_modulo = array('menu_atual' => $menu);
              $this->owner_model->updateModuloAtual($usuario, $data_modulo);        
-             
+            
             $this->data['menu'] = $menu;
             $this->data['tabela_id'] = $tabela;
-            //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
+            $this->data['projetos'] = $this->projetos_model->getProjetoAtualByID_completo();;
             $this->data['cadastros'] = $this->projetos_model->getAllFasesProjetos();
-            $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
+              
             $this->page_construct_project('project/escopo/faseProjeto/index', $meta, $this->data);
            // $this->page_construct_user('owner/empresas/index', $meta, $this->data);
          }
@@ -4169,7 +4167,7 @@ class Project extends MY_Controller
          
     }
     
-     public function novoCadastroFase($tabela, $menu)
+    public function novoCadastroFase()
     {
         
          $this->form_validation->set_rules('id_cadastroEvento', lang("id_cadastro"), 'required');
@@ -4180,6 +4178,7 @@ class Project extends MY_Controller
              $periodo_evento = $this->input->post('periodo_evento');
              $responsavel = $this->input->post('responsavel');
              $id_fase = $this->input->post('projeto_id');
+             $validar_acao = $this->input->post('validar_acoes');
              
              $evento_periodo_de = substr($periodo_evento, 0, 10);
              $partes_data_inicio = explode("/", $evento_periodo_de);
@@ -4195,10 +4194,7 @@ class Project extends MY_Controller
              $diaf = $partes_data_fim[0];
              $data_tratado_ate = $anof.'-'.$mesf.'-'.$diaf;
              
-             $tabela_id = $this->input->post('tabela_id');
-             $tabela_nome = $this->input->post('tabela_nome');
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
+             
              
              $usuario = $this->session->userdata('user_id');
              $users_dados = $this->site->geUserByID($usuario);
@@ -4209,9 +4205,10 @@ class Project extends MY_Controller
                 'data_fim' => $data_tratado_ate,
                 'nome_fase' => $evento,
                 'id_projeto' => $projeto_atual_id,
-                'responsavel_aprovacao' => $responsavel
+                'responsavel_aprovacao' => $responsavel,
+                'validar_acoes_fase' => $validar_acao
             );
-            
+          //  print_r($data_evento); exit;
             $tabela_sig = 'fases_projeto';
             $id_cadastro =  $this->owner_model->addCadastro($tabela_sig, $data_evento);
               
@@ -4235,10 +4232,11 @@ class Project extends MY_Controller
            
                $this->owner_model->addLog($logdata);  
            // exit;
-            
+            $tabela_id = 21;
+            $menu_id = 63;
             $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
-            redirect("project/fases_projetos/$tabela_id/$menu_id");
-            
+           // redirect("project/fases_projetos/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>";
          }else{
         
         $date_cadastro = date('Y-m-d H:i:s');                           
@@ -4246,26 +4244,16 @@ class Project extends MY_Controller
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
         }
-        $tabela_cadastro = $this->owner_model->getTableById($tabela);
-        $tabela_nome = $tabela_cadastro->tabela;
-        $this->data['tabela_nome'] = $tabela_nome;
-        $this->data['titulo'] = $tabela_cadastro->titulo;
-        $this->data['tabela_id'] = $tabela;   
-        $this->data['menu_id'] = $menu;
-        $this->data['funcao'] = $funcao;
-        $this->data['fase'] = $fase;
-        $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-        $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-        $usuario = $this->session->userdata('user_id');                     
        
         //$this->load->view($this->theme . 'projetos/documentacao/add', $this->data);
+       // $this->page_construct_project_fases('project/escopo/faseProjeto/novaFase', $meta, $this->data);
         $this->load->view($this->theme . 'project/escopo/faseProjeto/cadastro', $this->data);
            
          }
             
     }
     
-    public function editar_fases_projetos($tabela, $fase, $menu, $funcao)
+    public function editar_fases_projetos($fase)
     {
      
         if ($this->input->get('id')) {
@@ -4281,10 +4269,9 @@ class Project extends MY_Controller
              $periodo_evento = $this->input->post('periodo_evento');
              $responsavel = $this->input->post('responsavel');
              $id_fase = $this->input->post('fase');
+             $validar_acao = $this->input->post('validar_acoes');
              
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
-             
+              
              $evento_periodo_de = substr($periodo_evento, 0, 10);
              $partes_data_inicio = explode("/", $evento_periodo_de);
              $ano = $partes_data_inicio[2];
@@ -4307,7 +4294,8 @@ class Project extends MY_Controller
                 'data_inicio' => $data_tratado_de,
                 'data_fim' => $data_tratado_ate,
                 'nome_fase' => $evento,
-                'responsavel_aprovacao' => $responsavel
+                'responsavel_aprovacao' => $responsavel,
+                'validar_acoes_fase' => $validar_acao
             );
            
             $tabela_sig = 'fases_projeto';
@@ -4334,22 +4322,16 @@ class Project extends MY_Controller
            // exit;
             
             $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
-            redirect("project/$funcao/$tabela_id/$menu_id");
-            
+           // redirect("project/$funcao/$tabela_id/$menu_id");
+             echo "<script>history.go(-2)</script>";
          }else{
              
             $tabela_cadastro = $this->owner_model->getTableById($tabela);
             $tabela_nome = $tabela_cadastro->tabela;
             
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['tabela_id'] = $tabela;   
-            $this->data['menu_id'] = $menu;
-            $this->data['funcao'] = $funcao;
+
             $this->data['fase'] = $fase;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
-            $this->data['menu'] = "cadastro";
-            $this->data['submenu'] = "modulo";
+           
             
                
 
@@ -4373,11 +4355,7 @@ class Project extends MY_Controller
                     'empresa' => $this->session->userdata('empresa'));
                     $this->owner_model->addLog($logdata); 
             
-            //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
-            $this->data['cadastros'] = $this->projetos_model->getAllFasesProjetos();
-            $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
+
             
             $this->load->view($this->theme . 'project/escopo/faseProjeto/editar', $this->data);
          }
@@ -4385,7 +4363,7 @@ class Project extends MY_Controller
          
     }
     
-    public function novoCadastroEvento($tabela, $fase, $menu, $funcao)
+    public function novoCadastroEvento($fase)
     {
         
          $this->form_validation->set_rules('id_cadastroEvento', lang("id_cadastro"), 'required');
@@ -4396,6 +4374,7 @@ class Project extends MY_Controller
              $periodo_evento = $this->input->post('periodo_evento');
              $responsavel = $this->input->post('responsavel');
              $id_fase = $this->input->post('fase');
+             $validar_acao = $this->input->post('validar_acoes');
              
              $evento_periodo_de = substr($periodo_evento, 0, 10);
              $partes_data_inicio = explode("/", $evento_periodo_de);
@@ -4411,10 +4390,7 @@ class Project extends MY_Controller
              $diaf = $partes_data_fim[0];
              $data_tratado_ate = $anof.'-'.$mesf.'-'.$diaf;
              
-             $tabela_id = $this->input->post('tabela_id');
-             $tabela_nome = $this->input->post('tabela_nome');
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
+            
              
              $usuario = $this->session->userdata('user_id');
              $users_dados = $this->site->geUserByID($usuario);
@@ -4428,15 +4404,15 @@ class Project extends MY_Controller
                 'responsavel' => $responsavel,
                 'data_cadastro' => date('Y-m-d H:i:s'),
                 'usuario' => $this->session->userdata('user_id'),
-                'nome_evento' => $evento
+                'nome_evento' => $evento,
+                'validar_acoes_evento' => $validar_acao
             );
-             
+             //print_r($data_evento); exit;
             $tabela_sig = 'eventos';
             $id_cadastro =  $this->owner_model->addCadastro($tabela_sig, $data_evento);
               
               
             $date_hoje = date('Y-m-d H:i:s');    
-            $usuario = $this->session->userdata('user_id');
             $empresa = $this->session->userdata('empresa');
             $ip = $_SERVER["REMOTE_ADDR"];
 
@@ -4456,8 +4432,8 @@ class Project extends MY_Controller
            // exit;
             
             $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
-            redirect("project/$funcao/$tabela_id/$menu_id");
-            
+           // redirect("project/$funcao/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>";
          }else{
         
         $date_cadastro = date('Y-m-d H:i:s');                           
@@ -4465,16 +4441,8 @@ class Project extends MY_Controller
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
         }
-        $tabela_cadastro = $this->owner_model->getTableById($tabela);
-        $tabela_nome = $tabela_cadastro->tabela;
-        $this->data['tabela_nome'] = $tabela_nome;
-        $this->data['titulo'] = $tabela_cadastro->titulo;
-        $this->data['tabela_id'] = $tabela;   
-        $this->data['menu_id'] = $menu;
-        $this->data['funcao'] = $funcao;
+       
         $this->data['fase'] = $fase;
-        $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-        $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
         $usuario = $this->session->userdata('user_id');                     
        
         //$this->load->view($this->theme . 'projetos/documentacao/add', $this->data);
@@ -4484,7 +4452,7 @@ class Project extends MY_Controller
             
     }
     
-    public function editar_evento_projetos($tabela, $evento, $menu, $funcao)
+    public function editar_evento_projetos($evento)
     {
      
         if ($this->input->get('id')) {
@@ -4500,9 +4468,8 @@ class Project extends MY_Controller
              $periodo_evento = $this->input->post('periodo_evento');
              $responsavel = $this->input->post('responsavel');
              $evento_id = $this->input->post('evento_id');
+             $validar_acao = $this->input->post('validar_acoes');
              
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
              
              $evento_periodo_de = substr($periodo_evento, 0, 10);
              $partes_data_inicio = explode("/", $evento_periodo_de);
@@ -4526,7 +4493,8 @@ class Project extends MY_Controller
                 'data_inicio' => $data_tratado_de,
                 'data_fim' => $data_tratado_ate,
                 'nome_evento' => $evento,
-                'responsavel' => $responsavel
+                'responsavel' => $responsavel,
+                 'validar_acoes_evento' => $validar_acao
             );
            
             $tabela_sig = 'eventos';
@@ -4553,25 +4521,11 @@ class Project extends MY_Controller
            // exit;
             
             $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
-            redirect("project/$funcao/$tabela_id/$menu_id");
-            
+          //  redirect("project/$funcao/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>"; 
          }else{
              
-            $tabela_cadastro = $this->owner_model->getTableById($tabela);
-            $tabela_nome = $tabela_cadastro->tabela;
-            
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['tabela_id'] = $tabela;   
-            $this->data['menu_id'] = $menu;
-            $this->data['funcao'] = $funcao;
-            $this->data['evento'] = $evento;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
-            $this->data['menu'] = "cadastro";
-            $this->data['submenu'] = "modulo";
-            
-               
-
+             $this->data['evento'] = $evento;
                 // registra o log de movimentação
 
                 $date_hoje = date('Y-m-d H:i:s');    
@@ -4593,10 +4547,7 @@ class Project extends MY_Controller
                     $this->owner_model->addLog($logdata); 
             
             //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
-            $this->data['cadastros'] = $this->projetos_model->getAllFasesProjetos();
-            $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
+           
             
             $this->load->view($this->theme . 'project/escopo/eventos/editar', $this->data);
          }
@@ -4604,7 +4555,7 @@ class Project extends MY_Controller
          
     }
     
-    public function excluir_evento_projetos($tabela, $evento, $menu, $funcao)
+    public function excluir_evento_projetos($evento)
     {
      
         if ($this->input->get('id')) {
@@ -4621,8 +4572,6 @@ class Project extends MY_Controller
              $responsavel = $this->input->post('responsavel');
              $evento_id = $this->input->post('evento_id');
              
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
              
              $evento_periodo_de = substr($periodo_evento, 0, 10);
              $partes_data_inicio = explode("/", $evento_periodo_de);
@@ -4658,9 +4607,13 @@ class Project extends MY_Controller
                  
                  
              }else if($acoesitem > 0){
-                 // inativa acoes ligada ao item
+                /*
+                 * PRECISA DESENVOLVER ESTA PARTE
+                 */    
+
+                // inativa acoes ligada ao item
                  
-                 // inativa os itens ligado ao evento
+                // inativa os itens ligado ao evento
                  $data_evento = array(
                 'data_inicio' => $data_tratado_de,
                 'data_fim' => $data_tratado_ate,
@@ -4670,7 +4623,7 @@ class Project extends MY_Controller
            
             $tabela_sig = 'eventos';
                  // inativa o evento
-                 $this->owner_model->updateCadastro($evento_id, $tabela_sig, $data_evento);
+              //   $this->owner_model->updateCadastro($evento_id, $tabela_sig, $data_evento);
              }
              
            
@@ -4697,20 +4650,11 @@ class Project extends MY_Controller
            // exit;
             
             $this->session->set_flashdata('message', lang("Cadastro apagado com Sucesso!!!"));
-            redirect("project/$funcao/$tabela_id/$menu_id");
+             echo "<script>history.go(-1)</script>"; 
             
          }else{
              
-            $tabela_cadastro = $this->owner_model->getTableById($tabela);
-            $tabela_nome = $tabela_cadastro->tabela;
-            
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['tabela_id'] = $tabela;   
-            $this->data['menu_id'] = $menu;
-            $this->data['funcao'] = $funcao;
             $this->data['evento'] = $evento;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
             $this->data['menu'] = "cadastro";
             $this->data['submenu'] = "modulo";
             
@@ -4737,10 +4681,6 @@ class Project extends MY_Controller
                     $this->owner_model->addLog($logdata); 
             
             //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
-            $this->data['cadastros'] = $this->projetos_model->getAllFasesProjetos();
-            $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
             
             $dadosItens  = $this->projetos_model->getItemEventoByEvento($evento);
             $quantidade_item =  $dadosItens->quantidade;
@@ -4766,7 +4706,7 @@ class Project extends MY_Controller
          
     }
     
-    public function novoItemEvento($tabela, $evento, $menu, $funcao)
+    public function novoItemEvento($evento)
     {
         
          $this->form_validation->set_rules('id_itemEvento', lang("id_cadastro"), 'required');
@@ -4778,6 +4718,8 @@ class Project extends MY_Controller
              $periodo_evento = $this->input->post('periodo_evento');
              $horas_previstas = $this->input->post('horas_previstas');
              $id_fase = $this->input->post('fase');
+             $validar_acao = $this->input->post('validar_acoes');
+             $responsavel = $this->input->post('responsavel');
              
              $evento_periodo_de = substr($periodo_evento, 0, 10);
              $partes_data_inicio = explode("/", $evento_periodo_de);
@@ -4793,21 +4735,16 @@ class Project extends MY_Controller
              $diaf = $partes_data_fim[0];
              $data_tratado_ate = $anof.'-'.$mesf.'-'.$diaf;
              
-             $tabela_id = $this->input->post('tabela_id');
-             $tabela_nome = $this->input->post('tabela_nome');
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
-             
-             
-             $usuario = $this->session->userdata('user_id');
-             $users_dados = $this->site->geUserByID($usuario);
-             $projeto_atual_id = $users_dados->projeto_atual;
-            
+            $empresa = $this->session->userdata('empresa');
             $data_evento = array(
                 'dt_inicio' => $data_tratado_de,
                 'dt_fim' => $data_tratado_ate,
                 'evento' => $id_fase,
-                'descricao' => $evento
+                'descricao' => $evento,
+                'horas_previstas' => $horas_previstas,
+                'validar_acoes_item' => $validar_acao,
+                'responsavel' => $responsavel,
+                'empresa' => $empresa
             );
              
             $tabela_sig = 'item_evento';
@@ -4822,39 +4759,25 @@ class Project extends MY_Controller
             $logdata = array('date' => date('Y-m-d H:i:s'), 
                 'type' => 'INSERT', 
                 'description' => 'Cadastro de um novo Item de Evento',  
-                'userid' => $this->session->userdata('user_id'), 
+                'userid' => $usuario, 
                 'ip_address' => $_SERVER["REMOTE_ADDR"],
                 'tabela' => 'sig_item_evento',
                 'row' => $id_cadastro,
                 'depois' => json_encode($data_evento), 
                 'modulo' => 'project',
                 'funcao' => 'project/novoItemEvento',  
-                'empresa' => $this->session->userdata('empresa'));
+                'empresa' => $empresa);
            
                $this->owner_model->addLog($logdata);  
            // exit;
             
             $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
-            redirect("project/$funcao/$tabela_id/$menu_id");
-            
+            //redirect("project/$funcao/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>"; 
          }else{
         
-        $date_cadastro = date('Y-m-d H:i:s');                           
-        
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
-        $tabela_cadastro = $this->owner_model->getTableById($tabela);
-        $tabela_nome = $tabela_cadastro->tabela;
-        $this->data['tabela_nome'] = $tabela_nome;
-        $this->data['titulo'] = $tabela_cadastro->titulo;
-        $this->data['tabela_id'] = $tabela;   
-        $this->data['menu_id'] = $menu;
-        $this->data['funcao'] = $funcao;
+      
         $this->data['fase'] = $evento;
-        $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-        $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-        $usuario = $this->session->userdata('user_id');                     
        
         //$this->load->view($this->theme . 'projetos/documentacao/add', $this->data);
         $this->load->view($this->theme . 'project/escopo/item_evento/cadastro', $this->data);
@@ -4863,7 +4786,7 @@ class Project extends MY_Controller
             
     }
     
-    public function editar_item_evento_projetos($tabela, $item_id, $menu, $funcao)
+    public function editar_item_evento_projetos($item_id)
     {
      
         if ($this->input->get('id')) {
@@ -4879,9 +4802,9 @@ class Project extends MY_Controller
              $periodo_evento = $this->input->post('periodo_evento');
              $item_id = $this->input->post('item_id');
              $horas_previstas = $this->input->post('horas_previstas');
+             $validar_acao = $this->input->post('validar_acoes');
+             $responsavel = $this->input->post('responsavel');
              
-             $funcao = $this->input->post('funcao');
-             $menu_id = $this->input->post('menu_id');
              
              $evento_periodo_de = substr($periodo_evento, 0, 10);
              $partes_data_inicio = explode("/", $evento_periodo_de);
@@ -4897,15 +4820,14 @@ class Project extends MY_Controller
              $diaf = $partes_data_fim[0];
              $data_tratado_ate = $anof.'-'.$mesf.'-'.$diaf;
              
-             $tabela_id = 21;
-             $tabela_nome = $this->input->post('tabela_nome');
-            // echo $tabela_nome.'<br>';
-            
+             
             $data_evento = array(
                 'dt_inicio' => $data_tratado_de,
                 'dt_fim' => $data_tratado_ate,
                 'descricao' => $evento,
-                'horas_previstas' => $horas_previstas
+                'horas_previstas' => $horas_previstas,
+                'validar_acoes_item' => $validar_acao,
+                'responsavel' => $responsavel
             );
            
             $tabela_sig = 'item_evento';
@@ -4932,25 +4854,13 @@ class Project extends MY_Controller
            // exit;
             
             $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
-            redirect("project/$funcao/$tabela_id/$menu_id");
+            //redirect("project/$funcao/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>";
             
          }else{
              
-            $tabela_cadastro = $this->owner_model->getTableById($tabela);
-            $tabela_nome = $tabela_cadastro->tabela;
-            
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['tabela_id'] = $tabela;   
-            $this->data['menu_id'] = $menu;
-            $this->data['funcao'] = $funcao;
+          
             $this->data['item'] = $item_id;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
-            $this->data['menu'] = "cadastro";
-            $this->data['submenu'] = "modulo";
-            
-               
-
                 // registra o log de movimentação
 
                 $date_hoje = date('Y-m-d H:i:s');    
@@ -4972,10 +4882,6 @@ class Project extends MY_Controller
                     $this->owner_model->addLog($logdata); 
             
             //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
-            $this->data['cadastros'] = $this->projetos_model->getAllFasesProjetos();
-            $this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            $this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
             
             $this->load->view($this->theme . 'project/escopo/item_evento/editar', $this->data);
          }
