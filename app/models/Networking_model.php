@@ -928,4 +928,134 @@ class Networking_model extends CI_Model
     }
     
     
+    
+    /**************************************************************************
+     ************** R E G I S T R O S * * A T I V I D A D E S ***************** 
+     **************************************************************************/
+     public function getRegistroAtividadesByUsuario($projeto_filtro, $data_inicio, $data_fim)
+    {
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $statement = "SELECT j.id, r.id as id_rat, j.projeto as projeto, p.data_termino, p.sequencial, r.data_rat as data_rat, hora_inicio, hora_fim, tempo, valor, r.descricao as descricao_rat, p.idplanos, p.descricao as descricao_acao, p.status as status_acao
+                    FROM sig_planos_rat r
+                    inner join sig_planos p on p.idplanos = r.planoid
+                    left join sig_projetos j on j.id = p.projeto
+                    where r.usuario = $usuario and r.empresa = $empresa ";  
+        
+        if($projeto_filtro){
+            $statement .= " and j.id = '$projeto_filtro'";
+        }
+            
+            
+        if($data_inicio && $data_fim){
+            $statement .= " and r.data_rat between '$data_inicio' and '$data_fim' ";
+        }else if($data_inicio){
+             $statement .= " and r.data_rat >= '$data_inicio' ";
+        }else if($data_fim){
+             $statement .= " and r.data_rat <= '$data_fim' ";
+        }
+         
+            
+        $statement .= " order by r.data_rat desc";    
+       
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+        
+     }
+     
+     
+     /************ RETORNA A RAT POR ID***********************************/
+    public function getRatByIdAndByEmpresa($id){
+        $empresa = $this->session->userdata('empresa');
+        $usuario = $this->session->userdata('user_id');
+        $dataHoje = date('Y-m-d');
+        
+        $statement = "SELECT j.id, r.id as id_rat, j.projeto as projeto, p.sequencial, p.data_termino, r.data_rat as data_rat, hora_inicio, hora_fim, tempo, valor, r.descricao as descricao_rat,
+                    p.idplanos, p.descricao as descricao_acao, p.status as status_acao
+                    FROM sig_planos_rat r
+                    inner join sig_planos p on p.idplanos = r.planoid
+                    left join sig_projetos j on j.id = p.projeto
+                    where r.id = $id and r.usuario = $usuario  and r.empresa = $empresa";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+     
+    
+    
+     /*
+     * altera a rat da ação por usuário e empresa
+     */
+     public function updateRat($rat, $data  = array())
+    {  
+        $empresa = $this->session->userdata('empresa');
+        $usuario = $this->session->userdata('user_id'); 
+        if ($this->db->update('planos_rat', $data, array('id' => $rat, 'empresa' => $empresa, 'usuario' => $usuario))) {
+            
+         return true;
+        }
+        return false;
+    }
+    
+    
+     /*
+     * APAGA RAT
+     */
+    public function deleteRat($id)
+    {
+       // $sale_items = $this->resetSaleActions($id);
+       $usuario = $this->session->userdata('user_id');  
+       $empresa = $this->session->userdata('empresa');
+       if ($id){
+            $this->db->delete('planos_rat', array('id' => $id, 'empresa' => $empresa, 'usuario' => $usuario));
+            return true;
+        }
+        return FALSE;
+    }
+    
+     /************************************************************************/
+     
+     
+      // RETORNA TODOS OS PROJETOS QUE O USUÁRIO TEM AÇÃO; NETWORK > MINHAS AÇÕES
+     public function getAllProjetosUserById_User()
+    {
+       $usuario = $this->session->userdata('user_id');  
+       $empresa = $this->session->userdata('empresa');
+       $statement = "SELECT distinct j.id as id, j.projeto as projeto
+                    FROM sig_planos p
+                    left join sig_atas a on a.id = p.idatas
+                    left join sig_projetos j on j.id = a.projetos
+                    where responsavel = $usuario and p.empresa = $empresa and p.status != 'ABERTO' and p.idatas != ''
+
+                    UNION
+
+                    SELECT distinct pj.id as id, pj.projeto as projeto
+                    FROM sig_planos p
+                    left join sig_projetos pj on pj.id = p.projeto
+                    where responsavel = $usuario and p.empresa = $empresa and p.status != 'ABERTO' and p.projeto != '' ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
 }

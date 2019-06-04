@@ -61,7 +61,7 @@
         </div>
        <div class="col-md-3">
           <div class="form-group">
-          <?php $pst[''] = '';
+          <?php //$pst[''] = '';
               $pst['PENDENTE'] = lang('PENDENTE');
               $pst['ATRASADO'] = lang('ATRASADO');
               $pst['AGUARDANDO VALIDAÇÃO'] = lang('AGUARDANDO VALIDAÇÃO');
@@ -131,7 +131,7 @@
                    
 
                     if ($status == 'PENDENTE') {
-                        $dataHoje = date('Y-m-d H:i:s');
+                        $dataHoje = date('Y-m-d');
 
                         if ($dataHoje <= $data_prazo) {
                         //    $novo_status = 'PENDENTE';
@@ -164,11 +164,11 @@
                 <table>
                     <thead>
                         <tr >
-                            <th > <a href="<?= site_url('welcome/minhasAcoes/1'); ?>"> <font class="label label-success" style="font-size: 12px; font-weight: bold"> Concluídas : <?php echo $cont_concluidas; ?> </font> </a></th>
-                            <th > <a href="<?= site_url('welcome/minhasAcoes/2'); ?>"> <font class="label label-primary" style="font-size: 12px; font-weight: bold"> Pendentes : <?php echo $cont_pendentes; ?></font> </a></th>
-                            <th > <a href="<?= site_url('welcome/minhasAcoes/3'); ?>"> <font class="label label-danger" style="font-size: 12px; font-weight: bold"> Atrasadas : <?php echo $cont_atrasadas; ?></font> </a></th>
-                            <th > <a href="<?= site_url('welcome/minhasAcoes/4'); ?>"> <font class="label label-warning" style="font-size: 12px; font-weight: bold"> Aguardando Validação : <?php echo $cont_avalidacao; ?></font> </a></th>
-                            <th > <a href="<?= site_url('welcome/minhasAcoes/5'); ?>"> <font class="label label-default" style="font-size: 12px; font-weight: bold"> Canceladas : <?php echo $cont_cancelado; ?></font> </a></th>
+                            <th > <a href="<?= site_url('welcome/minhasAcoes/1'); ?>"> <font class="label bg-green-active" style="font-size: 12px; font-weight: bold"> Concluídas : <?php echo $cont_concluidas; ?> </font> </a></th>
+                            <th > <a href="<?= site_url('welcome/minhasAcoes/2'); ?>"> <font class="label bg-orange-active" style="font-size: 12px; font-weight: bold"> Pendentes : <?php echo $cont_pendentes; ?></font> </a></th>
+                            <th > <a href="<?= site_url('welcome/minhasAcoes/3'); ?>"> <font class="label bg-red-active" style="font-size: 12px; font-weight: bold"> Atrasadas : <?php echo $cont_atrasadas; ?></font> </a></th>
+                            <th > <a href="<?= site_url('welcome/minhasAcoes/4'); ?>"> <font class="label bg-blue-gradient" style="font-size: 12px; font-weight: bold"> Aguardando Validação : <?php echo $cont_avalidacao; ?></font> </a></th>
+                            <th > <a href="<?= site_url('welcome/minhasAcoes/5'); ?>"> <font class="label bg-black-active" style="font-size: 12px; font-weight: bold"> Canceladas : <?php echo $cont_cancelado; ?></font> </a></th>
                         </tr>
                     </thead> 
                 </table>
@@ -179,11 +179,12 @@
                         <div class="box-body">
                             <table style="width: 100%" id="minhas_Acoes" class="table table-bordered table-striped">
                             <thead>
-                                <th style="width: 5%">ID</th>
+                                
                                 <th style="width: 45%">DESCRIÇÃO</th>
                                 <th style="width: 15%">ANDAMENTO</th>
-                                <th>PRAZO</th>
-                                <th>STATUS</th>
+                                <th>PRAZOS</th>
+                                
+                                
                                 <th>AÇÃO </th>
                                 
                             </thead>
@@ -196,7 +197,7 @@
 
                                             $status = $plano->status;
                                             $data_prazo = $plano->data_termino;
-                                            $dataHoje = date('Y-m-d H:i:s');
+                                            $dataHoje = date('Y-m-d');
                                             
                                             $andamento_plano = $plano->andamento;
                                             if($andamento_plano == 0){
@@ -212,7 +213,7 @@
                                                  */
                                                 if ($dataHoje <= $data_prazo) {
                                                     $novo_status = 'PENDENTE';
-                                                    $desc_tipo = "primary";
+                                                    $desc_tipo = "orange-active";
                                                 }
 
                                                 /*
@@ -224,7 +225,7 @@
                                                  */
                                                 if ($dataHoje > $data_prazo) {
                                                     $novo_status = 'ATRASADO';
-                                                    $desc_tipo = "danger";
+                                                    $desc_tipo = "red-active";
 
                                                   $time_inicial = geraTimestamp($this->sma->hrld($dataHoje));
                                                     $time_final = geraTimestamp($this->sma->hrld($data_prazo));
@@ -248,16 +249,16 @@
                                                 }
                                             } else if ($status == 'AGUARDANDO VALIDAÇÃO') {
                                                 $novo_status = 'AGUARDANDO VALIDAÇÃO';
-                                                $desc_tipo = "warning";
+                                                $desc_tipo = "blue-gradient";
 
 
                                             } else if ($status == 'CONCLUÍDO') {
                                                 $novo_status = 'CONCLUÍDO';
-                                                $desc_tipo = "success";
+                                                $desc_tipo = "green-active";
 
                                             }else if ($status == 'CANCELADO') {
                                                 $novo_status = 'CANCELADO';
-                                                $desc_tipo = "default";
+                                                $desc_tipo = "black-active";
                                             }
 
                                             if($plano->idatas){
@@ -271,15 +272,19 @@
 
 
                                             <tr   class="odd gradeX">
-                                                <td style="width: 5%"><?php echo $plano->sequencial; ?>   </td> 
+                                                
                                                 <td style="width: 45%">
                                                     <table>
                                                         <tr>
                                                             <td>
-                                                                <font title="Nome do Projeto " class="label label-primary" style="font-size: 12px; "><?php echo $projeto; ?> </font>
-                                                                <font title="ID do local de onde foi registrado a Ação. Pode ser uma ATA ou um Plano de Ação" class="label label-default" style="font-size: 12px; "><?php if($plano->idatas){ echo 'ATA : '.$plano->idatas; }else if($plano->idplano){ echo 'P.A.: '. $plano->idplano; } ?>  </font>
-                                                                <br><br>
-                                                               <font style="font-size: 14px; "><?php echo $plano->descricao; ?></font>
+                                                                <font title="ID da ação" class="label bg-black-active" style="font-size: 12px; "><?php echo 'ID: '.$plano->sequencial; ?></font>
+                                                                <?php if($projeto){ ?>
+                                                                <font title="Nome do Projeto " class="label label-primary" style="font-size: 12px; "><?php  echo $projeto; ?> </font>
+                                                                <?php } ?>
+                                                                <font title="Local de onde foi registrado a Ação. Pode ser uma ATA ou um Plano de Ação" class="label label-default" style="font-size: 12px; "><?php if($plano->idatas){ echo 'ATA : '.$plano->idatas; }else if($plano->idplano){ echo 'P.A.: '. $plano->idplano; } ?>  </font>
+                                                                <font class="label bg-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font>
+                                                                
+                                                               <h3><?php echo $plano->descricao; ?></h3>
                                                             </td>
                                                         </tr>
                                                     </table>
@@ -294,8 +299,14 @@
                                                         </div>      
                                                     </div> 
                                                 </td>
-                                                <td class="center"><font style="font-size: 14px;"> <?php echo date('d/m/Y', strtotime($plano->data_termino)); ?></font></td>     
-                                                <td class="center"><font class="label label-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font></td>
+                                                <td class="center">
+                                                    <font title="Data de Início da ação" style="font-size: 12px;" class="label label-primary"> <?php echo 'Início : '. date('d/m/Y', strtotime($plano->data_entrega_demanda)); ?></font> 
+                                                    <font title="Data prevista para Término da ação" style="font-size: 12px;" class="label bg-navy-active"> <?php echo 'Término : '. date('d/m/Y', strtotime($plano->data_termino)); ?></font> <br>
+                                                <?php if($plano->data_retorno_usuario){ ?>
+                                                    <br>  <font style="font-size: 12px;" class="label label-success"> <?php echo 'Finalizado em : '. date('d/m/Y', strtotime($plano->data_retorno_usuario)); ?></font>
+                                                <?php  } ?>    
+                                                </td>     
+                                                
 
                                                 <td class="center">
                                                     <?php if ($plano->status == 'PENDENTE')  { ?>

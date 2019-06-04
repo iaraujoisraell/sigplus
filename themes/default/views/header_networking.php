@@ -49,6 +49,10 @@
   <script type="text/javascript" src="<?= $assets ?>js/jquery-migrate-1.2.1.min.js"></script>
   <script type="text/javascript" src="<?= $assets ?>js/funcoes.js"></script>
   
+  
+  
+  
+  
 
   
 
@@ -108,6 +112,17 @@ function next( el, next )
 	$rData = $rData[2].'/'.$rData[1].'/'.$rData[0];
 	return $rData;
    }
+   
+     function float_min($num) {
+    //  $num = number_format($num,2);
+    //  $num_temp = explode('.', $num);
+      $num_temp[1] = $num-(number_format($num_temp[0],2));
+      $saida = number_format(((($num_temp[1]) * 60 / 100)+$num_temp[0]),2);
+      $saida = strtr($saida,'.',':');
+      return $saida;
+      // By Alexandre Quintal - alexandrequintal@yahoo.com.br
+    } 
+   
     ?>
 <?php 
  $usuario = $this->session->userdata('user_id');
@@ -138,3 +153,4 @@ $this->load->view($this->theme . 'menu_esquerdo');
 ?>
 
 <div class="content-wrapper">
+    <br>

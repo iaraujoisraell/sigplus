@@ -7,9 +7,9 @@
  */
 
 ?>
-<aside  class="main-sidebar">
+<aside style="position: fixed; max-height: 70%; height: 70%;  overflow-x: hidden; overflow-y: scroll; white-space:nowrap;"  class="main-sidebar">
     <!-- sidebar: style can be found in sidebar.less -->
-    <section class="sidebar">
+    <section  class="sidebar">
       <!-- Sidebar user panel -->
       <div  class="user-panel">
         <div  class="pull-left image">
@@ -42,7 +42,7 @@
       
       <!-- /.search form -->
       <!-- sidebar menu: : style can be found in sidebar.less -->
-      <ul class="sidebar-menu" data-widget="tree">
+      <ul  class="sidebar-menu" data-widget="tree">
         <li class="header">MENU</li>
         
         <?php
@@ -50,7 +50,7 @@
          $usuario = $this->session->userdata('user_id');
          $users_dados = $this->site->geUserByID($usuario);
         
-          
+         
          /*
           * ATUALIZA AS LABELS DO MENU
           */
@@ -65,7 +65,7 @@
          $this->owner_model->updateLabelMenu(28, $data_menu_projeto);
          $data_menu_portifolio = array('label4' => $soma_projetos);
          $this->owner_model->updateLabelMenu(84, $data_menu_portifolio);
-       
+        
          // ****************  ATAS ********************************************
          $atas = $this->owner_model->getQtdeAtasByStatysAndProjeto();
          $atas_aberta = $atas->aberto;
@@ -99,7 +99,7 @@
          $this->owner_model->updateLabelMenu(51, $data_menu_acoes_lista);
          
          
-         
+        
         
          
          

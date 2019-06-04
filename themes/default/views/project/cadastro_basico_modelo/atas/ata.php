@@ -35,6 +35,17 @@ $nome_projeto = $projetos->nome_projeto;
           <h1>
             <?php echo 'Ata '.$ata->sequencia; ?>
               <small><?php echo $nome_projeto; ?></small>
+              
+              <?php $status_plano = $ata->status;
+                    if($status_plano == 1){
+                        $status_desc = "FECHADO";
+                        $label_status = "success";
+                    }else{
+                        $status_desc = "ABERTO";
+                        $label_status = "warning";
+                    }
+              ?>
+              <font class="label label-<?php echo $label_status; ?>"><?php echo $status_desc; ?></font>
                   
           </h1>
           <ol class="breadcrumb">
@@ -85,10 +96,7 @@ $nome_projeto = $projetos->nome_projeto;
         <?php $attrib = array('data-toggle' => 'validator', 'role' => 'form', 'id' => 'add-customer-form');
             echo form_open_multipart("atas/edit", $attrib); 
             echo form_hidden('id_cadastro', '1'); 
-            echo form_hidden('menu_id', $menu_id); 
-            echo form_hidden('tabela_id', $tabela_id); 
-            echo form_hidden('tabela_nome', $tabela_nome);
-            echo form_hidden('funcao', $funcao);
+             echo form_hidden('tipo_ata', $tipo_ata);
             echo form_hidden('projeto', $id_projeto);
             echo form_hidden('id', $id);
             $statusAta = $ata->status;
@@ -187,18 +195,7 @@ $nome_projeto = $projetos->nome_projeto;
                             </div>
                         </div> 
                         
-                        <script>
-                         function optionConvocacao(){
-                                var option = document.getElementById("convocacao").value;
-                                if(option == "SIM"){
-                                 //   document.getElementById("hiddenDiv").style.visibility ="visible";
-                                    document.getElementById("hiddenDivConcovacao").style.display = "block";
-                                }else{
-                                    document.getElementById("hiddenDivConcovacao").style.display = "none";
-                                }
-                              
-                            }
-                        </script>
+                        
                              
                         <div class="col-md-6">
                             <div class="form-group">
@@ -223,8 +220,20 @@ $nome_projeto = $projetos->nome_projeto;
                         
                         <div class="clearfix"></div>
                     </div> 
+                    <div class="col-lg-12">
+                        <div class="col-lg-12">
+                        <div class="form-group">
+                                <?= lang("Assunto ", "assunto"); ?>
+                                 <?php if($statusAta == 1){ ?>
+                                <?php echo form_input('assunto', (isset($_POST['assunto']) ? $_POST['assunto'] : $ata->assunto), 'maxlength="200" disabled class="form-control input-tip" required="required" id="assunto"'); ?>
+                                <?php }else{ ?>
+                                   <?php echo form_input('assunto', (isset($_POST['assunto']) ? $_POST['assunto'] : $ata->assunto), 'maxlength="200" class="form-control input-tip" required="required"  id="assunto"'); ?>
+                                      <?php } ?>
+                            </div>
+                        </div>    
+                    </div> 
                     
-                    <div id="hiddenDiv" class="col-md-12">
+                    <?php if($ata->tipo == 'REUNIÃO CONTÍNUA'){ ?>
                             <div class="col-md-12">
                                     <div class="form-group">
                                         <?= lang("Item do Evento (escopo) vinculado a esta ATA", "slEvento"); ?>
@@ -242,8 +251,8 @@ $nome_projeto = $projetos->nome_projeto;
                                          ?>
                                     </div>
                                 </div>
-                        </div>
-                    
+                       
+                    <?php } ?>
                       
                     <div class="col-lg-12">
                         <div class="col-md-6" >
@@ -269,9 +278,9 @@ $nome_projeto = $projetos->nome_projeto;
                     </div> 
                                       
                     <div class="col-lg-12">    
-                        <div class="col-md-6" >
+                        <div class="col-md-12" >
                             <div class="form-group">
-                                <?= lang("Participantes", "slparticipantes"); ?> <i class="fa fa-info-circle" title="As pessoas presentes na Reunião. Para ser um participante é preciso ter um cadastro no SigPlus, caso o participante seja um convisado, visitante, ou não tem usuário no sigPlus, umaa sugestão é utilizar o campo observação para registar sua presença. "></i>
+                                <?= lang("Usuários", "slparticipantes"); ?> <i class="fa fa-info-circle" title="As pessoas presentes na Reunião. Para ser um participante é preciso ter um cadastro no SigPlus, caso o participante seja um convisado, visitante, ou não tem usuário no sigPlus, umaa sugestão é utilizar o campo observação para registar sua presença. "></i>
 
                                 <?php if($statusAta == 1){ ?>
                                     <table   class="table">
@@ -312,108 +321,61 @@ $nome_projeto = $projetos->nome_projeto;
                                              $wu4[$user->id] = $user->nome . ' - ' . $user->setor;
                                             //$wu4[$user->id] = $user->nome.' '.$user->last.' - '.$user->setor;
                                         }
-                                        echo form_dropdown('participantes[]', $wu4, (isset($_POST['participantes']) ? $_POST['participantes'] : ""), 'id="slAta_usuario"  multiple class="form-control selectpicker  select" data-placeholder="' . lang("Outros Participantes") . ' "  style="width:100%;" ');
+                                        echo form_dropdown('participantes[]', $wu4, (isset($_POST['participantes']) ? $_POST['participantes'] : ""), 'id="slAta_usuario"  multiple class="form-control selectpicker  select" data-placeholder="' . lang("Adicionar Usuário") . ' "  style="width:100%;" ');
                                         ?>
                                         </div>
                                         
                                         <br><br>
-                                       
-                                            <?php
+                                        <div class="col-md-12">
+                                                <table width="100%">
+                                                    <tr>
+                                                        <td>Nome</td>
+                                                        <td>Participante <i class="fa fa-info-circle" title="Pessoas que deverão comparecer a reunião. "></i></td>
+                                                        <td>Vincular <i class="fa fa-info-circle" title="Pessoas que poderão acessar a ATA, mesmo que nãoe steja na reunião. "></i></td>
+                                                        <td>Opções</td>
+                                                    </tr>
+                                                    <?php
                                                     $participantes_cadastrados_ata = $this->atas_model->getAtaUserParticipante_ByID_ATA($id);
                                                     foreach ($participantes_cadastrados_ata as $participante_cadastrados) {
-                                                        
-                                                        if($participante_cadastrados){
+
+                                                        if ($participante_cadastrados) {
+                                                            $participante = $participante_cadastrados->participante;
+                                                            $vinculo = $participante_cadastrados->vinculo;
                                                             
-                                                         
+                                                            if($participante == 1){
+                                                                $check = "checked";
+                                                            }else{
+                                                                $check = "";
+                                                            }
+                                                            
+                                                            if($vinculo == 1){
+                                                                $check_vinculo = "checked";
+                                                            }else{
+                                                                $check_vinculo = "";
+                                                            }
+                                                            
                                                             ?>
-                                             
-                                                        <div class="col-md-12">
-                                                                <?php echo ' '. $participante_cadastrados->nome.' - '.$participante_cadastrados->setor; ?>  <a style="color: red;margin-left: 15px;" title="Remover Participante" href="<?= site_url("atas/deleteParticipante/$participante_cadastrados->id/$id/1"); ?>" class=" fa fa-trash "></a>
-                                                               
-                                                        </div>
-                                                    
-                                                          <?php
+                                                            <tr>
+                                                                <td width="30%"> <?php echo ' ' . $participante_cadastrados->nome . ' - ' . $participante_cadastrados->setor; ?>  </td>
+                                                                <td><input type="checkbox" value="1" <?php echo $check; ?>  name="<?php echo $participante_cadastrados->id; ?>participante" id="participar"></td>
+                                                                <td><input type="checkbox" value="<?php echo $participante_cadastrados->id; ?>" <?php echo $check_vinculo; ?> name="<?php echo $participante_cadastrados->id; ?>vinculo" id="vinculo"></td>
+                                                                <td><a style="color: red;margin-left: 15px;" title="Remover Usuário" href="<?= site_url("welcome/deleteParticipante/$participante_cadastrados->id/$id"); ?>" class=" fa fa-trash "></a></td>
+                                                            </tr>
+                                                            <?php
                                                         }
                                                     }
-                                                ?>
+                                                    ?>
+                                                </table>
+                                             <br> <br>
+                                            </div>     
+                                       
                                                
                                                  <?php } ?>
                                 <br><br>
                                 
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                            <?= lang("Usuários Vinculados", "slAta_usuario");?> <i class="fa fa-info-circle" title="Os usuários vinculados podem visualizar o conteúdo completo da Ata, através do SIGPLUS.O usuário vinculado não precisa ser um participante da ATA."></i>
-                                              
-                                             
-                                                 <?php if($statusAta != 1){ ?>
-                                            <div class="well well-sm well_1">
-                                             <?php
-                                                //$wu3[''] = '';
-                                                foreach ($users as $user) {
-                                                     $wu4[$user->id] = $user->nome . ' - ' . $user->setor;
-                                                }
-                                                echo form_dropdown('usuario_ata[]', $wu4, (isset($_POST['usuario_ata']) ? $_POST['usuario_ata'] : ""), 'id="slAta_usuario"  multiple class="form-control selectpicker  select" data-placeholder="' . lang("Outros usuarios para vincular a ATA") . ' "  style="width:100%;" ');
-                                                ?>
-                                              </div>
-                                            <br><br>
-                                             <?php } ?>
-                                            
-                                                
-                                                <?php if($statusAta == 1){ ?>
-                                             <table   class="table">
-                                            <tbody style="width: 100%;">
-                                             <?php
-                                                 
-                                                   $usuarios_cadastrados_ata = $this->atas_model->getAtaUserByID_ATA($id );
-                                                    foreach ($usuarios_cadastrados_ata as $usuario_cadastrados) {
-                                                        if($usuario_cadastrados){
-                                                          
-                                                            
-                                                             
-                                                ?>
-                                                <tr>
-                                                            <td style="width: 40%;">
-                                                  <?php echo ' '. $usuario_cadastrados->nome.' - '.$usuario_cadastrados->setor; ?>
-                                                </td>
-                                                        </tr>
-                                             
-                                                <?php
-                                                        }
-                                                    }
-                                               
-                                           // }
-                                            ?>
-                                            </tbody>
-                                        </table> 
-                                            <?php }else{ ?>
-                                               
-                                              <?php
-                                                 
-                                                   $usuarios_cadastrados_ata = $this->atas_model->getAtaUserByID_ATA($id );
-                                                    foreach ($usuarios_cadastrados_ata as $usuario_cadastrados) {
-                                                        if($usuario_cadastrados){
-                                                         //   $cadastro_usuario_vinculo = $this->atas_model->getUserSetorByUserSetor($usuario_cadastrados->id_usuario);
-                                                            
-                                                             
-                                                ?>
-                                                <div class="col-md-12">
-                                                  <?php echo ' '. $usuario_cadastrados->nome.' - '.$usuario_cadastrados->setor; ?><a style="color: red; margin-left: 15px;" title="Remover Vinculo " href="<?= site_url("atas/deleteParticipante/$usuario_cadastrados->id/$id/2"); ?>" class=" fa fa-trash "></a>
-                                                </div>
-                                             
-                                                <?php
-                                                        }
-                                                    }
-                                               
-                                           // }
-                                            ?>
-                                                 <?php } ?>   
-                                                
-                                           
-                                        </div>
-
-                        </div>
+                        
                      </div> 
                    
                 </div>
@@ -427,7 +389,11 @@ $nome_projeto = $projetos->nome_projeto;
                           <?php if(!$statusAta == 1){ ?>    
                         <?php echo form_submit('add_item', lang("Confirmar"), 'id="add_item" class="btn btn-success " title="Salvar as alterações feita no cadastro da ATA." style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
                           <?php } ?>   
-                            <a  class="btn btn-danger" title="Retorna para a lista de ATAS." href="<?= site_url('project/atas'); ?>"><?= lang('Sair') ?> <i class="fa fa-sign-out"></i></a>
+                            <?php if($tipo_ata == 2){ ?>
+                            <a  class="btn btn-danger" title="Retorna para a lista de ATAS." href="<?= site_url('project/plano_acao_detalhes/'.$ata->plano_acao); ?>"> <i class="fa fa-backward"></i> <?= lang('Voltar') ?> </a>
+                            <?php }else{ ?>
+                            <a  class="btn btn-danger" title="Retorna para a lista de ATAS." href="<?= site_url('project/atas'); ?>"> <i class="fa fa-backward"></i> <?= lang('Voltar') ?></a>
+                            <?php } ?>
                             <a target="_blank" class="btn btn-bitbucket" title="Gantt das ações da Ata"  href="<?= site_url('project/ganttPlano/1/' .$ata->id); ?>"><i class="fa fa-tasks"></i>  GANTT </a>
                          </div>
                     </center> 
@@ -454,10 +420,10 @@ $nome_projeto = $projetos->nome_projeto;
                                         <a  class="btn btn-linkedin" title="Registro da discussão da(s) pauta(s) " href="<?= site_url('Atas/edit_discussao/'.$id); ?>"><?= lang('Anotações da Ata ') ?> <i class="fa fa-file-text-o"></i></a>
                                 </div>
                                 <div style="margin-top: 10px;" class="col-md-3">
-                                        <a  class="btn btn-linkedin" title="Imprimir a ATA " href="<?= site_url('Atas/edit_discussao/'.$id); ?>"><?= lang('Imprimir Ata ') ?> <i class="fa fa-print"></i></a>
+                                        <a  class="btn btn-linkedin" title="Imprimir a ATA " href="<?= site_url('Atas/pdf_ata/'.$id); ?>"><?= lang('Imprimir Ata ') ?> <i class="fa fa-print"></i></a>
                                 </div>
                                 <div style="margin-top: 10px;" class="col-md-3">
-                                        <a  class=" btn btn-linkedin btn-theme " title="A ata é concluída, após isso, a Ata não pode ser alterada. E as ações são enviadas aos responsáveis." href="<?= site_url('Atas/finalizaAta/'.$id.'/'.$avulsa); ?>" onclick="alertas();"><?= lang('Finalizar Ata ') ?> <i class="fa fa-check"></i></a>
+                                        <a  class=" btn btn-linkedin btn-theme " title="A ata é concluída, após isso, a Ata não pode ser alterada. E as ações são enviadas aos responsáveis." href="<?= site_url('Atas/finalizaAta/'.$id.'/'.$tipo_ata); ?>" onclick="alertas();"><?= lang('Finalizar Ata ') ?> <i class="fa fa-check"></i></a>
                                  </div>
                              </div>   
                         <?php } ?>
@@ -678,7 +644,7 @@ $nome_projeto = $projetos->nome_projeto;
                                                                 <ul class="dropdown-menu pull-right" role="menu"> 
                                                                      <li><a title="Editar Ação" href="<?= site_url('project/manutencao_acao_pendente/' . $plano->idplanos); ?>"><i class="fa fa-edit"></i>Editar </a></li>
                                                                      <li><a title="Duplicar Ação"  href="<?= site_url('atas/replicar_acao/' . $plano->idplanos . '/' . $plano->idatas); ?>" ><i class="fa fa-refresh"></i> Replicar  </a></li>
-                                                                     <li><a title="Deletar Ação." href="<?= site_url('atas/deletar_acao/' . $plano->idplanos . '/' . $plano->idatas); ?>"><i class="fa fa-trash-o"></i>Deletar</a></li>  
+                                                                     <li><a title="Cancelar Ação." href="<?= site_url('project/visualiza_acao/' . $plano->idplanos . '/2'); ?>"><i class="fa fa-ban"></i>Cancelar</a></li>  
                                                                 </ul>
                                                             </div>
                                                             </div>

@@ -17,15 +17,18 @@ if (isset($_POST)) {
     $ip = $_SERVER["REMOTE_ADDR"];
     
     $descricao_checklist = $_POST['descricao_checklist'];
+    $descricao_checklist = str_replace("'",'',$descricao_checklist);
+    
     $id_plano = $_POST['id_plano'];
     $usuario = $_POST['usuario'];
    
-    
+  //echo'aqui : '.$descricao_checklist; exit;   
   
   //INSERT
     if($tipo_operacao == 1){
         if($descricao_checklist){
         $sql = "INSERT INTO sig_plano_checklist (usuario, data_envio, descricao, ip, plano_id,  status) VALUE('$usuario','$date_hoje','$descricao_checklist','$ip','$id_plano','0')";
+        //echo $sql; exit;
         mysqli_query($link, $sql);
         }
     }else if($tipo_operacao == 2){

@@ -11,6 +11,7 @@
    
 <?php
         $acao = $this->atas_model->getPlanoByID($idplano);
+        
         $usuario = $this->session->userdata('user_id');
 //$users = $this->site->geUserByID($acao->responsavel);     
         if($acao->idplano){
@@ -187,6 +188,25 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <?php if($acao->idplano){ ?>
+                                    <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <?= lang("Categoria ", "categoria"); ?><small>(Categoria no Plano de Ação)</small>
+                                        <?php
+                                        $categorias = $this->networking_model->getAllCategoriaPlanoAcaoByPlano($acao->idplano);
+                                       
+                                        foreach ($categorias as $categoria) {
+                                            $wu_cat[$categoria->id] = $categoria->descricao;
+                                        }
+                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
+                                        echo form_dropdown('categoria', $wu_cat, (isset($_POST['categoria']) ? $_POST['categoria'] : $acao->categoria_plano), 'id="categoria"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
+                              
+                                        ?>
+                                    </div>
+                                </div>    
+                            </div>  
+                                    <?php } ?>
                                     <div class="col-md-12">
 
                                         <div class="col-md-6">
@@ -202,13 +222,36 @@
                                                 <?= lang("Local ", "onde"); ?><small>(Onde ?)</small>
                                                 <?php echo form_textarea('onde', (isset($_POST['descricao']) ? $_POST['descricao'] : $acao->onde), 'class="form-control"   style="height: 120px;" id="onde"  '); ?>
                                             </div>
+                                            <!-- PORQUE -->  
+                                            <div class="form-group">
+                                                <?= lang("Motivo, Justificativa", "porque"); ?><small>(Por Quê? )</small>
+                                                <?php echo form_textarea('porque', (isset($_POST['porque']) ? $_POST['porque'] : $acao->porque), 'class="form-control"   style="height: 120px;" id="porque"  '); ?>
+                                            </div>
+                                            <!-- COMO -->  
+                                            <div class="form-group">
+                                            <?= lang("Detalhes", "como"); ?><small>(Como? )</small>
+                                            <?php echo form_textarea('como', (isset($_POST['como']) ? $_POST['como'] : $acao->como), 'class="form-control"   style="height: 120px;" id="como"  '); ?>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="col-md-6">
                                             <!-- PRAZO de -->
                                             <div class="form-group">
-                                                <?= lang("Data Início e Término", "sldate"); ?><small>(Quando ?)</small>
-                                                <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
-                                                <input type="text" value="<?php echo exibirData($acao->data_entrega_demanda) ?> - <?php echo exibirData($acao->data_termino) ?>" title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="periodo_acao" class="form-control pull-right" id="reservation">
+                                            <?= lang("Data Início", "sldate"); ?><small>(Quando ?)</small>
+                                            <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
+                                            <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_inicio" type="date" value="<?php echo $acao->data_entrega_demanda; ?>" class="form-control"> 
 
                                             </div>
+                                            <!-- PRAZO ATE -->
+                                            <div class="form-group">
+                                                <?= lang("Data  Término", "sldate"); ?><small>(Quando ?)</small>
+                                                <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
+                                                <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_termino" type="date" value="<?php echo $acao->data_termino; ?>" class="form-control"> 
+
+                                            </div>
+                                            
+                                            
                                             <!-- HORAS -->
                                             <div class="form-group">
                                                 <?= lang("Horas Previstas", "horas"); ?>
@@ -240,20 +283,7 @@
                                                
                                                
                                             </div>
-
-                                        </div>
-
-                                        <div class="col-md-6">
-                                            <!-- PORQUE -->  
-                                            <div class="form-group">
-<?= lang("Motivo, Justificativa", "porque"); ?><small>(Por Quê? )</small>
-<?php echo form_textarea('porque', (isset($_POST['porque']) ? $_POST['porque'] : $acao->porque), 'class="form-control"   style="height: 120px;" id="porque"  '); ?>
-                                            </div>
-                                            <!-- COMO -->  
-                                            <div class="form-group">
-<?= lang("Detalhes", "como"); ?><small>(Como? )</small>
-<?php echo form_textarea('como', (isset($_POST['como']) ? $_POST['como'] : $acao->como), 'class="form-control"   style="height: 120px;" id="como"  '); ?>
-                                            </div>
+                                            
                                             <!-- VALOR -->  
                                             <div class="form-group">
 <?= lang("Custo", "custo"); ?><small> (Descrição do Custo? )</small>
@@ -342,12 +372,13 @@
                             </div>
                         </div>
                         <div class=" tab-pane" id="activity">
-<?php
-$attrib = array('data-toggle' => 'validator', 'role' => 'form');
-echo form_open_multipart("project/manutencao_acao_vinculo_pa", $attrib);
-echo form_hidden('id', $acao->idplanos);
-echo form_hidden('idatas', $acao->idplano);
-?>
+                            <div class="row">
+                            <?php
+                            $attrib = array('data-toggle' => 'validator', 'role' => 'form');
+                            echo form_open_multipart("project/manutencao_acao_vinculo_pa", $attrib);
+                            echo form_hidden('id', $acao->idplanos);
+                            echo form_hidden('idatas', $acao->idplano);
+                            ?>
                             <div class="col-md-6">
                                 <div class="form-group">
                             <?= lang("Ação predecessora ", "slVinculoAcao"); ?> <i class="fa fa-info-circle" title="Ações que tem vinculo com a ação atual. Ações do qual se tem alguma dependencia."></i>
@@ -387,7 +418,7 @@ echo form_dropdown('tipo_vinculo', $pst, (isset($_POST['tipo']) ? $_POST['tipo']
                             </center>
                             <div class="portlet-body">
 
-                                <table id="example1" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
+                                <table id="acoes_vinculadas" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
                                     <thead>
                                         <tr>
                                             <th><font style="font-size: 10px;">ID</font></th>
@@ -433,16 +464,17 @@ echo form_dropdown('tipo_vinculo', $pst, (isset($_POST['tipo']) ? $_POST['tipo']
                                 </table>
 
                             </div>  
-
+                           </div>     
                         </div>
                         
                         <div class="tab-pane" id="settings">
-<?php
-$attrib = array('data-toggle' => 'validator', 'role' => 'form');
-echo form_open_multipart("project/manutencao_acao_arquivos", $attrib);
-echo form_hidden('id', $acao->idplanos);
-echo form_hidden('idatas', $acao->idplano);
-?>
+                            <div class="row">
+                            <?php
+                            $attrib = array('data-toggle' => 'validator', 'role' => 'form');
+                            echo form_open_multipart("project/manutencao_acao_arquivos", $attrib);
+                            echo form_hidden('id', $acao->idplanos);
+                            echo form_hidden('idatas', $acao->idplano);
+                            ?>
                             <div class="col-md-6">
                                 <div class="form-group">
                             <?= lang("Descrição", "descricao"); ?>
@@ -463,7 +495,7 @@ echo form_hidden('idatas', $acao->idplano);
                                 </div>
                             </center>
                             <div class="portlet-body">
-                                <table id="example2" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
+                                <table id="arquivos_acao" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
                                     <thead>
                                         <tr>
                                             <th><font style="font-size: 10px;">ID</font></th>
@@ -499,6 +531,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                 </table>
 
                             </div> 
+                            </div>    
                         </div>                   
                         
                         <div class="tab-pane" id="historico">
@@ -676,7 +709,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                     <div class="portlet-body">
                                         <div id="conteudo_rat">
                                             <div class="table-responsive  ">
-                                            <table style="font-size: 12px;" class="table table-striped">
+                                            <table id="registro_atividades_acao" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
                                                 <thead>
                                                     <tr>
                                                         <th style="width: 5%;">ID</th>
@@ -829,6 +862,20 @@ foreach ($acoes_arquivos as $arquivo) {
         
     </section>    
 
+         <script>
+  $(function () {
+    $('#acoes_vinculadas').DataTable()
+    $('#arquivos_acao').DataTable()
+    $('#registro_atividades_acao').DataTable({
+      'paging'      : true,
+      'lengthChange': false,
+      'searching'   : false,
+      'ordering'    : true,
+      'info'        : true,
+      'autoWidth'   : false
+    })
+  })
+</script>
 
 <script>
   $(function () {

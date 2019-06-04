@@ -20,7 +20,7 @@
         <div class="box-header">
                     <span class="pull-right-container">
                        <div class=" clearfix no-border">
-                           <a  title="Cadastrar Nova Tarefa" class="btn btn-default pull-right" href="<?= site_url('project/novoPlano/89/55'); ?>" data-toggle="modal" data-target="#myModal">  
+                           <a  title="Cadastrar Nova Tarefa" class="btn btn-primary pull-right" href="<?= site_url('project/novoPlano'); ?>" data-toggle="modal" data-target="#myModal">  
                            <i class="fa fa-plus"></i>   Novo Plano de Ação
                            </a> 
                          
@@ -63,11 +63,11 @@
                                     <table id="example1" class="table table-bordered table-striped">
                                     <thead>
                                     <tr>
-                                    <th style="width:5%; "><input class="checkbox checkft" type="checkbox" name="check"/></th>    
-                                    <th style="width:5%;" ><?php echo $this->lang->line("Id"); ?></th>
-                                    <th style="width:20%;"><?php echo $this->lang->line("Assunto"); ?></th>
-                                    <th style="width:30%;"><?php echo $this->lang->line("Objetivos"); ?></th>
-                                    <th style="width:5%;"><?php echo $this->lang->line("Responsável"); ?></th>
+                                    <th style="width:3%; "><input class="checkbox checkft" type="checkbox" name="check"/></th>    
+                                    <th style="width:3%;" ><?php echo $this->lang->line("Id"); ?></th>
+                                    <th style="width:30%;"><?php echo $this->lang->line("Título"); ?></th>
+                                    <th style="width:14%;"><?php echo $this->lang->line("Status"); ?></th>
+                                    <th style="width:15%;"><?php echo $this->lang->line("Responsável"); ?></th>
                                     <th style="width:5%;"><?php echo $this->lang->line("Data"); ?></th>
                                      <th style="width:5%;"><?php echo $this->lang->line("Ações"); ?></th>
                                     <th style="width:15%;  text-align: center;" ><?php echo $this->lang->line("Andamento"); ?></th>
@@ -79,7 +79,14 @@
                                             $wu4[''] = '';
                                             $cont = 1;
                                             foreach ($planos_acao as $ata) {
-
+                                                $status_plano = $ata->status;
+                                                if($status_plano == 1){
+                                                    $status_desc = "FECHADO";
+                                                    $label_status = "success";
+                                                }else{
+                                                    $status_desc = "ABERTO";
+                                                    $label_status = "warning";
+                                                }
                                                //TOTAL DE ACOES
                                                $planos = $this->atas_model->getTotalAcoesByPlanoAcao($ata->id);
                                                $total_acao = $planos->total_acoes;
@@ -123,11 +130,11 @@
                                             ?>               
 
                                                 <tr  >
-                                                    <td style="width: 5%;"><input class="checkbox checkft" type="checkbox" name="check"/></td>
-                                                    <td style="width: 5%; text-align: center;"><small   ><?php echo $ata->sequencial; ?></small></td>
-                                                    <td style="width: 20%;  font-size: 14px;"><small   ><?php echo $ata->assunto; ?></small></td> 
-                                                    <td style="width: 35%; text-align: center;"><small  ><?php echo $ata->objetivos; ?></small></td> 
-                                                    <td style="width: 5%; "><small  ><?php echo $ata->responsavel; ?></small></td> 
+                                                    <td style="width: 3%;"><input class="checkbox checkft" type="checkbox" name="check"/></td>
+                                                    <td style="width: 3%; text-align: center;"><small   ><?php echo $cont++; ?></small></td>
+                                                    <td style="width: 30%;  font-size: 16px;"><small   ><?php echo $ata->assunto; ?></small></td> 
+                                                    <td style="width: 14%;  font-size: 16px;"><font class="label label-<?php echo $label_status; ?>"><?php echo $status_desc; ?></font></td>
+                                                    <td style="width: 15%; "><small  ><?php echo $ata->responsavel; ?></small></td> 
                                                     <td style="width: 5%; "><small   ><?php echo exibirData($ata->data_pa); ?></small></td>
                                                     <td style="width: 5%; font-size: 12; text-align: center;"><b><?php echo $total_acao; ?></b></td> 
                                                     <td style="width: 15%;font-size: 12; ">
@@ -144,17 +151,7 @@
                                                         </div>
                                                     </td>  
                                                     <td style="width: 15%;">
-                                                        <div class="text-center"><div class="btn-group text-left">
-                                                                <button style="color:#ffffff" type="button" class="btn btn-default btn-xs btn-primary dropdown-toggle" data-toggle="dropdown">
-                                                            Selecionar <span class="caret"></span></button>
-                                                            <ul class="dropdown-menu pull-right" role="menu">
-                                                            <li><a title="Editar Registro"  href="<?= site_url('project/plano_acao_detalhes/' .$ata->id); ?>"><i class="fa fa-edit"></i>  Plano de Ação </a></li>
-                                                            <li><a title="Gantt do Plano de Ação"  href="<?= site_url('project/ganttPlano/2/' .$ata->id); ?>"><i class="fa fa-edit"></i>  GANTT </a></li>
-                                                            <li><a href="#"><i class="fa fa-download"></i>Download PDF</a></li>  
-                                                            </ul>
-                                                        </div>
-                                                        </div>
-                                                        
+                                                        <a class="btn bg-primary" title="Plano de Ação"  href="<?= site_url('project/plano_acao_detalhes/' .$ata->id); ?>"><i class="fa fa-folder-open"></i>  Abrir </a>
                                                     </td>    
 
 

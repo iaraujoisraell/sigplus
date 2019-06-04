@@ -19,7 +19,7 @@
     <div class="box-header">
         <span class="pull-right-container">
             <div class=" clearfix no-border">
-                <a title="Abrir Nova Ata" class="btn btn-default pull-right" href="<?= site_url('project/novaAta/' . $tabela_id . "/" . $menu_id); ?>" >  
+                <a title="Abrir Nova Ata" class="btn btn-primary pull-right" href="<?= site_url('project/novaAta/' . $tabela_id . "/" . $menu_id); ?>" >  
                     <i class="fa fa-plus"></i>  Nova Ata 
                 </a> 
             </div>

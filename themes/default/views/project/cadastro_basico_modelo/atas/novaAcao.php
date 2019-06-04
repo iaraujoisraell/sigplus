@@ -165,24 +165,43 @@ $fim_fase = $projetos->dt_final;
                             $attrib = array('data-toggle' => 'validator', 'role' => 'form');
                             echo form_open_multipart("Atas/plano_acao/".$ata, $attrib);
                             echo form_hidden('id', $ata);
-                            echo form_hidden('avulsa', $avulsa);
+                            echo form_hidden('plano_acao', $plano_acao);
+                            
+                           // echo form_hidden('avulsa', $avulsa);
                             ?>
                             <div class="col-md-12">
                             <!-- ITEM EVENTO -->
-                            <div class="col-md-12">
-                                  <div class="form-group">
+                                <div class="col-md-12">
+                                    <div class="form-group">
                                         <?= lang("Item do Evento", "slEvento"); ?>
                                          <?php
                                         $wue[''] = '';
-                                      foreach ($eventos as $evento) {
+                                        foreach ($eventos as $evento) {
                                             $wue[$evento->id] = $evento->nome_fase.' > '. $evento->nome_evento.' > '. resume($evento->descricao, 100). ' ( '.exibirData($evento->dt_inicio).' - '.exibirData($evento->dt_fim).' ) ';
-                                           
                                         }
                                         echo form_dropdown('evento', $wue, (isset($_POST['evento']) ? $_POST['evento'] : ""), 'id="slEvento"  class="form-control  select" data-placeholder="' . lang("Selecione o Item do Evento") . ' " required="required"  style="width:100%;"  ');
                                         ?>
                                     </div>
                                 </div>
                             </div>
+                            <?php if($plano_acao){ ?>
+                            <div class="col-md-12">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <?= lang("Categoria ", "categoria"); ?><small>(Categoria no Plano de Ação)</small>
+                                        <?php
+                                        $categorias = $this->networking_model->getAllCategoriaPlanoAcaoByPlano($plano_acao);
+                                        foreach ($categorias as $categoria) {
+                                            $wu_cat[$categoria->id] = $categoria->descricao;
+                                        }
+                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
+                                        echo form_dropdown('categoria', $wu_cat, (isset($_POST['categoria']) ? $_POST['categoria'] : ""), 'id="categoria"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
+                              
+                                        ?>
+                                    </div>
+                                </div>    
+                            </div>
+                            <?php } ?>
                             <div class="col-md-12">
                                 
                                 <div class="col-md-6">
@@ -192,20 +211,46 @@ $fim_fase = $projetos->dt_final;
                                         <?= lang("Descrição ", "sldescricao"); ?><small> (O que ?)</small>
                                         <?php echo form_textarea('descricao', (isset($_POST['descricao']) ? $_POST['descricao'] : $acao->descricao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>
                                   </div>
-                              
-                                    <!-- ONDE -->  
+                                <!-- ONDE -->  
                                   <div  class="form-group">
                                         <?= lang("Local ", "onde"); ?><small>(Onde ?)</small>
                                         <?php echo form_textarea('onde', (isset($_POST['descricao']) ? $_POST['descricao'] : $acao->descricao), 'class="form-control"   style="height: 120px;" id="onde"  '); ?>
                                   </div>
-                                    <!-- PRAZO de -->
-                                  <div class="form-group">
-                                            <?= lang("Data Início e Término", "sldate"); ?><small>(Quando ?)</small>
-                                            <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
-                                                     <input type="text" value="<?php echo exibirData(date('Y-m-d')) ?> - <?php echo exibirData($fim_fase) ?>" title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="periodo_acao" class="form-control pull-right" id="reservation">
-                
-                                        </div>
-                                    <!-- PRAZO ATE -->
+                                    <!-- PORQUE -->  
+                                    <div class="form-group">
+                                        <?= lang("Motivo, Justificativa", "porque"); ?><small>(Por Quê? )</small>
+                                        <?php echo form_textarea('porque', (isset($_POST['porque']) ? $_POST['porque'] : $acao->porque), 'class="form-control"   style="height: 120px;" id="porque"  '); ?>
+                                    </div>
+                                    <!-- COMO -->  
+                                    <div class="form-group">
+                                        <?= lang("Detalhes", "como"); ?><small>(Como? )</small>
+                                        <?php echo form_textarea('como', (isset($_POST['como']) ? $_POST['como'] : $acao->como), 'class="form-control"   style="height: 120px;" id="como"  '); ?>
+                                    </div>
+                                   
+                                   
+                                 
+                                
+                            </div>
+                            
+                                <div class="col-md-6">
+                                    
+                                       <!-- PRAZO de -->
+                                <div class="form-group">
+                                <?= lang("Data Início", "sldate"); ?><small>(Quando ?)</small>
+                                <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
+                                <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_inicio" type="date" value="<?php echo date('Y-m-d'); ?>" class="form-control"> 
+
+                                </div>
+                         <!-- PRAZO ATE -->
+                                <div class="form-group">
+                                    <?= lang("Data  Término", "sldate"); ?><small>(Quando ?)</small>
+                                    <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
+                                    <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_termino" type="date" value="<?php echo date('Y-m-d'); ?>" class="form-control"> 
+
+                                </div>
+                                    
+                               
+                                   
                                     
                                     <!-- HORAS -->
                                   <div class="form-group">
@@ -242,37 +287,8 @@ $fim_fase = $projetos->dt_final;
                               
                                         ?>
                                     </div>
-                                
-                            </div>
-                            
-                                <div class="col-md-6">
-                                    <!-- PORQUE -->  
-                                    <div class="form-group">
-                                        <?= lang("Motivo, Justificativa", "porque"); ?><small>(Por Quê? )</small>
-                                        <?php echo form_textarea('porque', (isset($_POST['porque']) ? $_POST['porque'] : $acao->porque), 'class="form-control"   style="height: 120px;" id="porque"  '); ?>
-                                    </div>
-                                    <!-- COMO -->  
-                                    <div class="form-group">
-                                        <?= lang("Detalhes", "como"); ?><small>(Como? )</small>
-                                        <?php echo form_textarea('como', (isset($_POST['como']) ? $_POST['como'] : $acao->como), 'class="form-control"   style="height: 120px;" id="como"  '); ?>
-                                    </div>
-                                    <!-- VALOR -->  
-                                    <div class="form-group">
-                                        <?= lang("Custo", "custo"); ?><small> (Descrição do Custo? )</small>
-                                        <?php echo form_textarea('custo', (isset($_POST['custo']) ? $_POST['custo'] : $acao->custo), 'class="form-control"   style="height: 120px;" id="custo"  '); ?>
-                                    </div>
-                                    <?= lang("Valor", "custo"); ?><small> (Valor do Custo? )</small>
-                                    <input class="form-control" placeholder="Valor do Custo" onkeypress="mascara(this, mvalor);" value="<?php echo $acao->custo; ?>"  name="valor_custo" type="text">
-                                    
                                    
-                                </div>
-                           
-                            </div>    
-                            
-                            
-                            <div class="col-md-12">
-                            <div class="col-md-12">
-                                    <div class="form-group">
+                                   <div class="form-group">
                                         <?= lang("Ação(ões) predecessora(s) ", "slVinculoAcao"); ?> <i class="fa fa-info-circle" title="Ações que tem vinculo com a ação atual. Ações do qual se tem alguma dependencia."></i>
                                         <?php
                                        
@@ -283,12 +299,8 @@ $fim_fase = $projetos->dt_final;
                                         echo form_dropdown('acoes_vinculo', $wu_acao, (isset($_POST['acoes_vinculo']) ? $_POST['acoes_vinculo'] : ""), 'id="slVinculoAcao"  class="form-control  select" data-placeholder="' . lang("Selecione a Ação") . ' "   style="width:100%;"   ');
                                         ?>
                                     </div>
-                                </div>
-                                
-                             
-                                
-                                <div class="col-md-12">
-                                    <div class="form-group">
+                                   
+                                   <div class="form-group">
                                         <?= lang("Tipo Vinculo ", "tipo_vinculo"); ?> <i class="fa fa-info-circle" title="INÍCIO-INÍCIO: A ação começa junto com a ação vinculada. INÍCIO-FIM: A ação Inícia após o término da ação vinculada."></i>
                                         <?php $pst[''] = '';
                                           $pst['II'] = lang('INÍCIO - INÍCIO');
@@ -300,8 +312,25 @@ $fim_fase = $projetos->dt_final;
                                   ?>
                                         
                                     </div>
-                                 </div>   
-                           </div>
+                                   
+                                    <!-- VALOR -->  
+                                    <div class="form-group">
+                                        <?= lang("Custo", "custo"); ?><small> (Descrição do Custo? )</small>
+                                        <?php echo form_textarea('custo', (isset($_POST['custo']) ? $_POST['custo'] : $acao->custo), 'class="form-control"   style="height: 120px;" id="custo"  '); ?>
+                                    </div>
+                                    <div class="form-group">
+                                    <?= lang("Valor", "custo"); ?><small> (Valor do Custo? )</small>
+                                    <input class="form-control" placeholder="Valor do Custo" onkeypress="mascara(this, mvalor);" value="<?php echo $acao->custo; ?>"  name="valor_custo" type="text">
+                                    </div>
+                                    
+                                     
+                                   
+                                </div>
+                           
+                            </div>    
+                            
+                            
+                            
                             
 
                             <center>

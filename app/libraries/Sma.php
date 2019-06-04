@@ -337,6 +337,14 @@ class Sma
           }
             
         }
+        
+        
+         // NETWORKING
+        if($modulo_atual == 3){
+            
+            
+            
+        }
          
          
         if($cont_log == 0){
@@ -536,6 +544,110 @@ class Sma
                               . '<tr>'
                                     . '<td style = "width : 80%;  "><img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/logos/cabecalho_plano_acao_sig.png"></td>'
                                     . '<td style = "width : 20%;  position: relative; float: right; ">'.$imagem_header. '</td>'
+                                . '</tr>'
+                              . '</table>';
+        
+         
+         $header = $conteudo_header;
+        
+        
+        
+         if($logo_bottom){
+         $footer = ' <img width="80%" height="38px;" src="'. base_url() . 'assets/uploads/logos/'.$logo_bottom.'" >';
+         }
+         
+        if (is_array($content)) {
+            $pdf->SetHeader('Relatório'.'||{PAGENO}/{nbpg}', '', TRUE); // For simple text header
+            $as = sizeof($content);
+            $r = 1;
+            foreach ($content as $page) {
+                
+                $pdf->WriteHTML($page['content']);
+                if (!empty($page['footer'])) {
+                    $pdf->SetHTMLFooter('<p class="text-center">' . $page['footer'] . '</p>', '', true);
+                }
+                if ($as != $r) {
+                    $pdf->AddPage();
+                }
+                $r++;
+            }
+
+        } else {
+            $pdf->SetHTMLHeader('<p class="text-center">' . $header . '</p>  ', '', true);
+           
+            $pdf->WriteHTML($content);
+          //  $pdf->SetHTMLFooter('<p class="text-center">' . $page['footer'] . '</p>', '', true);
+            
+            if ($header != '') {
+                $pdf->SetHTMLHeader('<p class="text-center">' . $header . '</p>', '', true);
+            }
+            
+            if ($logo_bottom) {
+                $pdf->SetHTMLFooter('<p class="text-center">' . $footer . '</p>', '', true);
+            }
+
+        }
+
+        if ($output_type == 'S') {
+            $file_content = $pdf->Output('', 'S');
+            write_file('assets/uploads/' . $name, $file_content);
+            return 'assets/uploads/' . $name;
+        } else {
+            $pdf->Output($name, $output_type);
+        }
+    }
+    
+    public function generate_pdf_registro_atividade($content, $name , $output_type = null, $footer = null, $margin_bottom = null, $header = null, $margin_top = null, $orientation = 'L', $logo_top = null, $logo_bottom = null, $usuario_emitiu, $documentacao)
+    {
+        if (!$output_type) {
+            $output_type = 'D';
+        }
+        if (!$margin_bottom) {
+            $margin_bottom = 20;
+        }
+        if (!$margin_top) {
+            $margin_top = 30;
+        }
+        
+        $this->load->library('pdf');
+        $pdf = new mPDF('utf-8', 'A4-' . $orientation, '12', '12', 10, 10, $margin_top, $margin_bottom, 4, 9, $orientation);
+        $pdf->debug = false;
+        $pdf->autoScriptToLang = true;
+        $pdf->autoLangToFont = true;
+        $pdf->SetProtection(array('print')); // You pass 2nd arg for user password (open) and 3rd for owner password (edit)
+        //$pdf->SetProtection(array('print', 'copy')); // Comment above line and uncomment this to allow copying of content
+        $pdf->SetTitle($this->Settings->site_name);
+        $pdf->SetAuthor($this->Settings->site_name);
+        $pdf->SetCreator($this->Settings->site_name);
+        $pdf->SetDisplayMode('fullpage');
+        $stylesheet = file_get_contents('assets/bs/bootstrap.min.css');
+        $pdf->WriteHTML($stylesheet, 1);
+        $date_cadastro = date('Y-m-d');
+        //date_default_timezone_set('America/Manaus');
+       
+        date_default_timezone_set('America/Manaus');
+          // CRIA UMA VARIAVEL E ARMAZENA A HORA ATUAL DO FUSO-HORÀRIO DEFINIDO (BRASÍLIA)
+            //$dataLocal = date('d/m/Y H:i:s', time());
+        
+        $hotas = date('H:i:s', time());
+        $empresa = $this->session->userdata('empresa');
+        $pdf->SetFooter($this->Settings->site_name.'<br> Emitido por: '.$usuario_emitiu.' <br> Em : '. date("d/m/Y", strtotime($date_cadastro)).' '.$hotas. '||{PAGENO}/{nbpg}', '', TRUE); // For simple text footer
+       
+    
+        
+        if($logo_top){
+             $imagem_header = '<img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/'.$empresa.'/logos/'.$logo_top.'">';  
+        }else{
+             $imagem_header = '<img  width="70px" height="70px;" src="'. base_url() . 'assets/uploads/logos/logo_sig.jpeg">';  
+        }
+         
+         
+              
+             
+         $conteudo_header = '<table style = "width : 100%;" >'
+                              . '<tr>'
+                                    . '<td style = "width : 80%;  "><img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/logos/cabecalho_rat.png"></td>'
+                                    . '<td style = "width : 20%;  position: fixed; float: right; ">'.$imagem_header. '</td>'
                                 . '</tr>'
                               . '</table>';
         

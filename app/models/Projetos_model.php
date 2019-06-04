@@ -771,11 +771,10 @@ class Projetos_model extends CI_Model
         $users_dados = $this->site->geUserByID($usuario);
         $projeto_atual = $users_dados->projeto_atual;
         
-        $statement = "select distinct pai.id as id_pai, pai.nome as descricao from sig_planos p
+        $statement = "select distinct s.id as id_pai, s.nome as descricao from sig_planos p
                     inner join sig_users_setor us on us.users_id = p.responsavel
                     inner join sig_setores s      on s.id = us.setores_id
-                    inner join sig_setores pai    on pai.id = s.pai
-                    where projeto = $projeto_atual and pai.pai is null ";
+                    where projeto = $projeto_atual and s.pai = 0 ";
         //echo $statement; exit;
         $q = $this->db->query($statement);
       
@@ -804,8 +803,9 @@ class Projetos_model extends CI_Model
          $statement = "select count(*) as qtde from sig_planos p
                     inner join sig_users_setor us on us.users_id = p.responsavel
                     inner join sig_setores s      on s.id = us.setores_id
-                    inner join sig_setores pai    on pai.id = s.pai
-                    where pai.id = $area and projeto = $projeto_atual  ";
+                   
+                    where s.id = $area and s.pai = 0 and projeto = $projeto_atual  ";
+         
         $q = $this->db->query($statement);
         
             if ($q->num_rows() > 0) {
@@ -1449,18 +1449,44 @@ class Projetos_model extends CI_Model
     }
     
     
-    
-     /*
-     * PEGA TODOS OS EVENTOS  E ITENS DE EVENTO DE UM PROJETO
+    /*
+     * PEGA TODOS OS EVENTOS  E ITENS DE EVENTO DO PROJETO DA AÇÃO
      */
-     public function getAllEventosItemEventoByProjeto($projeto, $campo, $ordem)
+     public function getAllEventosItemEventoByProjetoAcao($projeto)
     {
-    
+
+            
         $statement = "SELECT i.id as id, nome_fase, nome_evento, descricao, i.dt_inicio as dt_inicio, i.dt_fim as dt_fim
             FROM sig_fases_projeto f
         inner join sig_eventos e on e.fase_id = f.id
         inner join sig_item_evento i on i.evento = e.id where f.id_projeto = $projeto order by nome_fase asc";
-       // echo $statement; exit;
+       
+        $q = $this->db->query($statement);
+         
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+     /*
+     * PEGA TODOS OS EVENTOS  E ITENS DE EVENTO DE UM PROJETO
+     */
+     public function getAllEventosItemEventoByProjeto()
+    {
+        $usuario = $this->session->userdata('user_id');
+        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+        $projeto = $projetos_usuario->projeto_atual; 
+            
+        $statement = "SELECT i.id as id, nome_fase, nome_evento, descricao, i.dt_inicio as dt_inicio, i.dt_fim as dt_fim
+            FROM sig_fases_projeto f
+        inner join sig_eventos e on e.fase_id = f.id
+        inner join sig_item_evento i on i.evento = e.id where f.id_projeto = $projeto order by nome_fase asc";
+       
         $q = $this->db->query($statement);
          
         if ($q->num_rows() > 0) {

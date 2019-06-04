@@ -17,10 +17,10 @@
 ?>
 
 
-<header style="background-color: #323c50" class="main-header">
+<header style="background-color: #323c50; position: fixed; width: 100%;  " class="main-header">
     
     <!-- Logo -->
-    <a style="background-color: #323c50;  " href="<?= site_url($pagina_home); ?>" class="logo">
+    <a style="background-color: #323c50; position: fixed; " href="<?= site_url($pagina_home); ?>" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
          <span class="logo-mini"><img width="50px" height="50px" src="<?= base_url() ?>assets/uploads/logos/logo_sig.jpeg " ></span>
       <!-- logo for regular state and mobile devices -->            
@@ -258,6 +258,7 @@
     </nav>
   </header>
 
+<br><br>
 
      
 

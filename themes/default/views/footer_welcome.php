@@ -145,7 +145,7 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
     $('#table_ata').DataTable()
     $('#minha_agenda_home').DataTable()//
     $('#example7').DataTable()  // network > acoes
-    $('#example3').DataTable()
+    $('#minhas_rats').DataTable()
     $('#example4').DataTable()
     $('#example5').DataTable()
     $('#example6').DataTable()

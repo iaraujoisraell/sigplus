@@ -42,47 +42,6 @@
   <!--<script type="text/javascript" src="ganttTestSuite.js"></script>-->
 </head>
 
-<?php foreach ($fases as $fase) {
-    /* 
-     *
-     
-        $data_inicio = $fase->inicio;
-        $partes_data = explode("-", $data_inicio);
-        $ano2 = $partes_data[0];
-        $mes2 = $partes_data[1];
-        $dia2 = $partes_data[2];
-        $data_inicio_tratado =  $dia2."-".$mes2."-".$ano2; //"08-04-2014";
-        $milliseconds_data_inicio = 1000 * strtotime($data_inicio_tratado);
-        echo $data_inicio_tratado.'<br>';
-       // ECHO $data_inicio_tratado.'<BR>';
-        
-        $data_fim = $fase->fim;
-        $partes_dataf = explode("-", $data_fim);
-        $ano3 = $partes_dataf[0];
-        $mes3 = $partes_dataf[1];
-        $dia3 = $partes_dataf[2];
-        $data_fim_tratado =  $dia3."-".$mes3."-".$ano3;
-        $milliseconds_data_fim = 1000 * strtotime($data_fim_tratado);
-        //echo $data_fim.'<br>';
-        echo $data_fim_tratado.'<br>';
-        echo '-------------------------- <br>';
-        $diferenca = strtotime($data_fim) - strtotime($data_inicio);
-        $dias = floor($diferenca / (60 * 60 * 24));
-        echo 'diferença : '.$dias.'<br>';
-        //DIFERENÇA ENTRE DIAS
-        $data1 = new DateTime($data_inicio);
-        $data2 = new DateTime($data_fim);
-        $intervalo = $data1->diff($data2);
-        echo $intervalo->format('%a');
-      $mil = 1398203999999;
-    $seconds = $mil / 1000;
-    echo date("d/m/Y ", $seconds);
-     
-    * 
-     */
-}        
-     
-?> 
 
   
 <body style="background-color: #fff;">
@@ -154,156 +113,47 @@ function getDemoProject(){
 ret= {"tasks":    [
       <?php
       $cont_seq_fase = 1;
-      foreach ($fases as $fase) {
-        $id_fase = $fase->fase_id;
-        $nome_fase = $fase->nome_fase;
-        
-        $data_inicio = $fase->inicio;
-        $partes_data = explode("-", $data_inicio);
-        $ano2 = $partes_data[0];
-        $mes2 = $partes_data[1];
-        $dia2 = $partes_data[2];
-        $data_inicio_tratado =   $dia2."-".$mes2."-".$ano2; 
-        $milliseconds_data_inicio = 1000 * strtotime($data_inicio_tratado);
-        //ECHO $milliseconds_data_inicio.'<BR>';
-        
-        $data_fim = $fase->fim;
-        $partes_dataf = explode("-", $data_fim);
-        $ano3 = $partes_dataf[0];
-        $mes3 = $partes_dataf[1];
-        $dia3 = $partes_dataf[2];
-       // $data_fim_tratado = "29/04/2019";// $dia3."-".$mes3."-".$ano3;
-        $data_fim_tratado2 =  $dia3."-".$mes3."-".$ano3;
-        $milliseconds_data_fim = 1000 * strtotime($data_fim_tratado2);
-       
-        // ECHO $milliseconds_data_fim.'<BR>';
-        //DIFERENÇA ENTRE DIAS
-        
-        $diferenca = strtotime($data_fim) - strtotime($data_inicio);
-        $dias = floor($diferenca / (60 * 60 * 24));
-        $dias = $dias + 1;
-        
-      ?>
-      {"id": -<?php echo $id_fase; ?>, "name": "<?php echo $nome_fase; ?>",                   "progress": 20, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 0, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicio; ?>, "duration": <?php echo $dias; ?>, "end": <?php echo $milliseconds_data_fim; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
-      
-        <?php 
-        // EVENTOS
-        $cont_seq_evento = $cont_seq_fase + 1;
-        $eventos = $this->atas_model->getAllEventosPlano($idplano, $tipo, $id_fase);
-        foreach ($eventos as $evento) { 
-         $id_evento = $evento->evento;
-        $nome_evento = $evento->nome_evento;
-        $data_inicio_e = $evento->inicio;
-        $partes_datae = explode("-", $data_inicio_e);
-        $ano2e = $partes_datae[0];
-        $mes2e = $partes_datae[1];
-        $dia2e = $partes_datae[2];
-        $data_inicio_tratadoe =   $dia2e."-".$mes2e."-".$ano2e; 
-        $milliseconds_data_inicioe = 1000 * strtotime($data_inicio_tratadoe);
-        //ECHO $milliseconds_data_inicio.'<BR>';
-        
-        $data_fim_e = $evento->fim;
-        $partes_data_e = explode("-", $data_fim_e);
-        $anoe = $partes_data_e[0];
-        $mese = $partes_data_e[1];
-        $diae = $partes_data_e[2];
-       // $data_fim_tratado = "29/04/2019";// $dia3."-".$mes3."-".$ano3;
-        $data_fim_tratadoe =  $diae."-".$mese."-".$anoe;
-        $milliseconds_data_fim_e = 1000 * strtotime($data_fim_tratadoe);
-       
-        // ECHO $milliseconds_data_fim.'<BR>';
-        //DIFERENÇA ENTRE DIAS
-        
-        $diferenca_e = strtotime($data_fim_e) - strtotime($data_inicio_e);
-        $dias_e = floor($diferenca_e / (60 * 60 * 24));
-        $dias_e = $dias_e + 1;
-            
-        ?>
-          {"id": -<?php echo $id_fase.$id_evento; ?>, "name": "<?php echo $nome_evento; ?>",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 1, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioe; ?>, "duration": <?php echo $dias_e; ?>, "end": <?php echo $milliseconds_data_fim_e; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
-    
-         
-         
-         <?php 
-        // ITENS EVENTOS
-        $cont_seq_item_evento = $cont_seq_evento + 1;
-        $itens = $this->atas_model->getAllItensEventosPlano($idplano, $tipo, $id_evento);
-        foreach ($itens as $item) { 
-        $item_id = $item->item_id;
-        $nome_item = $item->item;
+               
+        // AÇÕES 
+        $cont_seq_acoes = $cont_seq_item_evento + 1;;
+       // $planos = $this->atas_model->getAllPlanosItensEventosPlano($idplano, $tipo, $item_id);
+        foreach ($planos as $plano) { 
+        $acao_id = $plano->id;
+        $nome_acao = strip_tags ($plano->descricao);
         //DATA INICIO
-        $data_inicio_i = $item->inicio;
-        $partes_datai = explode("-", $data_inicio_i);
-        $anoi = $partes_datai[0];
-        $mesi = $partes_datai[1];
-        $diai = $partes_datai[2];
-        $data_inicio_tratadoi =   $diai."-".$mesi."-".$anoi; 
-        $milliseconds_data_inicioi = 1000 * strtotime($data_inicio_tratadoi);
+        $data_inicio_acao = $plano->data_entrega_demanda;
+        $partes_data_i_acao = explode("-", $data_inicio_acao);
+        $anoia = $partes_data_i_acao[0];
+        $mesia = $partes_data_i_acao[1];
+        $diaia = $partes_data_i_acao[2];
+        $data_inicio_tratadoia =   $diaia."-".$mesia."-".$anoia; 
+        $milliseconds_data_inicioia = 1000 * strtotime($data_inicio_tratadoia);
         //ECHO $milliseconds_data_inicio.'<BR>';
-        
-        $data_fim_i = $item->fim;
-        $partes_data_i = explode("-", $data_fim_i);
-        $anoii = $partes_data_i[0];
-        $mesii = $partes_data_i[1];
-        $diaii = $partes_data_i[2];
+
+        $data_fim_acao = $plano->data_termino;
+        $partes_data_f_acao = explode("-", $data_fim_acao);
+        $anoaa = $partes_data_f_acao[0];
+        $mesaa = $partes_data_f_acao[1];
+        $diaaa = $partes_data_f_acao[2];
        // $data_fim_tratado = "29/04/2019";// $dia3."-".$mes3."-".$ano3;
-        $data_fim_tratadoi =  $diaii."-".$mesii."-".$anoii;
-        $milliseconds_data_fim_i = 1000 * strtotime($data_fim_tratadoi);
-       
+        $data_fim_tratado_acao =  $diaaa."-".$mesaa."-".$anoaa;
+        $milliseconds_data_fim_acao = 1000 * strtotime($data_fim_tratado_acao);
+
         // ECHO $milliseconds_data_fim.'<BR>';
         //DIFERENÇA ENTRE DIAS
-        
-        $diferenca_i = strtotime($data_fim_i) - strtotime($data_inicio_i);
-        $dias_i = floor($diferenca_i / (60 * 60 * 24));
-        $dias_i = $dias_i + 1;
-            
+
+        $diferenca_acao = strtotime($data_fim_acao) - strtotime($data_inicio_acao);
+        $dias_acao = floor($diferenca_acao / (60 * 60 * 24));
+        $dias_acao = $dias_acao + 1;
+
         ?>
-                {"id": -<?php echo $id_fase.$id_evento.$item_id; ?>, "name": "<?php echo $nome_item; ?>",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "", "level": 2, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioi; ?>, "duration": <?php echo $dias_i; ?>, "end": <?php echo $milliseconds_data_fim_i; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
-   
-                 <?php 
-                // AÇÕES 
-                $cont_seq_acoes = $cont_seq_item_evento + 1;;
-                $planos = $this->atas_model->getAllPlanosItensEventosPlano($idplano, $tipo, $item_id);
-                foreach ($planos as $plano) { 
-                $acao_id = $plano->idplanos;
-                $nome_acao = strip_tags ($plano->descricao);
-                //DATA INICIO
-                $data_inicio_acao = $plano->data_entrega_demanda;
-                $partes_data_i_acao = explode("-", $data_inicio_acao);
-                $anoia = $partes_data_i_acao[0];
-                $mesia = $partes_data_i_acao[1];
-                $diaia = $partes_data_i_acao[2];
-                $data_inicio_tratadoia =   $diaia."-".$mesia."-".$anoia; 
-                $milliseconds_data_inicioia = 1000 * strtotime($data_inicio_tratadoia);
-                //ECHO $milliseconds_data_inicio.'<BR>';
+        {"id": -<?php echo $acao_id; ?>, "name": "<?php echo $nome_acao; ?>",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "<?PHP echo $acao_id; ?>", "level": 3, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioia; ?>, "duration": <?php echo $dias_acao; ?>, "end": <?php echo $milliseconds_data_fim_acao; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
 
-                $data_fim_acao = $plano->data_termino;
-                $partes_data_f_acao = explode("-", $data_fim_acao);
-                $anoaa = $partes_data_f_acao[0];
-                $mesaa = $partes_data_f_acao[1];
-                $diaaa = $partes_data_f_acao[2];
-               // $data_fim_tratado = "29/04/2019";// $dia3."-".$mes3."-".$ano3;
-                $data_fim_tratado_acao =  $diaaa."-".$mesaa."-".$anoaa;
-                $milliseconds_data_fim_acao = 1000 * strtotime($data_fim_tratado_acao);
 
-                // ECHO $milliseconds_data_fim.'<BR>';
-                //DIFERENÇA ENTRE DIAS
-
-                $diferenca_acao = strtotime($data_fim_acao) - strtotime($data_inicio_acao);
-                $dias_acao = floor($diferenca_acao / (60 * 60 * 24));
-                $dias_acao = $dias_acao + 1;
-
-                ?>
-                {"id": -<?php echo $id_fase.$id_evento.$item_id.$acao_id; ?>, "name": "<?php echo $nome_acao; ?>",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "<?PHP echo $acao_id; ?>", "level": 3, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioia; ?>, "duration": <?php echo $dias_acao; ?>, "end": <?php echo $milliseconds_data_fim_acao; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
-   
-         
-           <?php  } //FIM AÇÕES ?>
+   <?php  } //FIM AÇÕES ?>
          
          
-           <?php  } //FIM ITEM EVENTO ?>
-         
-        <?php  } $cont_seq_fase = $cont_seq_acoes; //FIM EVENTO ?>
-     
-    <?php } //FIM FASE ?>
+          
           
       //{"id": -2, "name": "Cadastros",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "2", "level": 1, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": 1396994400000, "duration": 10, "end": 1398203999999,   "collapsed": false, "assigs": [], "hasChild": true},
     //  {"id": -3, "name": "Escopo",         "progress": 40, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "3", "level": 2, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": 1396994400000, "duration": 10,  "end": 1398203999999,   "collapsed": false, "assigs": [], "hasChild": false},
@@ -714,7 +564,7 @@ function showBaselineInfo (event,element){
     <td class="gdfCell"><input type="text" name="duration" autocomplete="off" value="(#=obj.duration#)"></td>
     <td class="gdfCell"><input type="text" name="progress" class="validated" entrytype="PERCENTILE" autocomplete="off" value="(#=obj.progress?obj.progress:''#)" (#=obj.progressByWorklog?"readOnly":""#)></td>
     <td class="gdfCell requireCanSeeDep"><input type="text" name="depends" autocomplete="off" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
-    <td class="gdfCell taskAssigs">(#=obj.getAssigsString()#)</td>
+    <td class="gdfCell taskAssigs"></td>
   </tr>
   --></div>
 

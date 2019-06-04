@@ -90,7 +90,7 @@ onload : optionCheck();
     }
 </script>
 <?php
-        $acao = $this->atas_model->getPlanoByID($idplano);
+        
         $usuario = $this->session->userdata('user_id');
 //$users = $this->site->geUserByID($acao->responsavel);                              
         ?>    
@@ -99,21 +99,20 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
 $id_projeto = $projetos->id;
 $nome_projeto = $projetos->nome_projeto;
 ?>
-<div id="blanket"></div>
-<div id="aguarde">Aguarde...</div>
-<div class="content-wrapper">
+
+
     
     <div class="col-lg-12">
     <div class="box">
     <section class="content-header">
           <h1>
-              <font style="color: red;"> <?php echo 'Excluir Ação '.$acao->sequencial; ?> </font>
+              <font style="color: red;"> <?php echo 'Cancelar Ação '.$acao->sequencial; ?> </font>
               <small><?php echo $nome_projeto; ?></small>
                   
           </h1>
           <ol class="breadcrumb">
             <li><a href="<?= site_url('project'); ?>"><i class="fa fa-home"></i> Home</a></li>
-            <li class="active">Plano de Ação</li>
+            <li class="active">Cancelar Ação</li>
           </ol>
 
         </section>
@@ -121,7 +120,19 @@ $nome_projeto = $projetos->nome_projeto;
     </div>    
     </div>
     
-    
+     <style>
+        #div1
+        {
+        border: 1px solid;
+        border-color: #000000;
+        width:100%;
+        height:100px;
+        background-color: #f4f4f4;
+
+
+        }
+
+        </style>
     <section  class="content">
     
     <div class="row">    
@@ -134,7 +145,11 @@ $nome_projeto = $projetos->nome_projeto;
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <center>
+                                        <?php if($origem == 1){ ?>
                                         <h2>  PLANO DE AÇÃO  <?PHP ECHO $acao->idplano; ?>  </h2>
+                                        <?php }else if($origem == 2){ ?>
+                                        <h2>  ATA  <?PHP ECHO $acao->idplano; ?>  </h2>
+                                        <?php } ?>
                                     </center>
                                 </div>
                             </div>
@@ -143,26 +158,13 @@ $nome_projeto = $projetos->nome_projeto;
                             <div class="clearfix"></div>
                             <?php
                             $attrib = array('data-toggle' => 'validator', 'role' => 'form');
-                           echo form_open_multipart("project/deletePlanoForm", $attrib); 
+                           echo form_open_multipart("project/cancelarAcao", $attrib); 
                             echo form_hidden('id', $acao->idplanos);
                             echo form_hidden('idatas', $acao->idplano);
+                            echo form_hidden('plano_acao', $plano_acao);
+                            echo form_hidden('origem', $origem);
                             ?>
-                            <div class="col-md-12">
-                            <!-- ITEM EVENTO -->
-                            <div class="col-md-12">
-                                  <div class="form-group">
-                                        <?= lang("Item do Evento", "slEvento"); ?>
-                                         <?php
-                                        $wue[''] = '';
-                                      foreach ($eventos as $evento) {
-                                            $wue[$evento->id] = $evento->nome_fase.' > '. $evento->nome_evento.' > '. resume($evento->descricao, 100);
-                                           
-                                        }
-                                        echo form_dropdown('evento', $wue, (isset($_POST['evento']) ? $_POST['evento'] : $acao->eventos), 'id="slEvento" disabled="true"  class="form-control  select" data-placeholder="' . lang("Selecione o Item do Evento") . ' " required="required"  style="width:100%;"  ');
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
+                            
                             <div class="col-md-12">
                                 
                                 <div class="col-md-6">
@@ -170,17 +172,22 @@ $nome_projeto = $projetos->nome_projeto;
                                   
                                   <div  class="form-group">
                                         <?= lang("Descrição ", "sldescricao"); ?><small>(O que ?)</small>
-                                        <?php echo form_textarea('descricao', (isset($_POST['descricao']) ? $_POST['descricao'] : $acao->descricao), 'class="form-control  input-tip "  readonly  style="height: 120px;" id="sldescricao" required="true" '); ?>
+                                        <div id="div1">
+                                                  <?php echo $acao->descricao; ?>
+                                               </div>
                                   </div>
                               
                                     <!-- ONDE -->  
                                   <div  class="form-group">
                                         <?= lang("Local ", "onde"); ?><small>(Onde ?)</small>
-                                        <?php echo form_textarea('onde', (isset($_POST['descricao']) ? $_POST['descricao'] : $acao->onde), 'class="form-control" disabled="true"  style="height: 120px;" id="onde"  '); ?>
+                                        <div id="div1">
+                                                  <?php echo $acao->onde; ?>
+                                               </div>
                                   </div>
                                     <!-- PRAZO de -->
                                   <div class="form-group">
                                             <?= lang("Data Início", "sldate"); ?><small>(Quando ?)</small>
+                                            
                                             <input class="form-control input-tip " value="<?php echo $acao->data_entrega_demanda; ?>" required="true" disabled="true" name="dateEntrega" type="date">
                                         </div>
                                     <!-- PRAZO ATE -->
@@ -214,80 +221,35 @@ $nome_projeto = $projetos->nome_projeto;
                                     <!-- PORQUE -->  
                                     <div class="form-group">
                                         <?= lang("Motivo, Justificativa", "porque"); ?><small>(Por Quê? )</small>
-                                        <?php echo form_textarea('porque', (isset($_POST['porque']) ? $_POST['porque'] : $acao->porque), 'class="form-control" disabled="true"  style="height: 120px;" id="porque"  '); ?>
+                                        <div id="div1">
+                                                  <?php echo $acao->porque; ?>
+                                               </div>
                                     </div>
                                     <!-- COMO -->  
                                     <div class="form-group">
                                         <?= lang("Detalhes", "como"); ?><small>(Como? )</small>
-                                        <?php echo form_textarea('como', (isset($_POST['como']) ? $_POST['como'] : $acao->como), 'class="form-control" disabled="true"  style="height: 120px;" id="como"  '); ?>
+                                        <div id="div1">
+                                                  <?php echo $acao->como; ?>
+                                               </div>
                                     </div>
                                     <!-- VALOR -->  
                                     <div class="form-group">
                                         <?= lang("Custo", "custo"); ?><small> (Descrição do Custo? )</small>
-                                        <?php echo form_textarea('custo', (isset($_POST['custo']) ? $_POST['custo'] : $acao->custo), 'class="form-control" disabled="true"  style="height: 120px;" id="custo"  '); ?>
+                                        <div id="div1">
+                                                  <?php echo $acao->custo; ?>
+                                               </div>
                                     </div>
                                     <?= lang("Valor", "custo"); ?><small> (Valor do Custo? )</small>
                                     <input class="form-control" placeholder="Valor do Custo para esta ação" onkeypress="mascara(this, mvalor);" disabled="true" value="<?php echo str_replace('.', ',', $acao->valor_custo); ?>"  name="valor_custo" type="text">
                                     
                                     <!-- DOCUMENTO -->  
-                                    <div class="form-group">
-                                <?= lang("Anexar Documento", "document") ?> 
-                                    <?php if($ata->anexo){ ?>
-                                <div class="btn-group">
-                            <a href="<?= site_url('assets/uploads/atas/' . $ata->anexo_ata) ?>" class="tip btn btn-file" disabled="true" title="<?= lang('Arquivo em Anexo') ?>">
-                                <i class="fa fa-chain"></i>
-                                <span class="hidden-sm hidden-xs"><?= lang('Ver Anexo') ?></span>
-                            </a>
-                                    <?php /* <input type="checkbox"><button type="button" class="btn btn-danger" id="reset"><?= lang('REMOVER') ?> */ ?>
-                        </div>
-                               
-                                <?php } ?>
-                               <?php if($statusAta != 1){ ?>
-                               <input id="document" disabled="true" type="file" data-browse-label="<?= lang('browse'); ?>" disabled="true" name="document" value="<?php echo $projeto->anexo; ?>" data-show-upload="false"
-                                       data-show-preview="false" class="form-control file">
-                                <?php } ?>  
-                               
-                            </div>
+                                    
                                 </div>
                            
                             </div>    
                             
                             
-                            <div class="col-md-12">
-                            <div class="col-md-12">
-                                    <div class="form-group">
-                                        <?= lang("Ação(ões) predecessora(s)", "slVinculoAcao"); ?>
-                                        <?php
-                                       
-                                          $wua[''] = '';
-                                       foreach ($acoes_vinculadas as $user_ata) {
-                                                    
-                                                    $wua[$user_ata->id_vinculo] = $user_ata->id_vinculo;
-                                                  
-                                                }
-                                       // $wu_acao[''] = '';
-                                        foreach ($acoes as $acao) {
-                                            $wu_acao[$acao->idplanos] = $acao->idplanos .' - '. substr($acao->descricao, 0, 100);
-                                        }
-                                        echo form_dropdown('acoes_vinculo[]', $wu_acao, (isset($_POST['acoes_vinculo']) ? $_POST['acoes_vinculo'] : $wua), 'id="slVinculoAcao" disabled="true" class="form-control  select" data-placeholder="' . lang("Selecione a(s) Ações(es)") . ' "   style="width:100%;"  multiple ');
-                                        ?>
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <?= lang("Tipo Vinculo ", "tipo_vinculo"); ?> <i class="fa fa-info-circle" title="INÍCIO-INÍCIO: A ação começa junto com a ação vinculada. INÍCIO-FIM: A ação Inícia após o término da ação vinculada."></i>
-                                        <?php $pst[''] = '';
-                                          $pst['II'] = lang('INÍCIO - INÍCIO');
-                                          $pst['IF'] = lang('INÍCIO - FIM');
-                                          
-                                  
-                                        echo form_dropdown('tipo_vinculo', $pst, (isset($_POST['tipo']) ? $_POST['tipo'] : $acao->tipo_vinculo), 'id="tipo"  class="form-control " disabled="true"  data-placeholder="' . lang("select") . ' ' . lang("o tipo de Vinculo") . '"   style="width:100%;" ');
-                              
-                                  ?>
-                                        
-                                    </div>
-                                 </div> 
-                           </div>
+                            
                             
                             
                             
@@ -295,8 +257,13 @@ $nome_projeto = $projetos->nome_projeto;
                             <center>
 
                                 <div class="col-md-12">
-                                      <?php echo form_submit('add_item', lang("Deletar"), 'id="add_item" class="btn btn-danger" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
-                                        <a  class="btn btn-warning"  href="<?= site_url('Atas/plano_acao/'.$acao->idatas); ?>"><?= lang('Cancelar') ?></a>
+                                      <?php echo form_submit('add_item', lang("Cancelar Ação"), 'id="add_item" class="btn btn-danger" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
+                                     <?php if($origem == 1){ ?>
+                                        <a  class="btn btn-primary"  href="<?= site_url('project/plano_acao_detalhes/'.$plano_acao); ?>"><?= lang('Voltar') ?></a>
+                                     <?php }else if($origem == 2){ ?>
+                                        <a  class="btn btn-primary"  href="<?= site_url('Atas/plano_acao/'.$plano_acao.'/2'); ?>"><?= lang('Voltar') ?></a>
+                                     <?php } ?>
+                                    
                              
                                 </div>
                                  </center>
@@ -329,4 +296,4 @@ $nome_projeto = $projetos->nome_projeto;
     <!-- /.col-lg-12 -->
         
     </section>    
-</div>
+

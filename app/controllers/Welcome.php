@@ -1284,32 +1284,43 @@ class Welcome extends MY_Controller
     // visualiza as ações em : Network > Minhas Ações
     public function dados_cadastrais_acao($id_acao = null)
     {
+     $this->sma->checkPermissions();
      
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
             }
             $date_hoje = date('Y-m-d H:i:s');    
-            $usuario = $this->session->userdata('user_id');
-            $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
-                        
+            $empresa = $this->session->userdata('empresa');            
            
             $ip = $_SERVER["REMOTE_ADDR"];
            // $this->data['acoes_vinculos'] =  $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual, $id_acao);//$this->atas_model->getAllAcoes();
             
+            $acao = $this->atas_model->getPlanoByID($id_acao);
+            $projeto = $acao->projeto;
+            $acao_empresa = $acao->empresa;
+            
+            if($empresa != $acao_empresa){
+                $this->session->set_flashdata('error', lang("Você não tem permissão para acessar esta ação!!!"));
+                redirect("welcome/minhasAcoes");
+            }
+            
+             
             $this->data['acoes_vinculadas'] = $this->atas_model->getAllAcoesVinculadasAta($id_acao);
             // echo $this->input->post('prazo') .'<br>';
             $this->data['acoes_arquivos'] = $this->atas_model->getAllArquivosByAcao($id_acao); 
             
-           $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjeto($projetos_usuario->projeto_atual);   
-                                                            
+            if($projeto){
+            $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjetoAcao($projeto);   
+            }                                         
+            
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
             
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+           // $this->data['projetos'] = $this->atas_model-> ();      
            // $this->data['ata'] = $id;
-           
-            $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual, $id_acao);
-            
+           if($projeto){
+            $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($id_acao, $projeto);
+           }
             $this->data['idplano'] = $id_acao;
             //$this->data['acoes'] = $this->atas_model->getPlanoByID($id); 
            //  $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual);
@@ -1623,7 +1634,7 @@ class Welcome extends MY_Controller
          $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
          $projeto_atual = $projetos_usuario->projeto_atual;
          //echo $id; exit;                                        
-        $ata = $this->atas_model->getAtaByIDByProjeto($id, $projeto_atual);
+        $ata = $this->atas_model->getAtaSemProjetoByIDByProjeto($id, $projeto_atual);
         $quantidade_ata = $ata->quantidade;
        
         if($quantidade_ata == 0){
@@ -1887,11 +1898,11 @@ class Welcome extends MY_Controller
             $this->data['id'] = $id;
            
             
-            $ata = $this->atas_model->getAtaByID($id);
+            $ata = $this->atas_model->getAtaSemProjetoByID($id);
              
             $this->data['users_ata'] = $this->atas_model->getAtaUserByID_ATA($id);
-            $this->data['ata'] = $this->atas_model->getAtaByID($id);
-            //$this->data['ataAtual'] = $this->atas_model->getAtaByID($id);
+            $this->data['ata'] = $this->atas_model->getAtaSemProjetoByID($id);
+            //$this->data['ataAtual'] = $this->atas_model->getAtaSemProjetoByID($id);
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); //$this->atas_model->getAllUsersSetores();
@@ -2483,7 +2494,7 @@ class Welcome extends MY_Controller
                         
             $id_acao = $this->atas_model->add_planoAcao($data_plano,$acao_vinculo,$tipo_vinculo,$id_responsavel);
             
-            
+            //plano de ação
              if($tipo == 2){
                  $dados_plano_acao = $this->atas_model->getPlanoAcaoByID($id_registro);
                  $status_plano = $dados_plano_acao->status;
@@ -2574,11 +2585,11 @@ class Welcome extends MY_Controller
             $this->data['id'] = $id;
            
             
-            $ata = $this->atas_model->getAtaByID($id);
+            $ata = $this->atas_model->getAtaSemProjetoByID($id);
              
             $this->data['users_ata'] = $this->atas_model->getAtaUserByID_ATA($id);
-            $this->data['ata'] = $this->atas_model->getAtaByID($id);
-            //$this->data['ataAtual'] = $this->atas_model->getAtaByID($id);
+            $this->data['ata'] = $this->atas_model->getAtaSemProjetoByID($id);
+            //$this->data['ataAtual'] = $this->atas_model->getAtaSemProjetoByID($id);
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); //$this->atas_model->getAllUsersSetores();
@@ -3606,7 +3617,7 @@ class Welcome extends MY_Controller
           
             $this->data['id'] = $id;
            
-            $this->data['ata'] = $this->atas_model->getAtaByID($id);
+            $this->data['ata'] = $this->atas_model->getAtaSemProjetoByID($id);
             
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['users'] = $this->site->getAllUser();
@@ -3732,7 +3743,7 @@ class Welcome extends MY_Controller
         $this->data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
        
             $this->data['id'] = $id;
-            $this->data['ata'] = $this->atas_model->getAtaByID($id);  // $this->atas_model->getAtaProjetoByID_ATA($id);
+            $this->data['ata'] = $this->atas_model->getAtaSemProjetoByID($id);  // $this->atas_model->getAtaProjetoByID_ATA($id);
             $empresa_dados = $this->owner_model->getEmpresaById($empresa);
             $cabecalho_empresa_ata = $empresa_dados->cabecalho_ata;
             $redape_empresa_ata = $empresa_dados->rodape_ata;
@@ -3782,7 +3793,7 @@ class Welcome extends MY_Controller
             $id_ata = $this->input->post('id');
             $ip = $_SERVER["REMOTE_ADDR"];
             
-            $dados_ata  = $this->atas_model->getAtaByID($id_ata);
+            $dados_ata  = $this->atas_model->getAtaSemProjetoByID($id_ata);
             $data_reuniao = $dados_ata->data_ata;
             $data_hora_inicio = $dados_ata->hora_inicio;
             $data_hora_fim = $dados_ata->hora_termino;
@@ -3875,7 +3886,7 @@ class Welcome extends MY_Controller
           
             $this->data['id'] = $id;
            
-            $this->data['ata'] = $this->atas_model->getAtaByID($id);
+            $this->data['ata'] = $this->atas_model->getAtaSemProjetoByID($id);
             
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
            // $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
@@ -5344,6 +5355,276 @@ class Welcome extends MY_Controller
     /******************   F I M  *  C O N V I D A D O S   ********************************/
     
     
+    
+    
+    
+    /**************************************************************************
+     ************************* R A T ' S **************************************
+     **************************************************************************/
+    
+    public function registro_atividade($tabela, $menu)
+    {
+        // SALVA O MÓDULO ATUAL do usuário
+        $usuario = $this->session->userdata('user_id');    
+        $data_modulo = array('menu_atual' => $menu);
+        $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+         
+        $this->sma->checkPermissions(); 
+        
+        if ($this->Settings->version == '2.3') {
+            $this->session->set_flashdata('warning', 'Please complete your update by synchronizing your database.');
+            redirect('sync');
+        }
+
+        $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+        $usuario = $this->session->userdata('user_id');                     
+        
+        
+        $filtro = $this->input->post('filtro');
+        
+        if($filtro == 1){
+        $projeto_filtro = $this->input->post('projeto_filtro');
+        $data_inicio = $this->input->post('data_de');
+        $data_fim = $this->input->post('data_ate');   
+        
+        $sql_rat  = $this->networking_model->getRegistroAtividadesByUsuario($projeto_filtro,$data_inicio,$data_fim);
+        $this->data['rats'] = $sql_rat;
+        $this->data['projeto_filtro'] = $projeto_filtro;
+        $this->data['data_inicio'] = $data_inicio;
+        $this->data['data_fim'] = $data_fim;
+        
+        }else{
+        $sql_rat  = $this->networking_model->getRegistroAtividadesByUsuario();  
+        $this->data['rats'] = $sql_rat;    
+        }
+        
+        
+        
+       
+        
+        $this->page_construct_networking('networking/rat/index', $meta, $this->data);
+      //  $this->load->view($this->theme . 'usuarios/rat/lista', $this->data);
+    }
+    
+    
+    public function registro_atividade_pdf($view = NULL)
+    {
+        $this->form_validation->set_rules('gerar_pdf', lang("id_cadastro"), 'required');
+         
+         if ($this->form_validation->run() == true) {
+          
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+        
+            $detalhes = $this->input->post('detalhes');
+            $sql_rat = $this->input->post('registros');
+            $valores_pdf = $this->input->post('valores_pdf');
+            
+            //echo $valores_pdf; exit;
+            /* 
+              foreach ($sql_rat as $rat) {
+                                            
+               $projeto = $rat->projeto;
+               $data_rat = $rat->data_rat;
+               
+               echo $data_rat.'<br>';
+              }
+             * 
+             */                              
+             
+            
+             
+             $this->data['detalhes'] = $detalhes;
+             $this->data['sql_rat'] = $sql_rat;
+             $this->data['valores_pdf'] = $valores_pdf;
+             
+            //$this->data['plano_acao'] = $this->atas_model->getPlanoAcaoByID($id);  // $this->atas_model->getAtaProjetoByID_ATA($id);
+            $empresa_dados = $this->owner_model->getEmpresaById(6);
+            $logo_empresa = $empresa_dados->logo_empresa;
+            $redape_empresa_ata = $empresa_dados->rodape_ata;
+            
+            $cadastro_usuario =  $this->site->getUser($usuario);
+            $nome = $cadastro_usuario->first_name;
+            //echo $usuario; exit;
+            //$this->data['users'] = $this->site->getAllUser();
+           // $this->data['projetos'] = $this->atas_model->getAllProjetos();
+            
+
+            $name = lang("Registro_de_Atividades") . "_" . str_replace('/', '_', $nome) . ".pdf";
+            $html = $this->load->view($this->theme . 'networking/rat/rat_pdf', $this->data, true);
+
+            
+          
+            
+        if ($view) {
+            $this->load->view($this->theme . 'networking/rat/rat_pdf', $this->data);
+        } else{
+            $this->sma->generate_pdf_registro_atividade($html, $name, false, $usuario, null, null, null, null, $logo_empresa, $redape_empresa_ata, $nome, $empresa);
+            //redirect("Welcome/registro_atividade/0/92");
+        }
+        
+           
+         }else{
+        echo "<script>history.go(-1)</script>";
+                exit;
+        
+        
+           
+         }
+            
+    }
+    
+    
+    public function editar_rat($rat_id)
+    {
+         
+        
+         
+        $this->form_validation->set_rules('editar_rat', lang("Informe a Hora de Início"), 'required');
+        $this->form_validation->set_rules('rat_id', lang("Informe a Hora de Término"), 'required');
+        $this->form_validation->set_rules('detalhes', lang("Informe o conteúdo"), 'required');
+         
+          if ($this->form_validation->run() == true) {
+           
+            $date_cadastro = date('Y-m-d H:i:s'); 
+            $data_registro = $this->input->post('data_registro'); 
+            $hora_inicio = $this->input->post('hora_inicio');
+            $hora_termino = $this->input->post('hora_termino');
+            $conteudo = $this->input->post('detalhes');
+            $valor2 = $this->input->post('valor');
+            $valor = str_replace(',', '.', $valor2);
+            $usuario = $this->session->userdata('user_id');
+           
+            $tempo = gmdate('H:i:s', strtotime( $hora_termino) - strtotime( $hora_inicio  ) );
+            
+            $rat_id = $this->input->post('rat_id');
+           // $rat_id = $this->input->post('rat_id');
+            
+            $data_rat = array(
+                //'data_registro' => $date_cadastro,
+                'hora_inicio' => $hora_inicio,
+                'hora_fim' => $hora_termino,
+                'descricao' => $conteudo,
+                'valor' => $valor,
+                'data_rat' => $data_registro,
+                'tempo' => $tempo
+            );
+           
+
+          
+            $this->atas_model->updateRat($rat_id, $data_rat);
+            
+            $this->session->set_flashdata('message', lang("Alteração Registrado com Sucesso!!!"));
+            redirect("Welcome/registro_atividade/0/92");
+            
+        } else {
+     
+            $date_cadastro = date('Y-m-d H:i:s');       
+            // $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+            
+          
+            $rat = $this->networking_model->getRatByIdAndByEmpresa($rat_id);
+            $this->data['rat'] = $rat;
+            $this->data['rat_id'] = $rat_id;
+                      
+            $this->load->view($this->theme . 'networking/rat/editar_rat', $this->data);
+        }
+
+            
+    }
+    
+    public function deletar_rat($rat_id)
+    {
+         
+        
+         
+        $this->form_validation->set_rules('deletar_rat', lang("Informe"), 'required');
+        $this->form_validation->set_rules('rat_id', lang("Informe "), 'required');
+        $this->form_validation->set_rules('detalhes', lang("Informe o conteúdo"), 'required');
+         
+          if ($this->form_validation->run() == true) {
+           
+            $date_cadastro = date('Y-m-d H:i:s'); 
+            $data_registro = $this->input->post('data_registro'); 
+            $hora_inicio = $this->input->post('hora_inicio');
+            $hora_termino = $this->input->post('hora_termino');
+            $conteudo = $this->input->post('detalhes');
+            $valor2 = $this->input->post('valor');
+            $valor = str_replace(',', '.', $valor2);
+            $usuario = $this->session->userdata('user_id');
+           
+            $tempo = gmdate('H:i:s', strtotime( $hora_termino) - strtotime( $hora_inicio  ) );
+            
+            $rat_id = $this->input->post('rat_id');
+           // $rat_id = $this->input->post('rat_id');
+           
+            $this->networking_model->deleteRat($rat_id);
+            
+            $this->session->set_flashdata('message', lang("Registro Apagado com Sucesso!!!"));
+            redirect("Welcome/registro_atividade/0/92");
+            
+        } else {
+     
+            $date_cadastro = date('Y-m-d H:i:s');       
+            // $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+            
+          
+            $rat = $this->networking_model->getRatByIdAndByEmpresa($rat_id);
+            $this->data['rat'] = $rat;
+            $this->data['rat_id'] = $rat_id;
+                      
+            $this->load->view($this->theme . 'networking/rat/deletar_rat', $this->data);
+        }
+
+            
+    }
+    
+    function dateDiff( $dateStart, $dateEnd, $format = '%a' ) {
+
+        $d1     =   new DateTime( $dateStart );
+        $d2     =   new DateTime( $dateEnd );
+        //Calcula a diferença entre as datas
+        $diff   =   $d1->diff($d2, true);   
+
+        //Formata no padrão esperado e retorna
+        return $diff->format( $format );
+
+    }
+    
+     
+    
+    
+    
+     public function add_rat($id = null)
+    {
+         
+        
+         
+      
+     
+            $date_cadastro = date('Y-m-d H:i:s');       
+            // $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+            
+           
+            
+            $this->data['id'] = $id;
+            $this->data['dados_equipe'] = $this->atas_model->getMebrosEquipeByIdEquipe($id); //
+            
+            $projeto_membro = $this->atas_model->getMebrosEquipeByIdMembro($id);
+            $projeto_selecionado = $projeto_membro->projeto;
+          
+             $this->data['projeto'] = $projeto_selecionado;
+
+             $this->load->view($this->theme . 'usuarios/rat/add_rat', $this->data);
+    }
+    
+    
+    
+    
+    /************ F I M ** R A T S ********************************************/
+    
+    
+    
     /***************************************************************************************
      ************************* T R E I N A M E N T O S **************************************
      ***************************************************************************************/
@@ -5702,47 +5983,13 @@ class Welcome extends MY_Controller
          
     }
     
-    public function getAcoes()
-    {
-        $this->sma->checkPermissions();
-        echo 'to aqui';exit;
-        
-        
-       // $edit_link = anchor('planos/edit/$1', '<i class="fa fa-edit"></i> ' . lang('Editar Plano'), 'data-toggle="modal" data-target="#myModal"');
-        $edit_link = anchor('planos/edit/$1', '<i class="fa fa-edit"></i> ' . lang('Editar Plano de Ação'), 'class="sledit"');
-      
-        $action = '<div class="text-center"><div class="btn-group text-left">'
-        . '<button type="button" class="btn btn-default btn-xs btn-primary dropdown-toggle" data-toggle="dropdown">'
-        . lang('actions') . ' <span class="caret"></span></button>
-        <ul class="dropdown-menu pull-right" role="menu">
-            <li>' . $edit_link . '</li>           
-            <li>' . $delete_link . '</li>
-        </ul>
-    </div></div>';
-        $action = '<div class="text-center">'  . $edit_link . '</div>';
-        
-        
-        
-        $usuario = $this->session->userdata('user_id');
-        //$projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
-        //$projetos_usuario->projeto_atual;
-           
-        $this->load->library('datatables');
-            $this->datatables
-                ->select("idplanos as id, idatas, descricao,  data_elaboracao, data_termino, status")
-                ->from('planos')
-                ->where('responsavel =', $usuario);
-            $this->db->order_by('idplanos', 'desc');
-         
-            
-        $this->datatables->add_column("Actions", $action, "id");
-        echo $this->datatables->generate();
-    }
 
     
     
    
-    
+    /**************************************************************************
+     ******************** T R E I N A M E N T O S *****************************
+     **************************************************************************/
     
     
     public function adcionar_acao_treinamento($id = null, $id_ata_facilitador = null)
@@ -6070,7 +6317,7 @@ class Welcome extends MY_Controller
         
        
        
-         $dados_ata = $this->atas_model->getAtaByID($id_ata);
+         $dados_ata = $this->atas_model->getAtaSemProjetoByID($id_ata);
          $tipo = $dados_ata->tipo;
          $tipo_ava_reacao = $dados_ata->avaliacao_reacao;
            
@@ -6123,7 +6370,7 @@ class Welcome extends MY_Controller
        
         
         $date_cadastro = date('Y-m-d H:i:s');  
-        $dados_ata = $this->atas_model->getAtaByID($id_ata);
+        $dados_ata = $this->atas_model->getAtaSemProjetoByID($id_ata);
         $tipo_ava_reacao = $dados_ata->avaliacao_reacao;
         
          $grupo_perguntas = $this->atas_model->getGrupoByIDPesquisa($tipo_ava_reacao);
@@ -6172,296 +6419,6 @@ class Welcome extends MY_Controller
         <?php    
     }
    
-    
-    public function lista_rat()
-    {
-        if ($this->Settings->version == '2.3') {
-            $this->session->set_flashdata('warning', 'Please complete your update by synchronizing your database.');
-            redirect('sync');
-        }
-
-        $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
-        $usuario = $this->session->userdata('user_id');                     
-        $this->data['equipes'] = $this->atas_model->getMebrosEquipeByUsuario($usuario);
-        
-        $users = $this->site->geUserByID($usuario);
-        
-        
-        //$this->page_construct('usuarios/index', $meta, $this->data);
-       
-        $this->load->view($this->theme . 'usuarios/rat/lista', $this->data);
-    }
-    
-    
-    function dateDiff( $dateStart, $dateEnd, $format = '%a' ) {
-
-        $d1     =   new DateTime( $dateStart );
-
-        $d2     =   new DateTime( $dateEnd );
-
-        //Calcula a diferença entre as datas
-        $diff   =   $d1->diff($d2, true);   
-
-        //Formata no padrão esperado e retorna
-        return $diff->format( $format );
-
-    }
-    
-     public function abrir_rat($id = null)
-    {
-         
-        
-         
-        $this->form_validation->set_rules('hora_inicio', lang("Informe a Hora de Início"), 'required');
-        $this->form_validation->set_rules('hora_termino', lang("Informe a Hora de Término"), 'required');
-        $this->form_validation->set_rules('conteudo', lang("Informe o conteúdo"), 'required');
-        
-        $date_cadastro = date('Y-m-d H:i:s');       
-        
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
-        
-          if ($this->form_validation->run() == true) {
-           
-            $data_rat = $this->input->post('data_registro'); 
-            $hora_inicio = $this->input->post('hora_inicio');
-            $hora_termino = $this->input->post('hora_termino');
-            $conteudo = $this->input->post('conteudo');
-            $data_criacao = $date_cadastro;
-            $usuario = $this->session->userdata('user_id');
-            $id_mebro = $this->input->post('id_membro');
-            $tipo = $this->input->post('tipo');
-            
-            $tempo = gmdate('H:i:s', strtotime( $hora_termino) - strtotime( $hora_inicio  ) );
-            
-         
-            
-            $funcoes = $this->input->post('funcao');
-            $itens = $this->input->post('eventos_item');
-            
-            
-            
-            $data_rat = array(
-                'equipe' => $id_mebro,
-                'data_registro' => $data_criacao,
-                'hora_inicio' => $hora_inicio,
-                'hora_fim' => $hora_termino,
-                'descricao' => $conteudo,
-                'data_rat' => $data_rat,
-             //   'tipo_hora' => $tipo ,
-                'tempo' => $usuario
-            );
-           
-            
-          //  print_r($data_ata); exit;
-          
-            $this->atas_model->add_rat($data_rat, $funcoes, $itens);
-            
-            $this->session->set_flashdata('message', lang("RAT Registrado com Sucesso!!!"));
-            redirect("Welcome/abrir_rat/$id_mebro");
-            
-        } else {
-     
-           $date_cadastro = date('Y-m-d H:i:s');       
-           // $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
-            
-          
-           
-            $this->data['id'] = $id;
-            $this->data['dados_equipe'] = $this->atas_model->getMebrosEquipeByIdEquipe($id); //
-            
-            $projeto_membro = $this->atas_model->getMebrosEquipeByIdMembro($id);
-            $projeto_selecionado = $projeto_membro->projeto;
-          
-             $this->data['projeto'] = $projeto_selecionado;
-            
-           
-            $this->load->view($this->theme . 'usuarios/rat/edit_rat', $this->data);
-        }
-
-            
-    }
-    
-    public function deleteRat($rat = null, $id_membro = null)
-    {
-     
-                  
-            $this->atas_model->deleteRat($rat);
-          
-           
-            redirect("welcome/abrir_rat/$id_membro");
-    }
-    
-    
-     public function update_rat($id = null,  $rat = null)
-    {
-         
-        
-         
-        $this->form_validation->set_rules('hora_inicio', lang("Informe a Hora de Início"), 'required');
-        $this->form_validation->set_rules('hora_termino', lang("Informe a Hora de Término"), 'required');
-        $this->form_validation->set_rules('conteudo', lang("Informe o conteúdo"), 'required');
-        
-        $date_cadastro = date('Y-m-d H:i:s');       
-        
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
-        
-          if ($this->form_validation->run() == true) {
-           
-            $data_rat = $this->input->post('data_registro'); 
-            $hora_inicio = $this->input->post('hora_inicio');
-            $hora_termino = $this->input->post('hora_termino');
-            $conteudo = $this->input->post('conteudo');
-            $data_criacao = $date_cadastro;
-            $usuario = $this->session->userdata('user_id');
-            $id_mebro = $this->input->post('id_membro');
-            $tempo = gmdate('H:i:s', strtotime( $hora_termino) - strtotime( $hora_inicio  ) );
-            
-         
-            
-            $funcoes = $this->input->post('funcao');
-            $itens = $this->input->post('eventos_item');
-            
-            $rat_id = $this->input->post('rat');
-            
-            $data_rat = array(
-                'equipe' => $id_mebro,
-                'data_registro' => $data_criacao,
-                'hora_inicio' => $hora_inicio,
-                'hora_fim' => $hora_termino,
-                'descricao' => $conteudo,
-                'data_rat' => $data_rat,
-                'tempo' => $usuario
-            );
-           
-            
-          //  print_r($data_ata); exit;
-          
-            $this->atas_model->updateRat($rat_id, $data_rat, $funcoes, $itens);
-            
-            $this->session->set_flashdata('message', lang("RAT Registrado com Sucesso!!!"));
-            redirect("Welcome/abrir_rat/$id_mebro");
-            
-        } else {
-     
-            $date_cadastro = date('Y-m-d H:i:s');       
-            // $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
-            
-           
-            $this->data['id'] = $id;
-            $this->data['dados_equipe'] = $this->atas_model->getMebrosEquipeByIdEquipe($id); //
-            $this->data['rat'] = $rat;
-            $projeto_membro = $this->atas_model->getMebrosEquipeByIdMembro($id);
-            $projeto_selecionado = $projeto_membro->projeto;
-            $this->data['projeto'] = $projeto_selecionado;
-            $this->data['dados_rat'] = $this->atas_model->getRatById($rat); 
-           
-            $this->data['modulosRat'] = $this->atas_model->getModulosRatById($rat);
-            $this->data['eventosRat'] = $this->atas_model->getEventosRatById($rat);
-            
-            $this->load->view($this->theme . 'usuarios/rat/update_rat', $this->data);
-        }
-
-            
-    }
-    
-    
-     public function add_rat($id = null)
-    {
-         
-        
-         
-      
-     
-            $date_cadastro = date('Y-m-d H:i:s');       
-            // $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
-            
-           
-            
-            $this->data['id'] = $id;
-            $this->data['dados_equipe'] = $this->atas_model->getMebrosEquipeByIdEquipe($id); //
-            
-            $projeto_membro = $this->atas_model->getMebrosEquipeByIdMembro($id);
-            $projeto_selecionado = $projeto_membro->projeto;
-          
-             $this->data['projeto'] = $projeto_selecionado;
-
-             $this->load->view($this->theme . 'usuarios/rat/add_rat', $this->data);
-    }
-    
-     public function abrir_rat_pdf($view = 1)
-    {
-         
-        
-         
-        $this->form_validation->set_rules('data_inicio', lang("Informe a Data de Início"), 'required');
-        $this->form_validation->set_rules('data_fim', lang("Informe a Data de Término"), 'required');
-       // $this->form_validation->set_rules('conteudo', lang("Informe o conteúdo"), 'required');
-        
-        $date_cadastro = date('Y-m-d H:i:s');       
-     
-        
-          if ($this->form_validation->run() == true) {
-           
-            $data_rat = $this->input->post('data_registro'); 
-            $hora_inicio = $this->input->post('hora_inicio');
-            
-          
-            $usuario = $this->session->userdata('user_id');
-           
-             $date_cadastro = date('Y-m-d H:i:s');       
-           // $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
-            
-          
-           
-           // $this->data['id'] = $id;
-            $this->data['dados_equipe'] = $this->atas_model->getMebrosEquipeByIdUsuario($usuario); //
-            
-            //$projeto_membro = $this->atas_model->getMebrosEquipeByIdMembro($id);
-            //$projeto_selecionado = $projeto_membro->projeto;
-          
-             //$this->data['projeto'] = $projeto_selecionado;
-             $data_inicio = $this->input->post('data_inicio'); 
-          $data_fim = $this->input->post('data_fim');
-          
-          if($data_inicio){
-            $this->data['data_inicio'] = $data_inicio;
-              
-          }
-          
-          if($data_fim){
-              $this->data['data_fim'] = $data_fim;
-              
-          }
-             
-              $name = lang('Registro_atividades') . "_.pdf";
-            $html = $this->load->view($this->theme . 'usuarios/rat/edit_rat_pdf', $this->data, true);
-           
-             // $dados_projeto = $this->projetos_model->getProjetoByID($projeto_doc);
-            $logo_doc_top =  'cabecalho_unimed';//$dados_projeto->logo_doc_top;
-           // $logo_doc_bottom =  $dados_projeto->logo_doc_bottom;
-            
-        if ($view) {
-           $this->load->view($this->theme . 'usuarios/rat/edit_rat_pdf', $this->data);
-        } else{
-        
-          
-           // $documentacao = $this->projetos_model->getDocumentacaoByID($id);
-            $usuario = $this->session->userdata('user_id');
-            $res_assinar = $this->site->geUserByID($usuario);
-            $nome_emitiu = $res_assinar->first_name.' '.$res_assinar->last_name;
-            
-            $this->sma->generate_pdf($html, $name, false, null, null, null, null, null, $logo_doc_top, null,$nome_emitiu,null);
-        }
-           
-            
-        }
-
-            
-    }
     
     
     

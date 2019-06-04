@@ -10,13 +10,23 @@
           ?>
    
 <?php
+   
         $acao = $this->atas_model->getPlanoByID($idplano);
         $usuario = $this->session->userdata('user_id');
+       // $empresa = $this->session->userdata('empresa');
         //$users = $this->site->geUserByID($acao->responsavel);     
+        // echo 'Plano : '.$empresa; exit;
         if($acao->idplano){
-            $referencia = 'PLANO DE AÇÃO :'.$acao->idplano;
+            $plano_acao = $this->atas_model->getPlanoAcaoByID($acao->idplano);
+            $referencia = 'PLANO DE AÇÃO : '.$plano_acao->sequencial;
         }else if($acao->idatas){
-            $referencia = 'ATA :'.$acao->idatas;
+            $ata = $this->atas_model->getAtaByID($acao->idatas);
+            $referencia = 'ATA : '.$ata->sequencia;
+        }
+        
+        if($acao->projeto){
+            $projeto_acao = $this->projetos_model->getProjetoByID($acao->projeto);
+            $nome_projeto = $projeto_acao->projeto;
         }
         
         ?>    
@@ -27,12 +37,12 @@
         
          if ($dataHoje <= $data_prazo) {
             $novo_status = 'PENDENTE';
-            $desc_tipo = "primary";
+            $desc_tipo = "orange-active";
         }
         
           if ($dataHoje > $data_prazo) {
                $novo_status = 'ATRASADO';
-                $desc_tipo = "danger";
+                $desc_tipo = "red-active";
 
               $time_inicial = geraTimestamp($this->sma->hrld($dataHoje));
                 $time_final = geraTimestamp($this->sma->hrld($data_prazo));
@@ -58,13 +68,13 @@
        
     }else if($acao->status == "CONCLUÍDO"){
         $novo_status = 'CONCLUÍDO';
-         $desc_tipo = "success";
+         $desc_tipo = "green-active";
     }else if($acao->status == "AGUARDANDO VALIDAÇÃO"){
          $novo_status = 'AGUARDANDO VALIDAÇÃO';
-         $desc_tipo = "warning";
+         $desc_tipo = "blue-gradient";
     }else if($acao->status == "CANCELADO"){
         $novo_status = 'CANCELADO';
-         $desc_tipo = "default";
+         $desc_tipo = "black-active";
     }
 ?>
     <script>
@@ -88,11 +98,29 @@
     <div class="col-lg-12">
     <div class="box">
     <section class="content-header">
-             <h1>
-            <?php echo 'Ação '.$acao->sequencial; ?>
-              <font class="label label-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font>   
-             </h1>
-              <?php echo $acao->descricao; ?>
+             <h3>
+            <font class="label bg-navy-active" style="font-size: 12px; font-weight: bold"><?php echo 'Ação '.$acao->sequencial; ?></font> 
+                 
+             <?php if($acao->projeto){ ?>    
+             <font class="label bg-green-active" style="font-size: 12px; font-weight: bold"><?php echo 'Projeto : '. $nome_projeto;  ?>  </font> 
+            <?php  } ?>
+            <?php
+             if($acao->idplano){
+             ?>    
+             <font class="label bg-blue" style="font-size: 12px; font-weight: bold"><?php echo $referencia;  ?>  </font> 
+            <?php
+            }else if($acao->idatas){
+            ?>    
+             <font class="label bg-blue" style="font-size: 12px; font-weight: bold"><?php echo $referencia;  ?>  </font> 
+            <?php
+            }
+             
+            
+              
+              ?>
+              <font class="label bg-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font>   
+             </h3>
+        <h2><?php echo $acao->descricao; ?></h2>
               <div id="exibe_andamento">
                   <script>exibe_andamento(<?php echo $idplano; ?>)</script>
               </div>
@@ -145,15 +173,19 @@ background-color: #f4f4f4;
 }
  
 </style>
-<?php if ($acao->status == 'PENDENTE') { ?>
+
     <div class="row">  
         <div class="col-lg-12">
             <div class="col-lg-12">
-                <a href="<?= site_url('welcome/retorno_new/'.$idplano); ?>" data-toggle="modal" data-target="#myModal" class="btn btn-primary"><i class="fa fa-retweet"></i> Retornar Ação</a>
+                <?php if ($acao->status == 'PENDENTE') { ?>
+                <a href="<?= site_url('welcome/retorno_new/'.$idplano); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-olive-active"><i class="fa fa-check"></i> Retornar Ação</a>
+                <?php } ?>
+                <a href="<?= site_url('welcome/minhasAcoes/0/69'); ?>"  class="btn btn-primary"><i class="fa fa-backward"></i> Voltar</a>
+
             </div>
         </div>
     </div>    
-<?php } ?>
+
     <section  class="content">
         <div class="col-lg-12">
             <div class="row">    
@@ -165,7 +197,7 @@ background-color: #f4f4f4;
                         <li><a href="#checklist" data-toggle="tab"><b>CheckList <i class="fa fa-check-square-o"></i></b></a></li>
                         <li><a href="#activity" data-toggle="tab"><b>Ações Vinculadas <i class="fa fa-link"></i></b></a></li>                         
                         <li><a href="#settings" data-toggle="tab"><b>Arquivos <i class="fa fa-folder-open"></i></b></a></li>
-                        <li><a href="#historico" data-toggle="tab"><b>Histórico <i class="fa fa-comments-o"></i></b></a></li>
+                        <li><a href="#historico" data-toggle="tab"><b>Comunicação <i class="fa fa-comments-o"></i></b></a></li>
                         <li><a href="#rat" data-toggle="tab"><b>Rat's <i class="fa fa-pencil"></i></b></a></li>
                     </ul>
                     <div class="tab-content">
@@ -188,6 +220,8 @@ background-color: #f4f4f4;
                                     echo form_hidden('id', $acao->idplanos);
                                     echo form_hidden('idatas', $acao->idplano);
                                     ?>
+                                    
+                                    <?php if ($acao->projeto) { ?>
                                     <div class="col-md-12">
                                         <!-- ITEM EVENTO -->
                                         <div class="col-md-12">
@@ -203,6 +237,7 @@ background-color: #f4f4f4;
                                             </div>
                                         </div>
                                     </div>
+                                    <?php } ?>
                                     <div class="col-md-12">
 
                                         <div class="col-md-6">
@@ -316,9 +351,13 @@ background-color: #f4f4f4;
                         </div>
                         
                         <div class=" tab-pane" id="activity">
-                            <div class="portlet-body">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    
                                 
-                                <table id="example1" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
+                                <div class="portlet-body">
+                                
+                                <table id="chcklist_networking" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
                                     <thead>
                                         <tr>
                                             <th><font style="font-size: 10px;">ID</font></th>
@@ -370,78 +409,86 @@ background-color: #f4f4f4;
                                       </div>  
                                     </center>
                             </div>
+                                </div>    
+                                    
+                            </div>    
                         </div>
                         
                         <div class="tab-pane" id="settings">
-                            <?php
-                            $attrib = array('data-toggle' => 'validator', 'role' => 'form');
-                            echo form_open_multipart("project/manutencao_acao_arquivos", $attrib);
-                            echo form_hidden('id', $acao->idplanos);
-                            echo form_hidden('idatas', $acao->idplano);
-                            ?>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                            <?= lang("Descrição", "descricao"); ?>
-                            <?php echo form_input('descricao_arquivo', (isset($_POST['descricao']) ? $_POST['descricao'] : ""), 'class="form-control input" maxlength="250"   id="descricao"  '); ?>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <?= lang("Arquivo", "descricao"); ?>
-                                    <input id="document" type="file" data-browse-label="<?= lang('browse'); ?>" name="document" value="<?php echo $projeto->anexo; ?>" data-show-upload="false"
-                                           data-show-preview="false" class="form-control file">
-                                </div>
-                            </div>
-                            <center>
+                            <div class="row">
                                 <div class="col-md-12">
-                            <?php echo form_submit('add_acao_arquivo', lang("Adcionar Arquivo"), 'id="add_item" class="btn btn-primary " style="padding: 6px 15px; margin:15px 0;"  " '); ?>
-                            <?php echo form_close(); ?>
+                                <h3>Lista de Arquivos da ação</h3>
+                                <?php
+                                $attrib = array('data-toggle' => 'validator', 'role' => 'form');
+                                echo form_open_multipart("project/manutencao_acao_arquivos", $attrib);
+                                echo form_hidden('id', $acao->idplanos);
+                                echo form_hidden('idatas', $acao->idplano);
+                                ?>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                <?= lang("Descrição", "descricao"); ?>
+                                <?php echo form_input('descricao_arquivo', (isset($_POST['descricao']) ? $_POST['descricao'] : ""), 'class="form-control input" maxlength="250"   id="descricao"  '); ?>
+                                    </div>
                                 </div>
-                            </center>
-                            <div class="portlet-body">
-                                <table id="example2" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
-                                    <thead>
-                                        <tr>
-                                            <th><font style="font-size: 10px;">ID</font></th>
-                                            <th><font style="font-size: 10px;">DESCRIÇÃO</th>
-                                            <th><font style="font-size: 10px;">ARQUIVO</th>
-                                            <th><font style="font-size: 10px;">DOWNLOAD</th>
-                                            
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-<?php
-$wu4[''] = '';
-$cont_arquivo = 1;
-foreach ($acoes_arquivos as $arquivo) {
-    ?>   
-                                            <tr class="odd gradeX">
-                                                <td><font style="font-size: 10px;"><?php echo $cont_arquivo++; ?></font></td>
-                                                <td><font style="font-size: 10px;"><?php echo $arquivo->descricao; ?></font></td>
-                                                <td><font style="font-size: 10px;"><?php echo $arquivo->anexo; ?></font></td>
-                                                <td><font style="font-size: 10px;"><a target="_blank" href="assets/uploads/planos/arquivos/<?php echo $arquivo->anexo; ?>" class="tip btn btn-file" title="<?= lang('Arquivo em Anexo') ?>"><i class="fa fa-download"></i></a></font></td>  
-                                                
-                                            </tr>
-    <?php
-}
-?>
-
-
-
-
-                                    </tbody>
-                                </table>
-                                 <br>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <?= lang("Arquivo", "descricao"); ?>
+                                        <input id="document" type="file" data-browse-label="<?= lang('browse'); ?>" name="document" value="<?php echo $projeto->anexo; ?>" data-show-upload="false"
+                                               data-show-preview="false" class="form-control file">
+                                    </div>
+                                </div>
                                 <center>
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <?php // echo form_submit('add_item', lang("Salvar"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
-                                            <button  class="btn btn-danger" onclick="history.go(-1)"><?= lang('Sair') ?></button>
+                                    <div class="col-md-12">
+                                <?php echo form_submit('add_acao_arquivo', lang("Adcionar Arquivo"), 'id="add_item" class="btn btn-primary " style="padding: 6px 15px; margin:15px 0;"  " '); ?>
+                                <?php echo form_close(); ?>
+                                    </div>
+                                </center>
+                                <div class="portlet-body">
+                                    <table id="networking_arquivos" class="table table-striped sorting_asc_disabled table-bordered table-hover table-green">
+                                        <thead>
+                                            <tr>
+                                                <th><font style="font-size: 10px;">ID</font></th>
+                                                <th><font style="font-size: 10px;">DESCRIÇÃO</th>
+                                                <th><font style="font-size: 10px;">ARQUIVO</th>
+                                                <th><font style="font-size: 10px;">DOWNLOAD</th>
 
-                                        </div>
-                                      </div>  
-                                    </center>
-                            </div> 
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+    <?php
+    $wu4[''] = '';
+    $cont_arquivo = 1;
+    foreach ($acoes_arquivos as $arquivo) {
+        ?>   
+                                                <tr class="odd gradeX">
+                                                    <td><font style="font-size: 10px;"><?php echo $cont_arquivo++; ?></font></td>
+                                                    <td><font style="font-size: 10px;"><?php echo $arquivo->descricao; ?></font></td>
+                                                    <td><font style="font-size: 10px;"><?php echo $arquivo->anexo; ?></font></td>
+                                                    <td><font style="font-size: 10px;"><a target="_blank" href="assets/uploads/planos/arquivos/<?php echo $arquivo->anexo; ?>" class="tip btn btn-file" title="<?= lang('Arquivo em Anexo') ?>"><i class="fa fa-download"></i></a></font></td>  
+
+                                                </tr>
+        <?php
+    }
+    ?>
+
+
+
+
+                                        </tbody>
+                                    </table>
+                                     <br>
+                                    <center>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <?php // echo form_submit('add_item', lang("Salvar"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
+                                                <button  class="btn btn-danger" onclick="history.go(-1)"><?= lang('Sair') ?></button>
+
+                                            </div>
+                                          </div>  
+                                        </center>
+                                </div> 
+                                </div>
+                            </div>    
                         </div>                   
                         
                         <div class="tab-pane" id="historico">
@@ -456,6 +503,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                       observacao: $('#observacao').val(),
                                       id_plano: $('#id_plano').val(),
                                       usuario: $('#usuario').val(),
+                                      empresa: $('#empresa').val(),
                                       total_obs: $('#total_obs').val()
                                     },
                                     success: function(data) {
@@ -470,12 +518,14 @@ foreach ($acoes_arquivos as $arquivo) {
                                  
                                 </script>
                                 <?php 
-                                $usuario = $this->session->userdata('user_id'); 
+                                $usuario = $this->session->userdata('user_id');
+                                $empresa = $this->session->userdata('empresa'); 
                                 $total_observacoes =  $this->atas_model->getCountAllHistoricoAcoes($acao->idplanos);
                                 $total_obs = $total_observacoes->total;
                                 ?>
                                 <input type="hidden" name="id_plano" id="id_plano" value="<?php echo $acao->idplanos; ?>" >
                                 <input type="hidden" name="usuario" id="usuario" value="<?php echo $usuario; ?>" >
+                                <input type="hidden" name="empresa" id="empresa" value="<?php echo $empresa; ?>" >
                                 <input type="hidden" name="total_obs" id="total_obs" value="<?php echo $total_obs; ?>" >
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -608,29 +658,30 @@ foreach ($acoes_arquivos as $arquivo) {
                                 <input type="hidden" name="id_plano" id="id_plano" value="<?php echo $acao->idplanos; ?>" >
                                 <input type="hidden" name="usuario" id="usuario" value="<?php echo $usuario; ?>" >
                                 <input type="hidden" name="empresa" id="empresa" value="<?php echo $empresa; ?>" >
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                     <?= lang("Data", "data_rat"); ?>
                                     <input type="date" name="data_rat" id="data_rat" class="form-control ">
                                 </div>
                             </div>
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <div class="form-group">
                                 <?= lang("Hora Início", "hora_inicio"); ?>
                                   <input type="time" name="hora_inicio" id="hora_inicio" class="form-control ">
                                 </div>
                             </div>
-                             <div class="col-md-2">
+                             <div class="col-md-4">
                                 <div class="form-group">
                                     <?= lang("Hora Fim", "hora_fim"); ?>
                                     <input  type="time" name="hora_fim" id="hora_fim" class="form-control ">
                                 </div>
                             </div>   
                                 
-                            <div class="col-md-5">
+                            <div class="col-md-12">
                                 <div class="form-group">
                             <?= lang("Descrição", "descricao_rat"); ?>
-                            <?php echo form_input('descricao_rat', (isset($_POST['descricao']) ? $_POST['descricao'] : ""), 'class="form-control input" maxlength="250"   id="descricao_rat"  '); ?>
+                                    <textarea name="descricao_rat" id="descricao_rat" class="form-control"></textarea>      
+                            <?php // echo form_input('descricao_rat', (isset($_POST['descricao']) ? $_POST['descricao'] : ""), 'class="form-control input" maxlength="250"   id="descricao_rat"  '); ?>
                                 </div>
                             </div>
                            
@@ -652,7 +703,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                     <div class="portlet-body">
                                         <div id="conteudo_rat">
                                             <div class="table-responsive  ">
-                                            <table style="font-size: 12px;" class="table table-striped">
+                                            <table id="networking_rats" style="font-size: 12px;" class="table table-striped">
                                                 <thead>
                                                     <tr>
                                                         <th style="width: 5%;">ID</th>
@@ -758,14 +809,14 @@ foreach ($acoes_arquivos as $arquivo) {
                            
                                 
                                 <div class="col-md-12">
-                                    <div class="col-md-11">
+                                    <div class="col-md-10">
                                         <div class="form-group">
-                                        <?php echo form_input('descricao_checklist', (isset($_POST['descricao_checklist']) ? $_POST['descricao_checklist'] : ""), 'class="form-control input"  placeholder="Descreva a Atividade" maxlength="250"   id="descricao_checklist"  '); ?>
+                                        <?php echo form_input('descricao_checklist', (isset($_POST['descricao_checklist']) ? $_POST['descricao_checklist'] : ""), 'class="form-control input"  placeholder="Descreva a Atividade" maxlength="350"   id="descricao_checklist"  '); ?>
                                         </div>
                                      </div> 
-                                    <div class="col-md-1">
+                                    <div class="col-md-2">
                                         <div class="form-group">
-                                            <button class="btn btn-success" type="submit" onclick="div_check_list(); document.getElementById('descricao_checklist').value = '';"><i class="fa fa-plus"></i></button>                                      
+                                            <button class="btn btn-success" type="submit" onclick="div_check_list(); document.getElementById('descricao_checklist').value = '';"><i class="fa fa-plus"></i> Enviar</button>                                      
                                         </div>
                                      </div>    
                                 </div>
@@ -786,7 +837,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                             </script>  
                                         </div>
                                      </div>
-                                        <!-- /.table-responsive -->
+                                        <!-- /.table-responsive   -->
                                     </div>
                                    
                                   </div>    
@@ -802,7 +853,20 @@ foreach ($acoes_arquivos as $arquivo) {
         </div>       
     </section>    
 
-
+    <script>
+  $(function () {
+    $('#networking_rats').DataTable()
+    $('#networking_arquivos').DataTable()
+    $('#chcklist_networking').DataTable({
+      'paging'      : true,
+      'lengthChange': false,
+      'searching'   : false,
+      'ordering'    : true,
+      'info'        : true,
+      'autoWidth'   : false
+    })
+  })
+</script>
 <script>
   $(function () {
     //Initialize Select2 Elements

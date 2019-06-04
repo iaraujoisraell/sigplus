@@ -9,9 +9,8 @@ class Atas_model extends CI_Model
     }
 
     
-    public function addAtas($data,$participantes)
+    public function addAtas($data, $usuario_ata,$participantes)
     {
-           // print_r($data); exit;
             
             if ($this->db->insert('atas', $data)) {
                  $id_ata = $this->db->insert_id();
@@ -60,10 +59,29 @@ class Atas_model extends CI_Model
         return false;
     }
     
-     public function getAtaByIDByProjeto($id, $projeto)
+     public function getAtaByIDByProjeto($id)
     {
+         $empresa = $this->session->userdata('empresa');
+         $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
          $this->db->select('count(id) as quantidade');
-        $q = $this->db->get_where('atas', array('id' => $id, 'projetos' => $projeto), 1);
+        $q = $this->db->get_where('atas', array('id' => $id, 'projetos' => $projeto_atual, 'empresa' => $empresa), 1);
+     
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+         
+    }
+    
+     public function getAtaSemProjetoByID($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+        $usuario = $this->session->userdata('user_id');
+        
+        $q = $this->db->get_where('atas', array('id' => $id,  'empresa' => $empresa), 1);
      
         if ($q->num_rows() > 0) {
             return $q->row();
@@ -74,7 +92,12 @@ class Atas_model extends CI_Model
     
      public function getAtaByID($id)
     {
-        $q = $this->db->get_where('atas', array('id' => $id), 1);
+        $empresa = $this->session->userdata('empresa');
+        $usuario = $this->session->userdata('user_id');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual = $users_dados->projeto_atual;
+        
+        $q = $this->db->get_where('atas', array('id' => $id, 'projetos' => $projeto_atual, 'empresa' => $empresa), 1);
      
         if ($q->num_rows() > 0) {
             return $q->row();
@@ -85,13 +108,59 @@ class Atas_model extends CI_Model
     
     public function getPlanoAcaoByID($id)
     {
-        $q = $this->db->get_where('plano_acao', array('id' => $id), 1);
+        $empresa = $this->session->userdata('empresa');
+        $q = $this->db->get_where('plano_acao', array('id' => $id, 'empresa' => $empresa), 1);
      
         if ($q->num_rows() > 0) {
             return $q->row();
         }
         return FALSE;
          
+    }
+    
+        /***********************************************************************************
+     ***** RETORNA AS ATAS . A PARTIR DE UM PLANO DE AÇÃO ***********
+     ***********************************************************************************/
+    public function getAllMinhasAtasByPlanoAcao($planoAcao){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $projetos = $this->projetos_model->getProjetoAtualByID_completo();
+        $id_projeto = $projetos->id;
+       
+        $statement = "SELECT * FROM sig_atas "
+                 . " WHERE projetos = $id_projeto and networking = 0
+                     and empresa = $empresa and plano_acao = $planoAcao order by id desc";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    // retorna todas as categosrias de um plano de ação de um projeto
+     public function getAllCategoriaPlanoAcaoByPlano($plano){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT * FROM sig_plano_acao_categoria where pa = $plano and empresa = $empresa  order by ordem asc";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
     }
     
      public function getAtaProjetoByID_ATARetornoUsuario($id)
@@ -578,7 +647,11 @@ class Atas_model extends CI_Model
     
     public function getAllProjetos()
     {
-        $q = $this->db->get('projetos');
+       $usuario = $this->session->userdata('user_id');
+        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+        $projeto = $projetos_usuario->projeto_atual; 
+        
+       $q = $this->db->get_where('projetos', array('empresa' => $projeto), 1);
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;
@@ -659,7 +732,7 @@ class Atas_model extends CI_Model
      public function updatePlanoAta($id, $data  = array())
     {  
         
-        if ($this->db->update('planos', $data, array('idatas' => $id))) {
+        if ($this->db->update('planos', $data, array('idatas' => $id, 'status' => 'ABERTO'))) {
             
          return true;
         }
@@ -673,7 +746,7 @@ class Atas_model extends CI_Model
      public function updateAcoesPlanoAcao($id, $data  = array())
     {  
         
-        if ($this->db->update('planos', $data, array('idplano' => $id))) {
+        if ($this->db->update('planos', $data, array('idplano' => $id, 'status' => 'ABERTO'))) {
             
          return true;
         }
@@ -1046,8 +1119,8 @@ order by su.nome asc
                     inner join sig_users u on u.id = p.responsavel
                     inner join sig_users_setor us on us.users_id = u.id
                     inner join sig_setores s on s.id = us.setores_id
-                    where s.pai = $id and p.projeto = $projeto_atual and s.empresa_id = $empresa order by nome asc";
-        //echo $statement; exit;
+                    where (s.pai = $id or s.id = $id) and p.projeto = $projeto_atual and s.empresa_id = $empresa order by nome asc";
+        
         $q = $this->db->query($statement);
         /*
         $this->db->select('setores.id as setor_id,setores.nome as setor, superintendencia.nome as superintendencia, superintendencia.id as id_area')
@@ -1120,12 +1193,15 @@ order by su.nome asc
      */
      public function getAllAcaoPlanoAcaoById($id)
     {
-          $statement = "SELECT p.idplanos as id, p.descricao as descricao, p.categoria_plano as categoria_plano, c.descricao as categoria, sequencial, p.status as status, u.first_name as responsavel,  s.nome as setor, data_entrega_demanda, data_termino, como, porque,onde,custo, p.anexo as anexo, valor_custo, horas_previstas, peso  FROM sig_planos p
+         $empresa = $this->session->userdata('empresa');
+          $statement = "SELECT p.idplanos as id,  a.sequencia as idatas, p.idplano as idplano, p.descricao as descricao, p.categoria_plano as categoria_plano, c.descricao as categoria, sequencial, p.status as status, u.first_name as responsavel,  s.nome as setor, data_entrega_demanda, p.data_termino, como, porque,onde,custo, p.anexo as anexo, valor_custo, horas_previstas, peso  
+              FROM sig_planos p
+            left join sig_atas a on a.id = p.idatas  
             inner join sig_users u on u.id = p.responsavel
             inner join sig_setores s on s.id = p.setor
             inner join sig_plano_acao_categoria c on c.id = p.categoria_plano
-            where p.idplano = $id order by c.ordem asc";
-          // echo $statement; exit;
+            where p.idplano = $id and p.empresa = $empresa order by c.ordem asc";
+        //   echo $statement; exit;
         $q = $this->db->query($statement);
         
       /*   $this->db->select('planos.*, users.*, setores.*')
@@ -1186,7 +1262,7 @@ order by su.nome asc
      public function getAllAcoesUserById_User($usuario, $projeto, $status)
     {
        $empresa = $this->session->userdata('empresa');
-       $dataHoje = date('Y-m-d H:i:s');
+       $dataHoje = date('Y-m-d');
 
        $statement = "SELECT * FROM sig_planos p
                      where responsavel = $usuario and status != 'ABERTO' and empresa = $empresa";
@@ -1203,9 +1279,12 @@ order by su.nome asc
                 }else{
                      $statement .= " and status = '$status'";
                 }
+            }else{
+                 $statement .= " and status = 'PENDENTE' and data_termino >= '$dataHoje' ";
             }
-        $statement .= " order by idplanos desc ";
-       //echo $statement; exit;
+            
+        $statement .= " order by data_termino asc ";
+      // echo $statement; exit;
         $q = $this->db->query($statement);
         
         if ($q->num_rows() > 0) {
@@ -1221,6 +1300,7 @@ order by su.nome asc
     // RETORNA TODOS OS PROJETOS QUE O USUÁRIO TEM AÇÃO; NETWORK > MINHAS AÇÕES
      public function getAllProjetosUserById_User($usuario)
     {
+         
        $empresa = $this->session->userdata('empresa');
        $statement = "SELECT distinct j.id as id, j.projeto as projeto
                     FROM sig_planos p
@@ -1369,16 +1449,20 @@ order by su.nome asc
         }
         return FALSE;
     }
-    
-     public function getAllAcoesProjeto($id, $id_acao)
+    //
+     public function getAllAcoesProjeto($id_acao, $projeto_acao)
     {
        $empresa = $this->session->userdata('empresa');
-       $statement = "SELECT idplanos, sequencial, idatas, p.data_entrega_demanda as dt_inicio, p.data_termino as dt_termino, p.descricao as descricao, i.descricao as item, nome_evento, nome_fase FROM sig_planos p
+       $usuario = $this->session->userdata('user_id');
+    
+         
+       $statement = "SELECT idplanos, sequencial, idatas, p.data_entrega_demanda as dt_inicio, p.data_termino as dt_termino, p.descricao as descricao, i.descricao as item, nome_evento, nome_fase 
+           FROM sig_planos p
                     inner join sig_item_evento i on i.id = p.eventos
                     inner join sig_eventos e on e.id = i.evento
                     inner join sig_fases_projeto f on f.id = e.fase_id
                     left join sig_atas a on a.id = p.idatas
-                    where a.projetos = $id and a.empresa = $empresa and p.empresa = $empresa and idplanos not in($id_acao) and idplanos not in(select id_vinculo from sig_acao_vinculos where planos_idplanos = $id_acao) ";
+                    where a.projetos = $projeto_acao and a.empresa = $empresa and p.empresa = $empresa and idplanos not in($id_acao) and idplanos not in(select id_vinculo from sig_acao_vinculos where planos_idplanos = $id_acao) ";
        //echo $statement; exit;
         $q = $this->db->query($statement);
         
@@ -1504,7 +1588,8 @@ order by su.nome asc
     {
          $usuario = $this->session->userdata('user_id');
          $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
-           
+         $projeto_atual = $projetos_usuario->projeto_atual;  
+         
          $this->db->select('atas.id as id, atas.id as ata, projeto, atas.status as status,  data_ata, pauta, participantes,  tipo, responsavel_elaboracao, assinaturas, pendencias, atas.anexo')
          ->join('projetos', 'atas.projetos = projetos.id', 'left')
          ->order_by('id', 'desc');
@@ -1654,7 +1739,7 @@ order by su.nome asc
      */
      public function getSequencialAta()
     {
-    $empresa = $this->session->userdata('empresa');
+        $empresa = $this->session->userdata('empresa');
         $statement = "SELECT max(sequencia)+1 as sequencial FROM sig_atas where empresa = $empresa";
         //echo $statement; exit;
         $q = $this->db->query($statement);
@@ -1790,6 +1875,56 @@ order by su.nome asc
         if ($q->num_rows() > 0) {
             return $q->row();
         }
+        return FALSE;
+         
+    }
+    
+     public function getAllPlanoByAtaID($id)
+    {
+        //$this->db->select("count(idplanos) as totalplanos");
+        $empresa = $this->session->userdata('empresa');    
+        $q = $this->db->get_where('planos', array('idatas' => $id, 'empresa' => $empresa));
+    
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+         }
+        return FALSE;
+         
+    }
+    
+    //RETORNA AS AÇÕES ABERTAS DE UMA ATA
+     public function getAllPlanoAbertosByAtaID($id)
+    {
+        //$this->db->select("count(idplanos) as totalplanos");
+        $empresa = $this->session->userdata('empresa');    
+        $q = $this->db->get_where('planos', array('idatas' => $id, 'status' => 'ABERTO', 'empresa' => $empresa));
+    
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+         }
+        return FALSE;
+         
+    }
+    
+     //RETORNA AS AÇÕES ABERTAS DE UM PLANO DE AÇÃO
+     public function getAllPlanoAbertosByPlanoAcaoID($id)
+    {
+        //echo $id; exit;
+        $empresa = $this->session->userdata('empresa');    
+        $q = $this->db->get_where('planos', array('idplano' => $id, 'status' => 'ABERTO', 'empresa' => $empresa));
+    
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+         }
         return FALSE;
          
     }
@@ -3116,12 +3251,24 @@ order by su.nome asc
     }
     
     
+     public function getRegistroAtividadesByUsuario($id)
+    {
+         $statement = "SELECT r.data_rat, hora_inicio, hora_fim, tempo, valor, r.descricao as descricao_rat, p.idplanos, p.descricao as descricao_acao, p.status
+                    FROM sig_planos_rat r
+                    inner join sig_planos p on p.idplanos = r.planoid
+                    where r.usuario = 2 and r.empresa = 5";    
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+     }
+    
     
      /*
      * PEGA TODOS OS PROJETOS QUE EU SOU MEMBRO DE UMA EQUIPE
      */
      public function getMebrosEquipeByUsuario($id)
     {
+         
+         
          $this->db->select('membros_equipe.id as id, users_setores.id as id_usuario_setor, users.id as id_usuario, users.first_name as name, users.last_name as last, setores.nome as setor, papeis_responsabilidades.papel as papel, papeis_responsabilidades.descricao as descricao, equipes.nome as equipe, projetos.projeto as projeto')
         ->join('users_setores', 'membros_equipe.usuario = users_setores.id', 'inner')           
         ->join('users', 'users_setores.usuario = users.id', 'inner')       
@@ -3453,34 +3600,14 @@ order by su.nome asc
          
     }
     
-    
-     public function updateRat($rat, $data  = array(),  $funcoes, $itens)
+    /*
+     * altera a rat da ação por usuário e empresa
+     */
+     public function updateRat($rat, $data  = array())
     {  
-     
-        if ($this->db->update('rats', $data, array('id' => $rat))) {
-            
-          
-                $this->db->delete('rats_funcao', array('rat' => $rat));
-                $this->db->delete('rats_item', array('rat' => $rat));
-            
-               
-                   foreach ($itens as $item) {
-                    
-                        $data_ata_usuario = array(
-                            'rat' => $rat,
-                            'item' => $item);      
-                       
-                        $this->db->insert('rats_item', $data_ata_usuario);
-                 }
-                 
-                  foreach ($funcoes as $funcao) {
-                        $data_rat_funcao = array(
-                            'rat' => $rat,
-                            'funcao' => $funcao);      
-                        
-                        $this->db->insert('rats_funcao', $data_rat_funcao);
-                 }
-           
+          $empresa = $this->session->userdata('empresa');
+        $usuario = $this->session->userdata('user_id'); 
+        if ($this->db->update('planos_rat', $data, array('id' => $rat,  'empresa' => $empresa))) {
             
          return true;
         }

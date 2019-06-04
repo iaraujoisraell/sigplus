@@ -27,27 +27,7 @@ class Reports extends MY_Controller
 
     
     
-    
-    public function status_report()
-    {
-        $this->sma->checkPermissions();
-        $data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
-        
-        // $this->load->library("phpmailer_library");
-        //$objMail = $this->phpmailer_library->load();
-        
-        $usuario = $this->session->userdata('user_id');
-        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
-        $this->data['status_report'] = $this->reports_model->getAllStatusReportByProjeto($projetos_usuario->projeto_atual);
-        
-        $bc = array(array('link' => base_url(), 'page' => lang('home')), array('link' => '#', 'page' => lang('reports')));
-        $meta = array('page_title' => lang('reports'), 'bc' => $bc);
-        $this->page_construct('reports/status_report/index', $meta, $this->data);
-
-    }
-    
-    
-     function diasemana($data){  // Traz o dia da semana para qualquer data informada
+    function diasemana($data){  // Traz o dia da semana para qualquer data informada
         $dia =  substr($data,0,2);
         $mes =  substr($data,3,2);
         $ano =  substr($data,6,9);
@@ -67,7 +47,28 @@ class Reports extends MY_Controller
         
         
         
-     public function envia_report()
+     public function rotina_envio()
+    {
+           $dia = date('d'); 
+           $date_cadastro = date('Y-m-d');   
+           $hora =  date('H:i:s');
+           $data_hoje_tratada = date('d/m/Y',  strtotime($date_cadastro));//$this->sma->hrld($date_cadastro); 
+           $dia_da_semana = $this->diasemana($data_hoje_tratada);
+           
+           
+           /* 
+            * *************************************************************************************************************************
+            *  1 - GERA O STATUS_REPORT SEMANAL DOS PROJETOS
+            * 
+            * TODA QUARTA-FEIRA
+            */
+          
+            $this->enviaEmailControle('O SISTEMA VERIFICOU SE EXISTE ALGUMA ORDEM DE SERVIÇO NOVA OU COM STATUS DIFERENTE NO GLPI E ATUALIZOU O SIG');  
+            
+            
+     }
+     
+      public function rotinas()
     {
            $dia = date('d'); 
            $date_cadastro = date('Y-m-d');   
@@ -182,10 +183,47 @@ class Reports extends MY_Controller
             
      }
      
+     
+     /*
+     **********************ELE ME ENVIA UM EMAIL TODA VEZ QUE O SERVIDOR DISPARA ALGUM EMAIL ************************************************************************************************* 
+     */
+    public function enviaEmailControle()
+    {
+      //  $this->sma->checkPermissions();
+           
+        
+        $date_hoje = date('Y-m-d H:i:s');
+        $date_2 = date('Y-m-d');
+        
+               // echo 'aqui'; exit;
+      //  $this->ion_auth->emailControleServidor($date_hoje,"teste");
+        
+                   
+    }
+     
+     
      /*
      ******************************STATUS REPORT ***************************************************************************************** 
      */
 
+     public function status_report()
+    {
+        $this->sma->checkPermissions();
+        $data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
+        
+        // $this->load->library("phpmailer_library");
+        //$objMail = $this->phpmailer_library->load();
+        
+        $usuario = $this->session->userdata('user_id');
+        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+        $this->data['status_report'] = $this->reports_model->getAllStatusReportByProjeto($projetos_usuario->projeto_atual);
+        
+        $bc = array(array('link' => base_url(), 'page' => lang('home')), array('link' => '#', 'page' => lang('reports')));
+        $meta = array('page_title' => lang('reports'), 'bc' => $bc);
+        $this->page_construct('reports/status_report/index', $meta, $this->data);
+
+    }
+     
     public function enviar_gera_status_report()
     {
        // $this->sma->checkPermissions();
@@ -413,22 +451,7 @@ class Reports extends MY_Controller
     }  
     
     
-    /*
-     **********************ELE ME ENVIA UM EMAIL TODA VEZ QUE O SERVIDOR DISPARA ALGUM EMAIL ************************************************************************************************* 
-     */
-    public function enviaEmailControle()
-    {
-      //  $this->sma->checkPermissions();
-           
-        
-        $date_hoje = date('Y-m-d H:i:s');
-        $date_2 = date('Y-m-d');
-        
-               // echo 'aqui'; exit;
-        $this->ion_auth->emailControleServidor($date_hoje,"teste");
-        
-                   
-    }
+    
     
     
     /*
@@ -1319,644 +1342,13 @@ class Reports extends MY_Controller
     }
     
      
-   /*
-     **********************ATUALIZA AS ORDEM DE SERVIÇO NO SIG. Verifica no GLPI e atualiza o SIG****************************************************************** 
-     */     
+   
     
-    public function verificaOrdemServicoSobreaviso()
-    {
-     // $date_hoje = date('Y-m-d H:i:s');
-     // $date_2 = date('Y-m-d');
-     
-        //GLPI
-        $tickets = $this->reports_model->getAllOrdemServicosSemAceite();
-        $ont_dif = 0;
-        $cont = 0;
-       // print_r($tickets);exit;
-        foreach ($tickets as $ticket) {
-           $id_ticket = $ticket->id;
-           $acao = $ticket->name;
-           $data = $ticket->date;
-           $data_conclusao = $ticket->closedate;
-           $status = $ticket->status;
-           $obs = $ticket->content;
-           $categoria = $ticket->itilcategories_id;
-          
-          
-           // ticket users
-           $user_id = $ticket->users_id;
-           $type = $ticket->type;
-           
-          
-             
-           if($categoria == 73){
-            // SOBREAVISO TÉCNICO
-         //      echo ' SUPORTE - SOBREAVISO TÉCNICO: '.$categoria.'<br>'; 
-               $sobreavisos = $this->reports_model->getListSobreaviso(1);
-                if($sobreavisos){
-                    foreach ($sobreavisos as $sobreaviso) {
-                        $id = $sobreaviso->id;
-                        
-                        $user_id = $sobreaviso->usuario;
-                        $users = $this->site->geUserByID($user_id);
-                       
-                        $telefone = $users->phone;
-                        $email = $users->email;
-                        
-                        
-                         $texto = "ALERTA DE CHAMADO DE SOBREAVISO - ID : $id_ticket."
-                            . " $acao."
-                            . " OBS: Você recebeu um chamado via helpdesk. Acessar o GLPI para mais detalhes";
-                    
-                            $this->enviaSMSSobreAviso('993200610', $texto); //ALICE
-                          //  $this->enviaSMSSobreAviso('984068481', $texto); // GABRIEL
-                            $this->enviaSMSSobreAviso('984011675', $texto); // GABRIEL
-                            $this->enviaSMSSobreAviso('991553632', $texto); //ISRAEL
-                         //   $this->enviaSMSSobreAviso($telefone, $texto); // SOBREAVISO
-                            
-                            $email = 'israel.araujo@unimedmanaus.coop.br';
-                            $email = 'israel.araujo@unimedmanaus.coop.br';
-                            $email = 'israel.araujo@unimedmanaus.coop.br';
-                            $email = 'israel.araujo@unimedmanaus.coop.br';
-                            
-                            
-                            $this->ion_auth->emailControleSobreaviso($email,$texto, $acao, $obs, "SUPORTE TÉCNICO");
-                    
-                    }
-                }else{
-                 
-                    $texto = "CHAMADO DE SOBREAVISO Fora do horário : Id Ticket : $id_ticket (SUPORTE - SOBREAVISO TÉCNICO)."
-                            . " $acao.";
-                //    echo $texto; exit;
-                    $this->enviaSMSSobreAviso('993200610', $texto); //ALICE
-                  //  $this->enviaSMSSobreAviso('984068481', $texto); // GABRIEL
-                    $this->enviaSMSSobreAviso('991553632', $texto);
-                    $this->enviaSMSSobreAviso('994122562', $texto);// ANDRÉ
-                    $email = 'israel.araujo@unimedmanaus.coop.br';
-                    $email2 = 'gabriel.rando@unimedmanaus.coop.br';
-                    $email3 = 'alice.silva@unimedmanaus.coop.br';
-                    $email4 = 'andre.dasilva@unimedmanaus.coop.br';
-                            
-                    $this->ion_auth->emailControleSobreaviso($email,$texto, $acao, $obs);
-                 //   $this->ion_auth->emailControleSobreaviso($email2,$texto, $acao, $obs);
-                    $this->ion_auth->emailControleSobreaviso($email3,$texto, $acao, $obs);
-                    $this->ion_auth->emailControleSobreaviso($email4,$texto, $acao, $obs);
-                    
-                    
-                }
-              
-               
-           }else if($categoria == 80){
-            // SOBREAVISO INFRAESTRUTURA
-               echo ' SUPORTE - SOBREAVISO INFRA: '.$categoria; exit;
-               $sobreavisos = $this->reports_model->getListSobreaviso(1);
-                if($sobreavisos){
-                    foreach ($sobreavisos as $sobreaviso) {
-                        $id = $sobreaviso->id;
-                        $user_id = $sobreaviso->usuario;
-
-                        echo $user_id;
-                    }
-                }else{
-                    echo 'não encontrou ou fora do horário.';
-                }
-           }else if($categoria == 75){
-            //   IMPRESSORA HUPL
-                  
-           }else if($categoria == 76){
-            //   IMPRESSORA HUPL
-                  
-           }else if($categoria == 77){
-            //   IMPRESSORA NA CENTRAL DE SERVIÇO
-                  
-           }else if($categoria == 78){
-            //   IMPRESSORA NO PRÉD. OLAVO BILAC
-                  
-           }else if($categoria == 79){
-            //   IMPRESSORA NA UNICLIN
-                  
-           }
-           
-          /*
-           
-           //CONSULTA SE EXISTE UMA AÇÃO REFERENTE AO TICKET
-           $plano = $this->reports_model->getPlanoByIdTicket($id, $id_user_sig);
-           
-           
-           if($plano){
-              //SE JÁ EXISTIR NO SIG, VERIFICA O STATUS, item_evento E O RESPONSÁVEL, CASO SEJAM DIFERENTES, ATUALIZA NO SIG
-               $id_plano = $plano->idplanos;
-               $evento = $plano->eventos;
-               $status_sig = $plano->status;
-               $responsvel = $plano->responsavel;
-               
-              
-               
-               //VERIFICA SE MUDOU O STATUS
-                if($status_sig == "PENDENTE"){
-                   $status_sig_id = 3;
-               }else if($status_sig == "CANCELADO"){
-                   $status_sig_id == 4;
-               }else if($status_sig == "AGUARDANDO VALIDAÇÃO"){
-                   $status_sig_id = 5;
-               }else if($status_sig == "CONCLUÍDO" ){
-                   $status_sig_id = 6;
-               }
-               
-               
-                if($status == 3){
-                   $status_sig2 = "PENDENTE";
-                   }else if($status == 4){
-                       $status_sig2 = "CANCELADO";
-                   }else if($status == 5){
-                       $status_sig2 = "AGUARDANDO VALIDAÇÃO";
-                   }else if($status == 6){
-                       $status_sig2 = "CONCLUÍDO";
-                   }
-                   
-               
-                if ($status == $status_sig_id){
-                // echo 'Status GLPI :'.$status.' Status no SIG : '.$status_sig2.'<br>';
-                 $ont_dif++;
-               }else{
-                   
-                    if($status_sig != 'CONCLUÍDO'){
-                        
-                       if($status_sig != 'CANCELADO'){
-                        
-                        
-                       // echo 'Status GLPI :'.$status.' Status no SIG : '.$status_sig2.'<br>';
-
-                        $data_acao = array('status' => $status_sig2);
-                        $this->reports_model->updatePlano($id_plano, $data_acao); 
-                       
-                    
-                       }
-                    }
-               }
-               
-               
-               
-               //VERIFICA SE MUDOU A CATEGORIA
-                if ($categoria == $id_evento_glpi){
-                 //echo 'a cat ta ok';
-               }else{
-                   //  echo 'a cat n ta ok';
-               }    
-                   
-               
-              //VERIFICA SE MUDOU O RESPONSAVEL
-                if ($id_user_sig == $responsvel){
-                 //echo 'a cat ta ok';
-               }else{
-                 // echo $id.' mudou de: '.$responsvel.'para: '.$id_user_sig.'<br>';
-                   $data_acao = array('responsavel' => $id_user_sig);
-                   $this->reports_model->updatePlano($id_plano, $data_acao); 
-               }   
-              
-              
-           
-               
-               
-           }else{
-               //NÃO TEM A AÇÃO NO SIG, FAZ O INSERT
-               
-               if($status == 3){
-                   $status_sig = "PENDENTE";
-               }else if($status == 4){
-                   $status_sig = "CANCELADO";
-               }else if($status == 5){
-                   $status_sig = "AGUARDANDO VALIDAÇÃO";
-               }else if($status == 6){
-                   $status_sig = "CONCLUÍDO";
-               }
-               
-               if(!$id_user_sig){
-                  // se não tiver usuário no SIG, faz um insert
-                   $data_usuario = array('email' => $email, 
-                                    'group_id' => 5, 
-                                    'id_glpi' => $user_id, 
-                                    'active' => 1);
-                   $id_user_sig = $this->reports_model->addUser( $data_usuario);
-               }
-               
-               //SE NÃO EXISTE FAZ O INSERT
-               $data_plano = array(
-                'id_ticket' => $id,   
-                'idatas' => 300,
-                'descricao' => $acao,
-                'data_termino' => $prazo,
-                'responsavel' => $id_user_sig,
-                'status' => $status_sig,
-                'data_elaboracao' => $data,   
-                'observacao' => $obs,
-                'eventos' => $id_evento
-            );
-               $avulsa = "SIM";
-               $this->atas_model->add_planoAcao($data_plano,null,$avulsa,$id_user_sig);
-               
-               
-                 $data_user = array(
-                'id_glpi' => $user_id
-            );
-                $this->reports_model->updateUser($id_user_sig, $data_user); 
-                
-           }
-           
-          
-           $cont++;
-            
-           */
-        }
-     //  echo 'total de ações com status diferentes : '.$ont_dif;
-        
-       
-       
-        
-         
-    }
     
-    /*
-     **********************ATUALIZA AS ORDEM DE SERVIÇO NO SIG. Verifica no GLPI e atualiza o SIG****************************************************************** 
-     */     
-    
-    public function atualizaOrdemServicos()
-    {
-     // $date_hoje = date('Y-m-d H:i:s');
-     // $date_2 = date('Y-m-d');
-     
-        //GLPI
-        $tickets = $this->reports_model->getAllOrdemServicos();
-        $ont_dif = 0;
-        $cont = 0;
-        foreach ($tickets as $ticket) {
-           $id = $ticket->id;
-           $acao = $ticket->name;
-           $data = $ticket->date;
-           $data_conclusao = $ticket->closedate;
-           $status = $ticket->status;
-           $obs = $ticket->content;
-           $categoria = $ticket->itilcategories_id;
-           
-           // ticket users
-           $user_id = $ticket->users_id;
-           $type = $ticket->type;
-           
-           // user
-           $matricula = $ticket->matricula;
-           
-           // email
-           $email = $ticket->email;
-           
-           //prazo da ação
-           $prazo =  date('Y-m-d', strtotime("+30 days",strtotime($data))); 
-           
-           // consulta o usuário no SIG
-           $user_sig = $this->reports_model->getUserbyemail($email);
-           $id_user_sig = $user_sig->id;
-          
-           
-           //CONSULTA O EVENTO
-           $evento = $this->reports_model->getEventoByIdGlpi($categoria);
-           $id_evento = $evento->id;
-           $id_evento_glpi = $evento->id_gpli;
-           
-           if(!$id_evento){
-               $categoria = 26;
-           }
-           
-           //  echo $status; exit;
-           
-           
-           
-           //CONSULTA SE EXISTE UMA AÇÃO REFERENTE AO TICKET
-           $plano = $this->reports_model->getPlanoByIdTicket($id, $id_user_sig);
-           
-           
-           if($plano){
-              //SE JÁ EXISTIR NO SIG, VERIFICA O STATUS, item_evento E O RESPONSÁVEL, CASO SEJAM DIFERENTES, ATUALIZA NO SIG
-               $id_plano = $plano->idplanos;
-               $evento = $plano->eventos;
-               $status_sig = $plano->status;
-               $responsvel = $plano->responsavel;
-               
-              
-               
-               //VERIFICA SE MUDOU O STATUS
-                if($status_sig == "PENDENTE"){
-                   $status_sig_id = 3;
-               }else if($status_sig == "CANCELADO"){
-                   $status_sig_id == 4;
-               }else if($status_sig == "AGUARDANDO VALIDAÇÃO"){
-                   $status_sig_id = 5;
-               }else if($status_sig == "CONCLUÍDO" ){
-                   $status_sig_id = 6;
-               }
-               
-               
-                   if($status == 3){
-                   $status_sig2 = "PENDENTE";
-                   }else if($status == 4){
-                       $status_sig2 = "CANCELADO";
-                   }else if($status == 5){
-                       $status_sig2 = "AGUARDANDO VALIDAÇÃO";
-                   }else if($status == 6){
-                       $status_sig2 = "CONCLUÍDO";
-                   }
-                   
-               
-                if ($status == $status_sig_id){
-                // echo 'Status GLPI :'.$status.' Status no SIG : '.$status_sig2.'<br>';
-                 $ont_dif++;
-               }else{
-                   
-                    if($status_sig != 'CONCLUÍDO'){
-                        
-                      // if($status_sig != 'CANCELADO'){
-                        
-                        
-                       // echo 'Status GLPI :'.$status.' Status no SIG : '.$status_sig2.'<br>';
-
-                        $data_acao = array('status' => $status_sig2);
-                        $this->reports_model->updatePlano($id_plano, $data_acao); 
-                       
-                    
-                      // }
-                    }
-               }
-               
-               
-               
-               //VERIFICA SE MUDOU A CATEGORIA
-                if ($categoria == $id_evento_glpi){
-                 //echo 'a cat ta ok';
-               }else{
-                   //  echo 'a cat n ta ok';
-               }    
-                   
-               
-              //VERIFICA SE MUDOU O RESPONSAVEL
-                if ($id_user_sig == $responsvel){
-                 //echo 'a cat ta ok';
-               }else{
-                 // echo $id.' mudou de: '.$responsvel.'para: '.$id_user_sig.'<br>';
-                   $data_acao = array('responsavel' => $id_user_sig);
-                   $this->reports_model->updatePlano($id_plano, $data_acao); 
-               }   
-              
-              
-           
-               
-               
-           }else{
-               //NÃO TEM A AÇÃO NO SIG, FAZ O INSERT
-               
-               if($status == 3){
-                   $status_sig = "PENDENTE";
-               }else if($status == 4){
-                   $status_sig = "CANCELADO";
-               }else if($status == 5){
-                   $status_sig = "AGUARDANDO VALIDAÇÃO";
-               }else if($status == 6){
-                   $status_sig = "CONCLUÍDO";
-               }
-               
-               if(!$id_user_sig){
-                  // se não tiver usuário no SIG, faz um insert
-                   $data_usuario = array('email' => $email, 
-                                    'group_id' => 5, 
-                                    'id_glpi' => $user_id, 
-                                    'active' => 1);
-                   $id_user_sig = $this->reports_model->addUser( $data_usuario);
-               }
-               
-               //SE NÃO EXISTE FAZ O INSERT
-               $data_plano = array(
-                'id_ticket' => $id,   
-                'idatas' => 300,
-                'descricao' => $acao,
-                'data_termino' => $prazo,
-                'responsavel' => $id_user_sig,
-                'status' => $status_sig,
-                'data_elaboracao' => $data,   
-                'observacao' => $obs,
-                'eventos' => $id_evento
-            );
-               $avulsa = "SIM";
-               $this->atas_model->add_planoAcao($data_plano,null,$avulsa,$id_user_sig);
-               
-               
-                 $data_user = array(
-                'id_glpi' => $user_id
-            );
-                $this->reports_model->updateUser($id_user_sig, $data_user); 
-                
-           }
-           
-          
-           $cont++;
-            
-           
-        }
-     //  echo 'total de ações com status diferentes : '.$ont_dif;
-        
-       
-       
-        
-         
-    }
-    
-    /*
-     **********************Verifica no GLPI se tem chamados abertos a 8 dias e envia um email de aviso. se o chamado tiver 10 dias ou mais, encerra.****************************************************************** 
-     */ 
-    public function atualizaStatusOrdemServicos(){
-         
-        
-        $tickets = $this->reports_model->getAllOrdemServicos();
-        $date_hoje = date('Y-m-d');
-        $cont = 0;
-        foreach ($tickets as $ticket) {
-           $id = $ticket->id;
-           $acao = $ticket->name;
-           $data = $ticket->date;
-           $data_conclusao = $ticket->closedate;
-           $status = $ticket->status;
-           $obs = $ticket->content;
-           $categoria = $ticket->itilcategories_id;
-           $prazo_aviso =  date('Y-m-d', strtotime("+8 days",strtotime($data)));
-           $prazo_encerra =  date('Y-m-d', strtotime("+10 days",strtotime($data))); 
-           
-           if($status == 5){
-               
-               $tickets2 = $this->reports_model->getAllSolicitanteOrdemServicosSolucionado($id);
-               $id_user = $tickets2->user_id;
-               $matricula = $tickets2->matricula;
-               $firstname = $tickets2->firstname;
-               $realname = $tickets2->realname;
-               $email = $tickets2->email;
-               
-               
-               if($date_hoje == $prazo_aviso){
-                   
-                   if($email){
-                       /*
-                        * ENVIA EMAIL AVISANDO DO CHAMDO ABERTO
-                        */
-                       
-                        $this->ion_auth->emailAvisoFechamentoOS($matricula, $firstname.' '.$realname, $email, $id);
-                       //  echo $id.' - '.$id_user.' data abertura : '.$data.' - '.$matricula.' : '.$firstname.' '.$realname.' - '.$email.'<br>';
-                   }
-                    
-                    
-               } else if($date_hoje >= $prazo_encerra){
-                    
-                       /*
-                        * MUDA O STATUS PARA FECHADO
-                        */
-                         $data_ticket = array(
-                            'status' => 6
-                        );
-                        $this->reports_model->updateTicket($id, $data_ticket); 
-                  //  $this->enviaEmailControle('O SIG Alterou o Status para FECHADO, dos chamados solucionado a 10 dias.');
-                   
-               }
-               
-               
-               
-              
-               
-           }
-           
-           
-        }
-        // echo $cont;
-     }
      
      
-    public function atualizaStatusAllOrdemServicos(){
-         
-        
-        $tickets = $this->reports_model->getDistinctAllOrdemServicos();
-        $date_hoje = date('Y-m-d');
-        $cont = 0;
-        foreach ($tickets as $ticket) {
-           $id_user = $ticket->id_user;
-          
-           $tickets2 = $this->reports_model->getTicketsByUser($id_user);
-           $qtde_ticket = $tickets2->quantidade;
-           
-           $emails = $this->reports_model->getUseremailGlpiById($id_user);
-           $email = $emails->email;
-           $matricula = $emails->name;
-           $firstname = $emails->firstname;
-           $realname = $emails->realname;
-           
-           if($email){
-             
-                //    $this->ion_auth->emailAvisoGeralFechamentoOS($matricula, $firstname.' '.$realname, $email, $qtde_ticket);
-                  
-                   
-           // echo $id_user.' - '.$email.' - '.$matricula.' - '.$firstname.' '.$realname.' - '.$qtde_ticket.'<br>';
-           }
-           
-           
-           
-           $cont++;
-        }
-         //echo '<br>'.$cont;
-     }
      
-     /*
-      * PERÍODO HORA EXTRA
-      */
-    public function criaNovoPeriodoHoraExtra(){
-         
-          $dia = date('d');
-          $mes = date('m');
-          $ano = date('Y');
-          $prox_mes = $mes+1;
-          
-       // if($dia == 11){
-                   
-          
-          $equipes_projeto = $this->atas_model->getAllEquipesMembrosDistinct(4);
-          foreach ($equipes_projeto as $equipe_projeto) {
-                  $id_usuario = $equipe_projeto->user_id;
-                  
-                //VERIFICA SE JA TEM CADASTRADO NO BANCO O PERÍODO DESEJADO.
-                $priodo = $this->reports_model->getPeriodoByCompetencia($prox_mes, $ano, $id_usuario);
-                $qtde = $priodo->quantidade;
-                   
-                if($qtde == 0){
-              
-                   $dados_novo_periodo = array(
-                       'mes' => $prox_mes,
-                       'ano' => $ano,
-                       'de' => '12/'.$mes,
-                       'ate' => '11/'.$prox_mes,
-                       'user_id' => $id_usuario
-                    );
-                 
-                   $id_periodo = $this->reports_model->addPeriodo_he($dados_novo_periodo);
-                    
-                   $data_inicial = $ano.'-'.$mes.'-'.'12';
-                    $data_final = $ano.'-'.$prox_mes.'-'.'11';
-
-                     // Calcula a diferença em segundos entre as datas
-                     $diferenca = strtotime($data_final) - strtotime($data_inicial);
-
-                     //Calcula a diferença em dias
-                     $dias_data = floor($diferenca / (60 * 60 * 24));
-
-                   
-                     //verifica o número de dias do mês
-                     $numero = cal_days_in_month(CAL_GREGORIAN, $mes, $ano); 
-                    
-                     $cont = 0;
-                     for($dia =12; $dia <= $numero; $dia++){
-                         
-                         if ($cont <= $dias_data) {
-                         
-                             if($dia >= 12){
-                               
-                                $dados_detalhe_periodo = array(
-                                   'id_periodo' => $id_periodo,
-                                   'dia' => $dia,
-                                   'mes' => $mes
-                                );
-                             }else{
-                         
-                                 $dados_detalhe_periodo = array(
-                                   'id_periodo' => $id_periodo,
-                                   'dia' => $dia,
-                                   'mes' => $prox_mes
-                                );
-                             }
-
-                             $this->reports_model->addPeriodo_he_detalhes($dados_detalhe_periodo);
-                             
-                             
-                            if (($dia == $numero) && ($cont <= $dias_data)) {
-                                $dia = 0;
-                            }
-                             $cont++;
-
-                           
-                        } else {
-                           // exit;
-                        }
-                }
-
-                }
-                  
-          }        
-         
-        //}
-          
-          
-        
-     }
-    
+      
    
     
     public function enviaSMSSobreAviso($numero, $texto){
@@ -2007,196 +1399,5 @@ class Reports extends MY_Controller
      }
      
  
-     
-   /*
-     **********************ATUALIZA AS ORDEM DE SERVIÇO NO SIG. Verifica no GLPI e atualiza o SIG****************************************************************** 
-     */     
-    
-    public function atualizaPontoTI()
-    {
-     
-        include 'conexao_rh3.php';
-        //OBTEM SALDO DE BANCO DE HORAS POR DIA
-        $dia = 18;// date('d');
-        $hoje =  date('d');
-        $mes =  date('m');
-        $ano = date('Y');
-        $prox_mes = $mes+1;
-          
-        if($hoje <= 11){
-           $mes_Selecionado = $mes; 
-        }else{
-            $mes_Selecionado = $prox_mes; 
-        }
-        
-      
-        $periodos = $this->user_model->getPeriodoHEByAnoAndMes($mes_Selecionado, $ano);
-            foreach ($periodos as $periodo) {
-                $id_periodo = $periodo->id;
-                $id_user = $periodo->user_id;
-               
-                $dados_user = $this->reports_model->getCPFByUser($id_user);
-                $cpf = $dados_user->cpf;
-                
-                 $lancamentos = $this->user_model->getDetalhesPeriodoHEByIdPeriodo($id_periodo);
-                 foreach ($lancamentos as $detalhes) {
-                   //$mes_detalhe = strlen($detalhes->mes);  
-                   
-                   if(strlen($detalhes->dia) == 1){
-                       $detalhe_dia = '0'.$detalhes->dia;
-                   }else{
-                       $detalhe_dia = $detalhes->dia;
-                   }  
-                     
-                   if(strlen($detalhes->mes) == 1){
-                       $detalhe_mes = '0'.$detalhes->mes;
-                   }else{
-                       $detalhe_mes = $detalhes->mes;
-                   }
-                   
-                   $data = "$detalhe_dia-$detalhe_mes-$periodo->ano";
-                   
-                  //echo 'Id Período :'.$id_periodo.' - usuario: '.$id_user.' - CPF : '.$cpf.'<br>';
-                  //echo 'Id dia :'.$detalhes->id.'<br>';
-                //  echo 'Data :'.$data.'<br>';
-                  
-                 
-                  
-                    $query_saldo_hora = "select  (select (ep.dataponto) from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') data,
-
-                                        (select to_char(min(ep.real_horarioentrada),'hh24:mi') from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') entrada,
-
-                                        (select to_char(min(ep.real_interventrada),'hh24:mi') from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') saida_intervalo,
-
-                                        (select to_char(min(ep.real_intervsaida),'hh24:mi') from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') retorno_intervalo,
-
-                                        (select to_char(min(ep.real_horariosaida),'hh24:mi') from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') saida,
-
-
-                                        (select to_char(min(ep.qtdhorasextras),'hh24:mi') from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') extra,
-
-                                        (select to_char(min(ep.bh_qtdcredito),'hh24:mi') from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') BH_CREDITO,
-
-
-                                         (select to_char(min(ep.bh_qtddebito),'hh24:mi') from pt_espelhoponto ep 
-                                        where ep.idpessoa = p.id
-                                        and to_char(ep.dataponto ,'dd-mm-yyyy') = '$data') BH_DEBITO
-
-
-
-
-                                from pessoas p
-                                where p.datarescisao is null 
-                                and p.cpf in '$cpf' 
-                                and p.tipopessoa ='F' ";
-
-                   
-
-                    $saldo_devedor_hmu = oci_parse($ora_conexao,$query_saldo_hora);
-                    oci_execute($saldo_devedor_hmu, OCI_NO_AUTO_COMMIT);
-                    $cont = 0;
-                    while (($row_sd_hmu = oci_fetch_array($saldo_devedor_hmu, OCI_BOTH)) != false)
-                    {
-
-                    $data_periodo = $row_sd_hmu[0];    //DATA
-                    $bt_entrada = $row_sd_hmu[1]; //  entrada
-                    $entrada_intervalo = $row_sd_hmu[2]; // entrada intervalo
-                    $saida_intervalo = $row_sd_hmu[3]; // saída intervalo 
-                    $bt_saida = $row_sd_hmu[4]; // bat saída 
-                    $extra = $row_sd_hmu[5]; // Extra
-                    $sd_positivo = $row_sd_hmu[6];  // crédito
-                    $sd_positivo = str_replace(",", ".", $sd_positivo);
-                    $sd_negativo = $row_sd_hmu[7]; // débito
-                    $sd_negativo = str_replace(",", ".", $sd_negativo);
-
-                    if($extra){
-                        $credito = $extra;
-                        $hr_extra = 1;
-                    }else{
-                        $credito = $sd_positivo;
-                        $hr_extra = 0;
-                    }
-
-                    
-                     $dados_novo_periodo = array(
-                                   'hora_inicio' => $bt_entrada,
-                                   'hora_fim_confirmado' => $bt_saida,
-                                   'saldo' => $credito,
-                                   'debito' => $sd_negativo,
-                                   'entrada_intervalo' => $entrada_intervalo,
-                                   'saida_intervalo' => $saida_intervalo,
-                                   'extra' => $hr_extra
-                                );
-                     
-                     
-                        $this->reports_model->updateDadosHoraUsuario($detalhes->id, $dados_novo_periodo);
-                    
-                      /*   
-                    echo '-------------------<br>';
-                        echo 'Entrada  : '.$bt_entrada. 
-                                '<br> entrada Intervalo : '.$entrada_intervalo.' Saída Intervalo : '.$saida_intervalo.
-                                '<br> Saída : '.$bt_saida.
-                                '<br> Crédito : <br>'.$this->float_min($sd_positivo).' Débito : '.$this->float_min($sd_negativo);
-                        
-                         echo '<br> ------------------------------- <br><br><br>';
-                         
-                         
-                      * 
-                      */
-                    }
-        
-                }
-           }
-           
-           echo 'EXECUTADO COM SUCESSO';
-    }  
-     
-      public  function float_min($num) {
-      $num = number_format($num,2);
-      $num_temp = explode('.', $num);
-      $num_temp[1] = $num-(number_format($num_temp[0],2));
-      $saida = number_format(((($num_temp[1]) * 60 / 100)+$num_temp[0]),2);
-      $saida = strtr($saida,'.',':');
-      return $saida;
-      // By Alexandre Quintal - alexandrequintal@yahoo.com.br
-    } 
-    
-    public function atualizaAcaoPeriodo(){
-         $periodos = $this->user_model->getDetalhesPeriodoHEByIdPeriodo($prox_mes, $ano);
-         $cont = 1;
-            foreach ($periodos as $periodo) {
-                $id_periodo = $periodo->id;
-                $id_acao = $periodo->id_acao;
-             
-                if($id_acao){
-                    echo $cont++.' - '.$id_periodo.'-'.$id_acao.'<br>';
-                    
-                    
-                    $dados_novo_periodo = array(
-                                   'id_acao' => $id_acao,
-                                   'id_periodo_registro' => $id_periodo
-                                  
-                                );
-                     
-                        $this->reports_model->addAcaoJustificativaHora( $dados_novo_periodo);
-                    
-                }
-            }    
-    }
-     
 
 }

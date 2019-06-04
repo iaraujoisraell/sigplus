@@ -109,34 +109,32 @@ $nome_projeto = $projetos->nome_projeto;
           </h1>
           <ol class="breadcrumb">
             <li><a href="<?= site_url('project'); ?>"><i class="fa fa-home"></i> Home</a></li>
-            <li class="active">Ata</li>
+            <li >Ata</li>
+            <li class="active">Nova Ata</li>
           </ol>
 
         </section>
         <br>
     </div>    
     
-    <div class="col-lg-12">
+   
         <div class="box">
         <div class="modal-header">
             
-            <h4 class="modal-title" id="myModalLabel"><?php echo lang('Cadastro de Ata'); ?></h4>
+            <h4 class="modal-title" id="myModalLabel"><?php echo lang('Abertura de Ata'); ?></h4>
         </div>
         <?php $attrib = array('data-toggle' => 'validator', 'role' => 'form', 'id' => 'add-customer-form');
             echo form_open_multipart("project/novaAta", $attrib); 
             echo form_hidden('id_cadastro', '1'); 
-            echo form_hidden('menu_id', $menu_id); 
-            echo form_hidden('tabela_id', $tabela_id); 
-            echo form_hidden('tabela_nome', $tabela_nome);
-            echo form_hidden('funcao', $funcao);
+             echo form_hidden('tipo_ata', $tipo_ata);
+            echo form_hidden('idplano', $id_plano);
             echo form_hidden('projeto', $id_projeto);
        
-            echo form_hidden('cadastrosHabilitados', $cadastrosHabilitados);
             
         ?>
             
             <div class="row">
-                <div class="col-md-12">
+               
                         <div class="col-lg-12">
                            
                         <div class="col-sm-3">
@@ -237,6 +235,15 @@ $nome_projeto = $projetos->nome_projeto;
                         
                         <div class="clearfix"></div>
                     </div> 
+                    
+                    <div class="col-lg-12">
+                    <div class="col-sm-12">
+                            <div class="form-group">
+                                <?= lang("Assunto ", "assunto"); ?>
+                                <?php echo form_input('assunto', (isset($_POST['assunto']) ? $_POST['assunto'] : $assunto), 'maxlength="250" required class="form-control input-tip"  id="assunto"'); ?>
+                            </div>
+                        </div>
+                    </div>
                       
                     <div class="col-lg-12">
                         <div class="col-md-6" >
@@ -299,7 +306,7 @@ $nome_projeto = $projetos->nome_projeto;
                         </div>
                      </div> 
                    
-                </div>
+               
             </div>
 
 
@@ -322,7 +329,7 @@ $nome_projeto = $projetos->nome_projeto;
         <?php echo form_close(); ?>
             <!-- /.modal-content -->
         </div>        
-    </div>
+    
    
     
     </div>

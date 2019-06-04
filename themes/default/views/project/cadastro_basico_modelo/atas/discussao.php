@@ -101,7 +101,7 @@ $nome_projeto = $projetos->nome_projeto;
 ?>
 <div id="blanket"></div>
 <div id="aguarde">Aguarde...</div>
-<div class="content-wrapper">
+
     
     <div class="col-lg-12">
     <div class="box">
@@ -217,4 +217,4 @@ $ataAtual = $this->atas_model->getAtaByID($id);
    
         
     </section>    
-</div>
+
