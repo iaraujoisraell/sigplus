@@ -8,8 +8,8 @@
     <!-- Content Header (Page header) -->
     <section class="content-header">
         <h1>
-            <?php echo $titulo; ?>
-            <small><?php echo $descricao_titulo; ?> </small>
+            <?php echo 'ATAS'; ?>
+            <small><?php echo 'Lista de Atas'; ?> </small>
         </h1>
         <ol class="breadcrumb">
             <li><a href="<?= site_url('project'); ?>"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -19,7 +19,7 @@
     <div class="box-header">
         <span class="pull-right-container">
             <div class=" clearfix no-border">
-                <a title="Abrir Nova Ata" class="btn btn-primary pull-right" href="<?= site_url('project/novaAta/' . $tabela_id . "/" . $menu_id); ?>" >  
+                <a title="Abrir Nova Ata" class="btn btn-primary pull-right" href="<?= site_url('project/novaAta'); ?>" >  
                     <i class="fa fa-plus"></i>  Nova Ata 
                 </a> 
             </div>
@@ -30,7 +30,7 @@
     <br>
     <div class="col-lg-12">
             <div class="row">
-    <?php if ($Settings->mmode) { ?>
+                    <?php if ($Settings->mmode) { ?>
                         <div class="alert alert-warning">
                             <button data-dismiss="alert" class="close" type="button">×</button>
                             <?= lang('site_is_offline') ?>
@@ -111,7 +111,7 @@
                                                     $label = "warning";
                                                 }else 
                                                 if($status == 1){
-                                                    $status_ata = 'Fechado';
+                                                    $status_ata = 'Ativo';
                                                     $label = "success";
                                                 }
                                                 

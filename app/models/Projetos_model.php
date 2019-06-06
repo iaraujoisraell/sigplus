@@ -537,17 +537,52 @@ class Projetos_model extends CI_Model
      /**********************************************************
      ************************* LISTA DE AÇÃO ************************
      ********************************************************/
-    public function getAllAcoesByProjetoAtual(){
+    public function getAllAcoesByProjetoAtual($tipo, $responsavel, $status){
+        //$tipo: 1 = (PENDENTE, CONCLUÍDO, CANCELADO)
+        //$tipo: 2 = (AGUARDANDO VALIDAÇÃO)
         $usuario = $this->session->userdata('user_id');
         $empresa = $this->session->userdata('empresa');
+        $dataHoje = date('Y-m-d');
         $users_dados = $this->site->geUserByID($usuario);
-        $modulo_atual_id = $users_dados->modulo_atual;
         $projeto_atual_id = $users_dados->projeto_atual;
+        
+        $dados_responsavel = $this->atas_model->getUserSetorBYid($responsavel);
+        $setor_responsavel = $dados_responsavel->setores_id;
+        $id_responsavel = $dados_responsavel->users_id;
         
         //echo $tabela_empresa;
         //$empresa_db = $this->load->database('provin_clientes', TRUE);
-       $statement = "SELECT * FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status IN('PENDENTE','CONCLUÍDO','CANECLADO');";
-     //  echo $statement; exit;
+       $statement = "SELECT * FROM sig_planos p "
+        //       . " inner join sig_setores s on s.id = p.setor "
+        //       . " inner join sig_users u on u.id = p.responsavel"
+                . " where projeto = $projeto_atual_id and p.empresa = $empresa ";
+        
+       
+               if($tipo == 1){
+                $statement .= " and status IN('PENDENTE','CONCLUÍDO','CANCELADO')";
+               }else if($tipo == 2){
+                $statement .= " and status = 'AGUARDANDO VALIDAÇÃO'";   
+               }
+               
+          
+        if($responsavel){
+                $statement .= " and responsavel = '$id_responsavel' and setor = '$setor_responsavel'";
+        }
+            
+        if($status){
+
+            if($status == "PENDENTE"){
+                 $statement .= " and status = '$status' and '$dataHoje' <= data_termino ";
+            }else if($status == "ATRASADO"){
+                 $statement .= " and status = 'PENDENTE' and '$dataHoje' > data_termino ";
+            }else{
+                 $statement .= " and status = '$status'";
+            }
+        }else{
+          //   $statement .= " and status = 'PENDENTE' and data_termino >= '$dataHoje' ";
+        }
+       
+       //echo $statement; exit;
         $q = $this->db->query($statement);
         
         if ($q->num_rows() > 0) {

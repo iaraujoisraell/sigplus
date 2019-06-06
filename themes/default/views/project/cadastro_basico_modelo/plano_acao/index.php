@@ -81,7 +81,7 @@
                                             foreach ($planos_acao as $ata) {
                                                 $status_plano = $ata->status;
                                                 if($status_plano == 1){
-                                                    $status_desc = "FECHADO";
+                                                    $status_desc = "ATIVO";
                                                     $label_status = "success";
                                                 }else{
                                                     $status_desc = "ABERTO";

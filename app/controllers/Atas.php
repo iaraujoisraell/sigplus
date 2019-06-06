@@ -1985,19 +1985,17 @@ class Atas extends MY_Controller
             
            // $descricao = $this->input->post('descricao') .'<br>';
             
-           
+          
             $usuario = $this->session->userdata('user_id');
             $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
             $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjeto($projetos_usuario->projeto_atual);   
-                                                            
+                                                         
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
-            //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
-            
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
             $this->data['ata'] = $id;
+            
             $ata = $this->atas_model->getAtaByID($id);
             $this->data['plano_acao'] = $ata->plano_acao;
-            $this->data['avulsa'] = $avulsa;
+            
             $this->data['acoes'] = $this->atas_model->getAllAcoesVinculoCadastro($projetos_usuario->projeto_atual);
             //$this->data['acoes'] = $this->atas_model->getPlanoByID($id);
             

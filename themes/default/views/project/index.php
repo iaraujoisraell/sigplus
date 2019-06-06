@@ -155,7 +155,7 @@
                               <th>Progresso</th>
                               <th style="width: 40px">%</th>
                               <th style="width: 40px">Acessar</th>
-                              <th style="width: 40px">Mudar Status</th>
+                              <th style="width: 40px">Opções</th>
                             </tr>
                             <?php foreach ($projetos_ativos as $projeto) {
                                 $projeto_id = $projeto->id;
@@ -194,17 +194,9 @@
                                 </div>
                               </td>
                               <td><span class="badge bg-red">55%</span></td>
-                              <td><a title="Para acessar as informações do projeto, deve selecionar o projeto." href="<?= site_url('Project/selecionarProjeto/'.$projeto_id); ?>" class="btn  btn-instagram"> Entrar <i class="fa fa-sign-in"></i></a></td>
+                              <td><a title="Para acessar as informações do projeto, deve selecionar o projeto." href="<?= site_url('Project/selecionarProjeto/'.$projeto_id); ?>" class="btn  btn-instagram"> Selecionar <i class="fa fa-check"></i></a></td>
                               <td> 
-                                <div class="text-center"><div class="btn-group text-left">
-                                        <button  type="button" class="btn btn-default  dropdown-toggle" data-toggle="dropdown">
-                                    Opções <span class="caret"></span></button>
-                                    <ul class="dropdown-menu pull-right" role="menu">
-                                          <li><a title="Cancelar o Projeto. Todas as Ações em aberto serão canceladas." href="#"><i class="fa fa-ban"></i>Cancelar</a></li>  
-                                          <li><a title="Colocar o Projeto em Aguardo. Todas as Ações em aberto serão suspensas." href="#"><i class="fa fa-clock-o"></i>Em Aguardo</a></li>  
-                                    </ul>
-                                </div>
-                                </div>
+                                <a title="Editar o cadastro do projeto." href="<?= site_url('Project/editarProjeto/'.$projeto_id); ?>" class="btn  btn-warning">  <i class="fa fa-edit"></i></a>
                                </td>   
                             </tr>
                             <?php } ?> 

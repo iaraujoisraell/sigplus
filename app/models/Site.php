@@ -360,18 +360,7 @@ class Site extends CI_Model
     }
     
     
-     public function geUserByID($id)
-    {
-     
-         $q = $this->db->get_where('users', array('id' => $id));
-    
-        if ($q->num_rows() > 0) {
-            return $q->row();
-            
-        }
-        return FALSE;
-         
-    }
+   
     
      public function getAccount($id) {
         $q = $this->db->get_where('accounts', array('id' => $id), 1);
@@ -757,6 +746,19 @@ class Site extends CI_Model
             return $q->row();
         }
         return FALSE;
+    }
+    
+      public function geUserByID($id)
+    {
+     $empresa = $this->session->userdata('empresa');
+         $q = $this->db->get_where('users', array('id' => $id, 'empresa_id' => $empresa));
+    
+        if ($q->num_rows() > 0) {
+            return $q->row();
+            
+        }
+        return FALSE;
+         
     }
     
      public function getUserSetorByUser($id_user)

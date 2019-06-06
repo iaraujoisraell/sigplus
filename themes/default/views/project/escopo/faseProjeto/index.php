@@ -46,7 +46,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
     <div class="box">
         
     <section class="content-header">
-                    <h1> <?php echo 'Cadastro de '. $titulo ; ?></h1>    
+                    <h1> <?php echo 'Cadastro de Fases do Projeto' ; ?></h1>    
                   
                   <ol class="breadcrumb">
                     <li><a href="<?= site_url('project'); ?>"><i class="fa fa-dashboard"></i> Home</a></li>
@@ -112,10 +112,10 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                     $controler_fase = 'project';
                     $funcao_add_evento = 'novoCadastroEvento';
                     $funcao_edit_evento = 'editar_fases_projetos';
-                    $funcao_excluir_evento = 'deletarCadastro';
-                    $tabela_evento_id = $tabela_id;
-                    $menu_id_evento = $menu;
-                    $tabela_evento = $tabela_id;
+                    $funcao_excluir_fase = 'deletarCadastro';
+                    $tabela_fase_id = 21;
+                    
+
                 ?>               
                 <li>
                    <div class="box box-primary collapsed box-solid">
@@ -129,7 +129,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                             <?php } ?>
                             <div style="margin-right: 30px;" class="tools">
                                 <small  ><a style="color: #ffffff;" title="<?php echo 'Editar Fase'; ?>" class="btn btn-warning fa fa-edit" href="<?= site_url('project/editar_fases_projetos/'.$id_fase); ?>" >  </a></small>
-                                <small  ><a style="color: #ffffff;" title="<?php echo 'Deletar Fase'; ?>" class="btn btn-danger fa fa-trash" href="<?= site_url($controler_fase.'/'.$funcao_excluir_evento.'/'.$tabela_evento_id.'/'.$id_fase.'/'.$menu_id_evento.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal">  </a></small>
+                                <small  ><a style="color: #ffffff;" title="<?php echo 'Deletar Fase'; ?>" class="btn btn-danger fa fa-trash" href="<?= site_url($controler_fase.'/'.$funcao_excluir_fase.'/'.$tabela_fase_id.'/'.$id_fase.'/'.$menu.'/fases_projetos'); ?>" data-toggle="modal" data-target="#myModal">  </a></small>
                             </div>
                             <div class="box-tools pull-left">
                                 <button type="button" class="btn btn-box-tool" data-widget="collapse"><i  class="fa  fa-minus"></i>
@@ -166,7 +166,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                         $funcao_excluir_evento = 'excluir_evento_projetos';
                                         $tabela_evento_id = 75;
                                         $tabela_item_evento = 76;
-                                        $menu_id_evento = $menu;
+                                    
                                     ?>
                                     <li>
 

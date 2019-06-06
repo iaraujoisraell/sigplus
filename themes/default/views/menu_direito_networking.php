@@ -26,12 +26,27 @@
             
     </script>
 
+    <?php
+    $usuario = $this->session->userdata('user_id');
+    $dados_user = $this->site->getUser($usuario);
+
+    //retorna o projeto atual
+    $projetos = $this->projetos_model->getProjetoAtualByID_completo();
+    $status_projeto = $projetos->status;
+
+    $empresa = $this->session->userdata('empresa');
+    $empresa_dados = $this->owner_model->getEmpresaById($empresa);
+    $nome_empresa = $empresa_dados->razaoSocial;
+    ?>
+    
+    
 <!-- Control Sidebar -->
   <aside style="height: 100%;"  class="control-sidebar control-sidebar-dark active">
     <!-- Create the tabs -->
     <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
         <li title="Chat" class="active"><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-wechat"></i></a></li>
         <li title="Aniversariantes do Mês"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-birthday-cake"></i></a></li>
+        <li title="Aniversariantes do Mês"><a href="#control-sidebar-inf-tab" data-toggle="tab"><i class="fa fa-info-circle"></i></a></li>
       
     </ul>
     <!-- Tab panes -->
@@ -115,10 +130,7 @@
           
         </ul>
         <!-- /.control-sidebar-menu -->
-
-       
-
-      </div>
+    </div>
       <!-- /.tab-pane -->
    
       <div  class="tab-pane active" id="control-sidebar-settings-tab">
@@ -177,7 +189,24 @@
       </div>
       <!-- /.tab-pane -->
       
-      
+      <div class="tab-pane " id="control-sidebar-inf-tab">
+        <h3 class="control-sidebar-heading">Informações de Acesso</h3>
+     
+       <div class="box-footer no-padding">
+              <ul class="nav nav-stacked">
+                  <li><a ><small><b>Empresa</b></small>        <span class="pull-right badge bg-blue"><?php echo $nome_empresa; ?>          </span></a></li>
+                  <br>
+                <li><a ><small><b>Usuário Atual </b></small> <span class="pull-right badge bg-red"><?php echo $dados_user->email; ?>      </span></a></li>
+                <br>
+                <li><a ><small><b>Último Acesso</b></small>  <span class="pull-right badge bg-aqua"><?php echo  date($dateFormats['php_ldate'], $this->session->userdata('old_last_login')) . " <br> " . ($this->session->userdata('last_ip') != $ip_address ? lang('ip:') . ' ' . $this->session->userdata('last_ip') : ''); ?>      </span></a></li>
+                <br>
+                <li><a ><small><b>Meu IP </b></small>        <span class="pull-right badge bg-green"><?php echo $ip_address; ?></span></a></li>
+                
+              </ul>
+            </div>  
+        
+         </div>
+        
       
     </div>
   </aside>

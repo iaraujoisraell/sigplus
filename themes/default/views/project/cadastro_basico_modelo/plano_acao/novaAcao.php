@@ -141,6 +141,15 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                     </div>
     </div>
     
+    <div class="row">  
+        <div class="col-lg-12">
+            <div class="col-lg-12">
+                <a title="Voltar para o plano de ação. " class="btn btn-primary"  href="<?= site_url('project/plano_acao_detalhes/'.$ata); ?>"><i class="fa fa-backward"></i> <?= lang('Voltar') ?> </a>
+            </div>
+        </div>
+    </div> 
+
+
     <section  class="content">
     
     <div class="row">    
@@ -153,7 +162,7 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                 <div class="col-md-12">
                     <div class="form-group">
                         <center>
-                            <h2> PLANO DE AÇÃO ID: <?php echo $ata; ?>  </h2>
+                            <h2> PLANO DE AÇÃO: <?php echo $plano_acao->assunto; ?>  </h2>
                         </center>
                     </div>
                 </div>
@@ -181,21 +190,21 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                 </div>
                 
                 <div class="col-md-12">
-                                <div class="col-md-12">
-                                    <div class="form-group">
-                                        <?= lang("Categoria ", "categoria"); ?><small>(Categoria no Plano de Ação)</small>
-                                        <?php
-                                        $categorias = $this->networking_model->getAllCategoriaPlanoAcaoByPlano($ata);
-                                        foreach ($categorias as $categoria) {
-                                            $wu_cat[$categoria->id] = $categoria->descricao;
-                                        }
-                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
-                                        echo form_dropdown('categoria', $wu_cat, (isset($_POST['categoria']) ? $_POST['categoria'] : ""), 'id="categoria"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
-                              
-                                        ?>
-                                    </div>
-                                </div>    
-                            </div>  
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <?= lang("Categoria ", "categoria"); ?><small>(Categoria no Plano de Ação)</small>
+                            <?php
+                            $categorias = $this->atas_model->getAllCategoriaPlanoAcaoByPlano($ata);
+                            foreach ($categorias as $categoria) {
+                                $wu_cat[$categoria->id] = $categoria->descricao;
+                            }
+                          //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
+                            echo form_dropdown('categoria', $wu_cat, (isset($_POST['categoria']) ? $_POST['categoria'] : ""), 'id="categoria"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
+
+                            ?>
+                        </div>
+                    </div>    
+                </div>  
                 
                 <div class="col-md-12">
 

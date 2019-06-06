@@ -91,10 +91,10 @@
     <div class="box">
         <section class="content-header">
              <h1>
-            <?php echo 'Editar Ação '.$acao->sequencial; ?>
+            <?php echo 'Ação '.$acao->sequencial; ?>
               <font class="label label-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font>   
              </h1>
-              <?php echo $acao->descricao; ?>
+            <h3><?php echo $acao->descricao; ?></h3>
               <div id="exibe_andamento">
                   <script>exibe_andamento(<?php echo $idplano; ?>)</script>
               </div>
@@ -136,6 +136,20 @@
                     </div>
        </div> 
     </div>
+    
+    <div class="row">  
+        <div class="col-lg-12">
+            <div class="col-lg-12">
+                <button  class="btn btn-primary " onclick="history.go(-1)"><i class="fa fa-backward"></i><?= lang('Voltar') ?></button>
+                <?php if($retorno == 1){ ?>
+                <a href="<?= site_url('project/retorno_acao/'.$acao->idplanos); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-olive-active"><i class="fa fa-check"></i> Validar Ação</a>
+            <?php } ?>
+                <a style="color: #ffffff;" class="btn bg-red " title="Cancelar Ação"  href="<?= site_url('project/visualiza_acao/'.$acao->idplanos.'/3'); ?>"> Cancelar Ação <i class="fa fa-ban"></i></a> 
+               
+             </div>
+        </div>
+    </div>  
+    
     
     <section  class="content">
     <div class="row">    
@@ -546,6 +560,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                       observacao: $('#observacao').val(),
                                       id_plano: $('#id_plano').val(),
                                       usuario: $('#usuario').val(),
+                                      empresa: $('#empresa').val(),
                                       total_obs: $('#total_obs').val()
                                     },
                                     success: function(data) {
@@ -559,11 +574,13 @@ foreach ($acoes_arquivos as $arquivo) {
                                 </script>
                                 <?php 
                                 $usuario = $this->session->userdata('user_id'); 
+                                $empresa = $this->session->userdata('empresa'); 
                                 $total_observacoes =  $this->atas_model->getCountAllHistoricoAcoes($acao->idplanos);
                                 $total_obs = $total_observacoes->total;
                                 ?>
                                 <input type="hidden" name="id_plano" id="id_plano" value="<?php echo $acao->idplanos; ?>" >
                                 <input type="hidden" name="usuario" id="usuario" value="<?php echo $usuario; ?>" >
+                                <input type="hidden" name="empresa" id="empresa" value="<?php echo $empresa; ?>" >
                                 <input type="hidden" name="total_obs" id="total_obs" value="<?php echo $total_obs; ?>" >
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -578,7 +595,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                   border-color: #000000;  " >
                                     <div class="form-group">
                                         <div id="conteudo">
-                                            <br>
+                                            <br><br>
                                              <?php
                                                     $observacoes       =  $this->atas_model->getAllHistoricoAcoes($acao->idplanos);
                                                     

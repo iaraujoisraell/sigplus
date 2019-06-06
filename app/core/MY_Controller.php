@@ -152,7 +152,7 @@ class MY_Controller extends CI_Controller {
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
      //   $meta['info'] = $this->site->getNotifications();
      //   $meta['events'] = $this->site->getUpcomingEvents();
-     //   $meta['ip_address'] = $this->input->ip_address();
+        $meta['ip_address'] = $this->input->ip_address();
         $meta['Settings'] = $data['Settings'];
         $meta['dateFormats'] = $data['dateFormats'];
         $meta['assets'] = $data['assets'];

@@ -40,8 +40,8 @@
                 
           </h1>
           <ol class="breadcrumb">
-            <li><a href="<?= site_url('project'); ?>"><i class="fa fa-home"></i> Home</a></li>
-            <li >Projetos</li>
+            <li><a href="<?= site_url('project'); ?>"><i class="fa fa-home"></i> Portifólio</a></li>
+            
             <li class="active">Editar Projeto</li>
           </ol>
 
@@ -75,6 +75,16 @@
        </div> 
     </div>
     
+    <div class="row">  
+        <div class="col-lg-12">
+            <div class="col-lg-12">
+                
+                <a href="<?= site_url('project/index'); ?>"  class="btn btn-primary pull-right"><i class="fa fa-backward"></i> Voltar</a>
+
+            </div>
+        </div>
+    </div>  
+
     <section  class="content">
     <div class="row">    
     <div class="col-lg-12">

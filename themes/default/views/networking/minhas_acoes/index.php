@@ -61,7 +61,7 @@
         </div>
        <div class="col-md-3">
           <div class="form-group">
-          <?php //$pst[''] = '';
+          <?php $pst[''] = '';
               $pst['PENDENTE'] = lang('PENDENTE');
               $pst['ATRASADO'] = lang('ATRASADO');
               $pst['AGUARDANDO VALIDAÇÃO'] = lang('AGUARDANDO VALIDAÇÃO');
@@ -82,7 +82,6 @@
         <?php echo form_close(); ?>
     <br>
     </div>
-    
     </div>
 <br>
 
@@ -121,11 +120,6 @@
               
                 foreach ($planos as $plano) {
                      
-                    $evento = $this->atas_model->getAllitemEventoByID($plano->eventos);
-
-                    //$ata_user = $this->atas_model->getAtaUserByAtaUser($plano->idatas, $usuario);
-                    //$result = $ata_user->id;
-                   
                     $status = $plano->status;
                     $data_prazo = $plano->data_termino;
                    
@@ -302,7 +296,7 @@
                                                 <td class="center">
                                                     <font title="Data de Início da ação" style="font-size: 12px;" class="label label-primary"> <?php echo 'Início : '. date('d/m/Y', strtotime($plano->data_entrega_demanda)); ?></font> 
                                                     <font title="Data prevista para Término da ação" style="font-size: 12px;" class="label bg-navy-active"> <?php echo 'Término : '. date('d/m/Y', strtotime($plano->data_termino)); ?></font> <br>
-                                                <?php if($plano->data_retorno_usuario){ ?>
+                                                <?php if($plano->status == 'CONCLUÍDO'){ ?>
                                                     <br>  <font style="font-size: 12px;" class="label label-success"> <?php echo 'Finalizado em : '. date('d/m/Y', strtotime($plano->data_retorno_usuario)); ?></font>
                                                 <?php  } ?>    
                                                 </td>     

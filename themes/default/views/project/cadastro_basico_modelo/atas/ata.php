@@ -38,14 +38,14 @@ $nome_projeto = $projetos->nome_projeto;
               
               <?php $status_plano = $ata->status;
                     if($status_plano == 1){
-                        $status_desc = "FECHADO";
+                        $status_desc = "ATIVO";
                         $label_status = "success";
                     }else{
                         $status_desc = "ABERTO";
                         $label_status = "warning";
                     }
               ?>
-              <font class="label label-<?php echo $label_status; ?>"><?php echo $status_desc; ?></font>
+              <small class="label label-<?php echo $label_status; ?>"><?php echo $status_desc; ?></small>
                   
           </h1>
           <ol class="breadcrumb">

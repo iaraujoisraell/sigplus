@@ -13,12 +13,12 @@
       <!-- Sidebar user panel -->
       <div  class="user-panel">
         <div  class="pull-left image">
-            <img style="height: 50px; width: 50px;" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="img-circle"  alt="User Image">
+            <img style="max-height: 50px; max-width: 50px;" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="img-circle"  alt="User Image">
         </div>
           <?php
                 $usuario = $this->session->userdata('user_id');
-                $dados_user = $this->site->getUser($usuario);
-                
+                $users_dados = $this->site->getUser($usuario);
+                $modulo_atual = $users_dados->modulo_atual;
                 //retorna o projeto atual
                 $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                 $status_projeto = $projetos->status;
@@ -26,18 +26,35 @@
                 $empresa = $this->session->userdata('empresa');
                 $empresa_dados = $this->owner_model->getEmpresaById($empresa);
                 $nome_empresa = $empresa_dados->razaoSocial;
+                
+                
+                $projetos = $this->owner_model->getQtdeProjetosByUser();
+                 $projeto_ativo = $projetos->ativo;
+                 $projeto_cancelado = $projetos->cancelado;
+                 $projeto_concluido = $projetos->concluido;
+                 $projeto_aguardando = $projetos->aguardando;
+                 $soma_projetos = $projeto_ativo +  $projeto_concluido +$projeto_aguardando;
                 ?>
         <div class="pull-left info">
-          <p><?php echo $dados_user->first_name; ?></p>
+          <p><?php echo $users_dados->first_name; ?></p>
           <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
         </div>
       </div>
       <!-- search form -->
-     
-        <div class="sidebar-form">
-            <center><h1><small>   <?php echo $nome_empresa; ?></small></h1></center>
-              
+     <div class="box-footer no-padding">
+         <div  class=" image">
+          <ul class="nav nav-stacked">
+              <li><a ><small><b>Empresa</b></small>        <span class="pull-right badge bg-blue"><?php echo $nome_empresa; ?>          </span></a></li>
+          </ul>
+         
+         <?php  if($modulo_atual == 4) { ?>
+         <ul class="nav nav-stacked">
+              <li><a href="<?= site_url('project/index'); ?>" ><small><b>Portifólio</b></small>        <span class="pull-right badge bg-red"><?php echo $soma_projetos; ?>          </span></a></li>
+          </ul>
+         <?php } ?>
+         </div>
         </div>
+        
      
       
       <!-- /.search form -->
@@ -47,24 +64,17 @@
         
         <?php
         
-         $usuario = $this->session->userdata('user_id');
-         $users_dados = $this->site->geUserByID($usuario);
-        
+         
          
          /*
           * ATUALIZA AS LABELS DO MENU
           */
          // ****************  PROJETOS ********************************************
-         $projetos = $this->owner_model->getQtdeProjetosByUser();
-         $projeto_ativo = $projetos->ativo;
-         $projeto_cancelado = $projetos->cancelado;
-         $projeto_concluido = $projetos->concluido;
-         $projeto_aguardando = $projetos->aguardando;
-         $soma_projetos = $projeto_ativo + $projeto_cancelado + $projeto_concluido +$projeto_aguardando;
-         $data_menu_projeto = array('label1' => $projeto_concluido,'label2' => $projeto_aguardando,'label3' => $projeto_cancelado, 'label4' => $projeto_ativo);
-         $this->owner_model->updateLabelMenu(28, $data_menu_projeto);
-         $data_menu_portifolio = array('label4' => $soma_projetos);
-         $this->owner_model->updateLabelMenu(84, $data_menu_portifolio);
+         
+         //$data_menu_projeto = array('label1' => $projeto_concluido,'label2' => $projeto_aguardando,'label3' => $projeto_cancelado, 'label4' => $projeto_ativo);
+         //$this->owner_model->updateLabelMenu(28, $data_menu_projeto);
+        // $data_menu_portifolio = array('label4' => $soma_projetos);
+        // $this->owner_model->updateLabelMenu(84, $data_menu_portifolio);
         
          // ****************  ATAS ********************************************
          $atas = $this->owner_model->getQtdeAtasByStatysAndProjeto();
@@ -86,7 +96,7 @@
          $acoes_concluido = $acoes->concluido;
          $acoes_aguardando = $acoes->aguardando;
          $total_acoes = $acoes_pendente + $acoes_atrasado + $acoes_concluido;
-         $data_menu_acoes = array( 'label2' => $acoes_aguardando,  'label4' => $total_acoes);
+         $data_menu_acoes = array( 'label1' => $acoes_concluido, 'label2' => $acoes_aguardando, 'label3' => $acoes_atrasado, 'label4' => $acoes_pendente);
          $this->owner_model->updateLabelMenu(77, $data_menu_acoes);
          //AGUARDANDO VALIDAÇÕES
          $data_menu_acoes_av = array( 'label2' => $acoes_aguardando);
@@ -255,25 +265,24 @@
         ?> 
         
         <li  class="<?php echo $ativo; ?> <?php  if($cont_sub > 0){  ?> treeview <?php } ?>">
-            
-            <a <?php if($blank == 1){ ?> target="_blank"  <?php } ?> href="<?= site_url($menu_controller.'/'.$menu_funcao.'/'.$menu_tabela.'/'.$menu_id); ?>">
-          
-            <i class="fa fa-<?php echo $menu_icone; ?>"></i>
-            <span><?php echo $menu_descricao; ?></span>
-            <span class="pull-right-container">
-           <?php if($cont_sub > 0){ ?>   <i class="fa fa-angle-left pull-right"></i> <?php } ?>
-           
-           
-          
-           <?php if($label4 > 0){ ?> <small title="<?php echo $title4; ?>" class="label pull-right bg-blue"><?php echo $label4; ?></small> <?php } ?>
-            <?php if($label3 > 0){ ?> <small title="<?php echo $title3; ?>" class="label pull-right bg-red"><?php echo $label3; ?></small> <?php } ?>
-           <?php if($label2 > 0){ ?> <small title="<?php echo $title2; ?>" class="label pull-right bg-orange"><?php echo $label2; ?></small> <?php } ?>
-           <?php if($label1 > 0){ ?> <small title="<?php echo $title1; ?>" class="label pull-right bg-green"><?php echo $label1; ?></small> <?php } ?>
-              
-            </span>
-            
-            
-          </a>
+            <?php if($modulo_atual == 4) { ?>
+             <a <?php if($blank == 1){ ?> target="_blank"  <?php } ?> href="<?= site_url($menu_controller.'/'.$menu_funcao.'/'.$menu_id); ?>">
+            <?php }else{ ?>
+             <a <?php if($blank == 1){ ?> target="_blank"  <?php } ?> href="<?= site_url($menu_controller.'/'.$menu_funcao.'/'.$menu_tabela.'/'.$menu_id); ?>">
+            <?php } ?>
+                <i class="fa fa-<?php echo $menu_icone; ?>"></i>
+                <span><?php echo $menu_descricao; ?></span>
+                <span class="pull-right-container">
+               <?php if($cont_sub > 0){ ?>   <i class="fa fa-angle-left pull-right"></i> <?php } ?>
+
+
+
+               <?php if($label4 > 0){ ?> <small title="<?php echo $title4; ?>" class="label pull-right bg-blue"><?php echo $label4; ?></small> <?php } ?>
+                <?php if($label3 > 0){ ?> <small title="<?php echo $title3; ?>" class="label pull-right bg-red"><?php echo $label3; ?></small> <?php } ?>
+               <?php if($label2 > 0){ ?> <small title="<?php echo $title2; ?>" class="label pull-right bg-orange"><?php echo $label2; ?></small> <?php } ?>
+               <?php if($label1 > 0){ ?> <small title="<?php echo $title1; ?>" class="label pull-right bg-green"><?php echo $label1; ?></small> <?php } ?>
+                </span>
+            </a>
             <?php 
             if($cont_sub > 0){
                 
@@ -310,9 +319,16 @@
             
               ?>
               <li class=" <?php echo $ativo; ?>"> 
-                  <a <?php if($smenu_blank == 1){ ?> target="_blank"  <?php } ?> href="<?= site_url($smenu_controller.'/'.$smenu_funcao.'/'.$smenu_tabela.'/'.$smenu_id); ?>"><i class="fa fa-<?php echo $smenu_icone; ?>"></i> <?php echo $smenu_descricao; ?>
+                  
+                   <?php if($modulo_atual == 4) { ?>
+                    <a <?php if($smenu_blank == 1){ ?> target="_blank"  <?php } ?> href="<?= site_url($smenu_controller.'/'.$smenu_funcao.'/'.$smenu_id); ?>"><i class="fa fa-<?php echo $smenu_icone; ?>"></i> <?php echo $smenu_descricao; ?>
+                    <?php }else{ ?>
+                    <a <?php if($smenu_blank == 1){ ?> target="_blank"  <?php } ?> href="<?= site_url($smenu_controller.'/'.$smenu_funcao.'/'.$smenu_tabela.'/'.$smenu_id); ?>"><i class="fa fa-<?php echo $smenu_icone; ?>"></i> <?php echo $smenu_descricao; ?>
+                    <?php } ?>
+                  
+                  
                       <span class="pull-right-container">
-                          <?php if($label4 > 0){ ?> <small title="<?php echo $stitle4; ?>" class="label pull-right bg-blue"><?php echo $slabel4; ?></small> <?php } ?>
+                          <?php if($slabel4 > 0){ ?> <small title="<?php echo $stitle4; ?>" class="label pull-right bg-blue"><?php echo $slabel4; ?></small> <?php } ?>
                         <?php //if($label3 > 0){ ?> <small title="<?php echo $stitle3; ?>" class="label pull-right bg-red"><?php echo $slabel3; ?></small> <?php// } ?>
                        <?php //if($label2 > 0){ ?> <small title="<?php echo $stitle2; ?>" class="label pull-right bg-orange"><?php echo $slabel2; ?></small> <?php// } ?>
                        <?php //if($label1 > 0){ ?> <small title="<?php echo $stitle1; ?>" class="label pull-right bg-green"><?php echo $slabel1; ?></small> <?php //} ?>

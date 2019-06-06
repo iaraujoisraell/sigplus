@@ -605,8 +605,8 @@ class Atas_model extends CI_Model
     // FINALIZA O PLANO DE AÇÃO
      public function updatePlanoAcao($id, $data  = array())
     {  
-        
-        if ($this->db->update('plano_acao', $data, array('id' => $id))) {
+        $empresa = $this->session->userdata('empresa');
+        if ($this->db->update('plano_acao', $data, array('id' => $id, 'empresa' => $empresa))) {
             
          return true;
         }
@@ -1280,7 +1280,7 @@ order by su.nome asc
                      $statement .= " and status = '$status'";
                 }
             }else{
-                 $statement .= " and status = 'PENDENTE' and data_termino >= '$dataHoje' ";
+              //   $statement .= " and status = 'PENDENTE' and data_termino >= '$dataHoje' ";
             }
             
         $statement .= " order by data_termino asc ";
@@ -1450,11 +1450,12 @@ order by su.nome asc
         return FALSE;
     }
     //
-     public function getAllAcoesProjeto($id_acao, $projeto_acao)
+     public function getAllAcoesProjeto($id_acao)
     {
        $empresa = $this->session->userdata('empresa');
        $usuario = $this->session->userdata('user_id');
-    
+       $usuario = $this->session->userdata('user_id');
+       $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
          
        $statement = "SELECT idplanos, sequencial, idatas, p.data_entrega_demanda as dt_inicio, p.data_termino as dt_termino, p.descricao as descricao, i.descricao as item, nome_evento, nome_fase 
            FROM sig_planos p
@@ -1462,7 +1463,7 @@ order by su.nome asc
                     inner join sig_eventos e on e.id = i.evento
                     inner join sig_fases_projeto f on f.id = e.fase_id
                     left join sig_atas a on a.id = p.idatas
-                    where a.projetos = $projeto_acao and a.empresa = $empresa and p.empresa = $empresa and idplanos not in($id_acao) and idplanos not in(select id_vinculo from sig_acao_vinculos where planos_idplanos = $id_acao) ";
+                    where a.projetos = $projetos_usuario->projeto_atual and a.empresa = $empresa and p.empresa = $empresa and idplanos not in($id_acao) and idplanos not in(select id_vinculo from sig_acao_vinculos where planos_idplanos = $id_acao) ";
        //echo $statement; exit;
         $q = $this->db->query($statement);
         
@@ -1701,13 +1702,18 @@ order by su.nome asc
     public function getResponsavelFasePlanoByID($id_acao)
     {
         $empresa = $this->session->userdata('empresa');
-       $statement = "SELECT idplanos, responsavel_aprovacao
+       $statement = "SELECT idplanos as id_acao, idplano, p.projeto as id_projeto, pa.usuario as responsavel_pa, i.validar_acoes_item as valida_item, i.responsavel as responsavel_item,
+                    e.validar_acoes_evento as valida_evento, e.responsavel as responsavel_evento, f.validar_acoes_fase as valida_fase, f.responsavel_aprovacao as responsavel_fase,
+                    j.edp_id as coordenador_projeto
+
                     FROM sig_planos p
-                    inner join sig_item_evento i on i.id = p.eventos
-                    inner join sig_eventos e on e.id = i.evento
-                    inner join sig_fases_projeto f on f.id = e.fase_id
+                    left join sig_plano_acao    pa on pa.id = p.idplano
+                    left join sig_item_evento   i  on i.id = p.eventos
+                    left join sig_eventos       e  on e.id = i.evento
+                    left join sig_fases_projeto f  on f.id = e.fase_id
+                    left join sig_projetos j  on j.id = p.projeto
                     where p.empresa = $empresa and idplanos = $id_acao ";
-      // echo $statement; exit;
+       
         $q = $this->db->query($statement);
        
         if ($q->num_rows() > 0) {
@@ -3985,5 +3991,9 @@ order by su.nome asc
         }
         return FALSE;
     }
+    
+    
+    
+    
     
 }

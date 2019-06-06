@@ -32,11 +32,11 @@ class Project extends MY_Controller
         $this->digital_file_types = 'zip|psd|ai|rar|pdf|doc|docx|xls|xlsx|ppt|pptx|gif|jpg|jpeg|png|tif|txt|xlt|xltx';
     }
     
-     public function verificarProjeto($tabela, $menu)
+     public function verificarProjeto($menu)
     {
         $usuario = $this->session->userdata('user_id'); 
         $empresa = $this->session->userdata('empresa');
-        $data_modulo = array('modulo_atual' => 4, 'menu_atual' => 24);
+        $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
         $this->owner_model->updateModuloAtual($usuario, $data_modulo); 
         $this->sma->checkPermissions();
       //echo 'aqui'.$id; exit;
@@ -46,7 +46,6 @@ class Project extends MY_Controller
         $menu_atual = $users_dados->menu_atual;
         $projeto_atual = $users_dados->projeto_atual;
         
-        $this->data['tabela_id'] = $tabela;
         $this->data['menu_id'] = $menu;
        
         
@@ -373,7 +372,7 @@ class Project extends MY_Controller
          $this->load->view($this->theme . 'project/dashboard/index', $this->data);       
     }
     
-    public function dashboard_setor($tabela, $menu)
+    public function dashboard_setor($menu)
     {
         $this->sma->checkPermissions();
       
@@ -392,7 +391,7 @@ class Project extends MY_Controller
          $projeto_atual = $users_dados->projeto_atual;
        
           // SALVA O MÓDULO ATUAL do usuário
-         $data_modulo = array('modulo_atual' => 4, 'menu_atual' => 90);
+         $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
          $this->owner_model->updateModuloAtual($usuario, $data_modulo);
          
         $this->data['areas_projeto'] =  $this->projetos_model->getAreasByProjeto();      
@@ -406,7 +405,7 @@ class Project extends MY_Controller
        $this->page_construct_project($pagina_home, $meta, $this->data);
     }
     
-    public function calendario($tabela, $menu)
+    public function calendario($menu)
     {
           
        $this->sma->checkPermissions(); 
@@ -491,7 +490,7 @@ class Project extends MY_Controller
     public function selecionarProjeto($id = null)
     {
         $this->sma->checkPermissions();
-      //echo 'aqui'.$id; exit;
+       //echo 'aqui'.$id; exit;
         
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
@@ -540,7 +539,7 @@ class Project extends MY_Controller
                 'data_registro' => $date_hoje,
                 'usuario' => $usuario,
                 'descricao' => "O usuário $nome,  Ativou o Projeto.",
-                'antes' => "NO AGUARDO",
+                'antes' => "EM AGUARDO",
                 'depois' => "ATIVO",
                 'empresa' => $empresa
               );
@@ -555,7 +554,7 @@ class Project extends MY_Controller
                 'ip_address' => $_SERVER["REMOTE_ADDR"],
                 'tabela' => 'sig_projetos',
                 'row' => $id,
-                'antes' => "status = NO AGUARDO",
+                'antes' => "status = EM AGUARDO",
                 'depois' => json_encode($data_projeto),
                 'modulo' => 'project',
                 'funcao' => 'project/ativarProjeto',
@@ -831,13 +830,13 @@ class Project extends MY_Controller
     }
     
     
-     public function editarProjeto($tabela, $menu)
+     public function editarProjeto($projeto_id)
     {
         $this->sma->checkPermissions();                      
         
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
+        $data_projeto['projeto_atual'] = $projeto_id;
+        $usuario = $this->session->userdata('user_id');
+        $this->projetos_model->updateProjetoUsuario($usuario,$data_projeto);
         
          $this->form_validation->set_rules('projeto', lang("Projeto"), 'required');
          $this->form_validation->set_rules('data_inicio', lang("Data Início"), 'required');
@@ -1171,8 +1170,8 @@ class Project extends MY_Controller
             $this->projetos_model->updateProjeto($id_projeto, $data_projeto);    
                
             $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
-            redirect("project/editarProjeto/42/85");
-          //   echo "<script>history.go(-1)</script>";
+            redirect("project/index");
+            // echo "<script>history.go(-1)</script>";
          }else{
         
         $usuario = $this->session->userdata('user_id');
@@ -1244,7 +1243,8 @@ class Project extends MY_Controller
            
                $this->owner_model->addLog($logdata);  
          
-         $this->page_construct_project('project/projetos/editProjeto', $meta, $this->data);   
+         //$this->page_construct_project('project/projetos/editProjeto', $meta, $this->data);     
+               $this->page_construct_project_collapse('project/projetos/editProjeto', $meta, $this->data);
     }
             
     }
@@ -1687,7 +1687,7 @@ class Project extends MY_Controller
     /************************************************************************************************************
      ****************************************** CADASTROS ATAS **********************************************
      ************************************************************************************************************/
-    public function atas($tabela, $menu)
+    public function atas($menu)
     {
      
         if ($this->input->get('id')) {
@@ -1731,7 +1731,7 @@ class Project extends MY_Controller
 
             $logdata = array('date' => date('Y-m-d H:i:s'), 
                 'type' => 'INSERT', 
-                'description' => 'Cadastro de um novo '.$tabela,  
+                'description' => 'Cadastro de uma nova ATA',  
                 'userid' => $this->session->userdata('user_id'), 
                 'ip_address' => $_SERVER["REMOTE_ADDR"],
                 'tabela' => $tabela,
@@ -1748,21 +1748,10 @@ class Project extends MY_Controller
             redirect("owner/cadastro/$tabela_id");
             
          }else{
-             
-            $tabela_cadastro = $this->owner_model->getTableById(3);
-            $tabela_nome = $tabela_cadastro->tabela;
-            $menu = 54;
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['tabela_id'] = $tabela;
-            $this->data['menu_id'] = $menu;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
-            $this->data['menu'] = "cadastro";
-            $this->data['submenu'] = "modulo";
             
                 // SALVA O MÓDULO ATUAL do usuário
                  $usuario = $this->session->userdata('user_id');    
-                 $data_modulo = array('menu_atual' => $menu);
+                 $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
                  $this->owner_model->updateModuloAtual($usuario, $data_modulo);
 
                 // registra o log de movimentação
@@ -1798,7 +1787,7 @@ class Project extends MY_Controller
          
     }
     
-    public function novaAta($tabela, $menu, $id_plano, $tipo_ata) {
+    public function novaAta($id_plano, $tipo_ata) {
 
 
         if ($this->input->get('id')) {
@@ -1817,8 +1806,6 @@ class Project extends MY_Controller
         
         if ($this->form_validation->run() == true) {
             
-            $tabela_id = $this->input->post('tabela_id');
-            $tabela_nome = $this->input->post('tabela_nome');
             $funcao = $this->input->post('funcao');
             $menu_id = $this->input->post('menu_id');
             $status = 'ATIVO';
@@ -2045,7 +2032,7 @@ class Project extends MY_Controller
     /************************************************************************************************************
      ****************************************** PLANO DE AÇÃO **********************************************
      ************************************************************************************************************/
-    public function plano_acao($tabela, $menu)
+    public function plano_acao($menu)
     {
       $this->sma->checkPermissions();
         if ($this->input->get('id')) {
@@ -2109,48 +2096,32 @@ class Project extends MY_Controller
             
          }else{
              
-            $tabela_cadastro = $this->owner_model->getTableById(89);
-            $tabela_nome = $tabela_cadastro->tabela;
-            $menu = 55;
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['tabela_id'] = $tabela;
-            $this->data['menu_id'] = $menu;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
-            $this->data['menu'] = "cadastro";
-            $this->data['submenu'] = "modulo";
+            // SALVA O MÓDULO ATUAL do usuário
+            $usuario = $this->session->userdata('user_id');    
+            $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
+            $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+
+            // registra o log de movimentação
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'ACESSO', 
+                'description' => "Acessou o menu $menu do Módulo OWNER",  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => '',
+                'row' => '',
+                'depois' => '', 
+                'modulo' => 'owner',
+                'funcao' => 'owner/cadastro',  
+                'empresa' => $this->session->userdata('empresa'));
+                $this->owner_model->addLog($logdata); 
             
-                // SALVA O MÓDULO ATUAL do usuário
-                 $usuario = $this->session->userdata('user_id');    
-                 $data_modulo = array('menu_atual' => $menu);
-                 $this->owner_model->updateModuloAtual($usuario, $data_modulo);
-
-                // registra o log de movimentação
-
-                $date_hoje = date('Y-m-d H:i:s');    
-                $usuario = $this->session->userdata('user_id');
-                $empresa = $this->session->userdata('empresa');
-                $ip = $_SERVER["REMOTE_ADDR"];
-
-                $logdata = array('date' => date('Y-m-d H:i:s'), 
-                    'type' => 'ACESSO', 
-                    'description' => "Acessou o menu $menu do Módulo OWNER",  
-                    'userid' => $this->session->userdata('user_id'), 
-                    'ip_address' => $_SERVER["REMOTE_ADDR"],
-                    'tabela' => '',
-                    'row' => '',
-                    'depois' => '', 
-                    'modulo' => 'owner',
-                    'funcao' => 'owner/cadastro',  
-                    'empresa' => $this->session->userdata('empresa'));
-                    $this->owner_model->addLog($logdata); 
-            
-            //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
             $this->data['planos_acao'] = $this->projetos_model->getAllPlanoAcaoByProjetoAtual();
-            //$this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            //$this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            
-           // $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
+           
             $this->page_construct_project('project/cadastro_basico_modelo/plano_acao/index', $meta, $this->data);
            // $this->page_construct_user('owner/empresas/index', $meta, $this->data);
          }
@@ -2956,7 +2927,7 @@ class Project extends MY_Controller
             $id = $this->input->get('id');
             }
         
-                        
+                       
             $date_hoje = date('Y-m-d H:i:s');    
             $usuario = $this->session->userdata('user_id');  
             $ip = $_SERVER["REMOTE_ADDR"];
@@ -2973,6 +2944,7 @@ class Project extends MY_Controller
           
            // $this->data['projetos'] = $this->atas_model->getAllProjetos();      
             $this->data['ata'] = $id;
+            $this->data['plano_acao'] = $this->atas_model->getPlanoAcaoByID($id);
             //$this->data['avulsa'] = $avulsa;
             
             $this->data['acoes'] = $this->atas_model->getAllAcoesVinculoCadastro($projetos_usuario->projeto_atual);
@@ -2987,7 +2959,7 @@ class Project extends MY_Controller
             $this->data['participantes_usuarios'] = $participantes_usuario;
             //$this->data['participantes_lista'] = "$nomes_participantes";
            
-               $this->page_construct_project('project/cadastro_basico_modelo/plano_acao/novaAcao', $meta, $this->data);
+            $this->page_construct_project('project/cadastro_basico_modelo/plano_acao/novaAcao', $meta, $this->data);
              //$this->load->view($this->theme . 'project/cadastro_basico_modelo/plano_acao/novaAcao', $this->data);
          
     }
@@ -3229,8 +3201,8 @@ class Project extends MY_Controller
         }
     }
     
-    //EDITAR AÇÃO - VIEW
-    public function manutencao_acao_pendente($id_acao = null)
+    //EDITAR AÇÃO - VIEW     o retorno é quando se tem a opção de retornar para o usuário o status da ação, permitindo concluir a ação
+    public function manutencao_acao_pendente($id_acao = null, $retorno = null)
     {
      
         if ($this->input->get('id')) {
@@ -3240,17 +3212,24 @@ class Project extends MY_Controller
             $usuario = $this->session->userdata('user_id');
             $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
                         
-           
+          
             $ip = $_SERVER["REMOTE_ADDR"];
             
             $this->data['acoes_vinculadas'] = $this->atas_model->getAllAcoesVinculadasAta($id_acao);
             $this->data['acoes_arquivos'] = $this->atas_model->getAllArquivosByAcao($id_acao); 
+            
             $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjeto($projetos_usuario->projeto_atual);   
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
-            $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto( $id_acao);
+            
+           // $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+            $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($id_acao);
             $this->data['idplano'] = $id_acao;
-          
+            
+            if(!$retorno){
+                $retorno = 0;
+            }
+            $this->data['retorno'] = $retorno;
+           //echo 'aqui'; exit;
             $this->page_construct_ata('project/cadastro_basico_modelo/plano_acao/editAcao', $meta, $this->data);
          
     }
@@ -4042,19 +4021,20 @@ class Project extends MY_Controller
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
             
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+           // $this->data['projetos'] = $this->atas_model->getAllProjetos();      
            // $this->data['ata'] = $id;
             $this->data['origem'] = $origem;
             
             $this->data['idplano'] = $id_acao;
-            $acao = $this->atas_model->getPlanoByID($id_acao); 
+            $acao = $this->atas_model->getPlanoByID($id_acao);
+           
             $this->data['acao'] = $acao;
             
             //ATA
             if($origem == 2){
                 $id_ata = $acao->idatas;
                 $this->data['plano_acao'] = $id_ata;
-            }else{
+            }else if($origem == 1){
                 // Plano Ação
                 $id_plano_acao = $acao->idplano;
                 $this->data['plano_acao'] = $id_plano_acao;
@@ -4102,7 +4082,9 @@ class Project extends MY_Controller
                 'idplano' => $idacao,
                 'data_registro' => $date_hoje,
                 'usuario' => $usuario,
-                'descricao' => "Ação Cancelada a partir do plano de ação, módulo Project.",
+                'descricao' => "Ação Cancelada a partir da lista de ações, módulo Project.",
+                'antes' => "PENDENTE",
+                'depois' => "CANCELADO",
                 'empresa' => $empresa
               );
             $this->atas_model->add_logPlano($data_log);
@@ -4156,6 +4138,8 @@ class Project extends MY_Controller
                 redirect('Atas/plano_acao/'.$plano_acao.'/2');
             }else if($origem == 1){
                 redirect('project/plano_acao_detalhes/'.$plano_acao);
+            }else if($origem == 3){
+                redirect('project/lista_acoes/51');
             }
             
         }
@@ -4279,7 +4263,7 @@ class Project extends MY_Controller
             
                 // SALVA O MÓDULO ATUAL do usuário
                  $usuario = $this->session->userdata('user_id');    
-                 $data_modulo = array('menu_atual' => $menu);
+                 $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
                  $this->owner_model->updateModuloAtual($usuario, $data_modulo);
 
                 // registra o log de movimentação
@@ -4437,7 +4421,7 @@ class Project extends MY_Controller
            // exit;
             
             $this->session->set_flashdata('message', lang("Alteração realizada com Sucesso!!!"));
-            redirect("project/cadastro/$tabela_id/$menu_id");
+            redirect("project/cadastro/$menu_id");
             
          }else{
              
@@ -4527,7 +4511,7 @@ class Project extends MY_Controller
            // exit;
             
             $this->session->set_flashdata('message', lang("Cadastro deletado com Sucesso!!!"));
-            redirect("project/fases_projetos/$tabela_id/$menu_id");
+            redirect("project/fases_projetos/$menu_id");
             
          }else{
              
@@ -4559,7 +4543,7 @@ class Project extends MY_Controller
     /************************************************************************************************************
      *************************** CADASTROS DE FASES E EVENTOS E ITENS **********************************************
      ************************************************************************************************************/
-    public function fases_projetos($tabela, $menu)
+    public function fases_projetos( $menu)
     {
      
         if ($this->input->get('id')) {
@@ -4621,18 +4605,10 @@ class Project extends MY_Controller
             
          }else{
              
-            $tabela_cadastro = $this->owner_model->getTableById($tabela);
-            $tabela_nome = $tabela_cadastro->tabela;
-            
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['tabela_id'] = $tabela;
-            $this->data['menu_id'] = $menu;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
-            $this->data['menu'] = "cadastro";
-            $this->data['submenu'] = "modulo";
-            
-             
+             // SALVA O MENU ATUAL do usuário
+             $usuario = $this->session->userdata('user_id');    
+             $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
+             $this->owner_model->updateModuloAtual($usuario, $data_modulo);  
 
                 // registra o log de movimentação
 
@@ -4654,14 +4630,11 @@ class Project extends MY_Controller
                     'empresa' => $this->session->userdata('empresa'));
                     $this->owner_model->addLog($logdata); 
             
-            // SALVA O MENU ATUAL do usuário
-             $usuario = $this->session->userdata('user_id');    
-             $data_modulo = array('menu_atual' => $menu);
-             $this->owner_model->updateModuloAtual($usuario, $data_modulo);        
+                  
             
             $this->data['menu'] = $menu;
-            $this->data['tabela_id'] = $tabela;
-            $this->data['projetos'] = $this->projetos_model->getProjetoAtualByID_completo();;
+           // $this->data['tabela_id'] = $tabela;
+            $this->data['projetos'] = $this->projetos_model->getProjetoAtualByID_completo();
             $this->data['cadastros'] = $this->projetos_model->getAllFasesProjetos();
               
             $this->page_construct_project('project/escopo/faseProjeto/index', $meta, $this->data);
@@ -5449,120 +5422,254 @@ class Project extends MY_Controller
     /************************************************************************************************************
      ****************************************** LISTA DE AÇÕES **********************************************
      ************************************************************************************************************/
-    public function lista_acoes($tabela, $menu)
+    public function lista_acoes($menu)
     {
-             $this->sma->checkPermissions();
+        $this->sma->checkPermissions();
 
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
         }
         
-        $this->form_validation->set_rules('id_cadastro', lang("id_cadastro"), 'required');
-         
-         if ($this->form_validation->run() == true) {
-           
-             $tabela_id = $this->input->post('tabela_id');
-             $tabela_nome = $this->input->post('tabela_nome');
-             $id_pa = $this->input->post('id');
-             
-             $campos = $this->owner_model->getAllCamposTablesCadastro($tabela_id);
-             $data_modulo = array();
-              foreach ($campos as $habilitado) {
-                    $campo_banco = $habilitado->campo;
-                    $nome_campo = $habilitado->nome_campo;
-                    $tipo_campo = $habilitado->tipo_campo;
-                    $tipo_texto = $habilitado->tipo_texto;
-                    $tamanho = $habilitado->tamanho;
-                    $obrigatorio = $habilitado->obrigatorio;
-                    
-                    $campo_cadastro = $this->input->post($campo_banco);
-                    
-                    $data_modulo[] = array(
-                        $campo_banco => $campo_cadastro,
-                       
-                    );
-                    
-              }
-              $data_campos_cadastro = call_user_func_array('array_merge', $data_modulo);
-              $tabela_sig = substr($tabela_nome, 4);
-            
               
-              $id_cadastro =  $this->owner_model->updateCadastro($id_pa, $tabela_sig, $data_campos_cadastro);
-              
+            // SALVA O MÓDULO ATUAL do usuário
+             $usuario = $this->session->userdata('user_id');    
+             $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
+             $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+
+            // registra o log de movimentação
+
             $date_hoje = date('Y-m-d H:i:s');    
             $usuario = $this->session->userdata('user_id');
             $empresa = $this->session->userdata('empresa');
             $ip = $_SERVER["REMOTE_ADDR"];
 
             $logdata = array('date' => date('Y-m-d H:i:s'), 
-                'type' => 'UPDATE', 
-                'description' => 'Update Plano de Ação ID:  '.$id_pa,  
+                'type' => 'ACESSO', 
+                'description' => "Acessou o menu $menu do Módulo OWNER",  
                 'userid' => $this->session->userdata('user_id'), 
                 'ip_address' => $_SERVER["REMOTE_ADDR"],
-                'tabela' => $tabela_nome,
-                'row' => $id_pa,
-                'depois' => json_encode($data_campos_cadastro), 
-                'modulo' => 'project',
-                'funcao' => 'project/plano_acao',  
+                'tabela' => '',
+                'row' => '',
+                'depois' => '', 
+                'modulo' => 'owner',
+                'funcao' => 'owner/cadastro',  
                 'empresa' => $this->session->userdata('empresa'));
-           
-               $this->owner_model->addLog($logdata);  
-           // exit;
+                $this->owner_model->addLog($logdata); 
             
-            $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
-            redirect("project/plano_acao_detalhes/$tabela_id/55/$id_pa");
             
-         }else{
-             
-            $tabela_cadastro = $this->owner_model->getTableById($tabela);
-            $tabela_nome = $tabela_cadastro->tabela;
-            $menu = 51;
-            $this->data['tabela_nome'] = $tabela_nome;
-            $this->data['tabela_id'] = $tabela;
-            $this->data['menu_id'] = $menu;
-            $this->data['titulo'] = $tabela_cadastro->titulo;
-            $this->data['descricao_titulo'] = $tabela_cadastro->descricao;
-            $this->data['menu'] = "cadastro";
-            $this->data['submenu'] = "modulo";
-            
-                // SALVA O MÓDULO ATUAL do usuário
-                 $usuario = $this->session->userdata('user_id');    
-                 $data_modulo = array('menu_atual' => $menu);
-                 $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+            $responsavel_filtro = $this->input->post('responsavel_filtro');
+            $status_filtro = $this->input->post('status_filtro');
 
-                // registra o log de movimentação
+            if($tipo == 1){
+                $status_filtro = 'CONCLUÍDO';
+            }else if($tipo == 2){
+                $status_filtro = 'PENDENTE';
+            }else if($tipo == 3){
+                $status_filtro = 'ATRASADO';
+            }else if($tipo == 4){
+                $status_filtro = 'AGUARDANDO VALIDAÇÃO';
+            }else if($tipo == 5){
+                $status_filtro = 'CANCELADO';
+            }
 
-                $date_hoje = date('Y-m-d H:i:s');    
-                $usuario = $this->session->userdata('user_id');
-                $empresa = $this->session->userdata('empresa');
-                $ip = $_SERVER["REMOTE_ADDR"];
+            $tipo = 1;
+            $this->data['responsavel_filtro'] = $responsavel_filtro; //footer
+            $this->data['status_filtro'] = $status_filtro;  
+            $this->data['menu'] = $menu;
+            $this->data['retorno'] = 0;
+            $this->data['responsaveis'] = $this->atas_model->getAllUsersSetores();         
+            $this->data['planos'] = $this->projetos_model->getAllAcoesByProjetoAtual($tipo,$responsavel_filtro, $status_filtro);
+            
 
-                $logdata = array('date' => date('Y-m-d H:i:s'), 
-                    'type' => 'ACESSO', 
-                    'description' => "Acessou o menu $menu do Módulo OWNER",  
-                    'userid' => $this->session->userdata('user_id'), 
-                    'ip_address' => $_SERVER["REMOTE_ADDR"],
-                    'tabela' => '',
-                    'row' => '',
-                    'depois' => '', 
-                    'modulo' => 'owner',
-                    'funcao' => 'owner/cadastro',  
-                    'empresa' => $this->session->userdata('empresa'));
-                    $this->owner_model->addLog($logdata); 
-            
-            //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
-            $this->data['planos'] = $this->projetos_model->getAllAcoesByProjetoAtual();
-            //$this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
-            //$this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
-            
-           // $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
             $this->page_construct_project('project/acoes/index', $meta, $this->data);
            // $this->page_construct_user('owner/empresas/index', $meta, $this->data);
-         }
+         
          
          
     }
     
+    
+    
+    /************************************************************************************************************
+     ******************************* AÇÕES AGUARDANDO VALIDAÇÃO**********************************************
+     ************************************************************************************************************/
+    public function acoes_aguardando_validacao($menu)
+    {
+             $this->sma->checkPermissions();
+
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+               
+            // SALVA O MÓDULO ATUAL do usuário
+            $usuario = $this->session->userdata('user_id');    
+            $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
+            $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+
+            // registra o log de movimentação
+
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'ACESSO', 
+                'description' => "Acessou o menu $menu do Módulo PROJECT",  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => '',
+                'row' => '',
+                'depois' => '', 
+                'modulo' => 'project',
+                'funcao' => 'project/acoes_aguardando_validacao',  
+                'empresa' => $this->session->userdata('empresa'));
+                $this->owner_model->addLog($logdata); 
+            
+            $responsavel_filtro = $this->input->post('responsavel_filtro');
+            $status_filtro = $this->input->post('status_filtro');
+
+            if($tipo == 1){
+                $status_filtro = 'CONCLUÍDO';
+            }else if($tipo == 2){
+                $status_filtro = 'PENDENTE';
+            }else if($tipo == 3){
+                $status_filtro = 'ATRASADO';
+            }else if($tipo == 4){
+                $status_filtro = 'AGUARDANDO VALIDAÇÃO';
+            }else if($tipo == 5){
+                $status_filtro = 'CANCELADO';
+            }
+
+            $tipo = 2;
+            $this->data['tipo'] = $tipo;
+            $this->data['retorno'] = 1;
+            $this->data['responsavel_filtro'] = $responsavel_filtro; //footer
+            $this->data['status_filtro'] = $status_filtro;  
+            $this->data['menu'] = $menu;  
+            $this->data['responsaveis'] = $this->atas_model->getAllUsersSetores();         
+            $this->data['planos'] = $this->projetos_model->getAllAcoesByProjetoAtual($tipo,$responsavel_filtro, $status_filtro);
+
+
+            $this->page_construct_project('project/acoes/index', $meta, $this->data);
+         
+         
+         
+    }
+    
+    
+    public function retorno_acao($id = null)
+    {
+     
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+        
+        $this->form_validation->set_rules('idplano', lang("idplano"), 'required');
+        $this->form_validation->set_rules('validar', lang("cadastrar"), 'required');
+        
+         if ($this->form_validation->run() == true) {
+             
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');  
+            $idplano = $this->input->post('idplano');
+            $sequencial = $this->input->post('sequencial');
+            $ip = $_SERVER["REMOTE_ADDR"];
+            $envia_email = 1;
+            
+            $status = $this->input->post('status');
+            $observacao = trim($this->input->post('observacao')); 
+            
+            $acao = $this->atas_model->getPlanoByID($idplano);
+            $responsavel = $acao->responsavel;  //RESPONSÁVEL ATUAL
+            $setor_responsavel_atual = $acao->setor;
+            
+            
+            
+           
+            // HISTÓRICO DA AÇÃO
+            $data_historicoAcao = array(
+                'data_envio' => $date_hoje,
+                'usuario' => $usuario,
+                'idplanos' => $idplano,
+                'observacao' => 'Resposta '.' - '.$observacao,
+                'ip' => $ip,
+                'tipo' => 1
+            );
+            $this->atas_model->add_historicoPlanoAcao($data_historicoAcao);
+           
+            // DADOS DO USUÁRIO QUE ESTÁ ENVIANDO
+            $users_dados = $this->site->geUserByID($usuario);
+            $nome_usuario = $users_dados->first_name;
+            
+            
+            
+            $title = "Ação : $idplano ";
+            if($status == 'CONCLUÍDO'){
+                $texto_msg = "A ação $sequencial foi CONCLUÍDA com sucesso, pelo usuário $nome_usuario, Parabéns! ";
+            }else{
+                $texto_msg = "A ação $sequencial foi respondida pelo usuário $nome_usuario e continua PENDENTE. Verifique as observações na Aba comunicação. ";
+            }
+            
+            if($observacao){
+                $texto_msg .= "<br> Mensagem: $observacao";
+            }
+            
+             // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
+            $data_notificacao = array(
+                'id_from' => $usuario,
+                'id_to' => $responsavel,
+                'title' => "$title",
+                'text' => "$texto_msg",
+                'lida' => 0,
+                'data' => $date_hoje,
+                'email' => $envia_email,
+                'idplano' => $idplano,
+                'empresa' => $this->session->userdata('empresa')
+            );
+            $this->atas_model->add_notificacoes($data_notificacao);
+
+            //ENVIA E-MAIL - QDO A AÇÃO NÃO VEM DE PROJETO
+            $data_email = array(
+                'id_from' => $usuario,
+                'id_to' => $responsavel,
+                'title' => "$title",
+                'text' => "$texto_msg",
+                'lida' => 0,
+                'data' => $date_hoje,
+                'referencia' => "project > retorno_acao",
+                'idplano' => $idplano
+                );
+            $this->atas_model->add_email($data_email);
+
+            $data_acao = array(
+                'status' => $status
+            );
+           $this->atas_model->updatePlano($idplano, $data_acao);
+            
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+            'type' => 'RETORNO DE AÇÃO', 
+            'description' => "O EDP $nome_usuario enviou o retorno da ação: $sequencial. ",  
+            'userid' => $this->session->userdata('user_id'), 
+            'ip_address' => $_SERVER["REMOTE_ADDR"],
+            'tabela' => '',
+            'row' => '',
+            'depois' => '', 
+            'modulo' => 'Project',
+            'funcao' => 'Project/retorno_acao',  
+            'empresa' => $this->session->userdata('empresa'));
+            $this->owner_model->addLog($logdata);  
+            
+            $this->session->set_flashdata('message', lang("Retorno da ação enviada com Sucesso!!!"));
+            redirect("project/acoes_aguardando_validacao/78");
+            
+         }else{
+            $this->data['idplano'] = $id;
+            $this->data['acoes'] = $this->atas_model->getAllAcoes($id);
+            $this->load->view($this->theme . 'project/acoes/acaoRetorno', $this->data);
+            
+         }
+    }
     
     /*
      * GANTT
@@ -5597,7 +5704,7 @@ class Project extends MY_Controller
             
     }
     
-    public function ganttProjeto($tabela, $menu)
+    public function ganttProjeto( $menu)
     {
         $this->sma->checkPermissions();
         

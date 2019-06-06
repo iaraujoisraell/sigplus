@@ -13,8 +13,9 @@
     <div class="box">
     <section class="content-header">
           <h1>
+             <small><?php echo 'Plano de Ação '; ?></small> 
             <?php echo $plano_acao->assunto; ?>
-              <small><?php echo 'Plano de Ação '; ?></small>
+              
               
               <?php $status_plano = $plano_acao->status;
                     if($status_plano == 1){
@@ -25,7 +26,7 @@
                         $label_status = "warning";
                     }
               ?>
-              <font class="label label-<?php echo $label_status; ?>"><?php echo $status_desc; ?></font>
+              <small class="label label-<?php echo $label_status; ?>"><?php echo $status_desc; ?></small>
                
           </h1>
           <ol class="breadcrumb">
@@ -66,7 +67,7 @@
         <div class="col-lg-12">
             <div class="col-lg-12">
             <a style="color: #ffffff;" class="btn bg-navy-active  " title="Registro de Ações"  href="<?= site_url('project/adcionar_acao_plano_acao/'.$plano_acao->id); ?>"> Nova Ação <i class="fa fa-plus"></i></a> 
-            <a style="color: #ffffff;" class="btn bg-blue-active  " title="Registro de Atas"  href="<?= site_url('project/novaAta/0/86/'.$plano_acao->id.'/2'); ?>"> Nova Reunião <i class="fa fa-plus"></i></a> 
+            <a style="color: #ffffff;" class="btn bg-blue-active  " title="Registro de Atas"  href="<?= site_url('project/novaAta/'.$plano_acao->id.'/2'); ?>"> Nova Reunião <i class="fa fa-plus"></i></a> 
             <a style="color: #ffffff;" class="btn bg-blue-gradient  " title="Visualizar PDF do Plano de Ação"  href="<?= site_url('project/pdf_plano_acao/'.$plano_acao->id); ?>"> PDF <i class="fa fa-download"></i></a>
             <a style="color: #ffffff;" class="btn bg-black-gradient  " title="Visualizar o Gráfico de Gantt" target="_blank"  href="<?= site_url('project/ganttPlanoAcao/'.$plano_acao->id); ?>"> GANNT <i class="fa fa-dashboard"></i></a> 
            

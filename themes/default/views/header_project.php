@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="<?= $assets ?>bi/dist/css/skins/_all-skins.min.css">
   
   
+  
    <link rel="stylesheet" href="<?= $assets ?>bi/bower_components/fullcalendar/dist/fullcalendar.min.css">
   <link rel="stylesheet" href="<?= $assets ?>bi/bower_components/fullcalendar/dist/fullcalendar.print.min.css" media="print">
   

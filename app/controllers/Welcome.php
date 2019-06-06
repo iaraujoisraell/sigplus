@@ -1378,48 +1378,315 @@ class Welcome extends MY_Controller
                 'ip' => $ip,
                 'tipo' => 2
             );
-            $acaoFase = $this->atas_model->getResponsavelFasePlanoByID($idplano);
-            $usuarioResponsavel = $acaoFase->responsavel_aprovacao; 
-           
-            
             $this->atas_model->updatePlano($idplano, $data_acao);
             $this->atas_model->add_historicoPlanoAcao($data_historicoAcao);
-            
-            // REGISTRA A NOTIFICAÇÃO
+           
+            // DADOS DO USUÁRIO QUE ESTÁ ENVIANDO
             $users_dados = $this->site->geUserByID($usuario);
             $nome_usuario = $users_dados->first_name;
-         
-            $data_notificacao = array(
-                'id_from' => $usuario,
-                'id_to' => $usuarioResponsavel,
-                'title' => "Retorno de Ação",
-                'text' => "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo",
-                'lida' => 0,
-                'data' => $date_hoje,
-                'email' => $envia_email,
-                'idplano' => $idplano,
-                'empresa' => $this->session->userdata('empresa')
-            );
-            $this->atas_model->add_notificacoes($data_notificacao);
             
-            //cadastro para envio de email
-            if($envia_email == 1){
-              
+            //BUSCA QUEM É O RESPONSÁVEL PELA AÇÃO
+            $acaoFase = $this->atas_model->getResponsavelFasePlanoByID($idplano);
+            
+            $id_projeto = $acaoFase->id_projeto; 
+            $responsavel_pa = $acaoFase->responsavel_pa; 
+
+            $valida_item =  $acaoFase->valida_item;
+            $responsavel_item = $acaoFase->responsavel_item; 
+
+            $valida_evento = $acaoFase->valida_evento; 
+            $responsavel_evento = $acaoFase->responsavel_evento; 
+
+            $valida_fase = $acaoFase->valida_fase; 
+            $responsavel_fase = $acaoFase->responsavel_fase;
+
+            $coordenador_projeto = $acaoFase->coordenador_projeto; 
+            
+            
+            
+            $title = "Ação : $idplano ";
+            $texto_msg = "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo ";
+            
+            
+            // REGISTRA A NOTIFICAÇÃO
+            
+            
+            if($id_projeto){
+        
+                if($valida_item == 1){
+                    
+                    // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
+                    $data_notificacao = array(
+                        'id_from' => $usuario,
+                        'id_to' => $responsavel_item,
+                        'title' => "$title",
+                        'text' => "$texto_msg",
+                        'lida' => 0,
+                        'data' => $date_hoje,
+                        'email' => $envia_email,
+                        'idplano' => $idplano,
+                        'empresa' => $this->session->userdata('empresa')
+                    );
+                    $this->atas_model->add_notificacoes($data_notificacao);
+
+                    //ENVIA E-MAIL - QDO A AÇÃO NÃO VEM DE PROJETO
+                    $data_email = array(
+                        'id_from' => $usuario,
+                        'id_to' => $responsavel_item,
+                        'title' => "$title",
+                        'text' => "$texto_msg",
+                        'lida' => 0,
+                        'data' => $date_hoje,
+                        'referencia' => "welcome > retorno_new",
+                        'idplano' => $idplano
+                        );
+                    $this->atas_model->add_email($data_email);
+                    
+                    $resonsavel_evento_item = 0;
+                    
+                }
+
+                if($valida_evento == 1){
+
+                        //if o responsvael pelo evento for = ao responsavel pelo item, nao envia
+                        if($responsavel_item == $responsavel_evento) {
+                            $resonsavel_evento_item = 1;
+                            //ECHO 'já notificou <br>';
+                          }else{
+                              //envia NOTIFICACAO E EMAIL
+                              $resonsavel_evento_item = 0;
+                               // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
+                                $data_notificacao = array(
+                                    'id_from' => $usuario,
+                                    'id_to' => $responsavel_evento,
+                                    'title' => "$title",
+                                    'text' => "$texto_msg",
+                                    'lida' => 0,
+                                    'data' => $date_hoje,
+                                    'email' => $envia_email,
+                                    'idplano' => $idplano,
+                                    'empresa' => $this->session->userdata('empresa')
+                                );
+                                $this->atas_model->add_notificacoes($data_notificacao);
+
+                                //ENVIA E-MAIL - QDO A AÇÃO NÃO VEM DE PROJETO
+                                $data_email = array(
+                                    'id_from' => $usuario,
+                                    'id_to' => $responsavel_evento,
+                                    'title' => "$title",
+                                    'text' => "$texto_msg",
+                                    'lida' => 0,
+                                    'data' => $date_hoje,
+                                    'referencia' => "welcome > retorno_new",
+                                    'idplano' => $idplano
+                                    );
+                                $this->atas_model->add_email($data_email);
+                    
+                          
+                          }
+
+                }else{
+                    //NÃO VALIDA EVENTO
+                }
+
+                 // VALIDA A FASE
+                if($valida_fase == 1){
+
+                    //se os responsaveis do item e do evento forem os mesmos, verifica se o da fase é o mesmo do evento
+                    if($resonsavel_evento_item == 1){
+
+                        if($responsavel_fase == $responsavel_evento) {
+                            $resonsavel_fase_evento = 1; // se for o mesmo
+                            //echo 'é o mesmo responsável da fase. ja notificou <br>';
+                        }else{
+                            $resonsavel_fase_evento = 0;// se o responsável for diferente
+
+                            // verifica se o da fase é o mesmo do item
+                            if($responsavel_fase == $responsavel_item) {
+                                //se for o mesmo ele já foi notificado
+
+                            }else{
+                                // envia notificação
+                                
+                                
+                                 // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
+                                $data_notificacao = array(
+                                    'id_from' => $usuario,
+                                    'id_to' => $responsavel_fase,
+                                    'title' => "$title",
+                                    'text' => "$texto_msg",
+                                    'lida' => 0,
+                                    'data' => $date_hoje,
+                                    'email' => $envia_email,
+                                    'idplano' => $idplano,
+                                    'empresa' => $this->session->userdata('empresa')
+                                );
+                                $this->atas_model->add_notificacoes($data_notificacao);
+
+                                //ENVIA E-MAIL - QDO A AÇÃO NÃO VEM DE PROJETO
+                                $data_email = array(
+                                    'id_from' => $usuario,
+                                    'id_to' => $responsavel_fase,
+                                    'title' => "$title",
+                                    'text' => "$texto_msg",
+                                    'lida' => 0,
+                                    'data' => $date_hoje,
+                                    'referencia' => "welcome > retorno_new",
+                                    'idplano' => $idplano
+                                    );
+                                $this->atas_model->add_email($data_email);
+                               
+                            }
+
+                        }
+                    }else{
+                        // se os responsáveis do item e evento forem diferentes
+
+                        if($responsavel_fase == $responsavel_evento) {
+                            $resonsavel_fase_evento = 1; // se for o mesmo
+                            echo 'é o mesmo responsável do evento. ja notificou <br>';
+                        }else{
+                            $resonsavel_fase_evento = 0;// se o responsável for diferente
+
+
+                            // verifica se o da fase é o mesmo do item
+                            if($responsavel_fase == $responsavel_item) {
+                                //se for o mesmo ele já foi notificado
+
+                            }else{
+                                // envia notificação
+                                
+                                // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
+                                $data_notificacao = array(
+                                    'id_from' => $usuario,
+                                    'id_to' => $responsavel_fase,
+                                    'title' => "$title",
+                                    'text' => "$texto_msg",
+                                    'lida' => 0,
+                                    'data' => $date_hoje,
+                                    'email' => $envia_email,
+                                    'idplano' => $idplano,
+                                    'empresa' => $this->session->userdata('empresa')
+                                );
+                                $this->atas_model->add_notificacoes($data_notificacao);
+
+                                //ENVIA E-MAIL - QDO A AÇÃO NÃO VEM DE PROJETO
+                                $data_email = array(
+                                    'id_from' => $usuario,
+                                    'id_to' => $responsavel_fase,
+                                    'title' => "$title",
+                                    'text' => "$texto_msg",
+                                    'lida' => 0,
+                                    'data' => $date_hoje,
+                                    'referencia' => "welcome > retorno_new",
+                                    'idplano' => $idplano
+                                    );
+                                $this->atas_model->add_email($data_email);
+                                
+                                
+                            }
+
+                        }
+
+
+
+
+                    }
+
+
+                }else{
+                    // NÃO VALIDA A FASE
+                    //echo 'não valida fase'; exit;
+                }
+
+                // NOTIFICA O COORDENADOR DO PROJETO
+                if($coordenador_projeto != $responsavel_item){
+                    
+                    if($coordenador_projeto != $responsavel_evento){
+                        
+                        if($coordenador_projeto != $responsavel_evento){
+                            // NOTIFICA O COORDENADOR
+                            
+                            
+                            $data_notificacao = array(
+                                'id_from' => $usuario,
+                                'id_to' => $coordenador_projeto,
+                                'title' => "Retorno de Ação",
+                                'text' => "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo",
+                                'lida' => 0,
+                                'data' => $date_hoje,
+                                'email' => $envia_email,
+                                'idplano' => $idplano,
+                                'empresa' => $this->session->userdata('empresa')
+                            );
+                            $this->atas_model->add_notificacoes($data_notificacao);
+
+                            //cadastro para envio de email
+                            if($envia_email == 1){
+
+                                $data_email = array(
+                                'id_from' => $usuario,
+                                'id_to' => $coordenador_projeto,
+                                'title' => "Retorno de Ação",
+                                'text' => "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo",
+                                'lida' => 0,
+                                'data' => $date_hoje,
+                                'referencia' => "Retorno de Ação > Network",
+                                'idplano' => $idplano
+                                );
+                                $this->atas_model->add_email($data_email);
+
+                                 //Email
+                            //$this->ion_auth->retornoUsuario($idplano);
+                            }
+                            
+                            
+                        }else{
+                            // JA NOTIFICOU
+                        }
+                        
+                    }else{
+                        //JA NOTIFICOU
+                    }
+                    
+                
+                }else{
+                    // JA NOTIFICOU
+                }
+
+            }else{
+                // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
+                
+                $data_notificacao = array(
+                    'id_from' => $usuario,
+                    'id_to' => $responsavel_pa,
+                    'title' => "$title",
+                    'text' => "$texto_msg",
+                    'lida' => 0,
+                    'data' => $date_hoje,
+                    'email' => $envia_email,
+                    'idplano' => $idplano,
+                    'empresa' => $this->session->userdata('empresa')
+                );
+                $this->atas_model->add_notificacoes($data_notificacao);
+                
+                //ENVIA E-MAIL - QDO A AÇÃO NÃO VEM DE PROJETO
                 $data_email = array(
-                'id_from' => $usuario,
-                'id_to' => $usuarioResponsavel,
-                'title' => "Retorno de Ação",
-                'text' => "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo",
-                'lida' => 0,
-                'data' => $date_hoje,
-                'referencia' => "Retorno de Ação > Network",
-                'idplano' => $idplano
+                    'id_from' => $usuario,
+                    'id_to' => $responsavel_pa,
+                    'title' => "Retorno de Ação",
+                    'text' => "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo",
+                    'lida' => 0,
+                    'data' => $date_hoje,
+                    'referencia' => "welcome > retorno_new",
+                    'idplano' => $idplano
                 );
                 $this->atas_model->add_email($data_email);
-                
-                 //Email
-            //$this->ion_auth->retornoUsuario($idplano);
+            
+            
             }
+
+           
             
             $logdata = array('date' => date('Y-m-d H:i:s'), 
             'type' => 'RETORNO DE AÇÃO', 

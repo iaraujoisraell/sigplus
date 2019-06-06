@@ -956,7 +956,7 @@ class Networking_model extends CI_Model
         }
          
             
-        $statement .= " order by r.data_rat desc";    
+        $statement .= " order by r.data_rat asc";    
        
         //echo $statement; exit;
         $q = $this->db->query($statement);
