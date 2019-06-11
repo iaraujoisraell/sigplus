@@ -47,23 +47,58 @@ class Reports extends MY_Controller
         
         
         
-     public function rotina_envio()
+    public function rotina_envio()
     {
-           $dia = date('d'); 
-           $date_cadastro = date('Y-m-d');   
-           $hora =  date('H:i:s');
-           $data_hoje_tratada = date('d/m/Y',  strtotime($date_cadastro));//$this->sma->hrld($date_cadastro); 
-           $dia_da_semana = $this->diasemana($data_hoje_tratada);
+       $dia = date('d'); 
+       $date_cadastro = date('Y-m-d');   
+       $hora =  date('H:i:s');
+       $data_hoje_tratada = date('d/m/Y',  strtotime($date_cadastro));//$this->sma->hrld($date_cadastro); 
+       $dia_da_semana = $this->diasemana($data_hoje_tratada);
+
+
+       /* 
+        * *************************************************************************************************************************
+        *  1 - ENVIA E-MAILS PENDENTES
+        * 
+        * A CADA 1 MINUTO
+        */
+       $emails_pendente = $this->reports_model->getAllEmailsPendentes();
+       
+       foreach ($emails_pendente as $email) {
+           $email_id = $email->id;
+           $user_de = $email->id_from;
+           $user_para = $email->id_to;
+           $titulo = $email->title;
+           $texto = $email->text;
+           $acao_id = $email->idplano;
+           $convite = $email->convite;
+           $enviado = $email->enviado;
+           
+           if($enviado == 0){
+           
+               if($acao_id > 0){
+                   // QUANDO É EMAIL REFERENTE A AÇÃO: NOVA AÇÃO, RETORNO DE AÇÃO, ETC.
+                   $this->ion_auth->enviaEmailComAcao($titulo, $texto, $user_para, $acao_id, $email_id);
+                   $data_status_report = array(
+                    'data_envio' => date('Y-m-d H:i:s'),
+                    'enviado' => 1                       
+                );
+                 //UPDATE O STATUS DE ENVIADO
+                $this->site->updateStatusEmailEnviado($email_id, $data_status_report);   
+                   
+               }
+              
+
+               if($convite == 1){
+                   // QUANDO VEM DE CONVITE DE ATAS: NETWORKING OU PROJECT
+                   $this->ion_auth->enviaEmailComAcao($titulo, $texto, $user_para, $acao_id);  
+               }
+           
+           }
+           
+       }
            
            
-           /* 
-            * *************************************************************************************************************************
-            *  1 - GERA O STATUS_REPORT SEMANAL DOS PROJETOS
-            * 
-            * TODA QUARTA-FEIRA
-            */
-          
-            $this->enviaEmailControle('O SISTEMA VERIFICOU SE EXISTE ALGUMA ORDEM DE SERVIÇO NOVA OU COM STATUS DIFERENTE NO GLPI E ATUALIZOU O SIG');  
             
             
      }

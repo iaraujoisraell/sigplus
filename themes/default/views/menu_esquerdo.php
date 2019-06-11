@@ -225,6 +225,14 @@
          $this->owner_model->updateLabelMenu(72, $data_qtde_fechada);
        //  }
          
+         
+         // Mensagens
+         $qtde_mensagens = $this->networking_model->getQtdeMensagensNaoLidasByUsuario();
+         $qtde_mensagem_aberto = $qtde_mensagens->quantidade;
+         if($qtde_mensagem_aberto > 0){
+         $msg_qtde_aberto = array('label1' => $qtde_mensagem_aberto);
+         $this->owner_model->updateLabelMenu(93, $msg_qtde_aberto);
+         }
          //***************************************************************************
          $modulo_atual = $users_dados->modulo_atual;
          $menu_atual = $users_dados->menu_atual;

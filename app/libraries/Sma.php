@@ -222,7 +222,7 @@ class Sma
         
 
 
-   
+   /*
         // Exibe uma mensagem de resultado
         if ($enviado) {
           echo "E-mail enviado com sucesso!";
@@ -236,6 +236,8 @@ class Sma
           echo "<b>Informações do erro:</b> " . $mail->ErrorInfo;
           return false;
         }
+    * 
+    */
 
     }
     

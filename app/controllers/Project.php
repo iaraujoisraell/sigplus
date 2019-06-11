@@ -2537,14 +2537,14 @@ class Project extends MY_Controller
                        $data_email = array(
                         'id_from' => $usuario,
                         'id_to' => $id_responsavel,
-                        'title' => "Nova Ação",
+                        'title' => "Nova Atividade",
                         'text' => "Parabéns $nome_usuario, você recebeu uma nova ação. Acessar o SigPlus para mais detalhes.",
                         'lida' => 0,
                         'data' => $date_hoje,
-                        'referencia' => "Project > Plano de Ação > Nova Ação",
-                        'idplano' => 1,
+                        'referencia' => "Project > plano_acao_detalhes",
+                        'idplano' => $id_acao,
                         'empresa' => $empresa,
-                        'acao_id' => $id_acao   );
+                        'enviado' => 0  );
                         $this->atas_model->add_email($data_email);
                         
                   } 
@@ -2792,10 +2792,10 @@ class Project extends MY_Controller
                         'text' => "Parabéns $nome_usuario, você recebeu uma nova ação. Acessar o SigPlus para mais detalhes.",
                         'lida' => 0,
                         'data' => $date_hoje,
-                        'referencia' => "Atas > plano_acao > Finalizar Plano",
-                        'idplano' => 1,
+                        'referencia' => "Project > finalizaPlano",
+                        'idplano' => $id_acao,
                         'empresa' => $empresa,
-                        'acao_id' => $id_acao   );
+                        'enviado' => 0);
                         
                         $this->atas_model->add_email($data_email);
                     
@@ -5473,6 +5473,7 @@ class Project extends MY_Controller
             }
 
             $tipo = 1;
+            $this->data['tipo'] = $tipo;
             $this->data['responsavel_filtro'] = $responsavel_filtro; //footer
             $this->data['status_filtro'] = $status_filtro;  
             $this->data['menu'] = $menu;
@@ -5604,17 +5605,31 @@ class Project extends MY_Controller
             
             
             
-            $title = "Ação : $idplano ";
+            $title = "Retorno de Ação ";
             if($status == 'CONCLUÍDO'){
                 $texto_msg = "A ação $sequencial foi CONCLUÍDA com sucesso, pelo usuário $nome_usuario, Parabéns! ";
+                
+                $data_acao = array(
+                'status' => $status,
+                'andamento' => 100
+                );
+                
             }else{
                 $texto_msg = "A ação $sequencial foi respondida pelo usuário $nome_usuario e continua PENDENTE. Verifique as observações na Aba comunicação. ";
+                
+                $data_acao = array(
+                'status' => $status
+                );
             }
             
             if($observacao){
                 $texto_msg .= "<br> Mensagem: $observacao";
             }
             
+            
+            $this->atas_model->updatePlano($idplano, $data_acao);
+            
+            $empresa = $this->session->userdata('empresa');
              // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
             $data_notificacao = array(
                 'id_from' => $usuario,
@@ -5625,7 +5640,7 @@ class Project extends MY_Controller
                 'data' => $date_hoje,
                 'email' => $envia_email,
                 'idplano' => $idplano,
-                'empresa' => $this->session->userdata('empresa')
+                'empresa' => $empresa
             );
             $this->atas_model->add_notificacoes($data_notificacao);
 
@@ -5638,14 +5653,14 @@ class Project extends MY_Controller
                 'lida' => 0,
                 'data' => $date_hoje,
                 'referencia' => "project > retorno_acao",
-                'idplano' => $idplano
+                'idplano' => $idplano,
+                'empresa' => $empresa,
+                'enviado' => 0 
                 );
             $this->atas_model->add_email($data_email);
 
-            $data_acao = array(
-                'status' => $status
-            );
-           $this->atas_model->updatePlano($idplano, $data_acao);
+            
+           
             
             $logdata = array('date' => date('Y-m-d H:i:s'), 
             'type' => 'RETORNO DE AÇÃO', 

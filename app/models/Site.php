@@ -28,6 +28,18 @@ class Site extends CI_Model
          
     }
     
+    
+    /****************** Muda o status do e-mail para enviado ************************/   
+     public function updateStatusEmailEnviado($id, $data  = array())
+    {  
+        
+        if ($this->db->update('emails', $data, array('id' => $id))) {
+            
+        return true;
+        }
+        return false;
+    }
+    
      /*
      * PEGA A QUANTIDADE DE PLANOS NÃO CONCLUÍDO DE UM USUÁRIO
      */
@@ -748,9 +760,23 @@ class Site extends CI_Model
         return FALSE;
     }
     
+    // usado no envio de email
+      public function geUserByIDSemEmpresa($id)
+    {
+        $empresa = $this->session->userdata('empresa');
+         $q = $this->db->get_where('users', array('id' => $id));
+    
+        if ($q->num_rows() > 0) {
+            return $q->row();
+            
+        }
+        return FALSE;
+         
+    }
+    
       public function geUserByID($id)
     {
-     $empresa = $this->session->userdata('empresa');
+        $empresa = $this->session->userdata('empresa');
          $q = $this->db->get_where('users', array('id' => $id, 'empresa_id' => $empresa));
     
         if ($q->num_rows() > 0) {

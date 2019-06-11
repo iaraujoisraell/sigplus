@@ -783,6 +783,121 @@ class Networking_model extends CI_Model
     /********************************* F I M - C O N V I T E S*******************************************************************/
     
     
+    /**********************************************************
+     ************************* CONVITES ************************
+     ********************************************************/
+    public function getAllMensagensRecebidos(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT * FROM sig_emails e"
+               . " where e.id_to = $usuario and e.empresa = $empresa order by data_envio desc ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    public function getAllMensagensNaoLidas(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT * FROM sig_emails e"
+               . " where e.id_to = $usuario and e.empresa = $empresa and lida = 0 order by data_envio desc ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    public function getPlanoByIdAndUsuario($id)
+    {
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $q = $this->db->get_where('planos', array('idplanos' => $id, 'responsavel' => $usuario, 'empresa' => $empresa), 1);
+       
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+         
+    }
+    
+    // quantidade de mensagens não lidas por usuário
+     public function getQtdeMensagensNaoLidasByUsuario(){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT count(*) as quantidade "
+               . " FROM sig_emails e"
+               . " where e.lida = 0 and e.id_to = $usuario and e.empresa = $empresa  ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+       if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    // verifica se tem mensagem não lida por ação, USUARIO e empresa
+     public function getQtdeMensagensNaoLidasByAcaoAndUsuario($ação){
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        
+        
+        //echo $tabela_empresa;
+        //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT count(*) as quantidade "
+               . " FROM sig_emails e"
+               . " where e.lida = 0 and e.id_to = $usuario and e.empresa = $empresa and idplano = $ação  ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+       if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+   
+     
+    //Salva a resposta do usuario referente ao convite
+     public function updatestatusMensagem($id, $data  = array())
+    {  
+        
+        if ($this->db->update('emails', $data, array('idplano' => $id))) {
+            
+         return true;
+        }
+        return false;
+    }
+    
+    /********************************* F I M - M E N S A G E M ********************************************/
+    
+    
+    
     /*********************************************************************************************************
      ************************* PLANO DE AÇÃO *****************************************************************
      *********************************************************************************************************/
@@ -1056,6 +1171,47 @@ class Networking_model extends CI_Model
         }
         return FALSE;
     }
+    
+    
+    // TODAS AS AÇÕES DO USUÁRIOS > NETWORK
+     public function getAllAcoesUserById_User($projeto, $status)
+    {
+       $usuario = $this->session->userdata('user_id');    
+       $empresa = $this->session->userdata('empresa');
+       $dataHoje = date('Y-m-d');
+
+       $statement = "SELECT * FROM sig_planos p
+                     where responsavel = $usuario and status != 'ABERTO' and empresa = $empresa";
+            if($projeto){
+                $statement .= " and projeto = '$projeto'";
+            }
+            
+            if($status){
+               
+                if($status == "PENDENTE"){
+                     $statement .= " and status = '$status' and '$dataHoje' <= data_termino ";
+                }else if($status == "ATRASADO"){
+                     $statement .= " and status = 'PENDENTE' and '$dataHoje' > data_termino ";
+                }else{
+                     $statement .= " and status = '$status'";
+                }
+            }else{
+              //   $statement .= " and status = 'PENDENTE' and data_termino >= '$dataHoje' ";
+            }
+            
+        $statement .= " order by data_termino DESC ";
+      // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
     
     
 }

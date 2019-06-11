@@ -825,6 +825,8 @@ class Atas extends MY_Controller
                 $id_responsavel = $plano_ata->responsavel;
                 //   $this->ion_auth->emailAtaUsuario($id_usuario, $id_acao);
               
+                
+                
                 /***********************************************************************************************
                 ********************** L O G     A Ç Ã O ****************************************************** 
                 ***********************************************************************************************/
@@ -878,14 +880,14 @@ class Atas extends MY_Controller
                        $data_email = array(
                         'id_from' => $usuario,
                         'id_to' => $id_responsavel,
-                        'title' => "Nova Ação",
+                        'title' => "Nova Atividade",
                         'text' => "Parabéns $nome_usuario, você recebeu uma nova ação. Acessar o SigPlus para mais detalhes.",
                         'lida' => 0,
                         'data' => $date_hoje,
-                        'referencia' => "Atas > plano_acao > Finalizar Ata",
-                        'idplano' => 1,
+                        'referencia' => "Atas > finalizaAta",
+                        'idplano' => $id_acao,
                         'empresa' => $empresa,
-                        'acao_id' => $id_acao   );
+                        'enviado' => 0);
                         
                         $this->atas_model->add_email($data_email);
                        
@@ -1439,7 +1441,7 @@ class Atas extends MY_Controller
             
             
             $this->data['planosContinuo'] = $this->atas_model->getAllitemPlanosAtaContinua($ata->evento); //getAllitemPlanosAtaContinua
-            $this->data['acoes'] = $this->atas_model->getAllAcoes($id);
+            //$this->data['acoes'] = $this->atas_model->getAllAcoes($id);
             $this->data['planos'] = $this->atas_model->getAllitemPlanos($id);
             
             $usuario = $this->session->userdata('user_id');

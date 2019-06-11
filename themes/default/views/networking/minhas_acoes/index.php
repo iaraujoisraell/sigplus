@@ -91,26 +91,26 @@
                 
                 
               <?php if ($Settings->mmode) { ?>
-                        <div class="alert alert-warning">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <?= lang('site_is_offline') ?>
-                        </div>
-                    <?php }
-                    if ($error) { ?>
-                        <div class="alert alert-danger">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <ul class="list-group"><?= $error; ?></ul>
-                        </div>
-                    <?php }
-                    if ($message) { ?>
-                        <div class="alert alert-success">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <ul class="list-group"><?= $message; ?></ul>
-                        </div>
-                    <?php } ?>
-        
-                        <div class="box">
-                            <?php
+                    <div class="alert alert-warning">
+                        <button data-dismiss="alert" class="close" type="button">×</button>
+                        <?= lang('site_is_offline') ?>
+                    </div>
+                <?php }
+                if ($error) { ?>
+                    <div class="alert alert-danger">
+                        <button data-dismiss="alert" class="close" type="button">×</button>
+                        <ul class="list-group"><?= $error; ?></ul>
+                    </div>
+                <?php }
+                if ($message) { ?>
+                    <div class="alert alert-success">
+                        <button data-dismiss="alert" class="close" type="button">×</button>
+                        <ul class="list-group"><?= $message; ?></ul>
+                    </div>
+                <?php } ?>
+
+                <div class="box">
+                    <?php
                 $cont_atrasadas = 0;
                 $cont_pendentes = 0;
                 $cont_concluidas = 0;
@@ -149,7 +149,7 @@
                         $cont_cancelado++;
                     }
 
-                    $projetos_usuario = $this->atas_model->getAtaProjetoByID_ATA($plano->idatas);
+                    //$projetos_usuario = $this->atas_model->getAtaProjetoByID_ATA($plano->idatas);
                 }
                 ?>   
 
@@ -171,12 +171,14 @@
                       <br>
                     <div class="table-responsive">
                         <div class="box-body">
-                            <table style="width: 100%" id="minhas_Acoes" class="table table-bordered table-striped">
+                            <table style="width: 100%" id="minhas_acoes_usuario" class="table table-bordered table-striped">
                             <thead>
-                                
+                                <th style="width: 5%">AÇÃO</th>
                                 <th style="width: 45%">DESCRIÇÃO</th>
                                 <th style="width: 15%">ANDAMENTO</th>
-                                <th>PRAZOS</th>
+                                <th>Início</th>
+                                <th>Término</th>
+                                <th>Conclusão</th>
                                 
                                 
                                 <th>AÇÃO </th>
@@ -188,7 +190,8 @@
                                     $cont = 1;
                                       foreach ($planos as $plano) {
                                             $evento = $this->atas_model->getAllitemEventoByID($plano->eventos);
-
+                                            
+                                            $plano_id = $plano->idplanos;
                                             $status = $plano->status;
                                             $data_prazo = $plano->data_termino;
                                             $dataHoje = date('Y-m-d');
@@ -262,26 +265,30 @@
                                             $projetos_usuario = $this->atas_model->getProjetoByID($plano->projeto);    
                                             $projeto = $projetos_usuario->projeto;
                                             }
+                                            
+                                            $mensagem_acao = $this->networking_model->getQtdeMensagensNaoLidasByAcaoAndUsuario($plano_id);
+                                            $qtde_msg_acao = $mensagem_acao->quantidade;
+                                            
                                             ?>   
 
-
                                             <tr   class="odd gradeX">
-                                                
+                                                <td style="width: 5%">
+                                                    <font title="ID da ação" class="label bg-black-active" style="font-size: 12px; "><?php echo $plano->sequencial; ?></font>
+                                                </td>
                                                 <td style="width: 45%">
-                                                    <table>
-                                                        <tr>
-                                                            <td>
-                                                                <font title="ID da ação" class="label bg-black-active" style="font-size: 12px; "><?php echo 'ID: '.$plano->sequencial; ?></font>
-                                                                <?php if($projeto){ ?>
-                                                                <font title="Nome do Projeto " class="label label-primary" style="font-size: 12px; "><?php  echo $projeto; ?> </font>
-                                                                <?php } ?>
-                                                                <font title="Local de onde foi registrado a Ação. Pode ser uma ATA ou um Plano de Ação" class="label label-default" style="font-size: 12px; "><?php if($plano->idatas){ echo 'ATA : '.$plano->idatas; }else if($plano->idplano){ echo 'P.A.: '. $plano->idplano; } ?>  </font>
-                                                                <font class="label bg-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font>
+                                                   <?php if($projeto){ ?>
+                                                    <font title="Nome do Projeto " class="label label-primary" style="font-size: 12px; "><?php  echo $projeto; ?> </font>
+                                                    <?php } ?>
+                                                    <font title="Local de onde foi registrado a Ação. Pode ser uma ATA ou um Plano de Ação" class="label label-default" style="font-size: 12px; "><?php if($plano->idatas){ echo 'ATA : '.$plano->idatas; }else if($plano->idplano){ echo 'P.A.: '. $plano->idplano; } ?>  </font>
+                                                    <font class="label bg-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font>
+                                                    
+                                                       <h2> 
+                                                           <?php if($qtde_msg_acao == 1){ ?> <small title="Uma nova ação ou Mensagem na ação" class="label bg-green-active">New</small> <?php } ?>
+                                                                <?php echo $plano->descricao; ?>
+                                                       </h2>
+                                                   
                                                                 
-                                                               <h3><?php echo $plano->descricao; ?></h3>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
+                                                           
                                                 </td>   
 
                                                 <td style="width: 15%" class="center">
@@ -294,14 +301,16 @@
                                                     </div> 
                                                 </td>
                                                 <td class="center">
-                                                    <font title="Data de Início da ação" style="font-size: 12px;" class="label label-primary"> <?php echo 'Início : '. date('d/m/Y', strtotime($plano->data_entrega_demanda)); ?></font> 
-                                                    <font title="Data prevista para Término da ação" style="font-size: 12px;" class="label bg-navy-active"> <?php echo 'Término : '. date('d/m/Y', strtotime($plano->data_termino)); ?></font> <br>
-                                                <?php if($plano->status == 'CONCLUÍDO'){ ?>
-                                                    <br>  <font style="font-size: 12px;" class="label label-success"> <?php echo 'Finalizado em : '. date('d/m/Y', strtotime($plano->data_retorno_usuario)); ?></font>
-                                                <?php  } ?>    
+                                                    <font title="Data de Início da ação" style="font-size: 12px;" class="label label-primary"> <?php echo date('d/m/Y', strtotime($plano->data_entrega_demanda)); ?></font> 
                                                 </td>     
-                                                
-
+                                                <td class="center">
+                                                    <font title="Data prevista para Término da ação" style="font-size: 12px;" class="label bg-navy-active"> <?php echo  date('d/m/Y', strtotime($plano->data_termino)); ?></font>
+                                                </td>
+                                                 <td class="center">
+                                                  <?php if($plano->status == 'CONCLUÍDO'){ ?>
+                                                  <font style="font-size: 12px;" class="label label-success"> <?php echo  date('d/m/Y', strtotime($plano->data_retorno_usuario)); ?></font>
+                                                <?php  } ?> 
+                                                </td>
                                                 <td class="center">
                                                     <?php if ($plano->status == 'PENDENTE')  { ?>
                                                         <a title="Visualizar o cadastro completo da ação" class="btn btn-primary  fa fa-folder-open-o" href="<?= site_url('welcome/dados_cadastrais_acao/' . $plano->idplanos); ?>"> </a>
@@ -330,8 +339,8 @@
 
  <script>
   $(function () {
-  $('#minhas_Acoes').DataTable({
-      "order": [[ 0, "desc" ]]
+  $('#minhas_acoes_usuario').DataTable({
+      "order": [[ 3, "desc" ]]
     })
   })
 </script>

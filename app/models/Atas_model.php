@@ -1501,14 +1501,15 @@ order by su.nome asc
     
      public function getAllAcoes($id)
     {
+        $empresa = $this->session->userdata('empresa');
         
         $this->db->select('planos.*')
         
                   ->order_by('idplanos', 'desc');
          if($id){
-            $q = $this->db->get_where('planos', array('idplanos' => $id));
+            $q = $this->db->get_where('planos', array('idplanos' => $id, 'empresa' => $empresa));
          }else{
-            $q = $this->db->get_where('planos'); 
+            $q = $this->db->get_where('planos', array('empresa' => $empresa)); 
          }
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
@@ -1686,7 +1687,7 @@ order by su.nome asc
         return FALSE;
     }
     
-     public function getPlanoByID($id)
+    public function getPlanoByID($id)
     {
          $empresa = $this->session->userdata('empresa');
         $q = $this->db->get_where('planos', array('idplanos' => $id, 'empresa' => $empresa), 1);
@@ -1697,6 +1698,19 @@ order by su.nome asc
         return FALSE;
          
     }
+    
+    // pega a ação e a empresa por parametro. Usado ao enviar a notificação de email das empresas
+    public function getPlanoByIdAndEmpresa($id )
+    {
+        $q = $this->db->get_where('planos', array('idplanos' => $id), 1);
+       
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+         
+    }
+    
     
     // USADO QUANDO ENVIA UMA NOTIFICAÇÃO DA AÇÃO
     public function getResponsavelFasePlanoByID($id_acao)

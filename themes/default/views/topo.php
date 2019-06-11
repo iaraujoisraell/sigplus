@@ -85,19 +85,36 @@
             </li>
           </ul>
         <?php  } ?>
+          <?php
+          // MENSAGENS
+          $qtde_mensagem = $this->networking_model->getQtdeMensagensNaoLidasByUsuario();
+          $quantidade_msg = $qtde_mensagem->quantidade;
+          ?>
           <ul class="nav navbar-nav">
             <!-- Messages: style can be found in dropdown.less-->
             <li class="dropdown messages-menu">
               <!-- Menu toggle button -->
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <a title="Visualizar Mensagens" href="<?= site_url('welcome/mensagens/0/93'); ?>" class="dropdown-toggle" >
                 <i class="fa fa-envelope-o"></i>
-                <span class="label label-success">4</span>
+                <span class="label label-success"><?php echo $quantidade_msg; ?></span>
               </a>
+              <?php 
+              /*
+              ?>
               <ul class="dropdown-menu">
-                <li class="header">You have 4 messages</li>
+                <li class="header">Você tem <?php echo $quantidade_msg; ?> Mensagem</li>
                 <li>
                   <!-- inner menu: contains the messages -->
                   <ul class="menu">
+                    <?php 
+                     $mensagens = $this->networking_model->getAllMensagensNaoLidas();
+                     foreach ($mensagens as $mensagem) {
+                        $titulo = $mensagem->title;
+                        $mensagem = $mensagem->text;
+                        $users_dados = $this->site->geUserByID($mensagem->id_from);
+                        $remetente = $users_dados->first_name; 
+                     
+                     ?>
                     <li><!-- start message -->
                       <a href="#">
                         <div class="pull-left">
@@ -106,19 +123,23 @@
                         </div>
                         <!-- Message title and timestamp -->
                         <h4>
-                          Support Team
+                          <?php echo $titulo; ?>
                           <small><i class="fa fa-clock-o"></i> 5 mins</small>
                         </h4>
                         <!-- The message -->
                         <p>Why not buy a new awesome theme?</p>
                       </a>
                     </li>
+                    <?php
+                    } 
+                    ?>
                     <!-- end message -->
                   </ul>
                   <!-- /.menu -->
                 </li>
-                <li class="footer"><a href="#">See All Messages</a></li>
+                <li class="footer"><a href="<?= site_url('welcome/mensagens/0/93'); ?>">Ver Todas Mensagens</a></li>
               </ul>
+          <?php */ ?>
             </li>
             <!-- /.messages-menu -->
             <?php

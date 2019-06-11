@@ -1267,7 +1267,7 @@ class Welcome extends MY_Controller
         }
         
        
-        $this->data['planos'] = $this->atas_model->getAllAcoesUserById_User($usuario, $projeto_filtro, $status_filtro);
+        $this->data['planos'] = $this->networking_model->getAllAcoesUserById_User($projeto_filtro, $status_filtro);
         
         //$users = $this->site->geUserByID($usuario);
       
@@ -1295,7 +1295,7 @@ class Welcome extends MY_Controller
             $ip = $_SERVER["REMOTE_ADDR"];
            // $this->data['acoes_vinculos'] =  $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual, $id_acao);//$this->atas_model->getAllAcoes();
             
-            $acao = $this->atas_model->getPlanoByID($id_acao);
+            $acao = $this->networking_model->getPlanoByIdAndUsuario($id_acao);
             $projeto = $acao->projeto;
             $acao_empresa = $acao->empresa;
             
@@ -1316,15 +1316,20 @@ class Welcome extends MY_Controller
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
             
-           // $this->data['projetos'] = $this->atas_model-> ();      
-           // $this->data['ata'] = $id;
            if($projeto){
             $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($id_acao, $projeto);
            }
             $this->data['idplano'] = $id_acao;
-            //$this->data['acoes'] = $this->atas_model->getPlanoByID($id); 
-           //  $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual);
-           // $this->load->view($this->theme . 'Atas/editar_acao', $this->data); //manutencao_acao_av_pendente
+           
+            
+            //atualiza o status das mensagens para esta ação
+            $mensagem_acao = $this->networking_model->getQtdeMensagensNaoLidasByAcaoAndUsuario($id_acao);
+            $qtde_msg_acao = $mensagem_acao->quantidade;
+            if($qtde_msg_acao > 0){
+            // ATUALIZA O STATUS DA MENSAGEM
+             $data_msg = array('lida' => 1, 'data_lida' => $date_hoje);
+             $this->networking_model->updatestatusMensagem($id_acao, $data_msg);
+            }
             $this->page_construct_networking('networking/minhas_acoes/editAcao', $meta, $this->data);
         
       
@@ -1360,7 +1365,6 @@ class Welcome extends MY_Controller
             if($tipo == "CONCLUSÃO DA AÇÃO"){
                 $data_acao = array(
                 'data_retorno_usuario' => $date_hoje,
-                'andamento' => 100,
                 'status' => 'AGUARDANDO VALIDAÇÃO'
                 );
             }else{
@@ -1438,7 +1442,9 @@ class Welcome extends MY_Controller
                         'lida' => 0,
                         'data' => $date_hoje,
                         'referencia' => "welcome > retorno_new",
-                        'idplano' => $idplano
+                        'idplano' => $idplano,
+                        'empresa' => $this->session->userdata('empresa'),    
+                        'enviado' => 0    
                         );
                     $this->atas_model->add_email($data_email);
                     
@@ -1478,7 +1484,9 @@ class Welcome extends MY_Controller
                                     'lida' => 0,
                                     'data' => $date_hoje,
                                     'referencia' => "welcome > retorno_new",
-                                    'idplano' => $idplano
+                                    'idplano' => $idplano,
+                                    'empresa' => $this->session->userdata('empresa'),    
+                                    'enviado' => 0
                                     );
                                 $this->atas_model->add_email($data_email);
                     
@@ -1532,7 +1540,9 @@ class Welcome extends MY_Controller
                                     'lida' => 0,
                                     'data' => $date_hoje,
                                     'referencia' => "welcome > retorno_new",
-                                    'idplano' => $idplano
+                                    'idplano' => $idplano,
+                                    'empresa' => $this->session->userdata('empresa'),    
+                                    'enviado' => 0  
                                     );
                                 $this->atas_model->add_email($data_email);
                                
@@ -1579,7 +1589,9 @@ class Welcome extends MY_Controller
                                     'lida' => 0,
                                     'data' => $date_hoje,
                                     'referencia' => "welcome > retorno_new",
-                                    'idplano' => $idplano
+                                    'idplano' => $idplano,
+                                    'empresa' => $this->session->userdata('empresa'),    
+                                    'enviado' => 0  
                                     );
                                 $this->atas_model->add_email($data_email);
                                 
@@ -1631,8 +1643,10 @@ class Welcome extends MY_Controller
                                 'text' => "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo",
                                 'lida' => 0,
                                 'data' => $date_hoje,
-                                'referencia' => "Retorno de Ação > Network",
-                                'idplano' => $idplano
+                                'referencia' => "welcome > retorno_new",
+                                'idplano' => $idplano,
+                                'empresa' => $this->session->userdata('empresa'),    
+                                'enviado' => 0      
                                 );
                                 $this->atas_model->add_email($data_email);
 
@@ -1679,7 +1693,9 @@ class Welcome extends MY_Controller
                     'lida' => 0,
                     'data' => $date_hoje,
                     'referencia' => "welcome > retorno_new",
-                    'idplano' => $idplano
+                    'idplano' => $idplano,
+                    'empresa' => $this->session->userdata('empresa'),    
+                    'enviado' => 0
                 );
                 $this->atas_model->add_email($data_email);
             
@@ -2780,7 +2796,7 @@ class Welcome extends MY_Controller
                         'lida' => 0,
                         'data' => $date_hoje,
                         'email' => $envia_email,
-                        'idplano' => 1
+                        'idplano' => $id_acao
                     );
                     $this->atas_model->add_notificacoes($data_notificacao);
 
@@ -2794,8 +2810,9 @@ class Welcome extends MY_Controller
                         'lida' => 0,
                         'data' => $date_hoje,
                         'referencia' => "Networking > Finalização de Ata",
-                        'idplano' => 1,
-                        'empresa' => $empresa );
+                        'idplano' => $id_acao,
+                        'empresa' => $empresa,
+                        'enviado' => 0);
                         $this->atas_model->add_email($data_email);
                         
                   }       
@@ -3899,47 +3916,51 @@ class Welcome extends MY_Controller
             }
     }
     
-    public function finalizaAta($id = null)
+    public function finalizaAta($id_ata = null)
     {
         $this->sma->checkPermissions();
       
         $date_finalizacao = date('Y-m-d H:i:s');       
         $envia_email = 1;
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
         
-          if ($id) {
+        
+          if ($id_ata) {
            
             $status = 1;
-            $id_ata = $id;
+            
             $usuario = $this->session->userdata('user_id');
             $empresa = $this->session->userdata('empresa');
             
+            /********************** FINALIZA A ATA  ***************************/
             $data_ataFinalizacao = array(
                 'status' => $status,
                 'data_finalizacao' => $date_finalizacao,
                 'usuario_finalizacao' => $usuario
             );
+            /******************************************************************/
             
-             $data_plano = array(
-                
-                'status' => 'PENDENTE'
-            );
-            //print_r($data_plano); exit;
-            
-            $this->atas_model->updatePlanoAta($id_ata, $data_plano);
-            //print_r($data_ata); exit;
-            
-            $this->atas_model->finalizaAta($id_ata, $data_ataFinalizacao);
-            
-            
-            $usuarios = $this->atas_model->getPlanoByAtaID_distinct($id_ata);
-            foreach ($usuarios as $usuarioresp) {
-               $id_responsavel = $usuarioresp->responsavel;
-               //  $id_acao = $usuario->sequencia;
+             if($this->atas_model->finalizaAta($id_ata, $data_ataFinalizacao)){
                
-               // REGISTRA A NOTIFICAÇÃO
+                
+                // ENVIA EMAIL E NOTIFIAÇÕES
+                $date_hoje = date('Y-m-d H:i:s');
+                $usuario = $this->session->userdata('user_id');
+                $empresa = $this->session->userdata('empresa');
+               
+                
+                $data_plano = array(
+                    'status' => 'PENDENTE'
+                );
+              
+                if($this->atas_model->updatePlanoAta($id_ata, $data_plano)){
+                        
+                    $planos_ata = $this->atas_model->getAllPlanoAbertosByAtaID($id_ata);
+                    foreach ($planos_ata as $plano_ata) {
+                
+                    $id_acao = $plano_ata->idplanos;
+                    $id_responsavel = $plano_ata->responsavel;
+                    
+                     // REGISTRA A NOTIFICAÇÃO
                     $users_dados = $this->site->geUserByID($id_responsavel);
                     $nome_usuario = $users_dados->first_name;
 
@@ -3951,13 +3972,13 @@ class Welcome extends MY_Controller
                         'lida' => 0,
                         'data' => $date_finalizacao,
                         'email' => $envia_email,
-                        'idplano' => 1,
+                        'idplano' => $id_acao,
                         'empresa' => $this->session->userdata('empresa')
                     );
                     $this->atas_model->add_notificacoes($data_notificacao);
 
                     //cadastro para envio de email
-                    if($envia_email == 1){
+                    
                         $data_email = array(
                         'id_from' => $usuario,
                         'id_to' => $id_responsavel,
@@ -3965,19 +3986,23 @@ class Welcome extends MY_Controller
                         'text' => "Parabéns $nome_usuario, você recebeu uma nova ação. Acessar o SigPlus para mais detalhes.",
                         'lida' => 0,
                         'data' => $date_finalizacao,
-                        'referencia' => "Networking > Finalização de Ata",
-                        'idplano' => 1,
-                        'empresa' => $empresa );
+                        'referencia' => "welcome > finalizaAta",
+                        'idplano' => $id_acao,
+                        'empresa' => $empresa,
+                        'enviado' => 0);
                         $this->atas_model->add_email($data_email);
 
-                         //Email
-                    //$this->ion_auth->retornoUsuario($idplano);
+                
                     }
-               
-               
-               
-               //   $this->ion_auth->emailAtaUsuario($id_usuario, $id_acao);
-            }
+                
+                }
+             }   
+            
+            
+            
+            //print_r($data_ata); exit;
+            
+           
             
                
            
@@ -4123,8 +4148,10 @@ class Welcome extends MY_Controller
                         'text' => "$descricao_texto",
                         'lida' => 0,
                         'data' => $date_cadastro,
-                        'referencia' => "Networking > Minhas Atas > Convites",
-                        'empresa' => $empresa );
+                        'referencia' => "welcome > convite_ata",
+                        'empresa' => $empresa,
+                        'enviado' => 0,
+                        'convite' => 1);
                         $this->atas_model->add_email($data_email);
                     
                     
@@ -4792,20 +4819,16 @@ class Welcome extends MY_Controller
          
     }
     
-    public function finalizaPlano($id = null)
+    public function finalizaPlano($id_plano = null)
     {
         $this->sma->checkPermissions();
       
         $date_finalizacao = date('Y-m-d H:i:s');       
         $envia_email = 1;
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
         
-          if ($id) {
+          if ($id_plano) {
            
             $status = 1;
-            $id_plano = $id;
             $usuario = $this->session->userdata('user_id');
             $empresa = $this->session->userdata('empresa');
             
@@ -4827,12 +4850,13 @@ class Welcome extends MY_Controller
             $this->atas_model->updatePlanoAcao($id_plano, $data_ataFinalizacao);
             
             
-            $usuarios = $this->atas_model->getPlanoByAtaID_distinct($id_plano);
-            foreach ($usuarios as $usuarioresp) {
-               $id_responsavel = $usuarioresp->responsavel;
-               //  $id_acao = $usuario->sequencia;
+            $planos_ata = $this->atas_model->getAllPlanoAbertosByPlanoAcaoID($id_plano);
+            foreach ($planos_ata as $plano_ata) {
+                $id_acao = $plano_ata->idplanos;
+                $id_responsavel = $plano_ata->responsavel;
+                //  $id_acao = $usuario->sequencia;
                
-               // REGISTRA A NOTIFICAÇÃO
+                // REGISTRA A NOTIFICAÇÃO
                     $users_dados = $this->site->geUserByID($id_responsavel);
                     $nome_usuario = $users_dados->first_name;
 
@@ -4844,31 +4868,26 @@ class Welcome extends MY_Controller
                         'lida' => 0,
                         'data' => $date_finalizacao,
                         'email' => $envia_email,
-                        'idplano' => 1,
+                        'idplano' => $id_acao,
                         'empresa' => $this->session->userdata('empresa')
                     );
                     $this->atas_model->add_notificacoes($data_notificacao);
 
                     //cadastro para envio de email
-                    if($envia_email == 1){
-                        $data_email = array(
+                    $data_email = array(
                         'id_from' => $usuario,
                         'id_to' => $id_responsavel,
                         'title' => "Nova Ação",
                         'text' => "Parabéns $nome_usuario, você recebeu uma nova ação. Acessar o SigPlus para mais detalhes.",
                         'lida' => 0,
                         'data' => $date_finalizacao,
-                        'referencia' => "Networking > Finalização de Plano de Ação",
-                        'idplano' => 1,
-                        'empresa' => $empresa );
-                        $this->atas_model->add_email($data_email);
+                        'referencia' => "welcome > finalizaPlano",
+                        'idplano' => $id_acao,
+                        'empresa' => $empresa,
+                        'enviado' => 0    );
+                    $this->atas_model->add_email($data_email);
 
-                         //Email
-                    //$this->ion_auth->retornoUsuario($idplano);
-                    }
-               
-               
-               
+                  
                //   $this->ion_auth->emailAtaUsuario($id_usuario, $id_acao);
             }
             
@@ -5446,7 +5465,7 @@ class Welcome extends MY_Controller
         $usuario = $this->session->userdata('user_id');                     
         
         // SALVA O MÓDULO ATUAL do usuário
-         $data_modulo = array('modulo_atual' => 3, 'menu_atual' => 73);
+         $data_modulo = array('modulo_atual' => 3, 'menu_atual' => $menu);
          $this->owner_model->updateModuloAtual($usuario, $data_modulo);
                     
         // registra o log de movimentação
@@ -5560,7 +5579,7 @@ class Welcome extends MY_Controller
             
                 // SALVA O MÓDULO ATUAL do usuário
                  $usuario = $this->session->userdata('user_id');    
-                 $data_modulo = array('menu_atual' => $menu);
+                 $data_modulo = array('modulo_atual' => 3, 'menu_atual' => $menu);
                  $this->owner_model->updateModuloAtual($usuario, $data_modulo);
 
                 // registra o log de movimentação
@@ -5621,7 +5640,118 @@ class Welcome extends MY_Controller
     
     /******************   F I M  *  C O N V I D A D O S   ********************************/
     
+    /***************************************************************************************
+     ************************* M E N S A G E N S *****************************************
+     ***************************************************************************************/
+    public function mensagens($tabela, $menu)
+    {
+     
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+        
+        $this->form_validation->set_rules('id_cadastro', lang("id_cadastro"), 'required');
+         
+         if ($this->form_validation->run() == true) {
+           
+            $funcao = $this->input->post('funcao'); 
+           
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');   
+            $descricao = $this->input->post('descricao');
+            $data_inicio = $this->input->post('data_inicio');
+            $data_termino = $this->input->post('data_termino');
+           
+                $data_modulo = array(
+                   'descricao' => $descricao,
+                   'status' => 0,
+                   'data_criacao' => $date_hoje,
+                   'user' => $usuario,
+                   'empresa' => $empresa,
+                   'data_inicio' => $data_inicio,
+                   'data_termino' => $data_termino
+
+                );
+                    
+            $id_cadastro =  $this->owner_model->addCadastro('tarefas', $data_modulo);
+              
+            
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'INSERT', 
+                'description' => 'Cadastro de uma nova tarefa ',  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => 'sig_tarefa',
+                'row' => $id_cadastro,
+                'depois' => json_encode($data_modulo), 
+                'modulo' => 'networking',
+                'funcao' => 'networking/tarefas',  
+                'empresa' => $this->session->userdata('empresa'));
+           
+               $this->owner_model->addLog($logdata);  
+           // exit;
+            
+            $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
+            redirect("welcome/$funcao/90/72");
+            
+         }else{
+             
+           
+            
+                // SALVA O MÓDULO ATUAL do usuário
+                 $usuario = $this->session->userdata('user_id');    
+                 $data_modulo = array('modulo_atual' => 3, 'menu_atual' => $menu);
+                 $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+
+                // registra o log de movimentação
+
+                $date_hoje = date('Y-m-d H:i:s');    
+                $usuario = $this->session->userdata('user_id');
+                $empresa = $this->session->userdata('empresa');
+                $ip = $_SERVER["REMOTE_ADDR"];
+
+                $logdata = array('date' => date('Y-m-d H:i:s'), 
+                    'type' => 'ACESSO', 
+                    'description' => "Acessou o menu $menu do Módulo NETWORKING",  
+                    'userid' => $this->session->userdata('user_id'), 
+                    'ip_address' => $_SERVER["REMOTE_ADDR"],
+                    'tabela' => 'SIG_TAREFAS',
+                    'row' => '',
+                    'depois' => '', 
+                    'modulo' => 'networking',
+                    'funcao' => 'networking/tarefas',  
+                    'empresa' => $this->session->userdata('empresa'));
+                    $this->owner_model->addLog($logdata); 
+            
+            //$this->data['modulos'] = $this->owner_model->getTablesCadastroBasico($tabela);
+            $this->data['mensagens'] = $this->networking_model->getAllMensagensRecebidos();
+            //$this->data['campos'] = $this->owner_model->getAllCamposTablesLista($tabela);
+            //$this->data['cadastrosHabilitados'] = $this->owner_model->getAllCamposTablesCadastro($tabela);
+            
+           // $this->data['botoes_menu'] = $this->owner_model->getAllBotoesByTabela($tabela);
+            $this->page_construct_networking('networking/mensagens/index', $meta, $this->data);
+           // $this->page_construct_user('owner/empresas/index', $meta, $this->data);
+         }
+         
+         
+    }
     
+    
+    //Resposta do usuario
+    public function responderMensagem($convite, $resposta)
+    {
+     
+        $date_hoje = date('Y-m-d H:i:s');    
+        $data_invite = array('confirmacao' => $resposta, 'data_confirmacao' => $date_hoje);
+        $this->networking_model->updateRespostaConvite($convite, $data_invite);
+                 
+      redirect("welcome/convites/107/88");
+    }
+    
+    /******************   F I M  *  M E N S A G E N S   ********************************/
     
     
     

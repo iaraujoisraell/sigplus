@@ -73,7 +73,6 @@ $usuario =  $this->session->userdata('user_id');
           <?php $pst[''] = '';
               $pst['PENDENTE'] = lang('PENDENTE');
               $pst['ATRASADO'] = lang('ATRASADO');
-              $pst['AGUARDANDO VALIDAÇÃO'] = lang('AGUARDANDO VALIDAÇÃO');
               $pst['CONCLUÍDO'] = lang('CONCLUÍDO');
               $pst['CANCELADO'] = lang('CANCELADO');
               ?>
@@ -99,7 +98,60 @@ $usuario =  $this->session->userdata('user_id');
             <div class="row">
                 
                         <div class="box">
-                    <br>
+                            <?php
+                            $cont_atrasadas = 0;
+                            $cont_pendentes = 0;
+                            $cont_concluidas = 0;
+                            $cont_cancelado = 0;
+                            $cont_avalidacao = 0;
+                            $total_pendentes = 0;
+                            $wu4[''] = '';
+                            $cont = 1;
+                            foreach ($planos as $plano) {
+
+                               $data_prazo = $plano->data_termino;
+                               $status = $plano->status;
+                               
+                                if ($status == 'PENDENTE') {
+                                $dataHoje = date('Y-m-d');
+
+                                if ($dataHoje <= $data_prazo) {
+                                //    $novo_status = 'PENDENTE';
+                                    $cont_pendentes++;
+                                }
+
+                                if ($dataHoje > $data_prazo) {
+                                //    $novo_status = 'ATRASADO';
+                                    $cont_atrasadas++;
+                                }
+
+
+                                }  if ($status == 'CONCLUÍDO') {
+                                //    $novo_status = 'AGUARDANDO VALIDAÇÃO';
+                                    $cont_concluidas++;
+                                }else if ($status == 'CANCELADO') {
+                                //    $novo_status = 'CANCELADO';
+                                    $cont_cancelado++;
+                                }
+                            }
+                            ?>        
+                        <br>
+                            <div class="col-lg-12">
+                            <table>
+                                <thead>
+                                    <tr >
+                                        <th >  <font class="label bg-green-active" style="font-size: 12px; font-weight: bold"> Concluídas : <?php echo $cont_concluidas; ?> </font> </th>
+                                        <th >  <font class="label bg-orange-active" style="font-size: 12px; font-weight: bold"> Pendentes : <?php echo $cont_pendentes; ?></font> </th>
+                                        <th >  <font class="label bg-red-active" style="font-size: 12px; font-weight: bold"> Atrasadas : <?php echo $cont_atrasadas; ?></font> </th>
+                                        <th >  <font class="label bg-gray" style="font-size: 12px; font-weight: bold"> Total : <?php echo $cont_concluidas + $cont_pendentes + $cont_atrasadas; ?></font> </th>
+                                        <th >  <font class="label bg-black-active" style="font-size: 12px; font-weight: bold"> Canceladas : <?php echo $cont_cancelado; ?></font> </th>
+                                        
+                                    </tr>
+                                </thead> 
+                            </table>
+                            </div>    
+                            <br>
+                                  <br>
                             <div class="table-responsive">
                                 <div class="box-body">
                                     <table id="example1" class="table table-bordered table-striped">
@@ -144,7 +196,7 @@ $usuario =  $this->session->userdata('user_id');
                                                 
                                                 if($status == 'PENDENTE'){
                                                     
-                                                    if($plano->data_termino > date('Y-m-d')){
+                                                    if($plano->data_termino >= date('Y-m-d')){
                                                         $label = "orange";
                                                         $status_desc = "PENDENTE";
                                                     }else if($plano->data_termino < date('Y-m-d')){

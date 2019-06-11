@@ -56,6 +56,17 @@ class Projetos_model extends CI_Model
           
         return false;
     }
+   
+    // retorna o projeto da empresa por parametro e não por sessão.
+    // Usado no envio de email para o usuário, verifica o projeto que é a ação.
+    public function getProjetoByIdAndByEmpresa($projeto, $empresa)
+    {
+        $q = $this->db->get_where('projetos', array('id' => $projeto, 'empresa_id' => $empresa), 1);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
     
      public function getProjetoByID($id)
     {
@@ -120,11 +131,9 @@ class Projetos_model extends CI_Model
      public function getAllProjetosAtivoAcesso($status) {
         $usuario = $this->session->userdata('user_id');
         $empresa = $this->session->userdata('empresa');
-        $users_dados = $this->site->geUserByID($usuario);
-        $modulo_atual_id = $users_dados->modulo_atual;
-        $empresa = $users_dados->empresa_id;
-        $empresa_dados = $this->owner_model->getEmpresaById($empresa);
-        $tabela_empresa = $empresa_dados->tabela_cliente;
+      
+       // $empresa_dados = $this->owner_model->getEmpresaById($empresa);
+       // $tabela_empresa = $empresa_dados->tabela_cliente;
         //echo $tabela_empresa;
        //$empresa_db = $this->load->database('provin_clientes', TRUE);
        $statement = "SELECT p.id as id, p.projeto as nome_projeto, dt_inicio, dt_final,gerente_area, p.status as status FROM sig_projetos p 
@@ -557,13 +566,7 @@ class Projetos_model extends CI_Model
         //       . " inner join sig_users u on u.id = p.responsavel"
                 . " where projeto = $projeto_atual_id and p.empresa = $empresa ";
         
-       
-               if($tipo == 1){
-                $statement .= " and status IN('PENDENTE','CONCLUÍDO','CANCELADO')";
-               }else if($tipo == 2){
-                $statement .= " and status = 'AGUARDANDO VALIDAÇÃO'";   
-               }
-               
+        
           
         if($responsavel){
                 $statement .= " and responsavel = '$id_responsavel' and setor = '$setor_responsavel'";
@@ -579,10 +582,14 @@ class Projetos_model extends CI_Model
                  $statement .= " and status = '$status'";
             }
         }else{
-          //   $statement .= " and status = 'PENDENTE' and data_termino >= '$dataHoje' ";
+          if($tipo == 1){
+                $statement .= " and status IN('PENDENTE','CONCLUÍDO','CANCELADO')";
+               }else if($tipo == 2){
+                $statement .= " and status = 'AGUARDANDO VALIDAÇÃO'";   
+               }
         }
        
-       //echo $statement; exit;
+      // echo $statement; exit;
         $q = $this->db->query($statement);
         
         if ($q->num_rows() > 0) {

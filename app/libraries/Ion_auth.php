@@ -18,6 +18,7 @@ class Ion_auth
         $this->form_validation->set_error_delimiters($this->config->item('error_start_delimiter', 'ion_auth'), $this->config->item('error_end_delimiter', 'ion_auth'));
         $this->load->model('auth_model');
         $this->load->model('projetos_model');
+        $this->load->model('owner_model');
         $this->load->model('atas_model');
         $this->load->model('site');
       
@@ -307,6 +308,62 @@ class Ion_auth
         
     }
 
+    
+    /**************************************************************************
+     ***************** CONTROLE DE ENVIO DE EMAILS ****************************
+     *************************************************************************/
+    
+    /*
+     * ENVIA EMAIL DE NOVA ATIVIDADE QUANDO FINALIZA A ATA (ATA)
+     */
+    public function enviaEmailComAcao($titulo, $texto,  $usuario_destino, $id_acao, $email_id){
+      
+        $acao =  $this->atas_model->getPlanoByIdAndEmpresa($id_acao);  
+        $empresa_acao = $acao->empresa;
+        $projeto_acao = $acao->projeto;
+        $sequencial_acao = $acao->sequencial;
+        
+        
+         
+        $empresa_dados = $this->owner_model->getEmpresaById($empresa_acao);
+        $nome_empresa = $empresa_dados->razaoSocial;
+       
+        $dados_projeto =  $this->projetos_model->getProjetoByIdAndByEmpresa($projeto_acao, $empresa_acao);
+        $projeto_acao = $dados_projeto->projeto;
+       
+        $users_destino = $this->site->geUserByIDSemEmpresa($usuario_destino);   
+        $email = $users_destino->email;
+        
+        $nome_usuario = $users_destino->first_name;
+        
+        
+        $this->load->library('parser');
+        $parse_data = array(
+           'usuario' =>  $nome_usuario,
+           'site_link' => site_url(),
+           'acao' => $id_acao,
+           'projeto' => $projeto_acao, 
+           'titulo' => $titulo,
+           'texto' => $texto,
+           'empresa' => $nome_empresa,
+           'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
+        );
+        
+        $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/sig_envio_usuario_com_acao.php');
+        $message = $this->parser->parse_string($msg, $parse_data);
+        $subject = $this->lang->line('SIGPLUS - '.$titulo);
+      
+
+        $from = 'noreply@sigplus.online';
+        $from_name = "SigPlus";
+        
+        
+        //$this->sma->send_email_credencial($email, $subject, $message, $from, $from_name,null,$cc);  
+        //$this->sma->send_email_credencial($email, $subject, $message, $from, $from_name,null,$cc);
+        $this->sma->send_email_credencial($email, $subject, $message, $from, $from_name,null,$cc);
+            
+    }
+    
     public function retornoUsuario($id = null){
        
         
@@ -554,42 +611,7 @@ class Ion_auth
             
     }
     
-    /*
-     * ENVIA EMAIL DE NOVA ATIVIDADE QUANDO FINALIZA A ATA (ATA)
-     */
-    public function emailAtaUsuario($id_usuario, $id_acao){
-       
-        $acao =  $this->atas_model->getPlanoByID($id_acao);  
-        
-        $usuario = $acao->responsavel;   
-        $users = $this->site->geUserByID($id_usuario);   
-        
-            /*
-             * ENVIAR EMAIL
-             */
-        
-            //$email = 'alice.silva@unimedmanaus.com.br';
-            $email = $users->email;
-            
-            $this->load->library('parser');
-                $parse_data = array(
-                   'usuario' =>  $users->first_name .' '. $users->last_name,
-                   'site_link' => site_url(),
-                   'acao' => $id_acao,
-                   'status' => $acao->status,
-                   'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
-                );
-                
-            $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/envio_usuario_ata.php');
-            $message = $this->parser->parse_string($msg, $parse_data);
-            $subject = $this->lang->line('Aviso de Nova Atividade');
-          
-            
-             if ($this->sma->send_email($email, $subject, $message)) {
-                    return true;
-                }
-            
-    }
+    
     
       function encrypt($str, $key)
         {
@@ -867,65 +889,7 @@ class Ion_auth
             
     }
     
-    /*
-     * ENVIA EMAIL DE NOTIFICAÇÃO PARA O SOLICITANTE DE UMA OS, ONDE A MESMA ESTÁ SOLUCIONADA
-     */
-    public function emailAvisoFechamentoOS($matricula,$nome, $email,$id){
-            /*
-             * ENVIAR EMAIL
-             */
-        
-          //  $email = 'israel.araujo@unimedmanaus.coop.br'; //'iaraujo.israel@gmail.com'.//'';
-          //  $cc = 'gabriel.rando@unimedmanaus.coop.br';//'alice.cabral@unimedmanaus.coop.br';
-           // $email = $users->email;
-            
-            $this->load->library('parser');
-                $parse_data = array(
-                   'ticket' => $id,  
-                  'matricula' => $matricula,
-                  'nome' => $nome,
-                  'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'  
-                );
-                
-            $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/envio_aviso_solicitante_os.php');
-            $message = $this->parser->parse_string($msg, $parse_data);
-            $subject = $this->lang->line('HELPDESK - TI/ Unimed');
-          
-            //
-             if ($this->sma->send_email($email, $subject, $message,null, null,null,$cc)) {
-                    return true;
-                }
-            
-    }
-    
-    public function emailAvisoGeralFechamentoOS($matricula,$nome, $email, $quantidade){
-            /*
-             * ENVIAR EMAIL
-             */
-        
-           // $email = 'israel.araujo@unimedmanaus.coop.br'; //'iaraujo.israel@gmail.com'.//'';
-          //  $cc = 'gabriel.rando@unimedmanaus.coop.br';//'alice.cabral@unimedmanaus.coop.br';
-            $email2 = $email;//$users->email;
-            
-            $this->load->library('parser');
-                $parse_data = array(
-                 
-                  'matricula' => $matricula,
-                  'quantidade' => $quantidade,  
-                  'nome' => $nome,
-                  'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'  
-                );
-                
-            $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/envio_aviso_todos_solicitante_os.php');
-            $message = $this->parser->parse_string($msg, $parse_data);
-            $subject = $this->lang->line('HELPDESK - Chamado Solucionado');
-          
-            //
-             if ($this->sma->send_email($email2, $subject, $message,null, null,null,$cc)) {
-                    return true;
-                }
-            
-    }
+   
     
     public function logout()
     {

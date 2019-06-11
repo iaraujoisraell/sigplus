@@ -1045,6 +1045,7 @@ where up.users = $usuario and status = 'ATIVO' and empresa_id = $empresa";
     {
          $usuario = $this->session->userdata('user_id');
         $empresa = $this->session->userdata('empresa');
+        $date_hoje = date('Y-m-d');
         $users_dados = $this->site->geUserByID($usuario);
         $modulo_atual_id = $users_dados->modulo_atual;
         $projeto_atual_id = $users_dados->projeto_atual; 
@@ -1054,8 +1055,8 @@ where up.users = $usuario and status = 'ATIVO' and empresa_id = $empresa";
          $statement = "SELECT count(*) as pendente,
 (SELECT count(*) as concluido FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status = 'CONCLUÍDO') as concluido,
 (SELECT count(*) as concluido FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status = 'AGUARDANDO VALIDAÇÃO') as aguardando,
-(SELECT count(*) as concluido FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status = 'PENDENTE' AND data_termino < NOW()) as atrasado
-FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status = 'PENDENTE' and data_termino > NOW() ";
+(SELECT count(*) as concluido FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status = 'PENDENTE' AND data_termino < '$date_hoje') as atrasado
+FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and status = 'PENDENTE' and data_termino >= NOW() ";
       // echo $statement; exit;
         $q = $this->db->query($statement);
      

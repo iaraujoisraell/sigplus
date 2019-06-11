@@ -8,6 +8,32 @@ class Reports_model extends CI_Model
         parent::__construct();
     }
 
+    /****************** Retorna os Emails não enviado ************************/
+    public function getAllEmailsPendentes() {
+        
+        $statement = "SELECT * FROM sig_emails where enviado = 0";
+        $q = $this->db->query($statement);
+      
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+
+    /****************** Muda o status do e-mail para enviado ************************/   
+     public function updateStatusEmailEnviado($id, $data  = array())
+    {  
+        
+        if ($this->db->update('emails', $data, array('id' => $id))) {
+            
+                       
+         return true;
+        }
+        return false;
+    }
     
     /**************************************************/
     

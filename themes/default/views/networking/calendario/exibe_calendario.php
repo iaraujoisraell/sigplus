@@ -25,10 +25,13 @@ if (isset($_POST)) {
     $empresa = $_POST['empresa'];
     $usuario = $_POST['usuario'];
    
-    
-
+    $mes_atual = date("m");
+    $ano_atual = date("Y");
      
+ 
+  
 }
+
 
 ?>
 
@@ -591,7 +594,6 @@ if (isset($_POST)) {
             
         }// MINHA AGENDA
         
-        // MINHAS AÇÕES
         else if($opcao == 2){
             //MINHAS AÇÕES
 
@@ -600,6 +602,7 @@ if (isset($_POST)) {
             $sql_minhas_acoes = "SELECT idplanos,sequencial, data_entrega_demanda, data_termino, responsavel, descricao, status  FROM sig_planos "
                     . " where responsavel = $usuario and empresa = $empresa and status in('CONCLUÍDO','AGUARDANDO VALIDAÇÃO','PENDENTE') "
                     . " order by data_entrega_demanda asc";
+            
             $result = mysqli_query($link, $sql_minhas_acoes); //$link->query($sql_historico);
             if ($result->num_rows > 0) {
                  $total_obs = 1;    
