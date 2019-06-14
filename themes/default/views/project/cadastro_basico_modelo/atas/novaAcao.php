@@ -190,7 +190,7 @@ $fim_fase = $projetos->dt_final;
                                     <div class="form-group">
                                         <?= lang("Categoria ", "categoria"); ?><small>(Categoria no Plano de Ação)</small>
                                         <?php
-                                        $categorias = $this->networking_model->getAllCategoriaPlanoAcaoByPlano($plano_acao);
+                                        $categorias = $this->atas_model->getAllCategoriaPlanoAcaoByPlano($plano_acao);
                                         foreach ($categorias as $categoria) {
                                             $wu_cat[$categoria->id] = $categoria->descricao;
                                         }
@@ -233,7 +233,19 @@ $fim_fase = $projetos->dt_final;
                             </div>
                             
                                 <div class="col-md-6">
-                                    
+                                    <!-- QUEM -->
+                                  <div class="form-group">
+                                        <?= lang("Responsável ", "slResponsavel"); ?><small>(Quem ?)</small>
+                                        <?php
+                                        //$wu4[''] = '';
+                                        foreach ($users as $user) {
+                                            $wu4[$user->id] = $user->nome.' '.$user->last.' - '.$user->setor;
+                                        }
+                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
+                                        echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : $participantes_usuarios), 'id="slResponsavel" required  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"  multiple ');
+                              
+                                        ?>
+                                    </div>
                                        <!-- PRAZO de -->
                                 <div class="form-group">
                                 <?= lang("Data Início", "sldate"); ?><small>(Quando ?)</small>
@@ -258,34 +270,19 @@ $fim_fase = $projetos->dt_final;
                                        <input class="form-control input-tip" placeholder="Horas Previstas" value="<?php echo $acao->horas_previstas; ?>"  name="horas_previstas" type="number">
                                        </div>
                                     
-                                   <!-- QUEM -->
-                                  <div class="form-group">
-                                        <?= lang("Responsável ", "slResponsavel"); ?><small>(Quem ?)</small>
-                                        <?php
-                                        //$wu4[''] = '';
-                                        foreach ($users as $user) {
-                                            $wu4[$user->id] = $user->nome.' '.$user->last.' - '.$user->setor;
-                                        }
-                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
-                                        echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : $participantes_usuarios), 'id="slResponsavel" required  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"  multiple ');
-                              
-                                        ?>
-                                    </div>
+                                   
                                    
                                    <div class="form-group">
                                         <?= lang("Peso da Ação ", "peso"); ?><small>(Nível de Importancia/Impácto para o projeto)</small>
                                         <i class="fa fa-info-circle" title="1-Normal: Não é Importante ou Urgente. 2-Pouco: Um Pouco Importante mas não é Urgente. 3-Médio: Importância e Urgência Média. 4-Grande: Importante e Urgente. 5-Muito Grande: Muito Importante e Muito Urgente "></i>
-                                        <?php
-                                        //$wu4[''] = '';
-                                          $wu_peso['1'] = lang('1-Pouco');
-                                          $wu_peso['2'] = lang('2-Normal');
-                                          $wu_peso['3'] = lang('3-Médio');
-                                          $wu_peso['4'] = lang('4-Grande');
-                                          $wu_peso['5'] = lang('5-Muito Grande');
-                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
-                                        echo form_dropdown('peso', $wu_peso, (isset($_POST['peso']) ? $_POST['peso'] : $acao->peso), 'id="peso" required  class="form-control  select" data-placeholder="' . lang("Selecione o Peso da Ação") . ' "   style="width:100%;"   ');
-                              
-                                        ?>
+                                        <br>
+                                        <input type="radio" class="form-control  "  checked="true"  value="1" name="peso">  1
+                                        <input type="radio" class="form-control  "  value="2" name="peso">  2
+                                        <input type="radio" class="form-control  "  value="3" name="peso">  3
+                                        <input type="radio" class="form-control  "  value="4" name="peso">  4
+                                        <input type="radio" class="form-control  "  value="5" name="peso">  5
+                                            
+                                           
                                     </div>
                                    
                                    <div class="form-group">

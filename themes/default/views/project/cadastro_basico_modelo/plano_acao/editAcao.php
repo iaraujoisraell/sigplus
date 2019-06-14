@@ -208,7 +208,7 @@
                                     <div class="form-group">
                                         <?= lang("Categoria ", "categoria"); ?><small>(Categoria no Plano de Ação)</small>
                                         <?php
-                                        $categorias = $this->networking_model->getAllCategoriaPlanoAcaoByPlano($acao->idplano);
+                                        $categorias = $this->atas_model->getAllCategoriaPlanoAcaoByPlano($acao->idplano);
                                        
                                         foreach ($categorias as $categoria) {
                                             $wu_cat[$categoria->id] = $categoria->descricao;
@@ -250,6 +250,19 @@
                                         </div>
 
                                         <div class="col-md-6">
+                                            <!-- QUEM -->
+                                            <div class="form-group">
+                                                <?= lang("Responsável ", "slResponsavel"); ?><small>(Quem ?)</small>
+                                                <?php
+                                                //$wu4[''] = '';
+                                                foreach ($users as $user) {
+                                                    $wu4[$user->id] = $user->nome . ' ' . $user->last . ' - ' . $user->setor;
+                                                }
+                                                $id_usu_setor = $this->atas_model->getUserSetorByUsuarioAndSetor($acao->responsavel, $acao->setor);
+                                                //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
+                                                echo form_dropdown('responsavel', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : $id_usu_setor->id), 'id="slResponsavel" required="true"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
+                                                ?>
+                                            </div>
                                             <!-- PRAZO de -->
                                             <div class="form-group">
                                             <?= lang("Data Início", "sldate"); ?><small>(Quando ?)</small>
@@ -271,19 +284,7 @@
                                                 <?= lang("Horas Previstas", "horas"); ?>
                                                 <input class="form-control input-tip"  placeholder="Horas Previstas" value="<?php echo $acao->horas_previstas; ?>"  name="horas_previstas" type="number">
                                             </div>
-                                            <!-- QUEM -->
-                                            <div class="form-group">
-                                                <?= lang("Responsável ", "slResponsavel"); ?><small>(Quem ?)</small>
-                                                <?php
-                                                //$wu4[''] = '';
-                                                foreach ($users as $user) {
-                                                    $wu4[$user->id] = $user->nome . ' ' . $user->last . ' - ' . $user->setor;
-                                                }
-                                                $id_usu_setor = $this->atas_model->getUserSetorByUsuarioAndSetor($acao->responsavel, $acao->setor);
-                                                //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
-                                                echo form_dropdown('responsavel', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : $id_usu_setor->id), 'id="slResponsavel" required="true"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
-                                                ?>
-                                            </div>
+                                            
 
                                             <div class="form-group">
                                             <?= lang("Peso da Ação ", "peso"); ?><small>(Nível de Importancia/Impácto para o projeto)</small>

@@ -1408,7 +1408,7 @@ class Welcome extends MY_Controller
             
             
             
-            $title = "Ação : $idplano ";
+            $title = "Retorno da Ação : $sequencial ";
             $texto_msg = "O usuário $nome_usuario enviou o retorno da ação: $sequencial. Referente a : $tipo ";
             
             

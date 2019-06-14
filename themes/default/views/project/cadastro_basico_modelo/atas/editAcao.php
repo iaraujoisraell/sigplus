@@ -202,7 +202,20 @@ $nome_projeto = $projetos->nome_projeto;
                                         <?= lang("Descrição ", "sldescricao"); ?><small>(O que ?)</small>
                                         <?php echo form_textarea('descricao', (isset($_POST['descricao']) ? $_POST['descricao'] : $acao->descricao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>
                                   </div>
+                              <!-- QUEM -->
+                                  <div class="form-group">
+                                        <?= lang("Responsável ", "slResponsavel"); ?><small>(Quem ?)</small>
+                                        <?php
+                                        //$wu4[''] = '';
+                                        foreach ($users as $user) {
+                                            $wu4[$user->id] = $user->nome.' '.$user->last.' - '.$user->setor;
+                                        }
+                                        $id_usu_setor =  $this->atas_model->getUserSetorByUsuarioAndSetor($acao->responsavel, $acao->setor);
+                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
+                                        echo form_dropdown('responsavel', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : $id_usu_setor->id), 'id="slResponsavel" required="true"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
                               
+                                        ?>
+                                    </div>
                                     <!-- ONDE -->  
                                   <div  class="form-group">
                                         <?= lang("Local ", "onde"); ?><small>(Onde ?)</small>
@@ -220,20 +233,7 @@ $nome_projeto = $projetos->nome_projeto;
                                         <?= lang("Horas Previstas", "horas"); ?>
                                        <input class="form-control input-tip" placeholder="Horas Previstas" value="<?php echo $acao->horas_previstas; ?>"  name="horas_previstas" type="number">
                                        </div>
-                                   <!-- QUEM -->
-                                  <div class="form-group">
-                                        <?= lang("Responsável ", "slResponsavel"); ?><small>(Quem ?)</small>
-                                        <?php
-                                        //$wu4[''] = '';
-                                        foreach ($users as $user) {
-                                            $wu4[$user->id] = $user->nome.' '.$user->last.' - '.$user->setor;
-                                        }
-                                        $id_usu_setor =  $this->atas_model->getUserSetorByUsuarioAndSetor($acao->responsavel, $acao->setor);
-                                      //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
-                                        echo form_dropdown('responsavel', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : $id_usu_setor->id), 'id="slResponsavel" required="true"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
-                              
-                                        ?>
-                                    </div>
+                                   
                                    <div class="form-group">
                                         <?= lang("Peso da Ação ", "peso"); ?><small>(Nível de Importancia/Impácto para o projeto)</small>
                                         <i class="fa fa-info-circle" title="1-Normal: Não é Importante ou Urgente. 2-Pouco: Um Pouco Importante mas não é Urgente. 3-Médio: Importância e Urgência Média. 

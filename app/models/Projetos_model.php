@@ -530,7 +530,7 @@ class Projetos_model extends CI_Model
         
         //echo $tabela_empresa;
         //$empresa_db = $this->load->database('provin_clientes', TRUE);
-       $statement = "SELECT * FROM sig_plano_acao where projeto = $projeto_atual_id and empresa = $empresa ";
+       $statement = "SELECT * FROM sig_plano_acao where projeto = $projeto_atual_id and empresa = $empresa order by id desc";
       // echo $statement; exit;
         $q = $this->db->query($statement);
         
