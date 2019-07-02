@@ -1179,10 +1179,10 @@ class Networking_model extends CI_Model
        $usuario = $this->session->userdata('user_id');    
        $empresa = $this->session->userdata('empresa');
        $dataHoje = date('Y-m-d');
-
+      // echo $status.'<br>';
        $statement = "SELECT * FROM sig_planos p
                      where responsavel = $usuario and status != 'ABERTO' and empresa = $empresa";
-            if($projeto){
+            if($projeto > 0){
                 $statement .= " and projeto = '$projeto'";
             }
             
@@ -1192,15 +1192,77 @@ class Networking_model extends CI_Model
                      $statement .= " and status = '$status' and '$dataHoje' <= data_termino ";
                 }else if($status == "ATRASADO"){
                      $statement .= " and status = 'PENDENTE' and '$dataHoje' > data_termino ";
-                }else{
-                     $statement .= " and status = '$status'";
+                }else if($status == "CONCLUÍDO"){
+                     $statement .= " and status = 'CONCLUÍDO'";
+                }else if($status == "AGUARDANDO VALIDAÇÃO"){
+                     $statement .= " and status = 'AGUARDANDO VALIDAÇÃO'";
+                }else if($status == "CANCELADO"){
+                     $statement .= " and status = 'CANCELADO'";
                 }
             }else{
               //   $statement .= " and status = 'PENDENTE' and data_termino >= '$dataHoje' ";
             }
             
         $statement .= " order by data_termino DESC ";
-      // echo $statement; exit;
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+     // TODAS AS AÇÕES DO USUÁRIOS > NETWORK
+     public function getAllAcoesUserById_UserSemFiltro($projeto)
+    {
+       $usuario = $this->session->userdata('user_id');    
+       $empresa = $this->session->userdata('empresa');
+       $dataHoje = date('Y-m-d');
+      // echo $status.'<br>';
+       $statement = "SELECT * FROM sig_planos p
+                     where responsavel = $usuario and status != 'ABERTO' and empresa = $empresa";
+            if($projeto > 0){
+                $statement .= " and projeto = '$projeto'";
+            }
+            
+           
+            
+        $statement .= " order by data_termino DESC ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+      public function getAllAcoesProjeto($id_acao, $project)
+    {
+       $empresa = $this->session->userdata('empresa');
+       $usuario = $this->session->userdata('user_id');
+    //   $usuario = $this->session->userdata('user_id');
+    //  $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+       
+       
+       
+       $statement = "SELECT idplanos, sequencial, idatas, p.data_entrega_demanda as dt_inicio, p.data_termino as dt_termino, p.descricao as descricao, i.descricao as item, nome_evento, nome_fase 
+           FROM sig_planos p
+                    inner join sig_item_evento i on i.id = p.eventos
+                    inner join sig_eventos e on e.id = i.evento
+                    inner join sig_fases_projeto f on f.id = e.fase_id
+                    left join sig_atas a on a.id = p.idatas
+                    where a.projetos = $project and a.empresa = $empresa and p.empresa = $empresa and idplanos not in($id_acao) and idplanos not in(select id_vinculo from sig_acao_vinculos where planos_idplanos = $id_acao) ";
+     //  echo $statement; exit;
         $q = $this->db->query($statement);
         
         if ($q->num_rows() > 0) {

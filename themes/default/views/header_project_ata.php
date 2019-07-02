@@ -34,6 +34,7 @@
   <link rel="stylesheet" href="<?= $assets ?>bi/dist/css/skins/_all-skins.min.css">
   
   
+  
  
    <link href="<?= $assets ?>styles/theme_novo.css" rel="stylesheet"/>
   <link href="<?= $assets ?>styles/style_novo.css" rel="stylesheet"/>

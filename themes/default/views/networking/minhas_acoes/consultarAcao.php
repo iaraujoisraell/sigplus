@@ -105,6 +105,7 @@
     </div> 
     </div>
     
+    
     <div class="row">  
     <div class="col-lg-12">
         <div class="col-lg-12">
@@ -143,7 +144,15 @@ background-color: #f4f4f4;
 }
  
 </style>
+<div class="row">  
+        <div class="col-lg-12">
+            <div class="col-lg-12">
+                
+                <a href="<?= site_url('welcome/minhasAcoes/'.$projeto_filtro.'/'.$status_filtro); ?>"  class="btn btn-primary"><i class="fa fa-backward"></i> Voltar</a>
 
+            </div>
+        </div>
+    </div>   
     <section  class="content">
         <div class="col-lg-12">
             <div class="row">    

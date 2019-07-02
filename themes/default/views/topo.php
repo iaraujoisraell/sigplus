@@ -41,22 +41,31 @@
       $empresa = $users_dados->empresa_id;
       
       $modulos = $this->owner_model->getAllModulosByEmpresa($empresa);
+      
+      $cont_modulos = $this->owner_model->getContlModulosByEmpresa();
+      
+      $modulo_admin = $cont_modulos->admin;
+      $modulo_project = $cont_modulos->project;
+      
+      $total_modulos = $modulo_admin + $modulo_project;
+      
       $cont_modulos = 0;
-        foreach ($modulos as $modulo) {
+      foreach ($modulos as $modulo) {
             $cont_modulos++;
         }
         //echo $cont_modulos;
       ?>
      
       <div  class="navbar-custom-menu">
-        <?php  if($cont_modulos > 1) { ?>
+        <?php  if($total_modulos > 1) { ?>
             <ul class="nav navbar-nav">
            <!-- <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
             <li><a href="#">Link</a></li> -->
             <li class="dropdown">
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">Módulos <span class="caret"></span></a>
               <ul class="dropdown-menu" role="menu">
-                 <?php
+                  
+                   <?php
                  $cont_mod = 1;
                  foreach ($modulos as $modulo) {
                     
@@ -66,15 +75,18 @@
                  $home = $dados_modulo->home;
                  
                  if ($modulo_atual_id == $modulo->sig_modulos_id){
-                $ativo = "active";
-                }else{
-                    $ativo = "";
-                }
+                    $ativo = "active";
+                    }else{
+                        $ativo = "";
+                    }
+                    
+                    
                  ?>
                 
-                  <li class="<?php echo $ativo; ?>"><a class="active"  href="<?= site_url($home); ?>"> <?php if ($modulo_atual_id == $modulo->sig_modulos_id){ ?> <i class="fa fa-circle text-success"></i> <?php } echo $nome_modulo; ?></a></li>
-                <?php if($cont_mod < $cont_modulos){ ?>
+                 <li class="<?php echo $ativo; ?>"><a class="active"  href="<?= site_url($home); ?>"> <?php if ($modulo_atual_id == $modulo->sig_modulos_id){ ?> <i class="fa fa-circle text-success"></i> <?php } echo $nome_modulo; ?></a></li>
+                    <?php if($cont_mod < $cont_modulos){ ?>
                 <li class="divider"></li>
+                
                 <?php
                 }
                 $cont_mod++;

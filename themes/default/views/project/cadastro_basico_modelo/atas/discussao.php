@@ -89,11 +89,11 @@ onload : optionCheck();
 
     }
 </script>
-<?php
-        $acao = $this->atas_model->getPlanoByID($idplano);
-        $usuario = $this->session->userdata('user_id');
-//$users = $this->site->geUserByID($acao->responsavel);                              
-        ?>    
+   
+    <?php
+$ataAtual = $this->atas_model->getAtaByID($id);
+ $statusAta = $ataAtual->status;
+?>
 <?php
 $projetos = $this->projetos_model->getProjetoAtualByID_completo();
 $id_projeto = $projetos->id;
@@ -107,7 +107,7 @@ $nome_projeto = $projetos->nome_projeto;
     <div class="box">
     <section class="content-header">
           <h1>
-            <?php echo 'Anotações da ATA '.$id; ?>
+            <?php echo 'Anotações da ATA : '.$ataAtual->sequencia; ?>
               <small><?php echo $nome_projeto; ?></small>
                   
           </h1>
@@ -147,10 +147,7 @@ $nome_projeto = $projetos->nome_projeto;
     <section  class="content">
     <div class="row">    
        
-    <?php
-$ataAtual = $this->atas_model->getAtaByID($id);
- $statusAta = $ataAtual->status;
-?>
+
     <div class="col-lg-12">
         <div class="box">
             <div class="row">
@@ -158,7 +155,7 @@ $ataAtual = $this->atas_model->getAtaByID($id);
                             <div class="col-md-12">
                                 <div class="form-group">
                                     <center>
-                                        <h2>  ATA  <?PHP ECHO $acao->idatas; ?>  </h2>
+                                        <h2>  Registro das Anotações  </h2>
                                     </center>
                                 </div>
                             </div>
@@ -171,14 +168,26 @@ $ataAtual = $this->atas_model->getAtaByID($id);
                             echo form_hidden('id', $id);
                             ?>
                             <div class="col-md-12">
+                                
+                                <div class="col-md-12">    
+                                    <div class="form-group">
+                                            <?= lang("Título", "sldate"); ?><small></small>
+                                            <i class="fa fa-info-circle" title="Título da Discussão da Reunião."></i>
+                                            <input type="text" value="<?php echo $ata->titulo_discussao; ?>" placeholder="Ex: Resumo da Ata, Principais Assuntos, etc." name="titulo_discussao" maxlength="250" class="form-control pull-right" id="titulo_discussao">
+                                    </div>
+                                </div>        
+                                
                             <!-- ITEM EVENTO -->
-                            <div class="col-md-12">
+                                <div class="col-md-12">
                                   <div  class="form-group">
-                                        <?= lang("Discussão da Reunião ", "sldescricao"); ?>
+                                        <?= lang("Anotações ", "sldescricao"); ?>
                                        <?php if($statusAta == 1){ ?>
                                             <?php echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip " disabled="true"  style="height: 120px;" id="sldescricao" required="true" '); ?>   
                                       <?php }else{ ?>
-                                        <?php echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>
+                                          <textarea   id="discussao" name="discussao" rows="10" required="true" cols="80">
+                                              <?php echo $ata->discussao; ?>
+                                          </textarea>
+                                        <?php // echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>
                                       <?php } ?>
                                   </div>
                                 </div>
@@ -208,13 +217,7 @@ $ataAtual = $this->atas_model->getAtaByID($id);
             
         </div>        
     </div>
-        
-   
-    
-    
-        
     </div>
    
         
     </section>    
-

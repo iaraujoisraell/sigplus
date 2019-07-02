@@ -583,7 +583,7 @@ class Project extends MY_Controller
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         
         $usuario = $this->session->userdata('user_id');                     
-        $this->data['planos'] = $this->atas_model->getAllPlanosUser($usuario);
+      //  $this->data['planos'] = $this->atas_model->getAllPlanosUser($usuario);
        
         
        
@@ -664,7 +664,7 @@ class Project extends MY_Controller
         $this->data['eventos'] = $this->projetos_model->getAllEventosProjeto($id);
        
         //GRÁFICO AÇOES NA LINHA DO TEMPO
-        $desempenhos = $this->projetos_model->getAllitemStatusPlanosLinhaTempo($id);
+        $desempenhos = $this->projetos_model->getAllitemStatusPlanosLinhaTempo();
         $this->data['acoes_tempo'] =  $desempenhos;
         
         /*
@@ -4543,7 +4543,7 @@ class Project extends MY_Controller
     /************************************************************************************************************
      *************************** CADASTROS DE FASES E EVENTOS E ITENS **********************************************
      ************************************************************************************************************/
-    public function fases_projetos( $menu)
+    public function fases_projetos($menu, $maximizado)
     {
      
         if ($this->input->get('id')) {
@@ -4609,8 +4609,7 @@ class Project extends MY_Controller
              $usuario = $this->session->userdata('user_id');    
              $data_modulo = array('modulo_atual' => 4, 'menu_atual' => $menu);
              $this->owner_model->updateModuloAtual($usuario, $data_modulo);  
-
-                // registra o log de movimentação
+             // registra o log de movimentação
 
                 $date_hoje = date('Y-m-d H:i:s');    
                 $usuario = $this->session->userdata('user_id');
@@ -4630,8 +4629,17 @@ class Project extends MY_Controller
                     'empresa' => $this->session->userdata('empresa'));
                     $this->owner_model->addLog($logdata); 
             
-                  
+             if($maximizado == 2){
+                 $maximizado = 2;
+             } else{
+                 $maximizado = 1;
+             }    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
             
+            $this->data['empresa'] = $empresa;
+            $this->data['usuario'] = $usuario;
+            $this->data['maximizado'] = $maximizado;
             $this->data['menu'] = $menu;
            // $this->data['tabela_id'] = $tabela;
             $this->data['projetos'] = $this->projetos_model->getProjetoAtualByID_completo();
@@ -4838,6 +4846,69 @@ class Project extends MY_Controller
          }
          
          
+    }
+    
+    public function organizarFases()
+    {
+        
+         $this->form_validation->set_rules('ordernar_fase', lang("id_cadastro"), 'required');
+         
+         if ($this->form_validation->run() == true) {
+         
+            $ordem_fase = $this->input->post('ordem_fase');
+            $codigo_fase = $this->input->post('codigo_fase');
+            
+         
+             $ordem = 1;
+            foreach ($codigo_fase as $codigo) {
+                
+                
+                $data_evento = array(
+                'ordem' => $ordem
+                );
+                
+                 $tabela_sig = 'fases_projeto';
+                $this->owner_model->updateCadastro($codigo, $tabela_sig, $data_evento);
+                
+                $date_hoje = date('Y-m-d H:i:s');    
+                $usuario = $this->session->userdata('user_id');
+                $empresa = $this->session->userdata('empresa');
+                $ip = $_SERVER["REMOTE_ADDR"];
+
+                $logdata = array('date' => date('Y-m-d H:i:s'), 
+                    'type' => 'UPDATE', 
+                    'description' => 'ordenou o cadastro de Fase',  
+                    'userid' => $this->session->userdata('user_id'), 
+                    'ip_address' => $_SERVER["REMOTE_ADDR"],
+                    'tabela' => 'sig_fases_projeto',
+                    'row' => $codigo,
+                    'depois' => json_encode($data_evento), 
+                    'modulo' => 'project',
+                    'funcao' => 'project/organizarFases',  
+                    'empresa' => $this->session->userdata('empresa'));
+
+                   $this->owner_model->addLog($logdata);  
+                
+                $ordem++;   
+            }
+            
+            
+           // exit;
+           
+            $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
+           // redirect("project/fases_projetos/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>";
+         }else{
+        
+            $date_cadastro = date('Y-m-d H:i:s');                           
+        
+         $this->data['fases'] = $this->projetos_model->getAllFasesProjetos();
+       
+        $this->page_construct_project_ordena('project/escopo/faseProjeto/organizar_fase', $meta, $this->data);
+       // $this->load->view($this->theme . 'project/escopo/faseProjeto/organizar_fase', $this->data);
+           
+         }
+            
     }
     
     public function novoCadastroEvento($fase)
@@ -5183,6 +5254,71 @@ class Project extends MY_Controller
          
     }
     
+    public function organizarEventos($fase)
+    {
+        
+        $this->form_validation->set_rules('ordernar_evento', lang("id_cadastro"), 'required');
+         
+        if ($this->form_validation->run() == true) {
+         
+            $ordem_fase = $this->input->post('ordem_fase');
+            $codigo_fase = $this->input->post('codigo_fase');
+            
+           
+         
+             $ordem = 1;
+            foreach ($codigo_fase as $codigo) {
+                
+                
+                $data_evento = array(
+                'ordem' => $ordem
+                );
+                
+                $tabela_sig = 'eventos';
+                $this->owner_model->updateCadastro($codigo, $tabela_sig, $data_evento);
+                
+                $date_hoje = date('Y-m-d H:i:s');    
+                $usuario = $this->session->userdata('user_id');
+                $empresa = $this->session->userdata('empresa');
+                $ip = $_SERVER["REMOTE_ADDR"];
+
+                $logdata = array('date' => date('Y-m-d H:i:s'), 
+                    'type' => 'UPDATE', 
+                    'description' => 'ordenou o cadastro de eventos',  
+                    'userid' => $this->session->userdata('user_id'), 
+                    'ip_address' => $_SERVER["REMOTE_ADDR"],
+                    'tabela' => 'sig_eventos',
+                    'row' => $codigo,
+                    'depois' => json_encode($data_evento), 
+                    'modulo' => 'project',
+                    'funcao' => 'project/organizarEventos',  
+                    'empresa' => $this->session->userdata('empresa'));
+
+                   $this->owner_model->addLog($logdata);  
+                
+                $ordem++;   
+            }
+            
+            
+           // exit;
+           
+            $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
+           // redirect("project/fases_projetos/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>";
+         }else{
+        
+         $date_cadastro = date('Y-m-d H:i:s');                           
+        
+         $this->data['eventos'] = $this->projetos_model->getAllEventosProjetoByFase($fase);
+         $this->data['fase_id'] = $fase;
+       
+         $this->page_construct_project_ordena('project/escopo/eventos/organizar_evento', $meta, $this->data);
+         // $this->load->view($this->theme . 'project/escopo/faseProjeto/organizar_fase', $this->data);
+           
+        }
+            
+    }
+    
     public function novoItemEvento($evento)
     {
         
@@ -5366,6 +5502,68 @@ class Project extends MY_Controller
          
     }
     
+    public function organizarItemEventos($id_evento)
+    {
+        
+        $this->form_validation->set_rules('ordernar_item', lang("id_cadastro"), 'required');
+         
+        if ($this->form_validation->run() == true) {
+         
+            $ordem_fase = $this->input->post('ordem_fase');
+            $codigo_fase = $this->input->post('codigo_fase');
+            
+             $ordem = 1;
+            foreach ($codigo_fase as $codigo) {
+                
+                
+                $data_evento = array(
+                'ordem' => $ordem
+                );
+                
+                $tabela_sig = 'item_evento';
+                $this->owner_model->updateCadastro($codigo, $tabela_sig, $data_evento);
+                
+                $date_hoje = date('Y-m-d H:i:s');    
+                $usuario = $this->session->userdata('user_id');
+                $empresa = $this->session->userdata('empresa');
+                $ip = $_SERVER["REMOTE_ADDR"];
+
+                $logdata = array('date' => date('Y-m-d H:i:s'), 
+                    'type' => 'UPDATE', 
+                    'description' => 'ordenou o cadastro de item_eventos',  
+                    'userid' => $this->session->userdata('user_id'), 
+                    'ip_address' => $_SERVER["REMOTE_ADDR"],
+                    'tabela' => 'sig_item_evento',
+                    'row' => $codigo,
+                    'depois' => json_encode($data_evento), 
+                    'modulo' => 'project',
+                    'funcao' => 'project/organizarItemEventos',  
+                    'empresa' => $this->session->userdata('empresa'));
+
+                   $this->owner_model->addLog($logdata);  
+                
+                $ordem++;   
+            }
+            
+            
+           // exit;
+           
+            $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
+           // redirect("project/fases_projetos/$tabela_id/$menu_id");
+            echo "<script>history.go(-2)</script>";
+         }else{
+        
+         $date_cadastro = date('Y-m-d H:i:s');                           
+        
+         $this->data['eventos_itens'] = $this->projetos_model->getAllItemEventosProjeto($id_evento);
+         $this->data['evento_id'] = $id_evento;
+       
+         $this->page_construct_project_ordena('project/escopo/item_evento/organizar_item', $meta, $this->data);
+         // $this->load->view($this->theme . 'project/escopo/faseProjeto/organizar_fase', $this->data);
+           
+        }
+            
+    }
     
     /************************************************************************************************************
      *************************** ESCOPO DO PROJETO **********************************************
@@ -5743,6 +5941,29 @@ class Project extends MY_Controller
         //$this->page_construct_project('project/escopo/eap/eap', $meta, $this->data);   
 
             
+    }
+    
+    
+    /*
+     * RELATÓRIOS
+     */
+    
+     public function status_report()
+    {
+        $this->sma->checkPermissions();
+        $data['error'] = (validation_errors()) ? validation_errors() : $this->session->flashdata('error');
+        
+        // $this->load->library("phpmailer_library");
+        //$objMail = $this->phpmailer_library->load();
+        
+        $usuario = $this->session->userdata('user_id');
+        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+        $this->data['status_report'] = $this->reports_model->getAllStatusReportByProjeto($projetos_usuario->projeto_atual);
+        
+        $bc = array(array('link' => base_url(), 'page' => lang('home')), array('link' => '#', 'page' => lang('reports')));
+        $meta = array('page_title' => lang('reports'), 'bc' => $bc);
+        $this->page_construct_project('project/reports/status_report/index', $meta, $this->data);
+
     }
     
 }

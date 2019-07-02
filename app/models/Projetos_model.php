@@ -235,7 +235,7 @@ class Projetos_model extends CI_Model
         //echo $tabela_empresa;
        //$empresa_db = $this->load->database('provin_clientes', TRUE);
        $statement = "SELECT * FROM sig_fases_projeto p 
-                    where id_projeto = $projeto_atual ";
+                    where id_projeto = $projeto_atual order by ordem asc ";
        //echo $statement; exit;
         $q = $this->db->query($statement);
         
@@ -505,7 +505,7 @@ class Projetos_model extends CI_Model
         
         //echo $tabela_empresa;
         //$empresa_db = $this->load->database('provin_clientes', TRUE);
-       $statement = "SELECT atas.id as id, atas.id as ata,  data_ata, pauta,  tipo, responsavel_elaboracao, atas.status, atas.anexo, atas.sequencia as sequencia "
+       $statement = "SELECT atas.id as id, atas.id as ata,  data_ata, pauta, assunto, tipo, responsavel_elaboracao, atas.status, atas.anexo, atas.sequencia as sequencia "
                . " FROM sig_atas atas where projetos = $projeto_atual_id and empresa = $empresa ";
       // echo $statement; exit;
         $q = $this->db->query($statement);
@@ -764,10 +764,19 @@ class Projetos_model extends CI_Model
     }
     
     // Desempenho geral da equipe do projeto pelo status das ações
-     public function getAllitemStatusPlanosLinhaTempo($projeto_atual)
+     public function getAllitemStatusPlanosLinhaTempo()
     {
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $dataHoje = date('Y-m-d');
+        $users_dados = $this->site->geUserByID($usuario);
+        $projeto_atual_id = $users_dados->projeto_atual; 
 
-         $q = $this->db->get_where('historico_acoes', array('resumo' => 1,'projeto' => $projeto_atual));
+        $statement = "SELECT * 
+                        FROM sig_desempenho_acoes 
+                        where resumo = 1 and projeto = $projeto_atual_id and empresa = $empresa ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
          
         
         if ($q->num_rows() > 0) {
@@ -813,10 +822,11 @@ class Projetos_model extends CI_Model
         $users_dados = $this->site->geUserByID($usuario);
         $projeto_atual = $users_dados->projeto_atual;
         
-        $statement = "select distinct s.id as id_pai, s.nome as descricao from sig_planos p
+        $statement = "select distinct s.id as id_pai, s.nome as descricao 
+                      from sig_planos p
                     inner join sig_users_setor us on us.users_id = p.responsavel
                     inner join sig_setores s      on s.id = us.setores_id
-                    where projeto = $projeto_atual and s.pai = 0 ";
+                    where p.projeto = $projeto_atual  order by s.nome asc ";
         //echo $statement; exit;
         $q = $this->db->query($statement);
       
@@ -843,11 +853,7 @@ class Projetos_model extends CI_Model
         $projeto_atual = $users_dados->projeto_atual;
         
          $statement = "select count(*) as qtde from sig_planos p
-                    inner join sig_users_setor us on us.users_id = p.responsavel
-                    inner join sig_setores s      on s.id = us.setores_id
-                   
-                    where s.id = $area and s.pai = 0 and projeto = $projeto_atual  ";
-         
+                   where p.setor = $area and projeto = $projeto_atual and p.status not in ('ABERTO','CANCELADO') ";
         $q = $this->db->query($statement);
         
             if ($q->num_rows() > 0) {
@@ -867,10 +873,7 @@ class Projetos_model extends CI_Model
         $users_dados = $this->site->geUserByID($usuario);
         $projeto_atual = $users_dados->projeto_atual;
         $statement = "select count(*) as qtde from sig_planos p
-                    inner join sig_users_setor us on us.users_id = p.responsavel
-                    inner join sig_setores s      on s.id = us.setores_id
-                    inner join sig_setores pai    on pai.id = s.pai
-                    where projeto = $projeto_atual  ";
+                    where projeto = $projeto_atual   ";
         
         $q = $this->db->query($statement);
          
@@ -891,10 +894,7 @@ class Projetos_model extends CI_Model
         $users_dados = $this->site->geUserByID($usuario);
         $projeto_atual = $users_dados->projeto_atual; 
         $statement = "select count(*) as qtde from sig_planos p
-                    inner join sig_users_setor us on us.users_id = p.responsavel
-                    inner join sig_setores s      on s.id = us.setores_id
-                    inner join sig_setores pai    on pai.id = s.pai
-                    where pai.id = $area and projeto = $projeto_atual and p.status = 'CONCLUÍDO'  ";
+                    where p.setor = $area and projeto = $projeto_atual and p.status = 'CONCLUÍDO'  ";
         $q = $this->db->query($statement);
         
        
@@ -909,17 +909,14 @@ class Projetos_model extends CI_Model
      * 
      */
     
-     public function getAcoesPendenteSetorPaiByProjeto($area, $tipo)
+        public function getAcoesPendenteSetorPaiByProjeto($area, $tipo)
     {
-        $date_hoje = date('Y-m-d H:i:s');
+        $date_hoje = date('Y-m-d');
         $usuario = $this->session->userdata('user_id');
         $users_dados = $this->site->geUserByID($usuario);
         $projeto_atual = $users_dados->projeto_atual; 
         $statement = "select count(*) as qtde from sig_planos p
-                    inner join sig_users_setor us on us.users_id = p.responsavel
-                    inner join sig_setores s      on s.id = us.setores_id
-                    inner join sig_setores pai    on pai.id = s.pai
-                    where pai.id = $area and projeto = $projeto_atual and p.status = 'PENDENTE'  ";
+                    where p.setor = $area and projeto = $projeto_atual and p.status = 'PENDENTE'  ";
         
         if($tipo == 1){
             //PENDENTE
@@ -930,6 +927,7 @@ class Projetos_model extends CI_Model
             $statement .= " and data_termino < '$date_hoje' ";
            
         }
+        //echo $statement; exit;
       $q = $this->db->query($statement);
       
         if ($q->num_rows() > 0) {
@@ -972,417 +970,20 @@ class Projetos_model extends CI_Model
     
     
     
-    /*
-     * PERFIL SUPERINTENDENCIA E GESTOR
-     */
+    
+    
+    
+    
+    
+    
+    
+    
+     
+    
+    
+    
+    
   
-    
-    
-    /*
-     * VERIFICA A TABELA USER_SUPERINTENCIA PARA VERIFICAR QUAIS SUPERINTENDENCIA O USUÁRIO ESTÁ LIGADO
-     */
-    
-    public function getSuperintenciaByUser($perfil,$projeto,$usuario)
-    {
-        if($perfil == 3){
-         $q = $this->db->get_where('users_superintendencia', array('users' => $usuario,'projeto' => $projeto));
-        }else if($perfil == 2){
-         $q = $this->db->get_where('users_gestor', array('users' => $usuario,'projeto' => $projeto));
-        }
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-      /*
-     * QTDE EQUIPE por PROJETO E POR SUPERINTENDENCIA
-     */
-     public function getEquipeByProjetoSuperintendencia($perfil,$projeto,$superintendencia)
-    {
-         $this->db->select("COUNT( DISTINCT (responsavel)) as responsavel")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-        ->join('projetos', 'atas.projetos = projetos.id', 'left')
-        ->join('users', 'planos.responsavel = users.id', 'left')
-        ->join('setores', 'planos.setor = setores.id', 'left'); 
-         if($perfil == 3){
-        $q = $this->db->get_where('planos', array('projetos.id' => $projeto, 'setores.superintendencia' => $superintendencia), 1);
-          }else if($perfil == 2){
-         $q = $this->db->get_where('planos', array('projetos.id' => $projeto, 'setores.id' => $superintendencia), 1);
-        
-        }
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    
-     /*
-     * QTDE AÇÕES POR PROJETO E POR SUPERINTENDENCIA
-     */
-     public function getQtdeAcoesByProjetoSuperintendencia($perfil,$projeto,$superintendencia)
-    {
-         $this->db->select("COUNT( idplanos) as total_acoes")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-        ->join('projetos', 'atas.projetos = projetos.id', 'left')
-        ->join('users', 'planos.responsavel = users.id', 'left')
-        ->join('setores', 'planos.setor = setores.id', 'left'); 
-         
-         if($perfil == 3){
-         $q = $this->db->get_where('planos', array('projetos.id' => $projeto, 'setores.superintendencia' => $superintendencia, 'planos.status !=' => 'CANCELADO'), 1);
-          }else if($perfil == 2){
-          $q = $this->db->get_where('planos', array('projetos.id' => $projeto, 'setores.id' => $superintendencia, 'planos.status !=' => 'CANCELADO'), 1);
-        
-        }
-        
-       
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /*
-     * QTDE AÇÕES CONCLUÍDAS, PENDENTES E ATRASADAS DE UM PROJETO E UMA SUPERINTENDENCIA
-     */
-     public function getAcoesByProjetoSuperintendenciaStatus($perfil,$id,$status,$superintendencia)
-    {   
-         $date_hoje = date('Y-m-d H:i:s');
-          
-         $this->db->select("COUNT( idplanos) as quantidade")
-        ->join('atas', 'planos.idatas = atas.id', 'left')
-        ->join('projetos', 'atas.projetos = projetos.id', 'left')
-        ->join('users', 'planos.responsavel = users.id', 'left')
-        ->join('setores', 'planos.setor = setores.id', 'left');         
-        
-        
-         if($perfil == 3){
-             
-             if ($status == 'CONCLUÍDO') {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status, 'setores.superintendencia' => $superintendencia), 1);
-            } else if (($status == 'PENDENTE') || ($status == 'AGUARDANDO VALIDAÇÃO')) {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status, 'setores.superintendencia' => $superintendencia, 'planos.data_termino >' => $date_hoje), 1);
-            } else if ($status == 'ATRASADO') {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => 'PENDENTE', 'setores.superintendencia' => $superintendencia, 'planos.data_termino <' => $date_hoje), 1);
-            }
-        }else if($perfil == 2){
-             if ($status == 'CONCLUÍDO') {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status, 'setores.id' => $superintendencia), 1);
-            } else if (($status == 'PENDENTE') || ($status == 'AGUARDANDO VALIDAÇÃO')) {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => $status, 'setores.id' => $superintendencia, 'planos.data_termino >' => $date_hoje), 1);
-            } else if ($status == 'ATRASADO') {
-                $q = $this->db->get_where('planos', array('projetos.id' => $id, 'planos.status' => 'PENDENTE', 'setores.id' => $superintendencia, 'planos.data_termino <' => $date_hoje), 1);
-            }
-       
-        }
-         
-         
-         
-         
-        
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
-    
-    /*
-     * Status E QUANTIDADE das Açõs no tempo do projeto
-     */
-     public function getAllitemPlanosLinhaTempoSuperintendencia($perfil,$id,$id_superintendencia_data = array())
-    {
-        
-         
-         $this->db->select("projeto, data,sum(total_acoes) as total_acoes,  sum(total_atrasados) as total_atrasados , sum(total_concluido) as total_concluido, sum(total_pendentes) as total_pendentes, sum(total_fora_prazo) as total_fora_prazo")
-        ->join('setores', 'historico_acoes.setor = setores.id', 'left');
-         
-       
-         
-         if($perfil == 3){
-          foreach ($id_superintendencia_data as $item_id) {
-            
-          $this->db->or_where('setores.superintendencia =', $item_id);
-        }
-          }else if($perfil == 2){
-           foreach ($id_superintendencia_data as $item_id) {
-            
-          $this->db->or_where('setores.id =', $item_id);
-        }
-        
-        }
-        
-        
-        
-       
-            $this->db->where('projeto =', $id);
-          
-         
-         $this->db->group_by('data');
-         $q = $this->db->get('historico_acoes');
-         
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-
-    
-    
-     
-    
-    /*
-     * PEGA AS ÁREAS  DO USUÁRIO
-     */
-     public function getAreasByUsuarioProjeto($projeto,$usuario)
-    {
-        $select =   array(
-             ' superintendencia.id as id_superintendencia',
-             'superintendencia.nome as superintendencia',
-            'projetos.id as projeto'
-);
-       $this->db->select($select)
-        ->distinct()
-        //->join('atas',             'planos.idatas = atas.id', 'left')
-        ->join('projetos',         'users_superintendencia.projeto = projetos.id', 'left')
-       // ->join('users',            'planos.responsavel = users.id', 'left')
-       // ->join('setores',          'users.setor_id = setores.id', 'left')         
-       // ->join('prestadores',      'setores.prestador = prestadores.id', 'left')
-        ->join('superintendencia', 'users_superintendencia.superintendencia = superintendencia.id', 'left')
-        // ->join('users_superintendencia', 'superintendencia.id = users_superintendencia.superintendencia', 'left')
-        ->order_by('id_superintendencia', 'asc');
-       
-     // $q = $this->db->get_where('planos', array('projetos.id' => $id));  
-     
-           $q = $this->db->get_where('users_superintendencia', array('users_superintendencia.users' => $usuario,'users_superintendencia.projeto' => $projeto));  
-       
-       
-      
-         
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    /*
-     * PEGA ÁREA E SETOR
-     */
-     public function getAreasSetorByUsuarioProjeto($projeto,$usuario)
-    {
-        $select =   array(
-             ' superintendencia.id as id_superintendencia',
-             'superintendencia.nome as superintendencia',
-            'projetos.id as projeto',
-            'planos.setor as setor_id',
-            'setores.nome as setor'
-);
-       $this->db->select($select)
-        ->distinct()
-        ->join('atas',             'planos.idatas = atas.id', 'left')
-        ->join('projetos',         'atas.projetos = projetos.id', 'left')
-        ->join('users',            'planos.responsavel = users.id', 'left')
-        ->join('setores',          'planos.setor = setores.id', 'left')         
-       // ->join('prestadores',      'setores.prestador = prestadores.id', 'left')
-        ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')
-         ->join('users_superintendencia', 'superintendencia.id = users_superintendencia.superintendencia', 'left')
-        ->order_by('setor_id', 'asc');
-       
-     // $q = $this->db->get_where('planos', array('projetos.id' => $id));  
-     
-           $q = $this->db->get_where('planos', array('users_superintendencia.users' => $usuario,'users_superintendencia.projeto' => $projeto));  
-       
-       
-      
-         
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-    /*
-     * PEGA ÁREA E SETOR
-     */
-     public function getAreasSetorBySuperintendente($projeto,$usuario)
-    {
-        
-        $select =   array(
-             ' superintendencia.id as id_superintendencia',
-             'superintendencia.nome as superintendencia',
-            'users_superintendencia.projeto as projeto',
-            'setores.id as setor_id',
-            'setores.nome as setor'
-);
-       $this->db->select($select)
-        ->distinct()
-       // ->join('atas',             'planos.idatas = atas.id', 'left')
-       // ->join('projetos',         'atas.projetos = projetos.id', 'left')
-      //  ->join('users',            'planos.responsavel = users.id', 'left')
-         ->join('superintendencia', 'users_superintendencia.superintendencia = superintendencia.id', 'left')       
-        ->join('setores',          'users_superintendencia.superintendencia = setores.superintendencia', 'left')         
-       // ->join('prestadores',      'setores.prestador = prestadores.id', 'left')
-       
-     //    ->join('users_superintendencia', 'superintendencia.id = users_superintendencia.superintendencia', 'left')
-        ->order_by('setores.id', 'asc');
-       
-     // $q = $this->db->get_where('planos', array('projetos.id' => $id));  
-     
-           $q = $this->db->get_where('users_superintendencia', array('users_superintendencia.users' => $usuario,'users_superintendencia.projeto' => $projeto));  
-       
-        //echo 'aqui'.$q->num_rows(); exit;  
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-    
-    /*
-     * PEGA AS ÁREAS  DO USUÁRIO
-     */
-     public function getSetoresByUsuarioProjeto($projeto,$usuario)
-    {
-        $select =   array(
-             ' superintendencia.id as id_superintendencia',
-             'superintendencia.nome as superintendencia',
-            
-            'projetos.id as projeto'
-);
-       $this->db->select($select)
-        ->distinct()
-        ->join('atas',             'planos.idatas = atas.id', 'left')
-        ->join('projetos',         'atas.projetos = projetos.id', 'left')
-        ->join('users',            'planos.responsavel = users.id', 'left')
-        ->join('setores',          'planos.setor = setores.id', 'left')         
-       // ->join('prestadores',      'setores.prestador = prestadores.id', 'left')
-         ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')
-         ->join('users_gestor', 'setores.id = users_gestor.setor', 'left')
-        ->order_by('setores.id', 'asc');
-       
-     // $q = $this->db->get_where('planos', array('projetos.id' => $id));  
-     
-           $q = $this->db->get_where('planos', array('users_gestor.users' => $usuario,'projetos.id' => $projeto));  
-       
-       
-      
-         
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-    
-     public function getGestoresSetoresByUsuarioProjeto($projeto,$usuario)
-    {
-        $select =   array(
-             ' superintendencia.id as id_superintendencia',
-             'superintendencia.nome as superintendencia',
-             'users_gestor.projeto as projeto'
-);
-       $this->db->select($select)
-        ->distinct()
-       // ->join('atas',             'planos.idatas = atas.id', 'left')
-       // ->join('projetos',         'atas.projetos = projetos.id', 'left')
-       // ->join('users',            'planos.responsavel = users.id', 'left')
-        ->join('setores',          'users_gestor.setor = setores.id', 'left')         
-       // ->join('prestadores',      'setores.prestador = prestadores.id', 'left')
-         ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')
-        // ->join('users_gestor', 'setores.id = users_gestor.setor', 'left')
-        ->order_by('setores.id', 'asc');
-     
-     // $q = $this->db->get_where('planos', array('projetos.id' => $id));  
-        $q = $this->db->get_where('users_gestor', array('users_gestor.users' => $usuario,'users_gestor.projeto' => $projeto));  
-       
-        
-      
-         
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    /*
-     * 
-     * 
-     * FIM PERFIL GESTOR E SUPERINTENDENCIA
-     * 
-     * 
-     * PERFIL EDP
-     */
-    
-    
-    
-     
-    
-    
-    
-    
-    
-    /*
-     * retorna todos os usuarios com acoes atrasadas de um projeto. objtivo é enviar emails para esses usuários.
-     */
-     public function usuariosComAcoesAtrasadas($id)
-    {
-      
-        $date_hoje = date('Y-m-d H:i:s');
-        $this->db->select('distinct(responsavel) as responsavel, users.username, users.email, ultimo_aviso_email')
-            ->join('users', 'planos.responsavel = users.id', 'left')
-            ->join('atas', 'planos.idatas = atas.id', 'left')
-            ->order_by('users.username', 'asc');
-         $q = $this->db->get_where('planos', array('atas.projetos' => $id,'planos.status' => 'PENDENTE','planos.data_termino <' => $date_hoje));
-         
-         
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
     
     /*
      * ALTERA A DATA DO ÚLTIMO ENVIO
@@ -1834,11 +1435,8 @@ order by su.nome asc
     {
          
          $this->db->select('*')
-           // ->join('users', 'planos.responsavel = users.id', 'left')
-           // ->join('setores', 'users.setor_id = setores.id', 'left')  
-           // ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')        
-           // ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->order_by('id', 'ASC');
+       
+         ->order_by('ordem', 'ASC');
         
          $q = $this->db->get_where('item_evento', array('evento' => $evento));
          
@@ -2827,244 +2425,23 @@ order by su.nome asc
     }
     
     
-    /*
-     * BI - EMPRÉSTIMO
-     */
+    // CONFIGURAÇÃO ESCOPO POR USUÁRIO - FASE DO PROJETO
     
-     
-       public function emprestimo_entrada_fornecedor($id)
-    {         
-        $db_tasy = $this->load->database('tasy', TRUE);
-        
-        $query_pizza = "select distinct CD_PESSOA_JURIDICA,PJ.DS_RAZAO_SOCIAL, 
-                  (select count(*) as emprestimo from emprestimo ep
-                  where ep.cd_pessoa_juridica = e.cd_pessoa_juridica
-                  and ep.dt_emprestimo between '01/06/2018' and '30/06/2018'
-                  and ep.cd_local_estoque = 65
-                  and ep.ie_tipo = 'E'
-                  ) as quantidade_emprestimo,
-
-                    (select sum(qt_emprestimo) as quantidade_emprestimo from emprestimo ep
-                    inner join emprestimo_material em on em.nr_emprestimo = ep.nr_emprestimo
-                    where ep.cd_pessoa_juridica = e.cd_pessoa_juridica
-                    and ep.dt_emprestimo between '01/06/2018' and '30/06/2018'
-                    and ep.cd_local_estoque = 65
-                    and ep.ie_tipo = 'E'
-                    ) as quantidade_material
-
-                    from emprestimo e
-                    inner join pessoa_juridica pj on pj.cd_cgc = e.cd_pessoa_juridica
-                    where e.dt_emprestimo between '01/06/2018' and '30/06/2018'
-                    and e.cd_local_estoque = 65
-                    and e.ie_tipo = 'E'";
-        
-         $q = $oracle->get_where('emprestimo', array('cd_local_estoque' => 65, 'ie_tipo' => 'E'));
-        //    $q = $db_tasy->query($query_pizza);    
-           echo 'aqui'; exit;
-      // $q = $this->db->query($myQuery, false);
+    //RETORNA O CLIENTE
+     public function getStatusScopoFaseByUserAndEmpresa($fase, $tipo)
+    {
+        $usuario = $this->session->userdata('user_id'); 
+        $empresa = $this->session->userdata('empresa');
+        if($tipo == 1){
+        $q = $this->db->get_where('user_escopo', array('fase' => $fase, 'empresa' => $empresa, 'usuario' => $usuario), 1);
+        }else if($tipo == 2){
+            $q = $this->db->get_where('user_escopo', array('evento' => $fase, 'empresa' => $empresa, 'usuario' => $usuario), 1);
+        }
         if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
+            return $q->row();
         }
         return FALSE;
     }
     
-    
-    
-    /*
-     * PEGA AS PERÍODO DE COMPETENCIA  DO USUÁRIO
-     */
-     public function getPeriodoCompetenciaHE()
-    {
-       
-       $this->db->select("*")
-       ->order_by('id', 'desc')
-       ->distinct();
-       $this->db->group_by('mes');
-       $this->db->group_by('ano');
-       $q = $this->db->get('periodo_he');  
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-    
-     public function getUsuarioPeriodoCompetenciaHE($mes, $ano)
-    {
-       
-       $this->db->select("periodo_he.id as id, periodo_he.user_id as user_id, mes, ano, de, ate, first_name as nome, last_name as sobrenome, status_verificacao")//
-       ->join('users', 'periodo_he.user_id = users.id', 'inner')
-       ->order_by('first_name', 'asc');
-       //->distinct();
-        
-       $q = $this->db->get_where('periodo_he', array('mes' => $mes, 'ano' => $ano));  
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-       public function getUsuarioHorario($mes, $ano)
-    {
-       
-       $this->db->select("user_horario.id as id,  first_name as nome, last_name as sobrenome")//
-       ->join('users', 'user_horario.user = users.id', 'inner')
-       ->order_by('first_name', 'asc');
-       //->distinct();
-        
-       $q = $this->db->get_where('user_horario');  
-       
-      if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
-    
-     public function updateStatusHESolicitacao($id, $data  = array())
-    {  
-       
-          
-    if ($this->db->update('periodo_he_registros', $data, array('id' => $id))) {
-           
-         return true;
-        }
-        return false;
-    }
-    
-    
-    /*
-     * SALVA NO RH3
-     */
-      public function updateDadosHoraExtraRH3($data, $hora_extra, $cpf, $dia, $hora_credito, $justificativa, $hora_extra_normal, $diferenca_credito_hora)
-    {
-    
-          include 'conexao_rh3.php';
-         
-          
-          
-          if($diferenca_credito_hora == '00:00'){
-            $hora_credito_rh3 = "";
-           }else{
-            $hora_credito_rh3 = "30/12/99 '||'$diferenca_credito_hora'||':00,000000";
-           }
-          
-          
-           if($hora_extra_normal == '00:00'){
-             $hora_extra_rh3 = "";
-           }else{
-            $hora_extra_rh3 = "30/12/99 '||'$hora_extra_normal'||':00,000000"; 
-           }       
-          
-           /*
-            IF($data == '10/11/2018'){
-          
-            ECHO $data.'<br>';
-            echo $hora_extra_normal.'<br>';
-            echo $hora_extra_rh3;
-            EXIT;  
-          }
-            * 
-            */
-          
-          
-          
-          $query_update_espelho = "update  pt_espelhoponto ep
-                                set ep.qtdhorasextras = '$hora_extra_rh3',
-                                ep.bh_qtdcredito = '$hora_credito_rh3'
-                                where ep.dataponto = '$data'
-                                and ep.idpessoa in (select p.id from pessoas p  where p.datarescisao is null and p.cpf in '$cpf' and p.tipopessoa ='F') ";
-          $update_Espelho = oci_parse($ora_conexao,$query_update_espelho);
-                               oci_execute($update_Espelho, OCI_NO_AUTO_COMMIT);
-             
-                               
-            
-                               
-                               
-                               
-              $r = oci_commit($ora_conexao);
-            if (!$r) {
-                $e = oci_error($ora_conexao);
-                trigger_error(htmlentities($e['message']), E_USER_ERROR);
-            }             
-                               
-      //    echo $query_update_espelho.'<br>'; 
-     //     echo ' --------------------- <br>';                     
-     //  echo 'Query Insert : '.$query_insert_justificativa .'<br>'; 
- 
-
-         
-    }
-    
-     public function insertDadosHoraExtraRH3($data, $hora_extra, $cpf, $dia, $hora_credito, $justificativa, $hora_extra_normal, $diferenca_credito_hora)
-    {
-    
-          include 'conexao_rh3.php';
-         
-       
-// insert na tabela de justificativas
-
-  $query_insert_justificativa = "insert into pt_justificativas j (IDPESSOA, 
-                                 IDJUSTIFICATIVA, 
-                                 DATAESPELHOPONTO, 
-                                 DATACADASTRO, 
-                                 IDUSUARIO, 
-                                 IDPESSOAORIGEM, 
-                                 OBSERVACAO, 
-                                 QTDHORASABONOFALTA,
-                                 QTDHORASABONOFALTACOEFICIENTE) 
-                                 
-VALUES (
-        (select p.id from pessoas p  where p.datarescisao is null and p.cpf in '$cpf' and p.tipopessoa ='F'),
-        '42',
-       (select ep.dataponto from pt_espelhoponto ep where ep.dataponto = '$data' and ep.idpessoa in (select p.id from pessoas p  where p.datarescisao is null and p.cpf in '$cpf' and p.tipopessoa ='F')),
-       (select to_char(sysdate,'DD/MM/YYYY') from dual),
-       '981',
-       (select p.id from pessoas p  where p.datarescisao is null and p.cpf in '$cpf' and p.tipopessoa ='F'),
-       '$justificativa',
-       (select  to_char(ep.qtdhorasextras,'DD/MM/YY HH24:MI:SS') from pt_espelhoponto ep where ep.dataponto = '$data' and ep.idpessoa in (select p.id from pessoas p  where p.datarescisao is null and p.cpf in '$cpf' and p.tipopessoa ='F')),
-       (select  to_char(ep.qtdhorasextras,'DD/MM/YY HH24:MI:SS') from pt_espelhoponto ep where ep.dataponto = '$data' and ep.idpessoa in (select p.id from pessoas p  where p.datarescisao is null and p.cpf in '$cpf' and p.tipopessoa ='F')))";
-  $insert_justificativa = oci_parse($ora_conexao,$query_insert_justificativa);
- // oci_bind_by_name($insert_justificativa, ':justificativa', $justificativa);
-                               oci_execute($insert_justificativa);
-  
-            $r2 = oci_commit($ora_conexao);
-            if (!$r2) {
-                $e = oci_error($ora_conexao);
-                trigger_error(htmlentities($e['message']), E_USER_ERROR);
-            } 
-            
-         //   echo 'Query Insert : '.$query_insert_justificativa .'<br>'; 
-
-       
-
-    }
-    
-    
-    
-    
-     public function updateStatusPeriodoHE($id, $data  = array())
-    {  
-      
-          
-    if ($this->db->update('periodo_he', $data, array('id' => $id))) {
-           
-         return true;
-        }
-        return false;
-    }
     
 }

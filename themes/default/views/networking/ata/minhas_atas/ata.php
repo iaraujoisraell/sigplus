@@ -375,7 +375,7 @@ $nome_projeto = $projetos->nome_projeto;
                           <?php } ?>   
                             <a  class="btn btn-danger" title="Retorna para a lista de ATAS." onclick="history.go(-1)"><?= lang('Sair') ?> <i class="fa fa-sign-out"></i></a>
                          
-                            <a  class="btn bg-gray-active" title="Imprimir a ATA " href="<?= site_url('welcome/pdf_ata/'.$id); ?>"><?= lang('PDF Ata ') ?> <i class="fa fa-download"></i></a>
+                            <a  class="btn bg-gray-active" title="Imprimir a ATA " href="<?= site_url('atas/pdf_ata/'.$id); ?>"><?= lang('PDF Ata ') ?> <i class="fa fa-download"></i></a>
                              <?php if($statusAta == 1){ ?> 
                                  <a  class="btn btn-linkedin" title="Registro de convites enviados aos participantes " href="<?= site_url('welcome/convite_ata/'.$id); ?>"><?= lang('Convites') ?> <i class="fa fa-send"></i></a>
                             <?php } ?>     

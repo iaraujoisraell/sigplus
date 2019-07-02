@@ -243,17 +243,16 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
 
         $t_projeto = $acao_tempo->projeto;
        // if($t_projeto == $projeto_selecionado){
-        $t_data = substr("$acao_tempo->data", 0, 10);
+        $t_data = $acao_tempo->data;
         $n_data = implode("/", array_reverse(explode("-", $t_data)));
+        $t_acoes = $acao_tempo->total_acoes;
         $t_concluido = $acao_tempo->total_concluido;
-        $t_fora_prazo = $acao_tempo->total_fora_prazo;
         $t_pendente = $acao_tempo->total_pendentes;
         $t_atrasado = $acao_tempo->total_atrasados;
 
-        $total_concluido = $t_concluido + $t_fora_prazo;
        // }
         ?>  
-        ['<?php echo $n_data; ?>',  <?php echo $total_concluido; ?>, <?php echo $t_atrasado; ?>, <?php echo $t_pendente; ?>],
+        ['<?php echo $n_data; ?>',  <?php echo $t_concluido; ?>, <?php echo $t_atrasado; ?>, <?php echo $t_pendente; ?>],
     <?php
     }
     /*
@@ -378,23 +377,14 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                 
                 <div  id="main_content_wrap" class="outer">
                     <section id="main_content" class="inner">
-                        <!-- Relógio  -->
                         <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-                        <script type="text/javascript">
-                          google.charts.load('current', {'packages':['gauge']});
-                          google.charts.setOnLoadCallback(drawChart);
-
-                          function drawChart() {
-
-                            var data = google.visualization.arrayToDataTable([
-                              ['Label', 'Value'],
-                               <?php
+                         <?php
 
                             $cont = 1;
                             foreach ($areas_projeto as $area_projeto) {
 
                                 $id_pai = $area_projeto->id_pai;
-                                $superintendencia = $area_projeto->descricao;
+                                $nome_setor = $area_projeto->descricao;
 
 
                                 // PEGA A QTDE DE AÇÕES POR AREAS E POR PROJETO
@@ -423,34 +413,44 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                 if ($perc_conc_area == 0) {
                                     $perc_conc_area = 0;
                                 }
-                                ?>
-                                 ['<?php echo $superintendencia; ?>', <?php echo substr("$perc_conc_area", 0, 3); ?>],
-                               <?php 
-                               }
+                        ?>
+                        
+                        
+                                <script type="text/javascript">
+                                google.charts.load('current', {'packages':['corechart']});
+                                google.charts.setOnLoadCallback(drawChart);    
+                                  function drawChart() {
+                                    var data = google.visualization.arrayToDataTable([
+                                      ['Ações', 'Quantidade'],
+                                      ['Work',     0],
+                                      ['Ações Arasadas',      <?php echo $atrasadas_area; ?>],
+                                      ['Ações Pendentes',  <?php echo $pendente_area; ?>],
+                                      ['Ações Concluídas', <?php echo $concluidas_setor_pai; ?>],
+                                      ['Sleep',    0]
+                                    ]);
 
-                                ?>
+                                    var options = {
+                                      title: '<?php echo $nome_setor; ?>',
+                                      is3D: true,
+                                    };
 
+                                    var chart = new google.visualization.PieChart(document.getElementById('<?php echo $id_pai; ?>'));
+                                    chart.draw(data, options);
+                                  }
+                                </script>
 
-                            ]);
+                           
+                                 <div id="<?php echo $id_pai; ?>" class="col-lg-6"  style=" height: 200px;"></div>
+                          
+                       <?php 
+                       }
 
-                            var options = {
-                              width: 300, height: 150,
-
-                              redFrom: 0, redTo: 60,
-                              yellowFrom:61, yellowTo: 90,
-                              greenFrom:91, greenTo: 100,
-                              minorTicks: 5
-                            };
-
-                            var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
-
-                            chart.draw(data, options);
-
-                          }
-                        </script>
-                        <div class="col-sm-12">
-                            <div id="chart_div" style="width: 100%; height: 200px;"></div>
-                        </div>
+                        ?>
+                         
+                        
+                        
+                       
+                       
                      </section>   
                 </div>
             </div>

@@ -30,7 +30,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
         return mktime(0, 0, 0, $partes[1], $partes[0], $partes[2]);
     }
     ?>
-<style>
+    <style>
        
 
 
@@ -137,15 +137,12 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                 });
                  $('slider').css('background', '#ccc'); 
                 function showResult(obj) {
-                  // 
-
-
-                   <?php $dias_de = "<script>+obj.value[0]+</script>" ?> ;
+                     <?php $dias_de = "<script>+obj.value[0]+</script>" ?> ;
                       //      alert(obj.value[0]);
                      $("#result").html("Previsto De " +  adicionarDiasData_de(obj.value[0])   + " Até " + obj.value[1]);
                 }
 
-               function adicionarDiasData_de(dias){
+                function adicionarDiasData_de(dias){
                   var hoje        = new Date();
                   var dataVenc    = new Date(hoje.getTime() + (dias * 24 * 60 * 60 * 1000));
                   return dataVenc.getDate() + "/" + (dataVenc.getMonth() + 1) + "/" + dataVenc.getFullYear();
@@ -282,42 +279,9 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
 
                                            $id_pai = $area_projeto->id_pai;
                                            $superintendencia = $area_projeto->descricao;
-
-                                            // PEGA A QTDE DE AÇÕES POR AREAS E POR PROJETO
-                                            $quantidade_area = $this->projetos_model->getAcoesSetorPaiByProjeto($id_pai);
-                                            $qtde_area = $quantidade_area->qtde;
-                                        ?>
-                                        <!-- 
-                                            TABELA COM AS AÇÕES DO SETOR
-                                        -->
-                                        <div class="tab-pane fade in <?php if ($cont == 1) { ?> active <?php } ?>"  id="<?php echo $id_pai; ?>">
-
-                                            <!-- 
-                                                AQUI MOSTRA AS CAIXAS COM AS 
-                                            QUANTIDADE DE AÇÕES DOS SETORES DA ÁREA SELECIONADA
-
-                                            -->
-                                        <?php
-                                        $cont_setor_area = 1;
-                                        // PEGA OS SETORES POR AREAS E POR PROJETO  $projeto,
-                                         if($perfil_atual == 2){
-                                             //GESTOR
-                                         //   $setores_areas = $this->atas_model->getAllSetorAreaUsuario($projeto, $usuario,$id_superintendente);
-                                        }else  if($perfil_atual == 3){
-                                            //SUPERINTENDENTE
-
-                                           //         $setores_areas = $this->atas_model->getAllSetorArea($projeto, $id_superintendente);//$this->projetos_model->getAllSetorArea($id_superintendente);                                                           
-                                        }else{
-                                            //EDP
-
-                                        }
-
-                                        $setores_areas = $this->atas_model->getAllSetorArea($id_pai); 
-                                        $cont_caixa = 1;
-                                        foreach ($setores_areas as $setor_area) {
-
-                                            $id_setor = $setor_area->id;
-                                            $nome_setor = $setor_area->nome;
+                                           
+                                           $id_setor = $area_projeto->id_pai;
+                                            $nome_setor = $area_projeto->descricao;
                                            
 
                                             // PEGA A QTDE DE AÇÕES POR AREAS E POR PROJETO
@@ -345,14 +309,49 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                             //CALCULA A PERCENTAGEM PENDENTES
                                             $calc_pendente = $total_pendentes * 100;
                                             $perc_pendente_setor = ($calc_pendente / $qtde_total_acoes_setor);
-                                            
+
+                                            // PEGA A QTDE DE AÇÕES POR AREAS E POR PROJETO
+                                            $quantidade_area = $this->projetos_model->getAcoesSetorPaiByProjeto($id_pai);
+                                            $qtde_area = $quantidade_area->qtde;
+                                        ?>
+                                        <!-- 
+                                            TABELA COM AS AÇÕES DO SETOR
+                                        -->
+                                        
+                                        <div style="height: 500px;" class="tab-pane fade in <?php if ($cont == 1) { ?> active <?php } ?> "  id="<?php echo $id_pai; ?>">
+
+                                            <!-- 
+                                                AQUI MOSTRA AS CAIXAS COM AS 
+                                            QUANTIDADE DE AÇÕES DOS SETORES DA ÁREA SELECIONADA
+
+                                            -->
+                                            <?php
+                                            $cont_setor_area = 1;
+                                            // PEGA OS SETORES POR AREAS E POR PROJETO  $projeto,
+                                             if($perfil_atual == 2){
+                                                 //GESTOR
+                                             //   $setores_areas = $this->atas_model->getAllSetorAreaUsuario($projeto, $usuario,$id_superintendente);
+                                            }else  if($perfil_atual == 3){
+                                                //SUPERINTENDENTE
+
+                                               //         $setores_areas = $this->atas_model->getAllSetorArea($projeto, $id_superintendente);//$this->projetos_model->getAllSetorArea($id_superintendente);                                                           
+                                            }else{
+                                                //EDP
+
+                                            }
+
                                            
                                             ?>
-                                                <!-- 
-                                            AQUI MOSTRA AS CAIXAS COM AS 
-                                        QUANTIDADE DE AÇÕES POR SETOR
-                                                -->      
-                                                <script type="text/javascript">
+                                                
+                                                  
+
+
+                                        
+
+                                        <div class="row">
+                                                <div class="col-lg-12">
+                                                    <!-- AQUI MOSTRA AS CAIXAS COM AS  QUANTIDADE DE AÇÕES POR SETOR -->      
+                                                    <script type="text/javascript">
                                                       google.charts.load("current", {packages:["corechart"]});
                                                       google.charts.setOnLoadCallback(drawChart);
                                                       function drawChart() {
@@ -375,42 +374,10 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                                       }
                                                     </script>
                                                     
-                                                <div style="height: 200px; margin-top: 5px;" class="col-md-4 ">
+                                                <div  style="height: 200px; margin-top: 5px;" class="col-md-4 ">
                                                      <div id="<?php echo $id_setor; ?>" style="width: 400px; height: 200px;"></div>
                                                 </div>
-                                                  
-
-
-                                        <?php   
-                                           
-                                            
-                                        }
-                                       
-                                        ?>   
-
-                                        <div class="row">
-                                                <div class="col-lg-12">
-
-                                                       <div class="portlet-body">
-                                                            <ul class="nav nav-tabs">
-                                                        <?php
-                                                            
-                                                            $cont_setor_area2 = 1;
-                                                            // PEGA OS SETORES POR AREAS E POR PROJETO  $projeto,
-
-                                                            $setores_areas = $this->atas_model->getAllSetorArea($id_pai);
-                                                            foreach ($setores_areas as $setor_area2) {
-                                                                $id_setor = $setor_area2->id;
-                                                                $nome_setor2 = $setor_area2->nome;
-                                                                // AKI CARREGA O NOME DO SETOR NA ABA
-                                                                ?>
-                                                                    <li class="<?php if ($cont_setor_area2++ == 1) { ?> active <?php } ?>">
-                                                                        <a href="#setor<?php echo $id_setor; ?>" data-toggle="tab"><?php echo $nome_setor2; ?></a>
-                                                                    </li>
-
-                                                            <?php } ?>   
-                                                            </ul>
-                                                        </div>
+                                                      
 
                                                         <div id="myPillsContent" class="tab-content">
                                                             <?php

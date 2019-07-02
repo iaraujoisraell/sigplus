@@ -148,7 +148,7 @@
                                                             <ul class="dropdown-menu pull-right" role="menu">
                                                             <li><a title="Editar Registro"  href="<?= site_url('welcome/plano_acao/'.$ata->id); ?>"><i class="fa fa-edit"></i>  ATA </a></li>
                                                             <li><a title="Ver Convites"  href="<?= site_url('welcome/convite_ata/'.$ata->id); ?>"><i class="fa fa-send-o"></i>  Convites </a></li>
-                                                            <li><a href="<?= site_url('welcome/pdf_ata/'.$ata->id); ?>"><i class="fa fa-download"></i>Download PDF</a></li>  
+                                                            <li><a href="<?= site_url('atas/pdf_ata/'.$ata->id); ?>"><i class="fa fa-download"></i>Download PDF</a></li>  
                                                             </ul>
                                                         </div>
                                                         </div>

@@ -224,7 +224,7 @@ class MY_Controller extends CI_Controller {
         
     }
     
-    function page_construct_project_fases($page, $meta = array(), $data = array()) {
+    function page_construct_project_ordena($page, $meta = array(), $data = array()) {
         $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
         $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
         $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
@@ -239,7 +239,7 @@ class MY_Controller extends CI_Controller {
        // $meta['exp_alert_num'] = $this->site->get_expiring_qty_alerts();
         $this->load->view($this->theme . 'header_project', $meta);
         $this->load->view($this->theme . $page, $data);    
-        $this->load->view($this->theme . 'footer_projeto');
+        $this->load->view($this->theme . 'footer_projeto_ordena');
           //$this->load->view($this->theme . 'footer');
         
     }

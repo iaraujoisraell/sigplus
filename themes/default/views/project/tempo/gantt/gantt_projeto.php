@@ -106,7 +106,7 @@ ret= {"tasks":    [
         $dias = $dias + 1;
         
       ?>
-      {"id": -<?php echo $id_fase; ?>, "name": "<?php echo $nome_fase; ?>", "progress": 20, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "Fase", "level": 0, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicio; ?>, "duration": <?php echo $dias; ?>, "end": <?php echo $milliseconds_data_fim; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
+      {"id": -<?php echo $id_fase; ?>, "name": "<?php echo $nome_fase; ?>", "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "Fase", "level": 0, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicio; ?>, "duration": <?php echo $dias; ?>, "end": <?php echo $milliseconds_data_fim; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
       
         <?php 
         // EVENTOS
@@ -144,7 +144,7 @@ ret= {"tasks":    [
         $dias_e = $dias_e + 1;
             
         ?>
-          {"id": -<?php echo $id_fase.$id_evento; ?>, "name": "<?php echo $nome_evento; ?>",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "Evento", "level": 1, "status": "STATUS_SUSPENDED",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioe; ?>, "duration": <?php echo $dias_e; ?>, "end": <?php echo $milliseconds_data_fim_e; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
+          {"id": -<?php echo $id_fase.$id_evento; ?>, "name": "<?php echo $nome_evento; ?>",      "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "Evento", "level": 1, "status": "STATUS_SUSPENDED",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioe; ?>, "duration": <?php echo $dias_e; ?>, "end": <?php echo $milliseconds_data_fim_e; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
     
          
          
@@ -182,7 +182,7 @@ ret= {"tasks":    [
         $dias_i = $dias_i + 1;
             
         ?>
-                {"id": -<?php echo $id_fase.$id_evento.$item_id; ?>, "name": "<?php echo $nome_item; ?>",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "Item", "level": 2, "status": "STATUS_DONE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioi; ?>, "duration": <?php echo $dias_i; ?>, "end": <?php echo $milliseconds_data_fim_i; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
+                {"id": -<?php echo $id_fase.$id_evento.$item_id; ?>, "name": "<?php echo $nome_item; ?>",      "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "Item", "level": 2, "status": "STATUS_DONE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioi; ?>, "duration": <?php echo $dias_i; ?>, "end": <?php echo $milliseconds_data_fim_i; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
    
                  <?php 
                 // AÇÕES 

@@ -147,7 +147,7 @@ ret= {"tasks":    [
         $dias_acao = $dias_acao + 1;
 
         ?>
-        {"id": -<?php echo $acao_id; ?>, "name": "<?php echo $nome_acao; ?>",      "progress": 30, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "<?PHP echo $acao_id; ?>", "level": 3, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioia; ?>, "duration": <?php echo $dias_acao; ?>, "end": <?php echo $milliseconds_data_fim_acao; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
+        {"id": -<?php echo $acao_id; ?>, "name": "<?php echo $nome_acao; ?>",      "progress": 0, "progressByWorklog": false, "relevance": 0, "type": "", "typeId": "", "description": "", "code": "<?PHP echo $acao_id; ?>", "level": 3, "status": "STATUS_ACTIVE",    "depends": "",    "canWrite": true, "start": <?php echo $milliseconds_data_inicioia; ?>, "duration": <?php echo $dias_acao; ?>, "end": <?php echo $milliseconds_data_fim_acao; ?>,   "collapsed": false, "assigs": [], "hasChild": true},
 
 
    <?php  } //FIM AÇÕES ?>

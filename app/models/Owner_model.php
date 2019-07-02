@@ -164,6 +164,19 @@ class Owner_model extends CI_Model
         return FALSE;
     }
     
+    public function getContlModulosByEmpresa() {
+        $usuario = $this->session->userdata('user_id');
+        
+        $q = $this->db->get_where('sig_users', array('id' => $usuario));
+        
+         if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        
+        return FALSE;
+    }
+    
+    
     public function getModuloById($id)
     {
         $q = $this->db->get_where('modulos', array('id' => $id), 1);
@@ -1088,5 +1101,28 @@ FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and
         return FALSE;
          
     }
+    
+    
+    /******************************************* USER ***********/
+     public function  getAllLogsAcessoByEmpresa()
+    {
+        $empresa = $this->session->userdata('empresa'); 
+         $statement = "SELECT * FROM sig_user_logins l
+         inner join sig_users u on u.id = l.user_id where u.empresa_id = $empresa order by time desc";
+       // echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+       // $q = $this->db->get_where('users', array('empresa_id' => $id));
+     
+         if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+         
+    }
+    
     
 }

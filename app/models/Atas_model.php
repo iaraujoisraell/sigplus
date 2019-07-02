@@ -8,6 +8,17 @@ class Atas_model extends CI_Model
         parent::__construct();
     }
 
+     public function getUserBySessao() {
+         $empresa = $this->session->userdata('empresa');
+         $usuario = $this->session->userdata('user_id');
+        $statement = "select * from sig_users where id = $usuario and empresa_id = $empresa ";    
+        $q = $this->db->query($statement);
+     
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
     
     public function addAtas($data, $usuario_ata,$participantes)
     {
@@ -97,7 +108,7 @@ class Atas_model extends CI_Model
         $users_dados = $this->site->geUserByID($usuario);
         $projeto_atual = $users_dados->projeto_atual;
         
-        $q = $this->db->get_where('atas', array('id' => $id, 'projetos' => $projeto_atual, 'empresa' => $empresa), 1);
+        $q = $this->db->get_where('atas', array('id' => $id,'empresa' => $empresa), 1);
      
         if ($q->num_rows() > 0) {
             return $q->row();
@@ -800,28 +811,7 @@ class Atas_model extends CI_Model
         return FALSE;
     }
     
-    /*
-     * PEGA TODOS OS PLANOS DE UM PROJETO e de um setor
-     */
-     public function getAllitemPlanosProjetoSetor($id, $setor)
-    {
-         
-         $this->db->select('planos.idplanos, planos.data_termino,planos.data_retorno_usuario, users.username,planos.status,users.company,users.gestor,users.award_points,setores.nome as setor, superintendencia.responsavel as superintendencia')
-            ->join('users', 'planos.responsavel = users.id', 'left')
-            ->join('setores', 'planos.setor = setores.id', 'left') 
-            ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')     
-            ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->order_by('idplanos', 'desc');
-         $q = $this->db->get_where('planos', array('atas.projetos' => $id,'planos.setor' => $setor));
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
+    
     
     
      /*
@@ -1057,20 +1047,7 @@ class Atas_model extends CI_Model
     }
     
     
-    /*
-     * HISTÓRICO DE AÇÕES
-     */
-       public function add_Historico_Acoes($historico_acoes)
-    {
-          
-            if ($this->db->insert('historico_acoes', $historico_acoes)) {
-                $this->db->insert_id();
-                 
-                return true;
-        }
-          
-        return false;
-    }
+    
     
     
     /*
@@ -1454,9 +1431,11 @@ order by su.nome asc
     {
        $empresa = $this->session->userdata('empresa');
        $usuario = $this->session->userdata('user_id');
-       $usuario = $this->session->userdata('user_id');
+    //   $usuario = $this->session->userdata('user_id');
        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
-         
+       
+       
+       
        $statement = "SELECT idplanos, sequencial, idatas, p.data_entrega_demanda as dt_inicio, p.data_termino as dt_termino, p.descricao as descricao, i.descricao as item, nome_evento, nome_fase 
            FROM sig_planos p
                     inner join sig_item_evento i on i.id = p.eventos
@@ -3970,9 +3949,9 @@ order by su.nome asc
     {
        $empresa = $this->session->userdata('empresa');
        
-            $statement = "SELECT id, e.data_inicio as inicio, e.data_fim as fim, e.nome_evento as nome_evento, e.fase_id  
+            $statement = "SELECT id, e.data_inicio as inicio, e.data_fim as fim, e.nome_evento as nome_evento, e.fase_id, ordem
                     FROM sig_eventos e
-                    where fase_id = $fase";
+                    where fase_id = $fase order by ordem asc";
      
         $q = $this->db->query($statement);
         

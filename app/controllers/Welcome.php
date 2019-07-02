@@ -1235,7 +1235,7 @@ class Welcome extends MY_Controller
      /***********************************************************************************************************************
       ************************************************* M I N H A S    A Ç Õ E S ********************************************
      ************************************************************************************************************************/
-    public function minhasAcoes($tipo)
+    public function minhasAcoes($projeto_filtro, $tipo)
     {
         // $this->sma->checkPermissions();
         if ($this->Settings->version == '2.3') {
@@ -1253,6 +1253,20 @@ class Welcome extends MY_Controller
                
         $projeto_filtro = $this->input->post('projeto_filtro');
         $status_filtro = $this->input->post('status_filtro');
+       
+        
+        if($tipo == 'CONCLUÍDO'){
+            $status_filtro = 'CONCLUÍDO';
+        }else if($tipo == 'PENDENTE'){
+            $status_filtro = 'PENDENTE';
+        }else if($tipo == 'ATRASADO'){
+            $status_filtro = 'ATRASADO';
+        }else if($tipo == 'AGUARDANDO VALIDAÇÃO'){
+            $status_filtro = 'AGUARDANDO VALIDAÇÃO';
+        }else if($tipo == 'CANCELADO'){
+            $status_filtro = 'CANCELADO';
+        }
+        
         
         if($tipo == 1){
             $status_filtro = 'CONCLUÍDO';
@@ -1267,7 +1281,10 @@ class Welcome extends MY_Controller
         }
         
        
+       
         $this->data['planos'] = $this->networking_model->getAllAcoesUserById_User($projeto_filtro, $status_filtro);
+        
+        $this->data['planos_resumo'] = $this->networking_model->getAllAcoesUserById_UserSemFiltro($projeto_filtro);
         
         //$users = $this->site->geUserByID($usuario);
       
@@ -1282,7 +1299,7 @@ class Welcome extends MY_Controller
     }
     
     // visualiza as ações em : Network > Minhas Ações
-    public function dados_cadastrais_acao($id_acao = null)
+    public function dados_cadastrais_acao($id_acao = null, $projeto_filtro = null, $status_filtro = null)
     {
      $this->sma->checkPermissions();
      
@@ -1297,6 +1314,7 @@ class Welcome extends MY_Controller
             
             $acao = $this->networking_model->getPlanoByIdAndUsuario($id_acao);
             $projeto = $acao->projeto;
+           
             $acao_empresa = $acao->empresa;
             
             if($empresa != $acao_empresa){
@@ -1317,9 +1335,13 @@ class Welcome extends MY_Controller
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
             
            if($projeto){
-            $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($id_acao, $projeto);
+            $this->data['acoes'] = $this->networking_model->getAllAcoesProjeto($id_acao, $projeto);
+            
            }
             $this->data['idplano'] = $id_acao;
+            
+            $this->data['projeto_filtro'] = $projeto_filtro;
+            $this->data['status_filtro'] = $status_filtro;
            
             
             //atualiza o status das mensagens para esta ação
@@ -1554,7 +1576,7 @@ class Welcome extends MY_Controller
 
                         if($responsavel_fase == $responsavel_evento) {
                             $resonsavel_fase_evento = 1; // se for o mesmo
-                            echo 'é o mesmo responsável do evento. ja notificou <br>';
+                          //  echo 'é o mesmo responsável do evento. ja notificou <br>';
                         }else{
                             $resonsavel_fase_evento = 0;// se o responsável for diferente
 
@@ -1768,7 +1790,7 @@ class Welcome extends MY_Controller
      }
      
      // quando a ação não está pendente. Campos desabilitados
-     public function consultar_acao($id_acao = null)
+     public function consultar_acao($id_acao = null, $projeto = null, $status = null)
     {
      
         if ($this->input->get('id')) {
@@ -1791,12 +1813,16 @@ class Welcome extends MY_Controller
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
             
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+          //  $this->data['projetos'] = $this->atas_model->getAllProjetos();      
            // $this->data['ata'] = $id;
            
             $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual, $id_acao);
             
             $this->data['idplano'] = $id_acao;
+            
+            $this->data['projeto_filtro'] = $projeto;
+            $this->data['status_filtro'] = $status;
+            
             //$this->data['acoes'] = $this->atas_model->getPlanoByID($id); 
            //  $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual);
            // $this->load->view($this->theme . 'Atas/editar_acao', $this->data); //manutencao_acao_av_pendente
@@ -3122,7 +3148,7 @@ class Welcome extends MY_Controller
         $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
         //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
 
-        $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+       // $this->data['projetos'] = $this->atas_model->getAllProjetos();      
        // $this->data['ata'] = $id;
 
         $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual, $id_acao);

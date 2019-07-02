@@ -221,7 +221,7 @@ window.onload = function(){
                                 $pi_project['0'] = lang('NÃO');
                                 $pi_project['1'] = lang('SIM');
 
-                                echo form_dropdown('project', $pi_project, (isset($_POST['project']) ? $_POST['project'] : $dados->projetct), 'id="project"  class="form-control " data-placeholder="' . lang("Pode Acessar") . ' ' . lang("o Módulo Project ?") . '" required="required"   style="width:100%;" ');
+                                echo form_dropdown('project', $pi_project, (isset($_POST['project']) ? $_POST['project'] : $dados->project), 'id="project"  class="form-control " data-placeholder="' . lang("Pode Acessar") . ' ' . lang("o Módulo Project ?") . '" required="required"   style="width:100%;" ');
                                 ?>
                             </div>
                         </div>

@@ -749,11 +749,13 @@ class Site extends CI_Model
     }
     
     public function getUser($id_user) {
-        $empresa = $this->session->userdata('empresa');
-      //  $statement = "select * from sig_users where id = $id_user and empresa_id = $empresa ";    
-      //  $q = $this->db->query($statement);
-        $q = $this->db->get_where('users', array('id' => $id_user, 'empresa_id' => $empresa), 1);
+            $empresa = $this->session->userdata('empresa');
       
+        $statement = "select * from sig_users where id = $id_user and empresa_id = $empresa ";    
+      //  echo $statement; exit;
+        $q = $this->db->query($statement);
+     //   $q = $this->db->get_where('users', array('id' => $id_user, 'empresa_id' => $empresa), 1);
+     
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -763,7 +765,7 @@ class Site extends CI_Model
     // usado no envio de email
       public function geUserByIDSemEmpresa($id)
     {
-        $empresa = $this->session->userdata('empresa');
+        //$empresa = $this->session->userdata('empresa');
          $q = $this->db->get_where('users', array('id' => $id));
     
         if ($q->num_rows() > 0) {
@@ -1595,53 +1597,10 @@ class Site extends CI_Model
     
     
     
-     /*
-     * CONTA QUANTAS AÇÕES O USUÁRIO TEM ATRASADO POR PROJETO
-     */
-     public function getContAcoesAtrasadasByUser($id,  $usuario)
-    {
-        
-         $date_hoje = date('Y-m-d H:i:s');
-         $this->db->select('count(idplanos) as quantidade')
-            ->join('users', 'planos.responsavel = users.id', 'left')
-            ->join('setores', 'users.setor_id = setores.id', 'left') 
-            ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')     
-            ->join('eventos', 'planos.eventos = eventos.id', 'left')    
-            ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->order_by('idplanos', 'DESC');
-         $q = $this->db->get_where('planos', array('atas.projetos' => $id, 'users.id' => $usuario, 'planos.status' => 'PENDENTE', 'planos.data_termino <' => $date_hoje), 1);
-         //    $q = $this->db->get_where('planos', array('atas.projetos' => $id, 'planos.status' => 'PENDENTE', 'users.setor_id' => $setor, 'planos.data_termino <' => $date_hoje), 1);
-         
-        if ($q->num_rows() > 0) {
-            return $q->row();
-        }
-        return FALSE;
-    }
     
     
-    /*
-     * PEGA TODOS OS PLANOS DE UM PROJETO e por usuario
-     */
-     public function getAllitemPlanosProjetoSetorUser($id,  $usuario)
-    {
-         $date_hoje = date('Y-m-d H:i:s');
-         $this->db->select('planos.idplanos, planos.data_termino as data_termino,eventos.nome_evento as eventos,planos.data_retorno_usuario,planos.descricao as descricao, users.username,planos.status,users.company,users.gestor,users.award_points,setores.nome as setor, superintendencia.responsavel as superintendencia')
-            ->join('users', 'planos.responsavel = users.id', 'left')
-            ->join('setores', 'users.setor_id = setores.id', 'left') 
-            ->join('superintendencia', 'setores.superintendencia = superintendencia.id', 'left')     
-            ->join('eventos', 'planos.eventos = eventos.id', 'left')    
-            ->join('atas', 'planos.idatas = atas.id', 'left')
-         ->order_by('idplanos', 'DESC');
-         $q = $this->db->get_where('planos', array('atas.projetos' => $id, 'users.id' => $usuario, 'planos.status' => 'PENDENTE', 'planos.data_termino <' => $date_hoje));
-        
-        if ($q->num_rows() > 0) {
-            foreach (($q->result()) as $row) {
-                $data[] = $row;
-            }
-            return $data;
-        }
-        return FALSE;
-    }
+    
+    
 
     /*
      * ALTERA O CADASTRO DO USUÁRIO

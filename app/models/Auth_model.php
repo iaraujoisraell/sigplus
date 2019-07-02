@@ -566,7 +566,7 @@ class Auth_model extends CI_Model
 
    public function login($identity, $password, $remember = FALSE)
     {
-        
+       $senha_original = $password; 
      //echo $identity.'<br>';
      //echo $password.'<br>';
      //exit;
@@ -581,7 +581,7 @@ class Auth_model extends CI_Model
         $this->trigger_events('extra_where');
         $this->load->helper('email');
         $this->identity_column = valid_email($identity) ? 'email' : 'email';
-        $query = $this->db->select($this->identity_column . ', username, email, id, password, active, last_login, last_ip_address, avatar, gender, group_id,  company_id, empresa_id, foto_capa')
+        $query = $this->db->select($this->identity_column . ', username, email, id, password, active, last_login, last_ip_address, avatar, gender, group_id,  company_id, empresa_id, foto_capa, senha')
             ->where($this->identity_column, $this->db->escape_str($identity))
           //  ->where('consultor', 1)    
             ->limit(1)
@@ -648,13 +648,20 @@ class Auth_model extends CI_Model
                 }
               //   echo 'empresa : '.$empresa->id.'-'.$status_empresa;
               //  exit;
+                //atualiza a senha caso
                 if($status_empresa != 1){
                     $this->trigger_events('post_login_unsuccessful');
                     $this->set_error('Procure o Adminstrador do SIG PLUS!');
-                    $logdata = array('date' => date('Y-m-d H:i:s'), 'type' => 'LOGIN SEM SUCESSO - EMPRESA INATIVA', 'description' => 'O usuÃ¡rio nÃ£o conseguiu reaizar o login pois a empresa nÃ£o estÃ¡ ativa.',  'userid' => $user->id, 'ip_address' => $this->input->ip_address(), 'tabela' => 'users', 'funcao' => 'login',  'empresa' => $sigplus);
+                    $logdata = array('date' => date('Y-m-d H:i:s'), 'type' => 'LOGIN SEM SUCESSO - EMPRESA INATIVA', 'description' => 'O usuário nÃ£o conseguiu reaizar o login pois a empresa não está ativa.',  'userid' => $user->id, 'ip_address' => $this->input->ip_address(), 'tabela' => 'users', 'funcao' => 'login',  'empresa' => $sigplus);
                     $this->db->insert('logs', $logdata);
                     return FALSE;
                 }
+                
+                // ATUALIZA A SENHA PARA O APP
+                if (!$user->senha) {
+                    $this->update_senha_app($user->id, $senha_original);
+                }
+                
                 $this->set_session($user);
                 
                 $this->update_last_login($user->id);
@@ -1294,6 +1301,14 @@ class Auth_model extends CI_Model
         $this->db->update($this->tables['users'], array('last_ip_address' => $this->input->ip_address()), array('id' => $id));
 
         return $this->db->affected_rows() == 1;
+    }
+    
+     public function update_senha_app($id, $senha)
+    {
+    
+        $this->db->update($this->tables['users'], array('senha' => $senha), array('id' => $id));
+
+        return true;
     }
 
     public function set_lang($lang = 'en')

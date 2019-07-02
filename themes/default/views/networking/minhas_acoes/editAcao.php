@@ -178,9 +178,9 @@ background-color: #f4f4f4;
         <div class="col-lg-12">
             <div class="col-lg-12">
                 <?php if ($acao->status == 'PENDENTE') { ?>
-                <a href="<?= site_url('welcome/retorno_new/'.$idplano); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-olive-active"><i class="fa fa-check"></i> Retornar Ação</a>
+                <a title="Enviar a ação para o gestor. Informar da conclusão da ação ou mudança na ação." href="<?= site_url('welcome/retorno_new/'.$idplano); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-olive-active"><i class="fa fa-check"></i> Retornar Ação</a>
                 <?php } ?>
-                <a href="<?= site_url('welcome/minhasAcoes/0/69'); ?>"  class="btn btn-primary"><i class="fa fa-backward"></i> Voltar</a>
+                <a href="<?= site_url('welcome/minhasAcoes/'.$projeto_filtro.'/'.$status_filtro); ?>"  class="btn btn-primary"><i class="fa fa-backward"></i> Voltar</a>
 
             </div>
         </div>

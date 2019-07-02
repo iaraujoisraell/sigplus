@@ -48,7 +48,7 @@
           <div class="form-group">
             
             <?php
-            $wu_projetos[''] = '';
+            $wu_projetos['0'] = 'Todos';
             $usuario = $this->session->userdata('user_id');
             $projetos_users = $this->atas_model->getAllProjetosUserById_User($usuario);
             foreach ($projetos_users as $projeto_u) {
@@ -61,7 +61,7 @@
         </div>
        <div class="col-md-3">
           <div class="form-group">
-          <?php $pst[''] = '';
+          <?php $pst['0'] = 'Todos';
               $pst['PENDENTE'] = lang('PENDENTE');
               $pst['ATRASADO'] = lang('ATRASADO');
               $pst['AGUARDANDO VALIDAÇÃO'] = lang('AGUARDANDO VALIDAÇÃO');
@@ -118,7 +118,7 @@
                 $cont_avalidacao = 0;
                 $total_pendentes = 0;
               
-                foreach ($planos as $plano) {
+                foreach ($planos_resumo as $plano) {
                      
                     $status = $plano->status;
                     $data_prazo = $plano->data_termino;
@@ -313,9 +313,9 @@
                                                 </td>
                                                 <td class="center">
                                                     <?php if ($plano->status == 'PENDENTE')  { ?>
-                                                        <a title="Visualizar o cadastro completo da ação" class="btn btn-primary  fa fa-folder-open-o" href="<?= site_url('welcome/dados_cadastrais_acao/' . $plano->idplanos); ?>"> </a>
+                                                        <a title="Visualizar o cadastro completo da ação" class="btn btn-primary  fa fa-folder-open-o" href="<?= site_url('welcome/dados_cadastrais_acao/' . $plano->idplanos.'/'.$projeto_filtro.'/'.$status_filtro); ?>"> </a>
                                                     <?php } else  { ?>
-                                                        <a title="Visualizar o cadastro completo da ação" class="btn btn-default fa fa-folder-open-o" href="<?= site_url('welcome/consultar_acao/' . $plano->idplanos); ?>"> </a>
+                                                        <a title="Visualizar o cadastro completo da ação" class="btn btn-default fa fa-folder-open-o" href="<?= site_url('welcome/consultar_acao/' . $plano->idplanos.'/'.$projeto_filtro.'/'.$status_filtro); ?>"> </a>
                                                     <?php } ?>
                                                 </td>
                                             </tr>

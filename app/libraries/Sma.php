@@ -280,11 +280,9 @@ class Sma
     {
         if (!$this->actionPermissions($action, $module)) {
             $this->session->set_flashdata('error', lang("access_denied"));
-            if ($js) {
-                die("<script type='text/javascript'>setTimeout(function(){ window.top.location.href = '" . (isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : site_url('welcome')) . "'; }, 10);</script>");
-            } else {
-                redirect(isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : 'welcome');
-            }
+            
+                redirect(isset($_SERVER["HTTP_REFERER"]) ? 'welcome' : 'welcome');
+           
         }
     }
 
@@ -300,41 +298,49 @@ class Sma
          $empresa_usuario = $dados->empresa_id;
          $modulo_atual = $dados->modulo_atual;
          $permissao_project = $dados->project;
-         
-        
+         $permissao_admin = $dados->admin;
+        //echo $permissao_project; exit;
          $cont_log = 0;
-            
+        
+        
+         
         if($usuario != $id_usuario){
+             
              return false;
              //bloqueia usuário
              // gerar 
             }else       
             if($empresa != $empresa_usuario){
+                
                  return false;
                  // bloquear usuário
                  // gerar alerta
             }
-         
+        
         // PROJECT
         if($modulo_atual == 4){
        //  echo $permissao_project;exit;
           if($permissao_project == 1){
            // validações do módulo project
-              
+             
               //1 - verifica se o projeto que esta acessando é da empresa dele.
               $projeto_cadastro = $this->projetos_model->getProjetoByID($projeto_atual);
               $empresa_cadastro_projeto = $projeto_cadastro->empresa_id;
              
+              if($empresa_cadastro_projeto){
+              
               if($empresa_cadastro_projeto == $empresa){
                   return true;
               }else{
                   // email de alerta
                   return true;
               }
+              }
               
               return true;
               
           }else{
+               echo 'aqui 3'; exit;
               return false;
           }
             
@@ -344,6 +350,19 @@ class Sma
          // NETWORKING
         if($modulo_atual == 3){
             
+            
+            
+        }
+        
+        
+         // ADMIN
+        if($modulo_atual == 2){
+            
+            if($permissao_admin == 1){
+                return true;
+            }else{
+                return false;
+            }
             
             
         }
@@ -392,7 +411,7 @@ class Sma
         return $qrimage;
     }
 
-    public function generate_pdf_ata($content, $name , $output_type = null, $footer = null, $margin_bottom = null, $header = null, $margin_top = null, $orientation = 'P', $logo_top = null, $logo_bottom = null, $usuario_emitiu, $documentacao)
+    public function generate_pdf_ata($content, $name , $output_type = null, $footer = null, $margin_bottom = null, $header = null, $margin_top = null, $orientation = 'P', $logo_top = null, $logo_bottom = null, $usuario_emitiu, $empresa_ata, $titulo, $logo_consultor)
     {
         if (!$output_type) {
             $output_type = 'D';
@@ -416,6 +435,7 @@ class Sma
         $pdf->SetCreator($this->Settings->site_name);
         $pdf->SetDisplayMode('fullpage');
         $stylesheet = file_get_contents('assets/bs/bootstrap.min.css');
+        //$stylesheet = file_get_contents('assets/pdf/css/AdminLTE.min.css');
         $pdf->WriteHTML($stylesheet, 1);
         $date_cadastro = date('Y-m-d');
         //date_default_timezone_set('America/Manaus');
@@ -431,19 +451,28 @@ class Sma
     
         
         if($logo_top){
-             $imagem_header = '<img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/logos/'.$logo_top.'">';  
+             $imagem_header = '<img  width="70px" height="70px; " src="'.base_url() . 'assets/uploads/'.$empresa_ata.'/logos/'.$logo_top.'">';  
         }else{
-             $imagem_header = '<img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/logos/cabecalho_ata_sig.png">';  
+             $imagem_header = '<img  width="70px" height="70px; " src="'.base_url() . 'assets/uploads/logos/logo_sig.jpeg">';  
         }
          
+        if($logo_consultor){
+          $imagem_header_consultor = '<img  width="100px" height="70px; " src="'. base_url() . 'assets/uploads/'.$empresa_ata.'/logos/'.$logo_consultor.'">';  
+        }    
          
-              
-             
          $conteudo_header = '<table style = "width : 100%;" >'
-                          . '<tr>'
-                                . '<td style = "width : 100%; ">'.$imagem_header. '</td>'
-                            . '</tr>'
-                          . '</table>';
+                              . '<tr>'
+                                    . '<td style = "width : 50px;   ">'.$imagem_header. '</td>'
+                                    . '<td style = "width : 10px; padding-left: 20px;   "><p>  </p></td>'
+                                    . '<td style = "width : 50px;  ">'.$imagem_header_consultor. '</td>'
+                                    . '<td style = "width : 10px; padding-left: 50px;   "><p>  </p></td>'
+                                    . '<td style = "width = 200px;  "><h2> '.$titulo.'</h2></td>'
+                                //    
+                                . '</tr>'
+                              . '</table>';
+          
+         
+          
         
          
          $header = $conteudo_header;
@@ -471,7 +500,7 @@ class Sma
             }
 
         } else {
-            $pdf->SetHTMLHeader('<p class="text-center">' . $header . '</p>  ', '', true);
+            $pdf->SetHTMLHeader('<p >' . $header . '</p>  ', '', true);
            
             $pdf->WriteHTML($content);
           //  $pdf->SetHTMLFooter('<p class="text-center">' . $page['footer'] . '</p>', '', true);
@@ -488,8 +517,9 @@ class Sma
 
         if ($output_type == 'S') {
             $file_content = $pdf->Output('', 'S');
-            write_file('assets/uploads/' . $name, $file_content);
-            return 'assets/uploads/' . $name;
+            write_file('assets/uploads/'.$empresa_ata.'/atas/' . $name, $file_content);
+              //  return 'assets/uploads/'.$empresa_ata.'/atas/' .$name;
+                $pdf->Output($name, 'D');
         } else {
             $pdf->Output($name, $output_type);
         }

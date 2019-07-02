@@ -58,7 +58,8 @@ $nome_projeto = $projetos->nome_projeto;
     </div>    
     </div>
     <div class="row">  
-    <div class="col-lg-12">
+        <div class="col-lg-12">
+            <div class="col-lg-12">
             <?php if ($Settings->mmode) { ?>
                         <div class="alert alert-warning">
                             <button data-dismiss="alert" class="close" type="button">×</button>
@@ -77,7 +78,8 @@ $nome_projeto = $projetos->nome_projeto;
                             <ul class="list-group"><?= $message; ?></ul>
                         </div>
                     <?php } ?>
-                    </div>
+            </div>
+        </div>
     </div>
     
     <section  class="content">
@@ -387,13 +389,18 @@ $nome_projeto = $projetos->nome_projeto;
                     <center>
                         <div class="col-md-12">
                           <?php if(!$statusAta == 1){ ?>    
-                        <?php echo form_submit('add_item', lang("Confirmar"), 'id="add_item" class="btn btn-success " title="Salvar as alterações feita no cadastro da ATA." style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
+                       <?php echo form_submit('add_item', lang("Salvar"), 'id="add_item"  class="  btn btn-success " title="Salvar as alterações feita no cadastro da ATA." style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
                           <?php } ?>   
                             <?php if($tipo_ata == 2){ ?>
                             <a  class="btn btn-danger" title="Retorna para a lista de ATAS." href="<?= site_url('project/plano_acao_detalhes/'.$ata->plano_acao); ?>"> <i class="fa fa-backward"></i> <?= lang('Voltar') ?> </a>
                             <?php }else{ ?>
                             <a  class="btn btn-danger" title="Retorna para a lista de ATAS." href="<?= site_url('project/atas'); ?>"> <i class="fa fa-backward"></i> <?= lang('Voltar') ?></a>
                             <?php } ?>
+                             <?php if($statusAta == 1){ ?> 
+                           
+                                        <a  class="btn btn-linkedin" title="Imprimir a ATA " href="<?= site_url('Atas/pdf_ata/'.$id); ?>"><?= lang('Imprimir Ata ') ?> <i class="fa fa-print"></i></a>
+                              
+                             <?php } ?> 
                             <a target="_blank" class="btn btn-bitbucket" title="Gantt das ações da Ata"  href="<?= site_url('project/ganttPlano/1/' .$ata->id); ?>"><i class="fa fa-tasks"></i>  GANTT </a>
                          </div>
                     </center> 

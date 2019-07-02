@@ -713,6 +713,9 @@ class Auth extends MY_Controller
                 $ldata = array('user_id' => $user->id, 'ip_address' => $this->input->ip_address(), 'login' => $this->input->post('identity'));
                 $this->db->insert('user_logins', $ldata);
                  */
+                
+                
+                
                
                 $this->session->set_flashdata('message', $this->ion_auth->messages());
                 
@@ -781,6 +784,21 @@ class Auth extends MY_Controller
 
             $this->load->view($this->theme . 'auth/login', $this->data);
         }
+    }
+    
+    
+    function login_app($email, $password)
+    {
+       
+                 
+            if ($this->ion_auth->login($email, $password)) {
+                
+                return true;
+                 
+            } else {
+                return false;
+            }
+        
     }
     
     function reload_captcha()

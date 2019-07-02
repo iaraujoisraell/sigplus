@@ -30,7 +30,6 @@
   
   <div class="clearfix"></div>
 
-
 <div class="modal fade in" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"></div>
 <div class="modal fade in" id="myModal2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true"></div>
 <div id="modal-loading" style="display: none;">
@@ -45,7 +44,7 @@ var lang = {paid: '<?=lang('paid');?>', pending: '<?=lang('pending');?>', comple
 </script>
   
   
-  
+    
 <?php
 $s2_lang_file = read_file('./assets/config_dumps/s2_lang.js');
 foreach (lang('select2_lang') as $s2_key => $s2_line) {
@@ -54,6 +53,7 @@ foreach (lang('select2_lang') as $s2_key => $s2_line) {
 $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
 ?>
     
+
 <script type="text/javascript" src="<?= $assets ?>js/jquery-2.0.3.min.js"></script>
 <script type="text/javascript" src="<?= $assets ?>js/bootstrap.min.js"></script>
 
@@ -66,7 +66,6 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
 <script type="text/javascript" src="<?= $assets ?>js/jquery.calculator.min.js"></script>
 <script type="text/javascript" src="<?= $assets ?>js/core.js"></script>
 <script type="text/javascript" src="<?= $assets ?>js/perfect-scrollbar.min.js"></script>
-
 
 
 <script src="<?= $assets ?>bi/plugins/input-mask/jquery.inputmask.js"></script>
@@ -91,6 +90,8 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
 <script src="<?= $assets ?>bi/dist/js/adminlte.min.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="<?= $assets ?>bi/dist/js/demo.js"></script>
+
+
 
 
 <?php

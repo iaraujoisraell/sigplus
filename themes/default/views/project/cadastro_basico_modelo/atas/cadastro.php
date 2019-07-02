@@ -316,7 +316,7 @@ $nome_projeto = $projetos->nome_projeto;
                         <center>
                             <div class="col-md-12">
                             <?php echo form_submit('add_item', lang("Salvar"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
-                                        <a  class="btn btn-danger"  href="<?= site_url('Atas'.$ata); ?>"><?= lang('Sair') ?></a>
+                                        <a  class="btn btn-danger"  href="<?= site_url('project/atas'); ?>"><?= lang('Sair') ?></a>
                              </div>
                        
                         </center> 

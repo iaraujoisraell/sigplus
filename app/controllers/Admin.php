@@ -30,7 +30,7 @@ class Admin extends MY_Controller
 
     public function index()
     {
-          
+         $this->sma->checkPermissions();  
         if ($this->Settings->version == '2.3') {
             $this->session->set_flashdata('warning', 'Please complete your update by synchronizing your database.');
             redirect('sync');
@@ -128,6 +128,7 @@ class Admin extends MY_Controller
    
     public function cadastrarSetor($tabela_id,$cadastro_id, $menu)
     {
+          $this->sma->checkPermissions();  
         $date_cadastro = date('Y-m-d H:i:s');                           
         
         if ($this->input->get('id')) {
@@ -285,13 +286,10 @@ class Admin extends MY_Controller
              
             $tabela_cadastro = $this->owner_model->getTableById(3);
             $tabela_nome = $tabela_cadastro->tabela;
-            $menu = 27;
-        
-            
                 // SALVA O MÓDULO ATUAL do usuário
-                 $usuario = $this->session->userdata('user_id');    
-                 $data_modulo = array('menu_atual' => $menu);
-                 $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+                $usuario = $this->session->userdata('user_id');    
+                $data_modulo = array('modulo_atual' => 2, 'menu_atual' => $menu);
+                $this->owner_model->updateModuloAtual($usuario, $data_modulo);
 
                 // registra o log de movimentação
 
@@ -351,7 +349,7 @@ class Admin extends MY_Controller
     
     public function novo_usuario()
     {
-     
+       $this->sma->checkPermissions();  
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
         }
@@ -707,7 +705,7 @@ class Admin extends MY_Controller
    
     public function editar_usuario($usuario_selecionado)
     {
-     
+       $this->sma->checkPermissions();  
         if ($this->input->get('id')) {
             $id = $this->input->get('id');
         }
@@ -765,7 +763,7 @@ class Admin extends MY_Controller
                 'corporativo' => $celular_corportativo,
                 'phone' => $celular1,
                 'networking' => $networking,
-                'projetct' => $project,
+                'project' => $project,
                 'admin' => $admin,
                 'administrador' => $administrador,
                 'publicacoes_institucionais' => $publicacoes_institucionais,
@@ -863,7 +861,7 @@ class Admin extends MY_Controller
     
      public function alterarSenhaUsuario($id_usuario)
     {
-        
+          $this->sma->checkPermissions();  
         $this->form_validation->set_rules('id_usuario', lang("id_cadastro"), 'required');
         $this->form_validation->set_rules('nova_Senha', lang("Nova Senha"), 'required');
         $this->form_validation->set_rules('confirmar_senha', lang("Confirmar Senha"), 'required');
@@ -931,5 +929,49 @@ class Admin extends MY_Controller
     }
     
     
+    
+    
+     /************************************************************************************************************
+     ******************************************* LOGS DE ACESSO LOGIN *********************************************
+     ************************************************************************************************************/
+    
+    
+    public function log_acesso($tabela, $menu)
+    {
+     
+         $this->sma->checkPermissions();
+        
+              
+             
+        // SALVA O MÓDULO ATUAL do usuário
+         $usuario = $this->session->userdata('user_id');    
+          $data_modulo = array('modulo_atual' => 2, 'menu_atual' => $menu);
+         $this->owner_model->updateModuloAtual($usuario, $data_modulo);
+
+        // registra o log de movimentação
+
+        $date_hoje = date('Y-m-d H:i:s');    
+        $usuario = $this->session->userdata('user_id');
+        $empresa = $this->session->userdata('empresa');
+        $ip = $_SERVER["REMOTE_ADDR"];
+
+         $logdata = array('date' => date('Y-m-d H:i:s'), 
+            'type' => 'ACESSO', 
+            'description' => "Acessou o menu $menu do Módulo ADMIN",  
+            'userid' => $this->session->userdata('user_id'), 
+            'ip_address' => $_SERVER["REMOTE_ADDR"],
+            'tabela' => '',
+            'row' => '',
+            'depois' => '', 
+            'modulo' => 'admin',
+            'funcao' => 'admin/log_acesso',  
+            'empresa' => $this->session->userdata('empresa'));
+            $this->owner_model->addLog($logdata); 
+
+        $this->data['usuarios'] = $this->owner_model->getAllLogsAcessoByEmpresa();
+
+        $this->page_construct_admin('admin/logs_acesso', $meta, $this->data);
+         
+    }
     
 }

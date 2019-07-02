@@ -67,14 +67,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
             </ol>
         </section>
         <div class="box-header">
-                    <span class="pull-right-container">
-                       <div class=" clearfix no-border">
-                           <a  title="Cadastrar Nova Tarefa" class="btn btn-default pull-right" href="<?= site_url('project/novoPlano/89/55'); ?>" data-toggle="modal" data-target="#myModal">  
-                           <i class="fa fa-plus"></i>   Novo Agenda
-                           </a> 
-                         
-                        </div>
-                    </span>
+                    
                 </div>
         <br>
         </div>    

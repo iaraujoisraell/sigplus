@@ -20,6 +20,7 @@ class Ion_auth
         $this->load->model('projetos_model');
         $this->load->model('owner_model');
         $this->load->model('atas_model');
+        $this->load->model('reports_model');
         $this->load->model('site');
       
         
@@ -364,6 +365,82 @@ class Ion_auth
             
     }
     
+    
+    // ENVIA UM EMAIL DE LEMBRETE PARA OS USUÁRIOS COM AÇÕES ATRASADAS
+     public function emailUsuarioAcoesAtrasadas($id_usuario, $projeto, $nome_projeto){
+       
+        
+        //$acao =  $this->atas_model->getPlanoByID($id_acao);  
+        // $usuario = $acao->responsavel;   
+        $users = $this->site->geUserByIDSemEmpresa($id_usuario);   
+        $email = $users->email;
+        $empresa_user = $users->empresa_id;
+        $nome_usuario = $users->first_name;
+        
+        
+        
+        $empresa_dados = $this->owner_model->getEmpresaById($empresa_user);
+        $nome_empresa = $empresa_dados->razaoSocial;
+            
+        
+            /*
+             * QUANTIDADE DE AÇÕES ATRASADAS
+             */
+             $qtde_acoes_users = $this->reports_model->getContAcoesAtrasadasByUser($projeto, $id_usuario);   
+             $quantidade_acao = $qtde_acoes_users->quantidade;
+            
+            if($quantidade_acao > 1){
+                $texto = 'Ações';
+            }else{
+                $texto = 'Ação';
+            }
+            
+            $titulo = "Ações atrasadas ";
+            
+            /*
+             * LISTA AS AÇÕES ATRASADAS
+             */
+             $acoes_users = $this->reports_model->getAllPlanosAtrasadosProjetobyUser($projeto, $id_usuario);   
+             foreach ($acoes_users as $acao_user) {
+                $dados_acao_usuario .= 'Ação : '.$acao_user->idplanos . ' - ' .$acao_user->descricao . '. Seu Prazo Venceu em : '. date("d/m/Y", strtotime($acao_user->data_termino)).' <br><br>' ;
+              
+             }
+           
+            
+            $this->load->library('parser');
+                $parse_data = array(
+                   'usuario' =>  $nome_usuario,
+                   'site_link' => site_url(),
+                   'qtde_acoes' => $quantidade_acao, 
+                   'acao' => $dados_acao_usuario,
+                   'projeto' => $nome_projeto, 
+                   'titulo' => $titulo,
+                   'texto' => $texto,
+                   'status' => 'ATRASADO',
+                   'empresa' => $nome_empresa,
+                   'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
+                );
+                
+            $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/sig_envio_usuario_acao_atrasada.php');
+            $message = $this->parser->parse_string($msg, $parse_data);
+            $subject = $this->lang->line('Ações Atrasadas');
+          
+            
+            $from = 'noreply@sigplus.online';
+            $from_name = "Sigplus.online";
+        
+        
+
+        if($this->sma->send_email_credencial($email, $subject, $message, $from, $from_name,null,$cc)){
+            return true;
+        }
+            
+
+            
+    }
+    
+    
+    
     public function retornoUsuario($id = null){
        
         
@@ -659,67 +736,7 @@ class Ion_auth
             
     }
     
-    public function emailUsuarioAcoesAtrasadas($id_usuario, $projeto, $nome_projeto){
-       
-        //$acao =  $this->atas_model->getPlanoByID($id_acao);  
-       // $usuario = $acao->responsavel;   
-        $users = $this->site->geUserByID($id_usuario);   
-       
-            /*
-             * ENVIAR EMAIL
-             */
-        
-           // $email = 'israel.araujo@unimedmanaus.coop.br';
-            $email = $users->email;
-            
-            /*
-             * QUANTIDADE DE AÇÕES ATRASADAS
-             */
-             $qtde_acoes_users = $this->site->getContAcoesAtrasadasByUser($projeto, $id_usuario);   
-             $quantidade_acao = $qtde_acoes_users->quantidade;
-            
-            if($quantidade_acao > 1){
-                $texto = 'ações';
-            }else{
-                $texto = 'ação';
-            }
-            
-            
-            /*
-             * LISTA AS AÇÕES ATRASADAS
-             */
-             $acoes_users = $this->site->getAllitemPlanosProjetoSetorUser($projeto, $id_usuario);   
-            
-             foreach ($acoes_users as $acao_user) {
-               
-                $dados_acao_usuario .= 'Ação : '.$acao_user->idplanos . ' - ' .$acao_user->descricao . '. Seu Prazo Venceu em : '. date("d/m/Y", strtotime($acao_user->data_termino)).' <br><br>' ;
-                
-              
-            }
-           
-            
-            $this->load->library('parser');
-                $parse_data = array(
-                   'usuario' =>  $users->first_name .' '. $users->last_name,
-                   'site_link' => site_url(),
-                    'qtde_acoes' => $quantidade_acao,
-                    'texto' => $texto,
-                    'projeto' => $nome_projeto,
-                    'acao' => $dados_acao_usuario,
-                   'status' => 'ATRASADO',
-                   'logo' => '<img src="' . base_url() . 'assets/uploads/logos/' . $this->Settings->logo . '" alt="' . $this->Settings->site_name . '"/>'
-                );
-                
-            $msg = file_get_contents('./themes/' . $this->theme . 'email_templates/envio_usuario_acao_atrasada.php');
-            $message = $this->parser->parse_string($msg, $parse_data);
-            $subject = $this->lang->line('Ações Atrasadas');
-          
-            
-             if ($this->sma->send_email($email, $subject, $message)) {
-                   return true;
-                }
-            
-    }
+   
     
      /*
      * ENVIA EMAIL DE NOTIFICAÇÃO PARA OS GESTORES DOS PROJETOS

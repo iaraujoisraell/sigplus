@@ -530,11 +530,13 @@ class Atas extends MY_Controller
           if ($this->form_validation->run() == true) {
            
             $discussao = $this->input->post('discussao');
+            $titulo_discussao = $this->input->post('titulo_discussao');
             $id_ata = $this->input->post('id');
             
             $data_ata = array(
                
-                'discussao' => $discussao
+                'discussao' => $discussao,
+                'titulo_discussao' => $titulo_discussao
             );
            
          
@@ -552,8 +554,10 @@ class Atas extends MY_Controller
             
             $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             $this->data['users'] = $this->site->getAllUser();
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();
+           
+            
             $this->data['users_ata'] = $this->atas_model->getAtaUserByID_ATA($id);
+          
             $bc = array(array('link' => site_url('atas'), 'page' => lang('Atas')), array('link' => site_url('atas/edit'), 'page' => lang('Editar ATA')));
             $meta = array('page_title' => lang('Editar ATA'), 'bc' => $bc);
             $this->page_construct_ata('project/cadastro_basico_modelo/atas/discussao', $meta, $this->data);
@@ -745,7 +749,7 @@ class Atas extends MY_Controller
    public function pdf_ata($id = null, $view = null)
     {
         
-        $this->sma->checkPermissions();
+        //$this->sma->checkPermissions();
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
             
         if ($this->input->get('id')) {
@@ -757,17 +761,24 @@ class Atas extends MY_Controller
        
             $this->data['id'] = $id;
             $this->data['ata'] = $this->atas_model->getAtaByID($id);  // $this->atas_model->getAtaProjetoByID_ATA($id);
+            $dados_ata = $this->atas_model->getAtaByID($id);
+            $empresa_ata = $dados_ata->empresa;
+            $assunto = $dados_ata->assunto;
+            //echo $empresa_ata;exit;
+            $this->data['projeto'] = $this->atas_model->getProjetoByID($dados_ata->projetos);
+            
             $empresa_dados = $this->owner_model->getEmpresaById($empresa);
             $cabecalho_empresa_ata = $empresa_dados->cabecalho_ata;
             $redape_empresa_ata = $empresa_dados->rodape_ata;
-            
-            $cadastro_usuario =  $this->site->getUser($usuario);
-            $nome = $cadastro_usuario->first_name;
+            //echo $cabecalho_empresa_ata; exit;
+            $cadastro_usuario =  $this->atas_model->getUserBySessao();
+            $nome_emitiu = $cadastro_usuario->first_name;
+            $logo_consultor = $cadastro_usuario->logo_consultor;
             //$this->data['users'] = $this->site->getAllUser();
            // $this->data['projetos'] = $this->atas_model->getAllProjetos();
             $this->data['planos'] = $this->atas_model->getAllitemPlanos($id);
 
-            $name = lang("ATA") . "_" . str_replace('/', '_', $id) . ".pdf";
+            $name = lang("ATA") . "_" . str_replace('/', '_', $dados_ata->sequencia) . ".pdf";
             $html = $this->load->view($this->theme . 'project/cadastro_basico_modelo/atas/pdf_ata', $this->data, true);
 
             
@@ -778,10 +789,9 @@ class Atas extends MY_Controller
           //  $logo_doc_bottom =  $dados_projeto->logo_ata_bottom;
             
         if ($view) {
-            $this->load->view($this->theme . 'networking/ata/minhas_atas/pdf_ata', $this->data);
-        } else{
-            
-            $this->sma->generate_pdf_ata($html, $name, false, $usuario, null, null, null, null, $cabecalho_empresa_ata, $redape_empresa_ata, $nome);
+            $this->load->view($this->theme . 'project/cadastro_basico_modelo/atas/pdf_ata', $this->data);
+        } else {
+            $this->sma->generate_pdf_ata($html, $name, 'S', $usuario, null, null, null, null, $cabecalho_empresa_ata, $redape_empresa_ata, $nome_emitiu, $empresa_ata, $assunto, $logo_consultor);
         }
     }
     

@@ -46,64 +46,40 @@ class Reports extends MY_Controller
         }
         
         
-        
-    public function rotina_envio()
+    //********************* CROW 1x POR MINUTO  *******************************  
+    public function rotina_envio_cada_minuto()
     {
-       $dia = date('d'); 
-       $date_cadastro = date('Y-m-d');   
-       $hora =  date('H:i:s');
-       $data_hoje_tratada = date('d/m/Y',  strtotime($date_cadastro));//$this->sma->hrld($date_cadastro); 
-       $dia_da_semana = $this->diasemana($data_hoje_tratada);
-
-
-       /* 
-        * *************************************************************************************************************************
-        *  1 - ENVIA E-MAILS PENDENTES
-        * 
-        * A CADA 1 MINUTO
-        */
-       $emails_pendente = $this->reports_model->getAllEmailsPendentes();
        
-       foreach ($emails_pendente as $email) {
-           $email_id = $email->id;
-           $user_de = $email->id_from;
-           $user_para = $email->id_to;
-           $titulo = $email->title;
-           $texto = $email->text;
-           $acao_id = $email->idplano;
-           $convite = $email->convite;
-           $enviado = $email->enviado;
-           
-           if($enviado == 0){
-           
-               if($acao_id > 0){
-                   // QUANDO É EMAIL REFERENTE A AÇÃO: NOVA AÇÃO, RETORNO DE AÇÃO, ETC.
-                   $this->ion_auth->enviaEmailComAcao($titulo, $texto, $user_para, $acao_id, $email_id);
-                   $data_status_report = array(
-                    'data_envio' => date('Y-m-d H:i:s'),
-                    'enviado' => 1                       
-                );
-                 //UPDATE O STATUS DE ENVIADO
-                $this->site->updateStatusEmailEnviado($email_id, $data_status_report);   
-                   
-               }
-              
-
-               if($convite == 1){
-                   // QUANDO VEM DE CONVITE DE ATAS: NETWORKING OU PROJECT
-                   $this->ion_auth->enviaEmailComAcao($titulo, $texto, $user_para, $acao_id);  
-               }
-           
-           }
-           
-       }
-           
-           
-            
-            
-     }
+     // 1 - Envia os e-emails pendentes
+     $this->envia_emails_pendentes();
      
-      public function rotinas()
+     //2 - Salva a porcentagem de conclusão de cada projeto
+            
+    }
+     
+    //************************* CROW 1x POR DIA  *******************************  
+    public function rotina_envio_cada_dia()
+    {
+       
+     // 1 - Salva o desempenho das ações por projetos
+     $this->salvaResumoDesempenhoAcoesProjetos();
+     
+     // 2 - Envia E-mails de ações atrasadas
+     $this->enviaEmailAcoesAtrasadas();
+     // 3 - Salva o desempenho das ações por usuário
+     
+    }
+    
+    
+    
+    /***********************************************************************/
+    
+    
+   
+      
+     
+    // função já adicionada na rotina de CRON 1X MIN
+    public function rotinas()
     {
            $dia = date('d'); 
            $date_cadastro = date('Y-m-d');   
@@ -157,7 +133,7 @@ class Reports extends MY_Controller
             * 4 - ENVIA EMAIL PARA OS GESTORES QUE ESCTÃO VINCULADO AOS PROJETOS
             */
            if ($dia_da_semana == "Sexta-Feira") {
-            if (($hora >= '12:00:00') && ($hora < '12:01:00')) {
+            if (($hora >= '12:00:00') && ($hora < '12:10:00')) {
                 $this->enviaEmailControle('O SISTEMA SALVOU O DESEMPENHO DAS AÇÕES ESTA SEMANA');
                 $this->SalvaDesempenhoAcoesProjetos();
             }
@@ -219,6 +195,202 @@ class Reports extends MY_Controller
      }
      
      
+    
+    
+    
+    
+    /***************************************************************************
+     *************************** F U N Ç Õ E S ********************************* 
+     ***************************************************************************/
+    
+     // a cada minuto verifica se tem email a ser enviado
+    public function envia_emails_pendentes()
+    {
+          $dia = date('d'); 
+       $date_cadastro = date('Y-m-d');   
+       $hora =  date('H:i:s');
+       $data_hoje_tratada = date('d/m/Y',  strtotime($date_cadastro));//$this->sma->hrld($date_cadastro); 
+       $dia_da_semana = $this->diasemana($data_hoje_tratada);
+
+
+       /* 
+        * **********************************************************************
+        *  1 - ENVIA E-MAILS PENDENTES
+        * 
+        * A CADA 1 MINUTO
+        */
+       $emails_pendente = $this->reports_model->getAllEmailsPendentes();
+       
+       foreach ($emails_pendente as $email) {
+           $email_id = $email->id;
+           $user_de = $email->id_from;
+           $user_para = $email->id_to;
+           $titulo = $email->title;
+           $texto = $email->text;
+           $acao_id = $email->idplano;
+           $convite = $email->convite;
+           $enviado = $email->enviado;
+           
+           if($enviado == 0){
+           
+                if($acao_id > 0){
+                   // QUANDO É EMAIL REFERENTE A AÇÃO: NOVA AÇÃO, RETORNO DE AÇÃO, ETC.
+                   $this->ion_auth->enviaEmailComAcao($titulo, $texto, $user_para, $acao_id, $email_id);
+                   $data_status_report = array(
+                    'data_envio' => date('Y-m-d H:i:s'),
+                    'enviado' => 1                       
+                );
+                 //UPDATE O STATUS DE ENVIADO
+                $this->site->updateStatusEmailEnviado($email_id, $data_status_report);   
+                   
+               }
+              
+
+               if($convite == 1){
+                   // QUANDO VEM DE CONVITE DE ATAS: NETWORKING OU PROJECT
+                   $this->ion_auth->enviaEmailComAcao($titulo, $texto, $user_para, $acao_id);  
+               }
+           
+           }
+           
+       }
+       
+    }
+    
+    
+    // 1x por dia salva qtas ações concluidas, pendentes e atrasadas cada projeto tem
+    public function salvaResumoDesempenhoAcoesProjetos()
+    {
+      //  $this->sma->checkPermissions();
+       
+        //TODOS OS PROJETOS ATIVOS
+         $allProjetos = $this->reports_model->getAllProjetos();
+         //print_r($allProjetos); exit;
+         $dataEscolhida = date('Y-m-d');   //
+         
+         
+        foreach ($allProjetos as $projeto) {
+
+            $empresa_projeto = $projeto->empresa_projeto;
+
+            $somma_acoes_pendentes = 0;
+            $somma_acoes_atrasadas_5 = 0;
+            $somma_acoes_concluidas = 0;
+            $somma_acoes_concluidas_fora_prazo = 0;
+            $somma_acoes_atrasadas_10 = 0;
+            $somma_total_acal = 0;
+            $somma_acoes_atrasadas_15 = 0;
+            $tota_atrasadas_total = 0;
+
+         //   echo $projeto->id.'<br>';
+            //echo $projeto->empresa_projeto.'<br>';
+            $acoes_empresa_projeto = $this->reports_model->getAllAcoesProjetosByEmpresaByProjeto($projeto->empresa_projeto, $projeto->projeto_id);
+            foreach ($acoes_empresa_projeto as $total_acoes) {
+                
+                
+                $somma_acoes_pendentes = $total_acoes->pendentes;
+                $somma_acoes_a_validacao = $total_acoes->a_validacao;
+                $somma_acoes_atrasadas = $total_acoes->atrasada;
+                $somma_acoes_concluidas = $total_acoes->concluidas;
+                $somma_total_acao = $total_acoes->total;
+
+                if($somma_acoes_pendentes == NULL){
+                    $somma_acoes_pendentes = 0;
+                }
+                if($somma_acoes_a_validacao == NULL){
+                    $somma_acoes_a_validacao = 0;
+                }
+                
+                if($somma_acoes_atrasadas == NULL){
+                    $somma_acoes_atrasadas = 0;
+                }
+                if($somma_acoes_concluidas == NULL){
+                    $somma_acoes_concluidas = 0;
+                }
+                
+                
+                $total_pendente = $somma_acoes_pendentes + $somma_acoes_a_validacao;
+
+                 //aqui os inserts
+                 if($somma_total_acao > 0){
+                 $data_historico_setor = array(
+                    'data' => $dataEscolhida,
+                    'projeto' => $projeto->projeto_id,
+                    'empresa' => $projeto->empresa_projeto, 
+                    'resumo' => '1', 
+                    'setor' => 'TODOS', 
+                    'total_acoes' => $somma_total_acao,
+                    'total_atrasados' => $somma_acoes_atrasadas,
+                    'total_concluido' => $somma_acoes_concluidas,
+                    'total_pendentes' => $total_pendente
+                );
+                // print_r($data_historico_setor); exit;
+
+               $this->reports_model->add_desempenho_acoes($data_historico_setor);
+             }
+
+
+         } //fim
+
+        }
+        
+     
+        
+                   
+    }
+    
+    
+    /****USUÁRIOS COM AÇÕES ATRASADAS - TODOS OS PROJETO **********************/
+    public function enviaEmailAcoesAtrasadas()
+    {
+      //  $this->sma->checkPermissions();
+         $hora =  date('H:i:s');
+         
+        /*
+         * FAZ O STATUS REPORT DE TODOS OS PROJETOS
+         */
+        $allProjetos = $this->reports_model->getAllProjetos();
+
+        foreach ($allProjetos as $projeto) {
+
+
+            $usuarios = $this->reports_model->usuariosComAcoesAtrasadas($projeto->projeto_id);
+            $date_hoje = date('Y-m-d H:i:s');
+            $date_2 = date('Y-m-d');
+
+            $data_atualizacao = array('ultimo_aviso_email' => $date_hoje);
+
+            foreach ($usuarios as $usuario) {
+                   $responsvael = $usuario->responsavel; 
+                   $dt_ultimo_aviso_email = $usuario->ultimo_aviso_email;
+                   $t_data  =  substr("$dt_ultimo_aviso_email", 0, 10);
+
+
+                     $this->ion_auth->emailUsuarioAcoesAtrasadas($responsvael,$projeto->projeto_id, $projeto->projeto);
+                   //  $this->projetos_model->updateDataNotificacaoUsuario($id,$data_atualizacao);
+
+                     /*
+                      *  $this->ion_auth->enviaEmailComAcao($titulo, $texto, $user_para, $acao_id, $email_id);
+           $data_status_report = array(
+            'data_envio' => date('Y-m-d H:i:s'),
+            'enviado' => 1                       
+        );
+         //UPDATE O STATUS DE ENVIADO
+        $this->site->updateStatusEmailEnviado($email_id, $data_status_report);  
+                      */
+
+               }
+
+        }
+               
+            
+     //   $this->session->set_flashdata('message', lang("Emails Enviados com Sucesso!!!"));   
+      //  redirect("Historico_Acoes/usuariosComAcoesAtrasadas");
+        
+                   
+    }
+    
+    
      /*
      **********************ELE ME ENVIA UM EMAIL TODA VEZ QUE O SERVIDOR DISPARA ALGUM EMAIL ************************************************************************************************* 
      */
@@ -236,6 +408,30 @@ class Reports extends MY_Controller
                    
     }
      
+    
+    
+    
+    /***************************FIM DESEMPENHO DAS AÇÕES**************************************************************************************/
+    
+    
+    /*
+     **********************EMAIL PARA OS USUÁRIOS COM AÇÕES ATRASADAS - TODA SEGUNDA-FEIRA 6H ************************************************************************************************* 
+     */
+     public function usuariosComAcoesAtrasadas()
+    {
+        $this->sma->checkPermissions();
+           
+        $usuario = $this->session->userdata('user_id');
+        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+        
+        $this->data['usuarios'] = $this->projetos_model->usuariosComAcoesAtrasadas($projetos_usuario->projeto_atual);
+           
+        $bc = array(array('link' => base_url(), 'page' => lang('Histórico de ações')), array('link' => '#', 'page' => lang('Usuários com Ações Atrasadas')));
+        $meta = array('page_title' => lang('Novo Registro'), 'bc' => $bc);
+        $this->page_construct('reports/UsuariosAcoesAtrasadas/usuariosComAcoesAtrasadas', $meta, $this->data);
+                   
+    }
+    
      
      /*
      ******************************STATUS REPORT ***************************************************************************************** 
@@ -486,53 +682,10 @@ class Reports extends MY_Controller
     }  
     
     
+    /*********************************************************************/
     
     
     
-    /*
-     **********************USUÁRIOS COM AÇÕES ATRASADAS - TODOS OS PROJETO ************************************************************************************************* 
-     */
-    public function enviaEmailAcoesAtrasadas()
-    {
-      //  $this->sma->checkPermissions();
-           
-        $usuario = $this->session->userdata('user_id');
-        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
-        
-         $hora =  date('H:i:s');
-         
-         //echo $hora;exit;
-                /*
-                 * FAZ O STATUS REPORT DE TODOS OS PROJETOS
-                 */
-                $allProjetos = $this->reports_model->getAllProjetos();
-                foreach ($allProjetos as $projeto) {
-                   
-        
-                    $usuarios = $this->projetos_model->usuariosComAcoesAtrasadas($projeto->id);
-                    $date_hoje = date('Y-m-d H:i:s');
-                    $date_2 = date('Y-m-d');
-
-                    $data_atualizacao = array('ultimo_aviso_email' => $date_hoje);
-
-                    foreach ($usuarios as $usuario) {
-                           $id = $usuario->responsavel; 
-                           $dt_ultimo_aviso_email = $usuario->ultimo_aviso_email;
-                           $t_data  =  substr("$dt_ultimo_aviso_email", 0, 10);
-                           if($t_data != $date_2){
-                             $this->ion_auth->emailUsuarioAcoesAtrasadas($id,$projeto->id, $projeto->projeto);
-                           //  $this->projetos_model->updateDataNotificacaoUsuario($id,$data_atualizacao);
-                           }
-
-                       }
-          
-                }
-            
-     //   $this->session->set_flashdata('message', lang("Emails Enviados com Sucesso!!!"));   
-      //  redirect("Historico_Acoes/usuariosComAcoesAtrasadas");
-        
-                   
-    }
         
     /*
      **********************GESTORES QUE ESTÃO LIGADOS AO PROJETO  - TODOS OS PROJETO ************************************************************************************************* 
@@ -579,197 +732,7 @@ class Reports extends MY_Controller
     return mktime(0, 0, 0, $partes[1], $partes[0], $partes[2]);
     }
 
-    public function salvaDesempenhoAcoesProjetos()
-    {
-      //  $this->sma->checkPermissions();
-       
-        //TODOS OS PROJETOS
-         $allProjetos = $this->reports_model->getAllProjetos();
-         //print_r($allProjetos); exit;
-         $dataEscolhida = date('Y-m-d H:i:s');   //
-         
-         
-                foreach ($allProjetos as $projeto) {
-                  
-                   
-                  //GESTORES QUE ESTÃO NO PROJETO
-                    
-                      
-                     
-                        $somma_acoes_pendentes = 0;
-                        $somma_acoes_atrasadas_5 = 0;
-                        $somma_acoes_concluidas = 0;
-                        $somma_acoes_concluidas_fora_prazo = 0;
-                        $somma_acoes_atrasadas_10 = 0;
-                        $somma_total_acal = 0;
-                        $somma_acoes_atrasadas_15 = 0;
-                        $tota_atrasadas_total = 0;
-                        
-                        echo $projeto->id.'<br>';
-                        
-                        $setores = $this->atas_model->getAllSetor();
-                        foreach ($setores as $setor) {
-                            
-                            $setor_selecionado = $setor->setor_id;
-                            
-                            $acoes_setor = $this->atas_model->getAllitemPlanosProjetoSetor($projeto->id,$setor_selecionado);
-                            
-                            $somma_acoes_pendentes_setor = 0;
-                            $somma_acoes_atrasadas_5_setor = 0;
-                            $somma_acoes_concluidas_setor = 0;
-                            $somma_acoes_concluidas_fora_prazo_setor = 0;
-                            $somma_acoes_atrasadas_10_setor = 0;
-                            $somma_total_acal_setor = 0;
-                            $somma_acoes_atrasadas_15_setor = 0;
-                        
-                       
-                        
-                            foreach ($acoes_setor as $a_setor) {
-                                                       
-                                $adata_prazo = $a_setor->data_termino;
-                                $adata_entrega = $a_setor->data_retorno_usuario;
-                                $astatus = $a_setor->status;
-                              
-                                if($astatus == 'CONCLUÍDO'){
-
-                            
-                                    if($adata_entrega <= $adata_prazo){
-                                        $somma_acoes_concluidas_setor +=1;
-                                        
-                                        $somma_acoes_concluidas += 1;
-                                    }
-
-                                    if($adata_entrega > $adata_prazo){
-                                         $somma_acoes_concluidas_fora_prazo_setor +=1;
-                                         $somma_acoes_concluidas_fora_prazo+=1;
-                                    }
-
-                                }else if(($astatus == 'PENDENTE')||($astatus == 'AGUARDANDO VALIDAÇÃO')){
-
-                                    if($dataEscolhida <= $adata_prazo){
-                                        $somma_acoes_pendentes_setor += 1;
-                                        $somma_acoes_pendentes += 1;
-                                    }
-                                    
-                                    if($dataEscolhida > $adata_prazo){
-                                        
-                                            $novo_status_setor = 'ATRASADO';
-
-                                            // Usa a função criada e pega o timestamp das duas datas:
-                                            $time_inicial_setor = $this->geraTimestamp($this->sma->hrld($dataEscolhida));
-                                            $time_final_setor = $this->geraTimestamp($this->sma->hrld($adata_prazo));
-                                           
-                                            
-                                            
-                                            // Calcula a diferença de segundos entre as duas datas:
-                                            $diferenca_setor = $time_final_setor - $time_inicial_setor; // 19522800 segundos
-                                            // Calcula a diferença de dias
-                                            $dias_setor = (int)floor( $diferenca_setor / (60 * 60 * 24)); // 225 dias
-
-
-
-                                             if($dias_setor >= '-5'){
-                                                $somma_acoes_atrasadas_5_setor +=1;
-                                                $somma_acoes_atrasadas_5 += 1;
-                                            }else if(($dias_setor < '-5') && ($dias_setor >= '-10')){
-                                               $somma_acoes_atrasadas_10_setor +=1;
-                                               $somma_acoes_atrasadas_10 += 1;
-                                            }else if($dias_setor < '-10') {
-                                                $somma_acoes_atrasadas_15_setor +=1;
-                                                $somma_acoes_atrasadas_15 += 1;
-                                            }
-
-                                        }
-                                }
-                                                    
-                                 $somma_total_acal_setor+=1;    
-                                 
-                                
-                         } //fim for $acoes_setor
-                         
-                         $tota_atrasadas_setor = $somma_acoes_atrasadas_5_setor + $somma_acoes_atrasadas_10_setor + $somma_acoes_atrasadas_15_setor;
-                         
-                         //aqui os inserts
-                         if($somma_total_acal_setor > 0){
-                         $data_historico_setor = array(
-                            'data' => $dataEscolhida,
-                            'setor' => $setor_selecionado, 
-                            'projeto' => $projeto->id,
-                            'superintendente' => $setor->superintendencia,
-                            'total_acoes' => $somma_total_acal_setor,
-                            'total_atrasados' => $tota_atrasadas_setor,
-                            'total_concluido' => $somma_acoes_concluidas_setor,
-                            'total_fora_prazo' => $somma_acoes_concluidas_fora_prazo_setor,
-                            'total_pendentes' => $somma_acoes_pendentes_setor,
-                            'atrasado_5' => $somma_acoes_atrasadas_5_setor,
-                            'atrasado_10' => $somma_acoes_atrasadas_10_setor,
-                            'atrasado_15' => $somma_acoes_atrasadas_15_setor
-                        );
-                        
-                       $this->atas_model->add_Historico_Acoes($data_historico_setor);
-                         }
-                         /*
-                         
-                         $this->atas_model->add_Historico_Acoes($data_historico_concluido_fp);
-                         $this->atas_model->add_Historico_Acoes($data_historico_pendente);
-                         $this->atas_model->add_Historico_Acoes($data_historico_atrasado_5);
-                         $this->atas_model->add_Historico_Acoes($data_historico_atrasado_10);
-                         $this->atas_model->add_Historico_Acoes($data_historico_atrasado_15);
-                         
-                          * 
-                          */
-                        
-                     } //fim for $setores
-                        
-                     $tota_atrasadas_total = $somma_acoes_atrasadas_5 + $somma_acoes_atrasadas_10 + $somma_acoes_atrasadas_15;
-                     //aqui os inserts
-                         $data_historico_total_resumo = array(
-                            'data' => $dataEscolhida,
-                            'setor' => 'TODOS', 
-                            'resumo' => '1', 
-                            'projeto' => $projeto->id,
-                            'superintendente' => 'TODOS',
-                            'total_acoes' => $somma_total_acal,
-                            'total_atrasados' => $tota_atrasadas_total,
-                            'total_concluido' => $somma_acoes_concluidas,
-                            'total_fora_prazo' => $somma_acoes_concluidas_fora_prazo,
-                            'total_pendentes' => $somma_acoes_pendentes,
-                            'atrasado_5' => $somma_acoes_atrasadas_5,
-                            'atrasado_10' => $somma_acoes_atrasadas_10,
-                            'atrasado_15' => $somma_acoes_atrasadas_15
-                        );
-                         
-                         $this->atas_model->add_Historico_Acoes($data_historico_total_resumo);
-                   
-                    
-                 
-                    
-                }
-        
-     
-        
-                   
-    }
-    /***************************FIM DESEMPENHO DAS AÇÕES**************************************************************************************/
     
-    
-    /*
-     **********************EMAIL PARA OS USUÁRIOS COM AÇÕES ATRASADAS - TODA SEGUNDA-FEIRA 6H ************************************************************************************************* 
-     */
-     public function usuariosComAcoesAtrasadas()
-    {
-        $this->sma->checkPermissions();
-           
-        $usuario = $this->session->userdata('user_id');
-        $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
-        
-        $this->data['usuarios'] = $this->projetos_model->usuariosComAcoesAtrasadas($projetos_usuario->projeto_atual);
-           
-        $bc = array(array('link' => base_url(), 'page' => lang('Histórico de ações')), array('link' => '#', 'page' => lang('Usuários com Ações Atrasadas')));
-        $meta = array('page_title' => lang('Novo Registro'), 'bc' => $bc);
-        $this->page_construct('reports/UsuariosAcoesAtrasadas/usuariosComAcoesAtrasadas', $meta, $this->data);
-                   
-    }
    
     /*
      **********************LINK PARA IMPRIMIR O DASHBOARD ************************************************************************************************* 

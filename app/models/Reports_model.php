@@ -112,10 +112,177 @@ class Reports_model extends CI_Model
     }
     
     
-     /**************************************************/
+     /*************RETORNA TODOS OS PROJETOS ATIVOS DE TODAS AS EMPRESAS *************************************/
+    // USADO NA ROTINA DE SALVAR O DESEMPENHO DE USUÁRIOS E SETORES
+    /*
+     * 
+     */
     
        public function getAllProjetos() {
-        $q = $this->db->get('projetos');
+        $empresa = $this->session->userdata('empresa');
+        $statement = "select p.id as projeto_id, p.projeto as projeto, e.id as empresa_projeto "
+                . " from sig_projetos p "
+                . " inner join sig_empresa e on e.id = p.empresa_id"
+                . " where p.status = 'ATIVO' and e.status = 1 ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    // RETORNA O RESUMO/ DESEMPENHO DE AÇÕES DO PROJETO
+    
+     public function getAllAcoesProjetosByEmpresaByProjeto($empresa, $projeto) {
+        //$empresa = $this->session->userdata('empresa');
+        $statement = "SELECT empresa, projeto, sum(peso) as total,
+                    ( select sum(peso) as concluidas from sig_planos p where  p.projeto = $projeto and p.empresa = $empresa and status = 'CONCLUÍDO' ) as concluidas,
+                    ( select sum(peso) as concluidas from sig_planos p where  p.projeto = $projeto and p.empresa = $empresa and status = 'PENDENTE' and p.data_termino >= now()  ) as pendentes,
+                    ( select sum(peso) as concluidas from sig_planos p where  p.projeto = $projeto and p.empresa = $empresa and status = 'AGUARDANDO VALIDAÇÃO') as a_validacao,
+                    ( select sum(peso) as concluidas from sig_planos p where  p.projeto = $projeto and p.empresa = $empresa and status = 'PENDENTE' and p.data_termino < now() ) as atrasada
+                     FROM sig_planos p
+                     where p.projeto = $projeto and p.empresa = $empresa and status in ('CONCLUÍDO', 'PENDENTE', 'AGUARDANDO VALIDAÇÃO')";
+       // echo $statement.'<br>'; 
+        $q = $this->db->query($statement);
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * FAZ O INSERT DO DESEMPENHO DAS AÇÕES DE UM PROJETO
+     */
+       public function add_desempenho_acoes($historico_acoes)
+    {
+          
+            if ($this->db->insert('desempenho_acoes', $historico_acoes)) {
+                $this->db->insert_id();
+                 
+                return true;
+        }
+          
+        return false;
+    }
+    
+    
+    
+    
+      
+    /*
+     * retorna todos os usuarios com acoes atrasadas de um projeto. 
+     * objtivo é enviar emails para esses usuários.
+     */
+     public function usuariosComAcoesAtrasadas($id)
+    {
+      
+        $date_hoje = date('Y-m-d H:i:s');
+        $this->db->select('distinct(responsavel) as responsavel, users.first_name, users.email, ultimo_aviso_email')
+            ->join('users', 'planos.responsavel = users.id', 'left')
+            ->order_by('users.first_name', 'asc');
+         $q = $this->db->get_where('planos', array('planos.projeto' => $id,'planos.status' => 'PENDENTE','planos.data_termino <' => $date_hoje));
+         
+         
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+     /*
+     * CONTA QUANTAS AÇÕES O USUÁRIO TEM ATRASADO POR PROJETO (de todas as empresas)
+     */
+     public function getContAcoesAtrasadasByUser($projeto,  $usuario)
+    {
+        
+         $date_hoje = date('Y-m-d');
+         
+         $statement = "SELECT count(*) as quantidade
+                     FROM sig_planos p
+                     where p.projeto = $projeto and p.responsavel = $usuario and status = 'PENDENTE' and p.data_termino <  '$date_hoje' ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+         
+        
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /**************************************************************************/
+    
+    /*
+     * PEGA TODOS OS PLANOS DE UM PROJETO e por usuario
+     */
+     public function getAllPlanosAtrasadosProjetobyUser($projeto,  $usuario)
+    {
+          $date_hoje = date('Y-m-d');
+         
+         $statement = "SELECT *
+                     FROM sig_planos p
+                     where p.projeto = $projeto and p.responsavel = $usuario and status = 'PENDENTE' and p.data_termino <  '$date_hoje' ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    /**************************************************************************/
+    
+    
+     /*
+     * PEGA TODOS OS SETORES DE TODAS AS EMPRESAS QUE TEM AÇÃO EM PROJETO PARA GERAR O DESEMPENHO
+     usado em Reports -> Resumo por setor
+     */
+    public function getAllSetores($empresa, $projeto)
+    {
+        $statement = "SELECT distinct s.id as setor_id, s.nome as nome_setor, p.empresa, p.projeto
+                     FROM sig_setores s
+                     inner join sig_planos p on p.setor = s.id
+                     where p.projeto = $projeto and p.empresa = $empresa ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /*****************************************************************
+     * PEGA TODOS OS PLANOS DE UM PROJETO e de um setor
+     ****************************************************************/
+     public function getAllAcoesByProjetoAndSetor($projeto, $setor)
+    {
+         $statement = "select * from sig_planos where setor = $setor and projeto = $projeto ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;

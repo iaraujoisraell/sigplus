@@ -66,10 +66,10 @@
                                     <table style="width: 100%;" id="example1" class="table table-bordered table-striped">
                                     <thead>
                                     <tr>
-                                    <th style="width:1%; text-align: center;"><input class="checkbox checkft" type="checkbox" name="check"/></th>
-                                    <th style="width:5%;" ><?php echo $this->lang->line("ATA"); ?></th>
+                                     <th style="width:5%;" ><?php echo $this->lang->line("ATA"); ?></th>
                                     <th style="width:10%;"><?php echo $this->lang->line("DT ATA"); ?></th>
-                                    <th style="width:34%;"><?php echo $this->lang->line("Pauta"); ?></th>
+                                    <th style="width:20%;"><?php echo $this->lang->line("Assunto"); ?></th>
+                                    <th style="width:35%;"><?php echo $this->lang->line("Pauta"); ?></th>
                                     <th style="width:5%;"><?php echo $this->lang->line("Tipo"); ?></th>
                                     <th style="width:5%;"><?php echo $this->lang->line("Resp."); ?></th>
                                     <th style="width:5%;"><?php echo $this->lang->line("Status"); ?></th>
@@ -128,10 +128,10 @@
 
                                                 <tr  >
 
-                                                    <td style="width: 1%;  font-size: 12;"><input class="checkbox checkft" type="checkbox" name="check"/></td> 
                                                     <td style="width: 5%; text-align: center; font-size: 12;"><small   ><?php echo $ata->sequencia; ?></small></td>
                                                     <td style="width: 10%; font-size: 12; "><small   ><?php echo exibirData(substr($ata->data_ata, 0, 10)); ?></small></td>
-                                                    <td style="width: 34%;  font-size: 12px;"><small   ><?php echo $ata->pauta; ?></small></td> 
+                                                    <td style="width: 20%;  font-size: 12px;"><small   ><?php echo $ata->assunto; ?></small></td> 
+                                                    <td style="width: 35%;  font-size: 12px;"><small   ><?php echo $ata->pauta; ?></small></td> 
                                                     <td style="width: 5%; font-size: 12; text-align: center;"><small class="label label-<?php echo $label_tipo; ?>" ><?php echo $ata->tipo; ?></small></td> 
                                                     <td style="width: 5%;font-size: 12; "><small  ><?php echo $ata->responsavel_elaboracao; ?></small></td> 
                                                     <td style="width: 5%; font-size: 12; text-align: center;"><small class="label label-<?php echo $label; ?>" ><?php echo $status_ata; ?></small></td> 
@@ -156,8 +156,7 @@
                                                             <ul class="dropdown-menu pull-right" role="menu">
                                                             <li><a title="Editar Registro"  href="<?= site_url('atas/plano_acao/'.$ata->id); ?>"><i class="fa fa-edit"></i>  ATA </a></li>
                                                             <li><a title="Gantt das ações da Ata"  href="<?= site_url('project/ganttPlano/1/' .$ata->id); ?>"><i class="fa fa-tasks"></i>  GANTT </a></li>
-                                                            <li><a href="#"><i class="fa fa-trash"></i>Cancelar Ata</a></li>
-                                                            <li><a href="#"><i class="fa fa-download"></i>Download PDF</a></li>  
+                                                           
                                                             </ul>
                                                         </div>
                                                         </div>

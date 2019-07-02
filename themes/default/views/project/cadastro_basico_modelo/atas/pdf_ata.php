@@ -1,8 +1,7 @@
 <div class="box">
     
    
-    <div class="box-header">
-        
+    <div style="" class="box-header">
         
     </div>
     
@@ -10,32 +9,35 @@
         
         <div class="row">
             <div class="col-lg-12">
-            <p style="background-color: gray; color: #ffffff; font-size: 16px;" class="text"><?= lang('ATA DE '.$ata->tipo.' No.  '); ?><?php echo $id; ?> (<?php echo $ata->projetos; ?>)</p>
+            <p style="background-color: gray; color: #ffffff; font-size: 16px;" class="text"><?= lang('ATA No.  '); ?><?php echo $ata->sequencia; ?> </p>
             </div>
             <div class="col-lg-12">
-                <table border="1"  class="table">
-                   
-                    
-                    <tr><td>DATA :</td> <td> <p class="introtext"> <?php echo substr($this->sma->hrld($ata->data_ata),0,10); ?></p> </td></tr>
-                    <tr><td>LOCAL:</td> <td> <p > <?php echo $ata->local; ?></p> </td></tr>
-                    <tr><td>REDIGIDO POR:</td> <td> <p > <?php echo $ata->responsavel_elaboracao; ?></p> </td></tr>
-                    <tr><td>PAUTA:</td> <td>  <?php echo $ata->pauta; ?> </td></tr>
-                 </table>    
+                <table style="width: 80%;" class="table">
+                    <tr><td style="width: 15%;">PROJETO:</td>      <td style="width: 60%;"> <p > <?php echo $projeto->projeto; ?></p> </td></tr>
+                    <tr><td style="width: 15%;">LOCAL:</td>        <td style="width: 60%;"> <p > <?php echo $ata->local; ?></p> </td></tr>
+                    <tr><td style="width: 15%;">RESPONSÁVEL:</td>  <td style="width: 60%;"> <p > <?php echo $ata->responsavel_elaboracao; ?></p> </td></tr>
+                    <tr><td style="width: 15%;">PAUTA:</td>        <td style="width: 60%;">  <?php echo $ata->pauta; ?> </td></tr>
+                    <tr><td style="width: 15%;">DATA :</td>        <td style="width: 60%;"> <p class="introtext"> <?php echo date("d/m/Y", strtotime($ata->data_ata)); ?> </p> </td></tr>
+                    <tr><td style="width: 15%;">HORA :</td>        <td style="width: 60%;"> <p class="introtext">  <?php echo ''.$ata->hora_inicio.' - '.$ata->hora_termino ?></p> </td></tr>
+                </table>    
                 
+                <br><br>
                 
-                <table style="width: 100%;" border="1"  class="table">
+                <p style="background-color: gray; color: #ffffff; font-size: 16px;" class="text"><?= lang('REGISTRO DE PRESENÇA '); ?> </p>
+                
+                <table style="width: 100%;"  class="table">
                   <tr>
-                            <td style="width: 40%;">
-                               <p style=" font-size: 16px;" class="text">PARTICIPANTES</p> 
+                            <td style="width: 50%; min-width: 50%; max-width: 50%;">
+                               <p style=" font-size: 16px;" class="text">Participantes</p> 
                             </td>
-                            <td style="width: 60%;">
-                                <p style=" font-size: 16px;" class="text">ASSINATURA</p> 
+                            <td style="width: 50%; min-width: 50%; max-width: 50%;;">
+                                <p style=" font-size: 16px;" class="text">Assinaturas</p> 
                             </td>
                         </tr>
                  </table>
                 
                 
-                <table border="1"  class="table">
+                <table  class="table">
                     <tbody style="width: 100%;">
                         
                          <?php
@@ -47,11 +49,11 @@
                                           //  $historico_convocado =  $this->atas_model->listaConvocadosByUsuarioAta($cadastro_usuario->id, $id);
                                             ?>
                                             <tr>
-                                                <td style="width: 40%;">
-                                                    <?php echo  $participante_cadastrados->nome; ?>
+                                                <td style="width: 50%;">
+                                                    <?php echo  $participante_cadastrados->nome .' - '.$participante_cadastrados->setor; ?>
                                                 </td>
-                                                <td style="width: 60%;">
-                                                   
+                                                <td style="width: 50%; ">
+                                                   <?php echo '______________________________________________________________'; ?>
                                                 </td>
                                             </tr>
 
@@ -64,6 +66,7 @@
                 </table>    
                 </div>
                 
+            <br>
                     <div class="col-lg-12">
                         <div class="portlet portlet-default">
                             <div class="portlet-heading">
@@ -74,12 +77,12 @@
                             </div>
                             <div class="portlet-body">
                                 <div class="table-responsive">
-                                    <table border="1" id="example-table" class="table table-striped table-bordered table-hover table-green">
+                                    <table style="width:100%;" id="example-table" class="table table-striped table-bordered table-hover table-green">
                                         <thead style="background-color: lightgray;">
                                             <tr style="  font-size: 14px;">
                                                 <th><font style="font-size: 12px;"><center>Id</center></font></th>
-                                                <th><font style="font-size: 12px;"><center>Descrição</center></font></th>
-                                                <th><font style="font-size: 12px;"><center>Resp.</center></font></th>
+                                                <th><font style="font-size: 12px;">Descrição</font></th>
+                                                <th><font style="font-size: 12px;"><center>Responsável</center></font></th>
                                                 <th><font style="font-size: 12px;"><center>Prazo</center></font></th>
                                                 <th><font style="font-size: 12px;"><center>Status</center></font></th>
                                                 
@@ -94,11 +97,11 @@
                                                     //$acoes = $this->atas_model->getAllAcoes($plano->idplanos);
                                                 ?>   
                                             <tr class="odd gradeX">
-                                                    <td style="width: 6%;"><center><font style=" font-size: 12px;"><?php echo $plano->idplanos; ?></center></p></td>
-                                                    <td><font style="font-size: 12px;"><?php echo $plano->descricao; ?></font></td>
-                                                    <td style="width: 10%;"><font style="font-size: 8px;"><center><?php echo $plano->first_name.' '.$plano->last_name ; ?></center></font></td>
-                                                    <td style="width: 12%; font-size: 8px;" ><center><?php  if($plano->data_termino != '0000-00-00 00:00:00'){ echo $this->sma->hrld($plano->data_termino); }else{ echo 'Não Definida';} ?></center></td>
-                                                   <td><font style="font-size: 12px;"><?php echo $plano->status; ?></font></td>
+                                                    <td style="width: 10%;"><center><font style=" font-size: 12px;"><?php echo $plano->sequencial; ?></center></td>
+                                                    <td style="width: 50%;"><font style="font-size: 12px;"><?php echo $plano->descricao; ?></font></td>
+                                                    <td style="width: 20%;"><font style="font-size: 12px;"><center><?php echo $plano->first_name.' '.$plano->last_name ; ?></center></font></td>
+                                                    <td style="width: 10%; font-size: 12px;" ><center><?php  if($plano->data_termino != '0000-00-00 00:00:00'){ echo date("d/m/Y", strtotime($plano->data_termino)); }else{ echo 'Não Definida';} ?></center></td>
+                                                   <td style="width: 10%;"><font style="font-size: 12px;"><center><?php echo $plano->status; ?></center></font></td>
                                                 </tr>
                                                 <?php
                                                 }
@@ -113,9 +116,9 @@
                         <!-- /.portlet -->
 
                     </div>
-            
+            <br>
             <div class="col-lg-12">
-                <p style="background-color: gray; color: #ffffff; font-size: 16px;" >DESCRIÇÃO DA REUNIÃO</p> 
+                <p style="background-color: gray; color: #ffffff; font-size: 16px;" ><?php if($ata->titulo_discussao){ echo $ata->titulo_discussao; }else{ echo 'Descrição'; }  ; ?></p> 
                 <?php if ($ata->discussao) { 
                     $texto = $ata->discussao;
                    $linhas = explode("\n", $texto);
