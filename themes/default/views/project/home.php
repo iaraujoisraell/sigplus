@@ -385,7 +385,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
 
                                 $id_pai = $area_projeto->id_pai;
                                 $nome_setor = $area_projeto->descricao;
-
+                                //$qtde_acao = $area_projeto->qtde_acao;
 
                                 // PEGA A QTDE DE AÇÕES POR AREAS E POR PROJETO
                                 $quantidade_area = $this->projetos_model->getAcoesSetorPaiByProjeto($id_pai);
@@ -413,6 +413,8 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                 if ($perc_conc_area == 0) {
                                     $perc_conc_area = 0;
                                 }
+                                
+                                if($qtde_area > 0){
                         ?>
                         
                         
@@ -443,6 +445,7 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
                                  <div id="<?php echo $id_pai; ?>" class="col-lg-6"  style=" height: 200px;"></div>
                           
                        <?php 
+                                }
                        }
 
                         ?>
@@ -514,11 +517,11 @@ $gerente_dados = $this->site->geUserByID($gerente_projeto);
 
                             var table = new google.visualization.Table(document.getElementById('table_div'));
 
-                            table.draw(data, {showRowNumber: true, width: '100%', height: '100'});
+                            table.draw(data, {showRowNumber: true, width: '100%', height: '100%'});
                           }
                         </script>
                        <div class="col-lg-12">
-                            <div id="table_div" style="width: 100%; height: 200px;"></div>  
+                            <div id="table_div" style="width: 100%; height: 100%;"></div>  
                        </div>
                        
                    

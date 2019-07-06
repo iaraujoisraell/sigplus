@@ -93,6 +93,7 @@ onload : optionCheck();
     <?php
 $ataAtual = $this->atas_model->getAtaByID($id);
  $statusAta = $ataAtual->status;
+
 ?>
 <?php
 $projetos = $this->projetos_model->getProjetoAtualByID_completo();
@@ -173,6 +174,7 @@ $nome_projeto = $projetos->nome_projeto;
                                     <div class="form-group">
                                             <?= lang("Título", "sldate"); ?><small></small>
                                             <i class="fa fa-info-circle" title="Título da Discussão da Reunião."></i>
+                                            
                                             <input type="text" value="<?php echo $ata->titulo_discussao; ?>" placeholder="Ex: Resumo da Ata, Principais Assuntos, etc." name="titulo_discussao" maxlength="250" class="form-control pull-right" id="titulo_discussao">
                                     </div>
                                 </div>        
@@ -184,9 +186,9 @@ $nome_projeto = $projetos->nome_projeto;
                                        <?php if($statusAta == 1){ ?>
                                             <?php echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip " disabled="true"  style="height: 120px;" id="sldescricao" required="true" '); ?>   
                                       <?php }else{ ?>
-                                          <textarea   id="discussao" name="discussao" rows="10" required="true" cols="80">
+                                          
                                               <?php echo $ata->discussao; ?>
-                                          </textarea>
+                                         
                                         <?php // echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>
                                       <?php } ?>
                                   </div>
@@ -198,8 +200,10 @@ $nome_projeto = $projetos->nome_projeto;
                             <center>
 
                                 <div class="col-md-12">
+                                    <?php if(!$statusAta == 1){ ?>
                                       <?php echo form_submit('add_item', lang("Salvar"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
-                                        <a  class="btn btn-danger" class="close" data-dismiss="modal"  href="<?= site_url('Atas/plano_acao/'.$id); ?>"><?= lang('Sair') ?></a>
+                                    <?php } ?>
+                                    <a  class="btn btn-danger" class="close" data-dismiss="modal"  href="<?= site_url('Atas/exibir_ata/'.$id); ?>"><?= lang('Sair') ?></a>
                              
                                 </div>
                                  </center>

@@ -567,141 +567,6 @@ class Atas extends MY_Controller
             }
     }
     
-    public function edit($id = null,  $tipo_ata)
-    {
-        $this->sma->checkPermissions();
-      
-       
-       // $this->form_validation->set_rules('projeto', lang("Projeto"), 'required');
-        $this->form_validation->set_rules('dateAta', lang("Data da ATA"), 'required');
-        $this->form_validation->set_rules('tipo', lang("Tipo da ATA"), 'required');
-        $this->form_validation->set_rules('pauta', lang("Pauta"), 'required');
-       // $this->form_validation->set_rules('participantes', lang("Participantes"), 'required');
-        $this->form_validation->set_rules('nome_elaboracao', lang("Elaboração a Pauta"), 'required');
-       // $this->form_validation->set_rules('pendencias', lang("Pendências"), 'required');
-        
-        $date_cadastro = date('Y-m-d H:i:s');       
-        
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
-         // echo 'aqui'; exit;
-          if ($this->form_validation->run() == true) {
-           
-          //  $projeto = $this->input->post('projeto');
-             $usuario_responsavel = $this->session->userdata('user_id');
-             
-            $dateAta = $this->input->post('dateAta'); 
-            $hora_inicio= $this->input->post('hora_inicio'); 
-            $hora_termino = $this->input->post('hora_fim'); 
-            $tipo = trim($this->input->post('tipo')); 
-            $pauta = trim($this->input->post('pauta')); 
-            $assunto = trim($this->input->post('assunto')); 
-            $participantes = $this->input->post('participantes');
-            $nome_elaboracao = $this->input->post('nome_elaboracao');
-            $local = $this->input->post('local');
-            $usuario_ata = $this->input->post('usuario_ata');
-            $note = $this->input->post('note');
-            $data_criacao = $date_cadastro;
-            $usuario = $this->session->userdata('user_id');
-            $id_ata = $this->input->post('id');
-            
-            $tipo_ata = $this->input->post('tipo_ata');
-            $vinculo = $this->input->post('vinculo');
-            
-            $participantes_cadastrados_ata = $this->atas_model->getAtaUserParticipante_ByID_ATA($id_ata);
-            foreach ($participantes_cadastrados_ata as $participante_cadastrados) {
-                $usuariop = $participante_cadastrados->id;
-                
-                //ATUALIZA CADASTRO DE PARTICIPANTES
-                 if (isset($_POST[$usuariop.'participante'])) {
-                    //var_dump("selecionado'");
-                    $this->atas_model->updateParticipantesAta($id_ata, $usuariop, 1);
-                } else {
-                    //var_dump("não escolheu ");
-                    $this->atas_model->updateParticipantesAta($id_ata, $usuariop, 0);
-                }
-                
-                //ATUALIZA CADASTRO DE VÍNCULOS
-                 if (isset($_POST[$usuariop.'vinculo'])) {
-                    //var_dump("selecionado'");
-                    $this->atas_model->updateVinculoAta($id_ata, $usuariop, 1);
-                } else {
-                    //var_dump("não escolheu ");
-                    $this->atas_model->updateVinculoAta($id_ata, $usuariop, 0);
-                }
-                
-                
-            }
-            
-            
-             if($tipo == "REUNIÃO CONTÍNUA"){
-                $evento = $this->input->post('evento');
-            }
-          
-            
-            $data_ata = array(
-               
-                'data_ata' => $dateAta,
-                'hora_inicio' => $hora_inicio,
-                'hora_termino' => $hora_termino,
-                'tipo' => $tipo,
-                'pauta' => $pauta,
-                'assunto' => $assunto,
-                'responsavel_elaboracao' => $nome_elaboracao,
-                'local' => $local,
-                'obs' => $note,
-                'data_criacao' => $data_criacao,
-                'evento' => $evento
-            );
-           
-            if ($_FILES['document']['size'] > 0) {
-                $this->load->library('upload');
-                $config['upload_path'] = $this->upload_path;
-                $config['allowed_types'] = $this->digital_file_types;
-                $config['max_size'] = $this->allowed_file_size;
-                $config['overwrite'] = false;
-                $config['encrypt_name'] = true;
-                $this->upload->initialize($config);
-                if (!$this->upload->do_upload('document')) {
-                    $error = $this->upload->display_errors();
-                    $this->session->set_flashdata('error', $error);
-                    redirect($_SERVER["HTTP_REFERER"]);
-                }
-                $photo = $this->upload->file_name;
-                $data_ata['anexo'] = $photo;
-            }
-            
-         //   if($texto_convocacao){
-         //       $data_ata['texto_convocacao'] = $texto_convocacao;
-         //   }
-            $this->atas_model->updateAta($id_ata, $data_ata, $participantes);
-            
-            
-            
-            $this->session->set_flashdata('message', lang("ATA Alterada com Sucesso!!!"));
-            redirect("Atas/plano_acao/".$id_ata.'/'.$tipo_ata);
-            
-        } else {
-
-           
-            $this->data['id'] = $id;
-            $this->data['tipo_ata'] = $tipo_ata;
-            $this->data['ata'] = $this->atas_model->getAtaByID($id);
-            
-            $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
-            $this->data['users'] = $this->site->getAllUser();
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();
-            $this->data['users_ata'] = $this->atas_model->getAtaUserByID_ATA($id);
-            $bc = array(array('link' => site_url('atas'), 'page' => lang('Atas')), array('link' => site_url('atas/edit'), 'page' => lang('Editar ATA')));
-            $meta = array('page_title' => lang('Editar ATA'), 'bc' => $bc);
-            $this->page_construct('Atas/plano_acao/'.$id_ata, $meta, $this->data);
-            
-           
-
-            }
-    }
- 
      public function delete($id = null)
     {
         $this->sma->checkPermissions(null, true);
@@ -1147,7 +1012,202 @@ class Atas extends MY_Controller
          
     }
     
-    public function plano_acao($id,  $tipo_ata)
+    public function edit($id = null,  $tipo_ata)
+    {
+        $this->sma->checkPermissions();
+      
+       
+       // $this->form_validation->set_rules('projeto', lang("Projeto"), 'required');
+        $this->form_validation->set_rules('dateAta', lang("Data da ATA"), 'required');
+        $this->form_validation->set_rules('tipo', lang("Tipo da ATA"), 'required');
+        $this->form_validation->set_rules('pauta', lang("Pauta"), 'required');
+       // $this->form_validation->set_rules('participantes', lang("Participantes"), 'required');
+        $this->form_validation->set_rules('nome_elaboracao', lang("Elaboração a Pauta"), 'required');
+       // $this->form_validation->set_rules('pendencias', lang("Pendências"), 'required');
+        
+        $date_cadastro = date('Y-m-d H:i:s');       
+        
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+         // echo 'aqui'; exit;
+          if ($this->form_validation->run() == true) {
+           
+          //  $projeto = $this->input->post('projeto');
+             $usuario_responsavel = $this->session->userdata('user_id');
+             
+            $dateAta = $this->input->post('dateAta'); 
+            $hora_inicio= $this->input->post('hora_inicio'); 
+            $hora_termino = $this->input->post('hora_fim'); 
+            $tipo = trim($this->input->post('tipo')); 
+            $pauta = trim($this->input->post('pauta')); 
+            $assunto = trim($this->input->post('assunto')); 
+            $participantes = $this->input->post('participantes');
+            $nome_elaboracao = $this->input->post('nome_elaboracao');
+            $local = $this->input->post('local');
+            $usuario_ata = $this->input->post('usuario_ata');
+            $note = $this->input->post('note');
+            $data_criacao = $date_cadastro;
+            $usuario = $this->session->userdata('user_id');
+            $id_ata = $this->input->post('id');
+            
+            $tipo_ata = $this->input->post('tipo_ata');
+            $vinculo = $this->input->post('vinculo');
+            
+            $participantes_cadastrados_ata = $this->atas_model->getAtaUserParticipante_ByID_ATA($id_ata);
+            foreach ($participantes_cadastrados_ata as $participante_cadastrados) {
+                $usuariop = $participante_cadastrados->id;
+                
+                //ATUALIZA CADASTRO DE PARTICIPANTES
+                 if (isset($_POST[$usuariop.'participante'])) {
+                    //var_dump("selecionado'");
+                    $this->atas_model->updateParticipantesAta($id_ata, $usuariop, 1);
+                } else {
+                    //var_dump("não escolheu ");
+                    $this->atas_model->updateParticipantesAta($id_ata, $usuariop, 0);
+                }
+                
+                //ATUALIZA CADASTRO DE VÍNCULOS
+                 if (isset($_POST[$usuariop.'vinculo'])) {
+                    //var_dump("selecionado'");
+                    $this->atas_model->updateVinculoAta($id_ata, $usuariop, 1);
+                } else {
+                    //var_dump("não escolheu ");
+                    $this->atas_model->updateVinculoAta($id_ata, $usuariop, 0);
+                }
+                
+                
+            }
+            
+            
+             if($tipo == "REUNIÃO CONTÍNUA"){
+                $evento = $this->input->post('evento');
+            }
+          
+            
+            $data_ata = array(
+               
+                'data_ata' => $dateAta,
+                'hora_inicio' => $hora_inicio,
+                'hora_termino' => $hora_termino,
+                'tipo' => $tipo,
+                'pauta' => $pauta,
+                'assunto' => $assunto,
+                'responsavel_elaboracao' => $nome_elaboracao,
+                'local' => $local,
+                'obs' => $note,
+                'data_criacao' => $data_criacao,
+                'evento' => $evento
+            );
+           
+            if ($_FILES['document']['size'] > 0) {
+                $this->load->library('upload');
+                $config['upload_path'] = $this->upload_path;
+                $config['allowed_types'] = $this->digital_file_types;
+                $config['max_size'] = $this->allowed_file_size;
+                $config['overwrite'] = false;
+                $config['encrypt_name'] = true;
+                $this->upload->initialize($config);
+                if (!$this->upload->do_upload('document')) {
+                    $error = $this->upload->display_errors();
+                    $this->session->set_flashdata('error', $error);
+                    redirect($_SERVER["HTTP_REFERER"]);
+                }
+                $photo = $this->upload->file_name;
+                $data_ata['anexo'] = $photo;
+            }
+            
+         //   if($texto_convocacao){
+         //       $data_ata['texto_convocacao'] = $texto_convocacao;
+         //   }
+            $this->atas_model->updateAta($id_ata, $data_ata, $participantes);
+            
+            
+            
+            $this->session->set_flashdata('message', lang("ATA Alterada com Sucesso!!!"));
+            redirect("Atas/exibir_ata/".$id_ata.'/'.$tipo_ata);
+            
+        } else {
+
+           
+            $this->data['id'] = $id;
+            $this->data['tipo_ata'] = $tipo_ata;
+            $this->data['ata'] = $this->atas_model->getAtaByID($id);
+            
+            $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+            $this->data['users'] = $this->site->getAllUser();
+            $this->data['projetos'] = $this->atas_model->getAllProjetos();
+            $this->data['users_ata'] = $this->atas_model->getAtaUserByID_ATA($id);
+            $bc = array(array('link' => site_url('atas'), 'page' => lang('Atas')), array('link' => site_url('atas/edit'), 'page' => lang('Editar ATA')));
+            $meta = array('page_title' => lang('Editar ATA'), 'bc' => $bc);
+            $this->page_construct('Atas/plano_acao/'.$id_ata, $meta, $this->data);
+            
+           
+
+            }
+    }
+    
+    public function edit_participantes_ata($id = null,  $tipo_ata)
+    {
+        $this->sma->checkPermissions();
+      
+       
+        // $this->form_validation->set_rules('projeto', lang("Projeto"), 'required');
+        $this->form_validation->set_rules('edita_participante_ata', lang("ATA"), 'required');
+        // $this->form_validation->set_rules('tipo', lang("Tipo da ATA"), 'required');
+        //$this->form_validation->set_rules('pauta', lang("Pauta"), 'required');
+        // $this->form_validation->set_rules('participantes', lang("Participantes"), 'required');
+        //$this->form_validation->set_rules('nome_elaboracao', lang("Elaboração a Pauta"), 'required');
+        // $this->form_validation->set_rules('pendencias', lang("Pendências"), 'required');
+         
+        $date_cadastro = date('Y-m-d H:i:s');       
+        
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+         // echo 'aqui'; exit;
+          if ($this->form_validation->run() == true) {
+          
+            $projeto = $this->input->post('projeto');
+            $usuario_responsavel = $this->session->userdata('user_id');
+             
+            $participantes = $this->input->post('participantes');
+      
+            $tipo_ata = $this->input->post('tipo_ata');
+            $vinculo = $this->input->post('vinculo');
+            $id_ata = $this->input->post('id');
+            
+            
+            
+           
+            $this->atas_model->insertParticipanteAta($id_ata,  $participantes);
+            
+            
+            
+            $this->session->set_flashdata('message', lang("ATA Alterada com Sucesso!!!"));
+            redirect("Atas/exibir_ata/".$id_ata.'/'.$tipo_ata);
+            
+        } else {
+
+           
+            $this->data['id'] = $id;
+            $this->data['tipo_ata'] = $tipo_ata;
+            $this->data['ata'] = $this->atas_model->getAtaByID($id);
+            
+            $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+            $this->data['users'] = $this->site->getAllUser();
+            $this->data['projetos'] = $this->atas_model->getAllProjetos();
+            $this->data['users_ata'] = $this->atas_model->getAtaUserByID_ATA($id);
+            $bc = array(array('link' => site_url('atas'), 'page' => lang('Atas')), array('link' => site_url('atas/edit'), 'page' => lang('Editar ATA')));
+            $meta = array('page_title' => lang('Editar ATA'), 'bc' => $bc);
+            $this->page_construct('Atas/plano_acao/'.$id_ata, $meta, $this->data);
+            
+           
+
+            }
+    }
+    
+    public function exibir_ata($id,  $tipo_ata)
     {
         $this->sma->checkPermissions();
         
@@ -1465,6 +1525,328 @@ class Atas extends MY_Controller
         }
     }
     
+   
+    
+   
+    
+    public function plano_acao($id,  $tipo_ata)
+    {
+        $this->sma->checkPermissions();
+        
+        /*
+         * VERIFICA SE A ATA PERTENCE AO PROJETO QUE O USUÁRIO ESTÁ LOGADO
+         */
+         $usuario = $this->session->userdata('user_id');
+         $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+         $projeto_atual = $projetos_usuario->projeto_atual;
+         //echo $id; exit;                                        
+        $ata = $this->atas_model->getAtaByIDByProjeto($id, $projeto_atual);
+        $quantidade_ata = $ata->quantidade;
+       
+        if($quantidade_ata == 0){
+             $this->session->set_flashdata('message', lang("A ATA QUE ESTÁ TENTANDO ACESSAR NÃO PERTENCE A ESTE PROJETO"));
+            redirect("Atas");
+        }else if($quantidade_ata == 1){
+            
+        
+        $this->form_validation->set_rules('descricao', lang("Descrição"), 'required');
+        $this->form_validation->set_rules('data_inicio', lang("Data Início e Término"), 'required');
+        $this->form_validation->set_rules('evento', lang("Item do Evento"), 'required');
+       // $this->form_validation->set_rules('responsavel', lang("Responsável"), 'required');
+       
+      
+        
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+        
+       // echo 'aqui'. $this->input->post('id'); exit;
+          if ($this->form_validation->run() == true) {
+           
+             
+            $id_ata = $this->input->post('id');  
+            $evento = $this->input->post('evento'); 
+            $categoria_plano = $this->input->post('categoria');
+            $descricao = $this->input->post('descricao');
+            $onde = $this->input->post('onde');
+            $porque = $this->input->post('porque');
+            $como = $this->input->post('como');
+            $valor_custo = $this->input->post('valor_custo');
+            if($valor_custo){
+            $valor_custo = str_replace(',', '.', str_replace('.', '', $valor_custo));
+            }
+            $custo_descricao = trim($this->input->post('custo'));
+            //$dataEntrega = $this->sma->fld(trim($this->input->post('dateEntrega'))); 
+            //$this->input->post('dateEntrega');
+            $responsaveis = $this->input->post('responsavel');
+            $peso = $this->input->post('peso');
+            $idplano = $this->input->post('plano_acao');
+            //$status = trim($this->input->post('status_plano')); 
+            $date_cadastro = date('Y-m-d H:i:s');  
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $users_dados = $this->site->geUserByID($usuario);
+            $modulo_atual_id = $users_dados->modulo_atual;
+            $projeto_atual_id = $users_dados->projeto_atual; 
+            
+            //PERÍODO
+            $data_inicio = $this->input->post('data_inicio');
+            $data_termino = $this->input->post('data_termino');
+            
+             /*
+            $periodo_acao = $this->input->post('periodo_acao');
+           
+            $evento_periodo_de = substr($periodo_acao, 0, 10);
+             $partes_data_inicio = explode("/", $evento_periodo_de);
+             $ano_de = $partes_data_inicio[2];
+             $mes = $partes_data_inicio[1];
+             $dia = $partes_data_inicio[0];
+             $data_tratado_de = $ano_de.'-'.$mes.'-'.$dia;
+            
+             $evento_periodo_ate = substr($periodo_acao, 13, 24);
+             $partes_data_fim = explode("/", $evento_periodo_ate);
+             $anof = $partes_data_fim[2];
+             $mesf = $partes_data_fim[1];
+             $diaf = $partes_data_fim[0];
+             $data_tratado_ate = $anof.'-'.$mesf.'-'.$diaf;
+             * 
+             */
+             
+             
+             /*
+              * VERIFICA SE A DATA DA AÇÃO ESTA DENTRO DO ITEM DE EVENTO SELECIONADO
+              */
+             $dados_item = $this->projetos_model->getItemEventoByID($evento);
+             $inicio_fase = $dados_item->dt_inicio;
+             $fim_fase = $dados_item->dt_fim;
+             
+           
+            
+               if($data_inicio < $inicio_fase){
+                  $rData = explode("-", $inicio_fase);
+                  $rData = $rData[2].'/'.$rData[1].'/'.$rData[0];
+                 $this->session->set_flashdata('error', lang("A data de Início da ação, é menor que o início do Item do Evento selecionado! A data Início, não pode ser menor que :  $rData"));
+                 echo "<script>alert('A data de Início da ação, é menor que o início do Item do Evento selecionado!')</script>";
+                echo "<script>history.go(-1)</script>";
+                exit;
+                // echo 'A data de início é menor que a esperada';
+             }else if($data_termino > $fim_fase){
+                 $rData = explode("-", $fim_fase);
+                  $rData = $rData[2].'/'.$rData[1].'/'.$rData[0];
+                 $this->session->set_flashdata('error', lang("A data de Término da ação, é maior que o término do Item do Evento selecionado! A data Término, não pode ser maior que :  $rData"));
+                 echo "<script>alert('A data de Término da ação, é maior que o término do Item do Evento selecionado!')</script>";
+                 echo "<script>history.go(-1)</script>";
+                exit;
+                 // echo 'A data de Término é maior que a esperada : '.$data_tratado_ate .'>'. $fim_fase;
+             }
+            
+           // exit;
+            $dataInicio = $data_inicio; 
+            $dataTermino = $data_termino;
+            $horas_previstas = $this->input->post('horas_previstas');
+                         
+            
+           
+            $cont_r = 0;
+            foreach ($responsaveis as $responsavel) {
+             $cont_r++;   
+            }
+            if($cont_r == 0){
+            $this->session->set_flashdata('error', lang("Selecione um responsável pela ação!!!"));
+            echo "<script>alert('Selecione um responsável pela ação!')</script>";
+            echo "<script>history.go(-1)</script>";
+            exit;
+            }
+            
+            /*
+             * APLICA A REGRA AS AÇÕES COM VINCULOS
+             */
+            $acao_vinculo = $this->input->post('acoes_vinculo');
+            $tipo_vinculo = $this->input->post('tipo_vinculo');
+            
+            
+           
+           
+             if($acao_vinculo){
+                 if(!$tipo_vinculo){
+                    $this->session->set_flashdata('error', lang("Selecione o Tipo de Vínculo!!!"));
+                    echo "<script>alert('Selecione o Tipo de Vínculo!')</script>";
+                    echo "<script>history.go(-1)</script>";
+                    exit;
+                 }else{
+                      //le as ações vinculadas selecionadas
+                     
+                         $dados_acao = $this->atas_model->getPlanoByID($acao_vinculo);
+                         $inicio = $dados_acao->data_entrega_demanda;
+                         $fim_v = $dados_acao->data_termino;   
+                         
+                         if($tipo_vinculo == 'II'){
+                            if($dataInicio != $inicio){
+                                $this->session->set_flashdata('error', lang("Para manter o vínculo da ação, a data de início da ação deve iniciar na mesma data de início da ação vinculada!!"));
+                                echo "<script>alert('Para manter o vínculo da ação, a data de início da ação deve iniciar na mesma data de início da ação vinculada!')</script>";    
+                                echo "<script>history.go(-1)</script>";
+                                    exit;
+                             }
+                         }else if($tipo_vinculo == 'IF'){
+                             
+                             if($dataInicio < $fim_v){
+                                $this->session->set_flashdata('error', lang("Para manter o vínculo da ação, a data de início da ação deve iniciar após a data de término da ação vinculada!!"));
+                                echo "<script>alert('Para manter o vínculo da ação, a data de início da ação deve iniciar após a data de término da ação vinculada!')</script>";    
+                                    echo "<script>history.go(-1)</script>";
+                                    exit;
+                             }
+                         
+                         }
+                         
+                        
+                 }
+            }
+            //FIM VINCULO
+            
+         
+           
+             foreach ($responsaveis as $responsavel) {
+             
+                
+             $dados_responsavel = $this->atas_model->getUserSetorBYid($responsavel);
+             $setor_responsavel = $dados_responsavel->setores_id;
+             $id_responsavel = $dados_responsavel->users_id;
+                
+             $dados_sequencial = $this->atas_model->getSequencialPlanosEmpresa();
+             $valor_sequencial = $dados_sequencial->sequencial;
+            
+             if($valor_sequencial == null){
+                 $sequencia = 1;
+             }else{
+                 $sequencia = $valor_sequencial;
+             }
+           
+             
+             $data_plano = array(
+                'idatas' => $id_ata,
+                'descricao' => $descricao,
+                'onde' => $onde,
+                'como' => $como,
+                'porque' => $porque,
+                'descricao' => $descricao,
+                'custo' => $custo_descricao,
+                'valor_custo' => $valor_custo,
+                'data_entrega_demanda' => $dataInicio, 
+                'data_termino' => $dataTermino,
+                'horas_previstas' => $horas_previstas,
+                'responsavel' => $id_responsavel,
+                'setor' => $setor_responsavel,  
+                'status' => 'ABERTO',
+                'data_elaboracao' => $date_cadastro,   
+                'responsavel_elaboracao' => $usuario,
+                'eventos' => $evento,
+                'status_tipo' => 1,
+                'sequencial' => $sequencia,
+                'empresa' => $empresa,
+                'peso' => $peso,
+                'idplano' => $idplano,
+                'categoria_plano' => $categoria_plano,
+                'projeto' => $projeto_atual_id
+            );  
+            
+           
+            
+             if ($_FILES['document']['size'] > 0) {
+                $this->load->library('upload');
+                $config['upload_path'] = $this->upload_path;
+                $config['allowed_types'] = $this->digital_file_types;
+                $config['max_size'] = $this->allowed_file_size;
+                $config['overwrite'] = false;
+                $config['encrypt_name'] = true;
+                $this->upload->initialize($config);
+                if (!$this->upload->do_upload('document')) {
+                    $error = $this->upload->display_errors();
+                    $this->session->set_flashdata('error', $error);
+                    redirect($_SERVER["HTTP_REFERER"]);
+                }
+                $photo = $this->upload->file_name;
+                $data_plano['anexo'] = $photo;
+            }
+            
+                     
+            $id_acao = $this->atas_model->add_planoAcao($data_plano,$acao_vinculo,$tipo_vinculo,$id_responsavel);
+            
+             /***********************************************************************************************
+            ********************** L O G     A Ç Ã O ****************************************************** 
+            ***********************************************************************************************/
+           $data_log = array(
+                'idplano' => $id_acao,
+                'data_registro' => $date_cadastro,
+                'usuario' => $usuario,
+                'depois' => "Ação Criada",
+                'empresa' => $empresa
+              );
+            $this->atas_model->add_logPlano($data_log);
+           
+           
+           
+            $date_hoje = date('Y-m-d H:i:s');
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'),
+                'type' => 'INSERT',
+                'description' => 'Cadastro de uma nova Ação, ID: '.$id_acao,
+                'userid' => $this->session->userdata('user_id'),
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => 'sig_planos',
+                'row' => $id_acao,
+                'depois' => json_encode($data_plano),
+                'modulo' => 'project',
+                'funcao' => 'project/plano_acao_detalhes',
+                'empresa' => $this->session->userdata('empresa'));
+
+            $this->owner_model->addLog($logdata);
+            
+            }
+
+            $this->session->set_flashdata('message', lang("Ação Cadastrada com Sucesso!!!"));
+            //redirect("project/manutencao_acao_pendente/".$id_acao);
+            
+            if($idplano){
+                redirect("atas/exibir_ata/".$id_ata.'/2');
+            }else{
+                echo "<script>history.go(-2)</script>";
+            }
+            
+            
+        } else {
+
+           
+            $this->data['id'] = $id;
+           $this->data['tipo_ata'] = $tipo_ata;
+            
+            $ata = $this->atas_model->getAtaByID($id);
+            
+            $this->data['users_ata'] = $this->atas_model->getAtaUserByID_ATA($id);
+            $this->data['ata'] = $this->atas_model->getAtaByID($id);
+            //$this->data['ataAtual'] = $this->atas_model->getAtaByID($id);
+            $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
+            
+            $this->data['users'] = $this->atas_model->getAllUsersSetores(); //$this->atas_model->getAllUsersSetores();
+            
+            
+            $this->data['planosContinuo'] = $this->atas_model->getAllitemPlanosAtaContinua($ata->evento); //getAllitemPlanosAtaContinua
+            //$this->data['acoes'] = $this->atas_model->getAllAcoes($id);
+            $this->data['planos'] = $this->atas_model->getAllitemPlanos($id);
+            
+            $usuario = $this->session->userdata('user_id');
+            $projetos_usuario = $this->site->getProjetoAtualByID_completo($usuario);
+            $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjeto($projetos_usuario->projeto_atual);   
+             
+                   
+            $this->page_construct_project('project/cadastro_basico_modelo/atas/edita_ata', $meta, $this->data);
+            
+          }
+        }
+    }
+    
     public function replicar_acao($id_acao = null)
     {
      
@@ -1488,15 +1870,12 @@ class Atas extends MY_Controller
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
             
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+          //  $this->data['projetos'] = $this->atas_model->getAllProjetos();      
            // $this->data['ata'] = $id;
             $this->data['avulsa'] = $avulsa;
             $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual);
             
             $this->data['idplano'] = $id_acao;
-            //$this->data['acoes'] = $this->atas_model->getPlanoByID($id); 
-           //  $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($projetos_usuario->projeto_atual);
-           // $this->load->view($this->theme . 'Atas/editar_acao', $this->data); //manutencao_acao_av_pendente
             $this->page_construct_ata('project/cadastro_basico_modelo/atas/replicar', $meta, $this->data);
         
       
@@ -1511,15 +1890,14 @@ class Atas extends MY_Controller
         
         
         $this->form_validation->set_rules('descricao', lang("Descrição"), 'required');
-        $this->form_validation->set_rules('periodo_acao', lang("Data Início e Término"), 'required');
-        $this->form_validation->set_rules('evento', lang("Item do Evento"), 'required');
-       // $this->form_validation->set_rules('responsavel', lang("Responsável"), 'required');
+        //$this->form_validation->set_rules('evento', lang("Item do Evento"), 'required');
+        $this->form_validation->set_rules('replicar_acao', lang("acao"), 'required');
        
     
        
-       // echo 'aqui'. $this->input->post('id'); exit;
+       // 
           if ($this->form_validation->run() == true) {
-          
+        
             //$idata = $this->input->post('id');   
             $id_ata = $this->input->post('idatas');  
             $evento = $this->input->post('evento'); 
@@ -1543,21 +1921,9 @@ class Atas extends MY_Controller
             $empresa = $this->session->userdata('empresa');
            
             //PERÍODO
-            $periodo_acao = $this->input->post('periodo_acao');
-           
-            $evento_periodo_de = substr($periodo_acao, 0, 10);
-             $partes_data_inicio = explode("/", $evento_periodo_de);
-             $ano_de = $partes_data_inicio[2];
-             $mes = $partes_data_inicio[1];
-             $dia = $partes_data_inicio[0];
-             $data_tratado_de = $ano_de.'-'.$mes.'-'.$dia;
-            
-             $evento_periodo_ate = substr($periodo_acao, 13, 24);
-             $partes_data_fim = explode("/", $evento_periodo_ate);
-             $anof = $partes_data_fim[2];
-             $mesf = $partes_data_fim[1];
-             $diaf = $partes_data_fim[0];
-             $data_tratado_ate = $anof.'-'.$mesf.'-'.$diaf;
+            //PERÍODO
+            $data_inicio = $this->input->post('data_inicio');
+            $data_termino = $this->input->post('data_termino');
               
              
              /*
@@ -1567,26 +1933,28 @@ class Atas extends MY_Controller
              $inicio_fase = $dados_item->dt_inicio;
              $fim_fase = $dados_item->dt_fim;
              
-             if($data_tratado_de < $inicio_fase){
+              if($data_inicio < $inicio_fase){
                   $rData = explode("-", $inicio_fase);
                   $rData = $rData[2].'/'.$rData[1].'/'.$rData[0];
                  $this->session->set_flashdata('error', lang("A data de Início da ação, é menor que o início do Item do Evento selecionado! A data Início, não pode ser menor que :  $rData"));
-            
+                 echo "<script>alert('A data de Início da ação, é menor que o início do Item do Evento selecionado!')</script>";
                 echo "<script>history.go(-1)</script>";
                 exit;
                 // echo 'A data de início é menor que a esperada';
-             }else if($data_tratado_ate > $fim_fase){
+             }else if($data_termino > $fim_fase){
                  $rData = explode("-", $fim_fase);
                   $rData = $rData[2].'/'.$rData[1].'/'.$rData[0];
                  $this->session->set_flashdata('error', lang("A data de Término da ação, é maior que o término do Item do Evento selecionado! A data Término, não pode ser maior que :  $rData"));
-                echo "<script>history.go(-1)</script>";
+                 echo "<script>alert('A data de Término da ação, é maior que o término do Item do Evento selecionado!')</script>";
+                 echo "<script>history.go(-1)</script>";
                 exit;
                  // echo 'A data de Término é maior que a esperada : '.$data_tratado_ate .'>'. $fim_fase;
              }
             
            // exit;
-            $dataInicio = $data_tratado_de; 
-            $dataTermino = $data_tratado_ate;
+            $dataInicio = $data_inicio; 
+            $dataTermino = $data_termino;
+            
             $horas_previstas = $this->input->post('horas_previstas');
                          
            
@@ -1714,7 +2082,7 @@ class Atas extends MY_Controller
             
             
             $this->session->set_flashdata('message', lang("Ação Cadastrada com Sucesso!!!"));
-            redirect("Atas/plano_acao/".$id_ata);
+            redirect("Atas/exibir_ata/".$id_ata);
             
         }
     }
@@ -2346,7 +2714,7 @@ class Atas extends MY_Controller
                 
             }
             $this->session->set_flashdata('message', lang('Participante Apagado com Sucesso!!!'));
-            redirect("Atas/plano_acao/".$id_ata);
+            redirect("Atas/exibir_ata/".$id_ata);
             }   
         
     }

@@ -2007,9 +2007,9 @@ class Project extends MY_Controller
 
             $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
               if($tipo_ata == 2){
-                redirect("atas/plano_acao/$id_ata/$tipo_ata");
+                redirect("atas/exibir_ata/$id_ata/$tipo_ata");
             }else{
-                redirect("atas/plano_acao/$id_ata");
+                redirect("atas/exibir_ata/$id_ata");
             }
            // redirect("project/atas/$tabela_id/$menu_id");
         } else {
@@ -2979,7 +2979,7 @@ class Project extends MY_Controller
             $this->data['acoes_vinculadas'] = $this->atas_model->getAllAcoesVinculadasAta($id_acao);
             $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjeto($projetos_usuario->projeto_atual);   
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+           // $this->data['projetos'] = $this->atas_model->getAllProjetos();      
             $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($id_acao);
             $this->data['idplano'] = $id_acao;
       
@@ -3682,10 +3682,10 @@ class Project extends MY_Controller
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
             
-            $this->data['projetos'] = $this->atas_model->getAllProjetos();      
+           // $this->data['projetos'] = $this->atas_model->getAllProjetos();      
            // $this->data['ata'] = $id;
            
-            $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto( $id_acao);
+            $this->data['acoes'] = $this->atas_model->getAllAcoesProjeto($id_acao);
             
             $this->data['idplano'] = $id_acao;
             //$this->data['acoes'] = $this->atas_model->getPlanoByID($id); 
@@ -4135,7 +4135,7 @@ class Project extends MY_Controller
             $this->session->set_flashdata('message', lang('Ação Cancelada com Sucesso!!!'));
             
             if($origem == 2){
-                redirect('Atas/plano_acao/'.$plano_acao.'/2');
+                redirect('Atas/exibir_ata/'.$plano_acao.'/2');
             }else if($origem == 1){
                 redirect('project/plano_acao_detalhes/'.$plano_acao);
             }else if($origem == 3){
@@ -5586,7 +5586,8 @@ class Project extends MY_Controller
        
        // $this->page_construct_project('project/escopo/escopo/escopo', $meta, $this->data);
         
-        $this->load->view($this->theme . 'project/escopo/escopo/escopo', $this->data);
+       // $this->load->view($this->theme . 'project/escopo/escopo/escopo', $this->data);
+         $this->page_construct_project('project/escopo/escopo/escopo', $meta, $this->data);
         //$this->load->view($this->theme . 'menu', $this->data);
     }
     

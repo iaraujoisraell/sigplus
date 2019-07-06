@@ -279,9 +279,9 @@
                                                 <td style="width: 15%;"><?php echo $projeto; ?></td> 
                                                 
                                                 <td style="width: 20%;">
-                                                    <small class="label bg-gray"><?php echo 'Dt da Atividade. : '. date('d/m/Y', strtotime($data_rat)); ?></small> <br>
-                                                    <small class="label bg-gray"><?php echo 'Hr Início : '. $inicio; ?></small> 
-                                                    <small class="label bg-gray"><?php echo 'Hr Fim : '.$termino; ?></small>
+                                                    <small ><?php echo 'Data : '. date('d/m/Y', strtotime($data_rat)); ?></small> <br>
+                                                    <small ><?php echo 'Início : '. $inicio; ?></small> 
+                                                    <small ><?php echo 'Término : '.$termino; ?></small>
                                                     <h4><small class="label bg-blue-active"><?php echo 'Tempo ( '.$tempo.' )'; ?></small></h4>
                                                     <?php if($valor > 0){ ?>
                                                     <h4><small class="label bg-green-active"> <?php echo 'Custo R$'. str_replace('.', ',', $valor); ?></small></h4>
@@ -351,10 +351,17 @@
     <!-- /.content -->
  
 
- <script>
+
+  <script>
   $(function () {
-  $('#minhas_rats').DataTable({
-     // "order": [[ 0, "desc" ]]
+ 
+    $('#minhas_rats').DataTable({
+      'paging'      : true,
+      'lengthChange': true,
+      'searching'   : true,
+      'info'        : true,
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
-</script>
+</script>   

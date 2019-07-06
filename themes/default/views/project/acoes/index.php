@@ -45,6 +45,8 @@ $usuario =  $this->session->userdata('user_id');
     </div>
     <div class="col-lg-12">
     <div class="box">
+        
+        
         <small><?php echo 'Filtro'; ?> </small>
         <section class="content-header">
 
@@ -59,7 +61,7 @@ $usuario =  $this->session->userdata('user_id');
           <div class="form-group">
             
             <?php
-            $wu_responsaveis[''] = '';
+            $wu_responsaveis[''] = 'Responsáveis';
             foreach ($responsaveis as $user) {
                 $wu_responsaveis[$user->id] = $user->nome.' - '.$user->setor;
             }
@@ -135,6 +137,7 @@ $usuario =  $this->session->userdata('user_id');
                                 }
                             }
                             ?>        
+                            <?php if($tipo != 2) { // Tipo 1: status da ação (pendente, concluido e cancelado)?>
                         <br>
                             <div class="col-lg-12">
                             <table>
@@ -151,7 +154,9 @@ $usuario =  $this->session->userdata('user_id');
                             </table>
                             </div>    
                             <br>
-                                  <br>
+                            <br>
+                            <?php } ?>
+                                  
                             <div class="table-responsive">
                                 <div class="box-body">
                                     <table id="example1" class="table table-bordered table-striped">

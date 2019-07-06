@@ -248,6 +248,30 @@ class Projetos_model extends CI_Model
         return FALSE;
     }
     
+    /*
+     * FASES DO PROJETOS SELECIONADO por parametro
+     * usado no reports
+     */
+     public function getAllFasesByProjetosReports($projeto){
+        $usuario = $this->session->userdata('user_id');
+        
+     
+        //echo $tabela_empresa;
+       //$empresa_db = $this->load->database('provin_clientes', TRUE);
+       $statement = "SELECT * FROM sig_fases_projeto p 
+                    where id_projeto = $projeto order by ordem asc ";
+       //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
     public function getFaseByID($id)
     {
         $q = $this->db->get_where('fases_projeto', array('id' => $id), 1);
@@ -506,7 +530,7 @@ class Projetos_model extends CI_Model
         //echo $tabela_empresa;
         //$empresa_db = $this->load->database('provin_clientes', TRUE);
        $statement = "SELECT atas.id as id, atas.id as ata,  data_ata, pauta, assunto, tipo, responsavel_elaboracao, atas.status, atas.anexo, atas.sequencia as sequencia "
-               . " FROM sig_atas atas where projetos = $projeto_atual_id and empresa = $empresa ";
+               . " FROM sig_atas atas where projetos = $projeto_atual_id and empresa = $empresa order by atas.sequencia desc ";
       // echo $statement; exit;
         $q = $this->db->query($statement);
         
@@ -815,8 +839,7 @@ class Projetos_model extends CI_Model
     /*
      * AS ÁREAS QUE TEM AÇÕES NO PROJETO, SUPERINTENDENCIA OU PRESTADORES
      */
-    
-     public function getAreasByProjeto()
+    public function getAreasByProjeto()
     {
         $usuario = $this->session->userdata('user_id');
         $users_dados = $this->site->geUserByID($usuario);
@@ -845,8 +868,7 @@ class Projetos_model extends CI_Model
     /*
      * QTDE AÇÕES POR SUPERINTENDENCIA
      */
-    
-     public function getAcoesSetorPaiByProjeto($area)
+    public function getAcoesSetorPaiByProjeto($area)
     {
         $usuario = $this->session->userdata('user_id');
         $users_dados = $this->site->geUserByID($usuario);
@@ -865,9 +887,8 @@ class Projetos_model extends CI_Model
     
     /*
      * QTDE AÇÕES DE TODAS AS SUPERINTENDENCIA DE UM PROJETO
-     */
-    
-     public function getTotalAcoesSetoresPaiByProjeto()
+     */ 
+    public function getTotalAcoesSetoresPaiByProjeto()
     {
         $usuario = $this->session->userdata('user_id');
         $users_dados = $this->site->geUserByID($usuario);
@@ -886,9 +907,8 @@ class Projetos_model extends CI_Model
     
     /*
      * QTDE AÇÕES CONCLUIDAS DE UM SETOR PAI
-     */
-    
-     public function getAcoesConcluidasSetorPaiByProjeto($area)
+     */   
+    public function getAcoesConcluidasSetorPaiByProjeto($area)
     {
         $usuario = $this->session->userdata('user_id');
         $users_dados = $this->site->geUserByID($usuario);
@@ -906,10 +926,8 @@ class Projetos_model extends CI_Model
     
     /*
      * QTDE AÇÕES PENDENTES POR SUPERINTENDENCIA
-     * 
-     */
-    
-        public function getAcoesPendenteSetorPaiByProjeto($area, $tipo)
+     */    
+    public function getAcoesPendenteSetorPaiByProjeto($area, $tipo)
     {
         $date_hoje = date('Y-m-d');
         $usuario = $this->session->userdata('user_id');
@@ -940,7 +958,7 @@ class Projetos_model extends CI_Model
     /*
      * PEGA TODOS OS PLANOS DE UM PROJETO e de uma área
      */
-     public function getAllitemPlanosProjetoArea($id, $area)
+    public function getAllitemPlanosProjetoArea($id, $area)
     {
          
          $this->db->select('planos.idplanos,planos.descricao, planos.data_termino,planos.data_retorno_usuario, users.username,planos.status,users.company,users.gestor,users.award_points,setores.nome as setor, superintendencia.responsavel as superintendencia')
@@ -1191,7 +1209,10 @@ class Projetos_model extends CI_Model
     
     public function getEventoByID($id)
     {
-        $q = $this->db->get_where('eventos', array('id' => $id), 1);
+       // $q = $this->db->get_where('eventos', array('id' => $id), 1);
+         $statement = "SELECT * FROM sig_eventos where id = $id ";
+       // echo $statement; 
+         $q = $this->db->query($statement);
         if ($q->num_rows() > 0) {
             return $q->row();
         }
@@ -1524,7 +1545,7 @@ order by su.nome asc
     {
         $empresa = $this->session->userdata('empresa'); 
         $statement = "SELECT sum(peso) as quantidade from sig_planos
-                    where eventoS = '$id' and status not in ('ABERTO', 'CANCELADO') and empresa = $empresa";
+                    where eventos = '$id' and status not in ('ABERTO', 'CANCELADO') and empresa = $empresa";
         $q = $this->db->query($statement);
         
         if ($q->num_rows() > 0) {

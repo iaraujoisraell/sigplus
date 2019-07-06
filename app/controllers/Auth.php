@@ -1337,8 +1337,9 @@ class Auth extends MY_Controller
             if ($_FILES['capa']['size'] > 0) {
                  
                 $this->load->library('upload');
-
-                $config['upload_path'] = 'assets/uploads/avatars';
+                $empresa = $this->session->userdata('empresa');
+                
+                $config['upload_path'] = 'assets/uploads/'.$empresa.'/avatars';
                 $config['allowed_types'] = 'gif|jpg|png';
                 //$config['max_size'] = '500';
                // $config['max_width'] = $this->Settings->iwidth;
@@ -1365,10 +1366,11 @@ class Auth extends MY_Controller
                 $this->form_validation->set_rules('avatar', lang("avatar"), 'required');
             }
         }
-
+       
         if ($this->form_validation->run() == true && $this->auth_model->updateCapa($id, $photo)) {
-            unlink('assets/uploads/avatars/' . $user->foto_capa);
-            unlink('assets/uploads/avatars/thumbs/' . $user->foto_capa);
+             echo 'aqui'; exit;
+            unlink('assets/uploads/'.$empresa.'/avatars/' . $user->foto_capa);
+            unlink('assets/uploads/'.$empresa.'/avatars/thumbs/' . $user->foto_capa);
             $this->session->set_userdata('foto_capa', $photo);
             $this->session->set_flashdata('message', lang("avatar_updated"));
             redirect("welcome/profile/" . $id);

@@ -57,7 +57,7 @@
                               <br>
                             <div class="table-responsive">
                                 <div class="box-body">
-                                    <table id="tarefas" class="table1 table-bordered table-striped">
+                                    <table id="tarefas" class="table table-bordered table-striped">
                                     <thead>
                                         <tr style="height: 30px;">
                                    <th style="width:5%;" >-</th>
@@ -132,7 +132,16 @@
 
           
  
-     <script>
-
-
+      <script>
+  $(function () {
+ 
+    $('#tarefas').DataTable({
+      'paging'      : true,
+      'lengthChange': true,
+      'searching'   : true,
+      'info'        : true,
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
+    })
+  })
 </script>

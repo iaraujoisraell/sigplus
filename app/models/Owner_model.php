@@ -1124,5 +1124,14 @@ FROM sig_planos p where projeto = $projeto_atual_id and p.empresa = $empresa and
          
     }
     
+    // update usuario
+     public function updateStatusUsuario($id, $data  = array())
+    {  
+        if ($this->db->update('users', $data, array('id' => $id))) {
+         return true;
+        }
+        return false;
+    }
+    
     
 }

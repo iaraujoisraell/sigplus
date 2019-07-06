@@ -49,7 +49,7 @@ class Admin extends MY_Controller
                     
         // registra o log de movimentação
          
-       $users_dados = $this->site->geUserByID($usuario);
+         $users_dados = $this->site->geUserByID($usuario);
          $modulo_atual = $users_dados->modulo_atual;
          $menu_atual = $users_dados->modulo_atual;
          $nome = $users_dados->first_name;
@@ -928,8 +928,189 @@ class Admin extends MY_Controller
             
     }
     
+    // Ativar ou Desativar o usuário
+     public function alterarStatusUsuario($id_usuario)
+    {
+        $this->sma->checkPermissions();  
+        $this->form_validation->set_rules('id_usuario', lang("id_cadastro"), 'required');
+        $this->form_validation->set_rules('alterar_status', lang("Alterar Status"), 'required');
+       
+         
+        if ($this->form_validation->run() == true) {
+          
+             $status_atual = $this->input->post('status_atual');
+             $usuario_id = $this->input->post('id_usuario');
+            
+             if($status_atual == 0){
+                $status_novo = 1;
+             }else 
+                if($status_atual == 1){
+                $status_novo = 0;
+             } 
+            
+             
+             $data_Status = array(
+                'active' => $status_novo
+                );
+             $this->owner_model->updateStatusUsuario($usuario_id, $data_Status);
+             
+             
+           
+              
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'UPDATE', 
+                'description' => 'Alterou o status do usuário',  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => 'sig_users',
+                'row' => $usuario_id,
+                'depois' => json_encode($data_Status), 
+                'modulo' => 'admin',
+                'funcao' => 'admin/alterarStatusUsuario',  
+                'empresa' => $this->session->userdata('empresa'));
+           
+               $this->owner_model->addLog($logdata);  
+           // exit;
+            $tabela_id = 55;
+            $menu_id = 27;
+            $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
+            redirect("admin/usuarios/$tabela_id/$menu_id");
+            
+         }else{
+        
+        $date_cadastro = date('Y-m-d H:i:s');                           
+        
+       
+        $dados = $this->site->getUser($id_usuario);
+        $this->data['dados'] = $dados;
+       
+        //$this->load->view($this->theme . 'projetos/documentacao/add', $this->data);
+        $this->load->view($this->theme . 'admin/cadastros/usuarios/alterar_status', $this->data);
+           
+         }
+            
+    }
     
     
+     // atualiza o status da ação. Modal. Ata > Enviar ação
+     public function enviarAcaoAtaresponsavel($id_acao)
+    {
+      //  $this->sma->checkPermissions();  
+        $this->form_validation->set_rules('id_acao', lang("id_cadastro"), 'required');
+        $this->form_validation->set_rules('envia_acao', lang("Alterar Status"), 'required');
+       
+         
+        if ($this->form_validation->run() == true) {
+          
+             $id_acao = $this->input->post('id_acao');
+             $usuario_id = $this->input->post('id_usuario');
+            
+             $date_hoje = date('Y-m-d H:i:s');
+            
+             
+             $data_Status = array(
+                'status' => 'PENDENTE'
+                );
+             $this->atas_model->updatePlano($id_acao, $data_Status);
+             
+             $acao = $this->atas_model->getPlanoByID($id_acao);
+             $responsavel = $acao->responsavel;
+             $ata_id = $acao->idatas;
+            // $dados_responsavel = $this->site->getUser($responsavel);
+             
+             $usuario = $this->session->userdata('user_id');
+             $empresa = $this->session->userdata('empresa');
+             
+             /***********************************************************************************************
+            ********************** L O G     A Ç Ã O ****************************************************** 
+            ***********************************************************************************************/
+           $data_log = array(
+                'idplano' => $id_acao,
+                'data_registro' => $date_hoje,
+                'usuario' => $usuario,
+                'descricao' => "Ação Enviada com sucesso",
+                'empresa' => $empresa
+              );
+            $this->atas_model->add_logPlano($data_log);
+           
+           // LOG GERAL
+            
+            
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+            $logdata = array('date' => date('Y-m-d H:i:s'),
+                'type' => 'UPDATE',
+                'description' => 'Envio de Ação para o Responsável. Ação, ID: '.$id_acao,
+                'userid' => $this->session->userdata('user_id'),
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => 'sig_planos',
+                'row' => $id_acao,
+                'depois' => json_encode($data_Status),
+                'modulo' => 'admin',
+                'funcao' => 'admin/enviarAcaoAtaresponsavel',
+                'empresa' => $this->session->userdata('empresa'));
+            $this->owner_model->addLog($logdata);
+           
+            
+                
+                   // REGISTRA A NOTIFICAÇÃO
+                    $users_dados = $this->site->geUserByID($responsavel);
+                    $nome_usuario = $users_dados->first_name;
+
+                    $data_notificacao = array(
+                        'id_from' => $usuario,
+                        'id_to' => $responsavel,
+                        'title' => "Nova Ação",
+                        'text' => "Parabéns $nome_usuario, Você recebeu uma nova ação.  ",
+                        'lida' => 0,
+                        'data' => $date_hoje,
+                        'email' => $envia_email,
+                        'idplano' => $id_acao
+                    );
+                    $this->atas_model->add_notificacoes($data_notificacao);
+
+                    
+                    //cadastro para envio de email
+                       $data_email = array(
+                        'id_from' => $usuario,
+                        'id_to' => $responsavel,
+                        'title' => "Nova Atividade",
+                        'text' => "Parabéns $nome_usuario, você recebeu uma nova ação. Acessar o SigPlus para mais detalhes.",
+                        'lida' => 0,
+                        'data' => $date_hoje,
+                        'referencia' => "Admin > enviarAcaoAtaresponsavel",
+                        'idplano' => $id_acao,
+                        'empresa' => $empresa,
+                        'enviado' => 0  );
+                        $this->atas_model->add_email($data_email);
+                        
+                  
+                  
+                  
+           
+            $this->session->set_flashdata('message', lang("Cadastro realizado com Sucesso!!!"));
+            redirect("atas/exibir_ata/$ata_id");
+            
+         }else{
+        
+        $date_cadastro = date('Y-m-d H:i:s');                           
+        
+        $this->data['acao'] = $this->atas_model->getPlanoByID($id_acao);
+            
+        $this->data['idplano'] = $id_acao;
+       // $dados = $this->site->getUser($id_usuario);
+        
+        //$this->load->view($this->theme . 'projetos/documentacao/add', $this->data);
+        $this->load->view($this->theme . 'project/cadastro_basico_modelo/atas/enviar_acao', $this->data);
+           
+         }
+            
+    }
     
      /************************************************************************************************************
      ******************************************* LOGS DE ACESSO LOGIN *********************************************

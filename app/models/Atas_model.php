@@ -538,6 +538,27 @@ class Atas_model extends CI_Model
         return false;
     }
     
+     public function insertParticipanteAta($id,  $participantes_ata= array())
+    {  
+        
+            if($participantes_ata){
+                  //$this->db->delete('ata_usuario', array('id_usuario' => $item, 'atas_id ' => $id));
+            
+                foreach ($participantes_ata as $item) {
+                        $data_ata_usuario = array('atas_id' => $id, 'participante' => 1, 'id_usuario' => $item);      
+                        $this->db->insert('ata_usuario', $data_ata_usuario);
+                        
+                 }
+                  return true;
+            }
+            
+           
+            
+        
+        
+        return false;
+    }
+    
     /*
      * ATUALIZA NO PLANO DE AÇÃO OS PARTICIPANTES
      */
@@ -3663,7 +3684,7 @@ order by su.nome asc
      public function getTotalAcoesByAta($idata)
     {
         $empresa = $this->session->userdata('empresa');
-        $statement = "SELECT count(*) as total_acoes FROM sig_planos where idatas = $idata and empresa = $empresa ";
+        $statement = "SELECT count(*) as total_acoes FROM sig_planos where idatas = $idata and empresa = $empresa and status not in ( 'CANCELADO')";
         //echo $statement; exit;
         $q = $this->db->query($statement);
          
@@ -3679,7 +3700,7 @@ order by su.nome asc
      public function getTotalPesoAcoesByAta($idata)
     {
         $empresa = $this->session->userdata('empresa');
-        $statement = "SELECT sum(peso) as total_peso FROM sig_planos where idatas = $idata and empresa = $empresa and status != 'ABERTO'";
+        $statement = "SELECT count(*) as qtde_acao, sum(peso) as total_peso FROM sig_planos where idatas = $idata and empresa = $empresa and status not in ( 'CANCELADO')";
         //echo $statement; exit;
         $q = $this->db->query($statement);
          

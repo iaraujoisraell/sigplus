@@ -72,6 +72,9 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
 <!-- date-range-picker -->
 <script src="<?= $assets ?>bi/bower_components/moment/min/moment.min.js"></script>
 <script src="<?= $assets ?>bi/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+
+<script src="<?= $assets ?>bi/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="<?= $assets ?>bi/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <!-- bootstrap datepicker -->
 <script src="<?= $assets ?>bi/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
 <!-- bootstrap color picker -->
@@ -98,7 +101,7 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
     $('#example1').DataTable()
     $('#table_ata').DataTable()
     $('#minha_agenda_home').DataTable()//
-   // $('#minhas_acoes_usuario').DataTable()  // network > acoes
+    $('#minhas_acoes_usuario').DataTable()  // network > acoes
     $('#minhas_rats').DataTable()
     $('#example4').DataTable()
     $('#example5').DataTable()
@@ -107,11 +110,12 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
     $('#tarefas').DataTable() 
     $('#example2').DataTable({
       'paging'      : true,
-      'lengthChange': false,
-      'searching'   : false,
-      'ordering'    : true,
+      'lengthChange': true,
+      'searching'   : true,
+     
       'info'        : true,
-      'autoWidth'   : false
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
 </script>

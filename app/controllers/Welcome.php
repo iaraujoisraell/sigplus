@@ -1293,6 +1293,7 @@ class Welcome extends MY_Controller
         $this->data['status_filtro'] = $status_filtro;
         
        
+        
         $this->page_construct_networking('networking/minhas_acoes/index', $meta, $this->data); 
       
 

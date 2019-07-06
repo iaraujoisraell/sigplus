@@ -134,13 +134,18 @@
     </section>
     <!-- /.content -->
  
-
-   <script>
+  <script>
   $(function () {
-  $('#convites').DataTable({
-      "order": [[ 0, "desc" ]]
+ 
+    $('#convites').DataTable({
+      'paging'      : true,
+      'lengthChange': true,
+      'searching'   : true,
+      'info'        : true,
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
-</script>        
- 
+</script>
+  
  

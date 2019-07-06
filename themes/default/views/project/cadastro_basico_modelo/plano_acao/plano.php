@@ -453,7 +453,7 @@
                                                                             </div>
                                                                         </td> 
                                                                         <td style="width: 15%; font-size: 12;">
-                                                                            <a class="btn btn-primary" title="Abrir ATA"  href="<?= site_url('atas/plano_acao/'.$ata->id.'/2'); ?>"><i class="fa fa-folder-open"></i>  ABRIR </a>
+                                                                            <a class="btn btn-primary" title="Abrir ATA"  href="<?= site_url('atas/exibir_ata/'.$ata->id.'/2'); ?>"><i class="fa fa-folder-open"></i>  ABRIR </a>
                                                                         </td>    
 
 

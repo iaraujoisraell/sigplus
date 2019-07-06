@@ -57,8 +57,6 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
 <script type="text/javascript" src="<?= $assets ?>js/jquery-2.0.3.min.js"></script>
 <script type="text/javascript" src="<?= $assets ?>js/bootstrap.min.js"></script>
 
-<script type="text/javascript" src="<?= $assets ?>js/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="<?= $assets ?>js/jquery.dataTables.dtFilter.min.js"></script>
 <script type="text/javascript" src="<?= $assets ?>js/select2.min.js"></script>
 <script type="text/javascript" src="<?= $assets ?>js/jquery-ui.min.js"></script>
 <script type="text/javascript" src="<?= $assets ?>js/bootstrapValidator.min.js"></script>
@@ -74,6 +72,9 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
 <!-- date-range-picker -->
 <script src="<?= $assets ?>bi/bower_components/moment/min/moment.min.js"></script>
 <script src="<?= $assets ?>bi/bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+
+<script src="<?= $assets ?>bi/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="<?= $assets ?>bi/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
 <!-- bootstrap datepicker -->
 <script src="<?= $assets ?>bi/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
 <!-- bootstrap color picker -->
@@ -135,9 +136,10 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
  * 
  */
 ?>
+     
 <script>
   $(function () {
-    $('#example1').DataTable()
+    $('#lista_atas_project').DataTable()
     $('#table_ata').DataTable()
     $('#example7').DataTable()  // network > acoes
     $('#example3').DataTable()
@@ -149,10 +151,11 @@ $s2_file_date = $this->parser->parse_string($s2_lang_file, $s2_data, true);
     $('#example2').DataTable({
       'paging'      : true,
       'lengthChange': false,
-      'searching'   : false,
-      'ordering'    : true,
+      'searching'   : true,
+      
       'info'        : true,
-      'autoWidth'   : false
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
 </script>

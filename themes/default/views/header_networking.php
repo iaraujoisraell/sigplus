@@ -42,6 +42,8 @@
   <link rel="stylesheet" href="<?= $assets ?>bi/bower_components/fullcalendar/dist/fullcalendar.min.css">
   <link rel="stylesheet" href="<?= $assets ?>bi/bower_components/fullcalendar/dist/fullcalendar.print.min.css" media="print">
   
+   <link rel="stylesheet" href="<?= $assets ?>bi/bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css">
+  
    
   <link href="<?= $assets ?>styles/theme_novo.css" rel="stylesheet"/>
   <link href="<?= $assets ?>styles/style_novo.css" rel="stylesheet"/>

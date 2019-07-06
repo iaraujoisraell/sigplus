@@ -60,7 +60,7 @@
                               <br>
                             <div class="table-responsive">
                                 <div class="box-body">
-                                    <table id="convites" class="table table-bordered table-striped">
+                                    <table id="mensagens" class="table table-bordered table-striped">
                                     <thead>
                                     <tr>
                                     <th style="width:10%;" ><?php echo $this->lang->line("Data Envio/ Remetente"); ?></th>
@@ -100,7 +100,7 @@
                                                 <tr  >
                                                     <td style="width: 10%; text-align: center;">
                                                         <small ><?php echo date('d/m/Y H:m:i', strtotime($mensagem->data_envio)); ?></small><br>
-                                                        <a href="<?= site_url('welcome/profile_visitor/'.$mensagem->id_from); ?>" title="Ver Perfil" ><small title="Remetente da mensagem" class="label bg-gray" ><?php echo  $users_dados->first_name; ?></small></a>
+                                                        <a href="<?= site_url('welcome/profile_visitor/'.$mensagem->id_from); ?>" title="Ver Perfil" ><small title="Remetente da mensagem" ><?php echo  $users_dados->first_name; ?></small></a>
                                                     </td>
                                                     <td style="width: 15%;  font-size: 14px;">
                                                         <small class="label bg-blue"><?php echo $mensagem->title; ?></small> 
@@ -109,7 +109,7 @@
                                                     <td style="width: 30%; text-align: center;"><small  ><?php echo $acao->descricao; ?></small></td>
                                                     <td style="width: 5%; text-align: center;"><small class="label pull-right <?php echo $bt; ?> " ><?php echo $bt_texto; ?></small></td> 
                                                     <?php if($acao_id){ ?>
-                                                    <td style="width: 10%; text-align: center;"><a href="<?= site_url('welcome/dados_cadastrais_acao/'.$acao_id); ?>" title="Ver Ação" class="btn btn-warning" ><i class="fa fa-folder-open-o"></i></a></td> 
+                                                    <td style="width: 10%; text-align: center;"><a href="<?= site_url('welcome/dados_cadastrais_acao/'.$acao_id); ?>" title="Ver Ação" class="btn btn-primary" ><i class="fa fa-folder-open-o"></i></a></td> 
                                                     <?php }else{ ?>
                                                     <td style="width: 10%; text-align: center;"><small  >-</small></td> 
                                                     <?php } ?>
@@ -133,13 +133,18 @@
     </section>
     <!-- /.content -->
  
-
-   <script>
+  <script>
   $(function () {
-  $('#convites').DataTable({
-      "order": [[ 0, "desc" ]]
+ 
+    $('#mensagens').DataTable({
+      'paging'      : true,
+      'lengthChange': true,
+      'searching'   : true,
+      'info'        : true,
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
-</script>        
+</script>   
  
  

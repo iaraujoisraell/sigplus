@@ -285,30 +285,7 @@ $fim_fase = $projetos->dt_final;
                                            
                                     </div>
                                    
-                                   <div class="form-group">
-                                        <?= lang("Ação(ões) predecessora(s) ", "slVinculoAcao"); ?> <i class="fa fa-info-circle" title="Ações que tem vinculo com a ação atual. Ações do qual se tem alguma dependencia."></i>
-                                        <?php
-                                       
-                                        $wu_acao[''] = '';
-                                        foreach ($acoes as $acao) {
-                                            $wu_acao[$acao->idplanos] = $acao->sequencial.' : ' . $acao->nome_fase.' > '.$acao->nome_evento.' > '.$acao->item.' - '. substr($acao->descricao, 0, 100).' ( '.exibirData($acao->dt_inicio).' - '.exibirData($acao->dt_termino).' )';
-                                        }
-                                        echo form_dropdown('acoes_vinculo', $wu_acao, (isset($_POST['acoes_vinculo']) ? $_POST['acoes_vinculo'] : ""), 'id="slVinculoAcao"  class="form-control  select" data-placeholder="' . lang("Selecione a Ação") . ' "   style="width:100%;"   ');
-                                        ?>
-                                    </div>
-                                   
-                                   <div class="form-group">
-                                        <?= lang("Tipo Vinculo ", "tipo_vinculo"); ?> <i class="fa fa-info-circle" title="INÍCIO-INÍCIO: A ação começa junto com a ação vinculada. INÍCIO-FIM: A ação Inícia após o término da ação vinculada."></i>
-                                        <?php $pst[''] = '';
-                                          $pst['II'] = lang('INÍCIO - INÍCIO');
-                                          $pst['IF'] = lang('INÍCIO - FIM');
-                                          
                                   
-                                        echo form_dropdown('tipo_vinculo', $pst, (isset($_POST['tipo']) ? $_POST['tipo'] : $ata->tipo), 'id="tipo"  class="form-control " data-placeholder="' . lang("select") . ' ' . lang("o tipo de Vinculo") . '"   style="width:100%;" ');
-                              
-                                  ?>
-                                        
-                                    </div>
                                    
                                     <!-- VALOR -->  
                                     <div class="form-group">

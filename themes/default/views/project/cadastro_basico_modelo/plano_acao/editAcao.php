@@ -163,7 +163,7 @@
                         <li><a href="#checklist" data-toggle="tab"><b>CheckList <i class="fa fa-check-square-o"></i></b></a></li>
                         <li style="border-right: #000" ><a href="#activity" data-toggle="tab"><b>Ações Vinculadas <i class="fa fa-link"></i></b></a></li>                         
                         <li><a href="#settings" data-toggle="tab"><b>Arquivos <i class="fa fa-folder-open"></i></b></a></li>
-                        <li><a href="#historico" data-toggle="tab"><b>Histórico <i class="fa fa-comments-o"></i></b></a></li>
+                        <li><a href="#historico" data-toggle="tab"><b>Comunicação <i class="fa fa-comments-o"></i></b></a></li>
                         <li><a href="#rat" data-toggle="tab"><b>Rat's <i class="fa fa-pencil"></i></b></a></li>
                         <li><a href="#log" data-toggle="tab"><b>Log <i class="fa fa-search"></i></b></a></li>
 
@@ -316,7 +316,7 @@
                                     <center>
 
                                         <div class="col-md-12">
-<?php echo form_submit('add_item', lang("Salvar"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
+<?php echo form_submit('add_item', lang("Atualizar Cadastro"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
                                             <button  class="btn btn-danger" onclick="history.go(-1)"><?= lang('Sair') ?></button>
 
                                         </div>

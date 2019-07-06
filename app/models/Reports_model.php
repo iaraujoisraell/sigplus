@@ -135,6 +135,139 @@ class Reports_model extends CI_Model
         return FALSE;
     }
     
+    /*
+     * PEGA TODOS OS EVENTOS DE UM PROJETO PELA FASE
+     */
+     public function getAllEventosProjetoByFase($fase)
+    {
+     $usuario = $this->session->userdata('user_id');
+        
+        $q = $this->db->get_where('eventos', array('fase_id' => $fase));
+       
+        if ($q->num_rows() > 0) {
+            foreach (($q->result()) as $row) {
+                $data[] = $row;
+            }
+            return $data;
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QUANTIDADE DE AÇÕES POR ITEM
+     */
+     public function getQuantidadeAcaoByItemEvento($item_evento)
+    {
+        $statement = "SELECT count(*) as qtde_acoes, sum(peso) as quantidade from sig_planos
+                    where eventos = '$item_evento' and status not in ('ABERTO', 'CANCELADO')";
+       // echo $statement;
+        $q = $this->db->query($statement);
+        
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QTDE AÇÕES CONCLUÍDAS POR ITEM DE EVENTO
+     */
+     public function getAcoesConcluidasByPItemEvento($eventos)
+    {
+        $statement = "SELECT count(*) as qtde_acoes, sum(peso) as quantidade from sig_planos
+                    where eventos = '$eventos' and status = 'CONCLUÍDO' ";
+        $q = $this->db->query($statement); 
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    /*
+     * QTDE AÇÕES PENDENTES POR ITEM
+     */
+    
+     public function getAcoesPendentesByItemEvento($eventos)
+    {
+        $date_hoje = date('Y-m-d H:i:s');
+        $statement = "SELECT count(*) as qtde_acoes, sum(peso) as quantidade from sig_planos
+                    where eventos = '$eventos' and status = 'PENDENTE' and data_termino > '$date_hoje'";
+        $q = $this->db->query($statement); 
+      
+          
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /*
+     * QTDE AÇÕES PENDENTES 
+     */
+    
+     public function getAcoesAguardandoValidacaoByItemEvento($eventos)
+    {
+        $statement = "SELECT count(*) as qtde_acoes, sum(peso) as quantidade from sig_planos
+                    where eventos = '$eventos' and status = 'AGUARDANDO VALIDAÇÃO'";
+        $q = $this->db->query($statement); 
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    /* 
+     * QTDE AÇÕES ATRASADAS
+     */
+    
+     public function getAcoesAtrasadasByItemEvento($eventos)
+    {
+        $date_hoje = date('Y-m-d H:i:s');
+        $statement = "SELECT count(*) as qtde_acoes, sum(peso) as quantidade from sig_planos
+                    where eventoS = '$eventos' and status = 'PENDENTE' and data_termino < '$date_hoje' ";
+        $q = $this->db->query($statement); 
+        
+         
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    // retorna o total de ações dos itens por evento do escopo
+    public function getQtdeAcoesPorItemByEvento($evento) {
+      
+        $statement = "SELECT sum(concluido) as concluido, sum(pendente) as pendente, sum(atrasado) as atrasado, sum(nao_iniciado) as nao_iniciado FROM sig_item_evento where evento = $evento ";
+       // echo $statement; 
+        $q = $this->db->query($statement);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    // retorna o total de ações dos itens por evento do escopo
+    public function getQtdeAcoesPorEventoByFase($fase) {
+      
+        $statement = "SELECT sum(concluido) as concluido, sum(pendente) as pendente, sum(atrasado) as atrasado, sum(nao_iniciado) as nao_iniciado FROM sig_eventos where fase_id = $fase ";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        if ($q->num_rows() > 0) {
+            return $q->row();
+        }
+        return FALSE;
+    }
+    
+    
+    
+    
+    /****************************************************************************/
     
     // RETORNA O RESUMO/ DESEMPENHO DE AÇÕES DO PROJETO
     
@@ -810,22 +943,7 @@ class Reports_model extends CI_Model
         return FALSE;
     }
     
-    
-    
-    public function updateTicket($id, $data  = array())
-    {  
-         // ADICIONE ISTO ABAIXO
-        $glpi = $this->load->database('glpi', TRUE);
-        $this->db2 = $db2;
-        
-        if ($glpi->update('glpi_tickets', $data, array('id' => $id))) {
-            
-                       
-         return true;
-        }
-        return false;
-    }
-    
+      
      public function getPlanoByIdTicket($id, $responsavel)
     {
         
@@ -969,6 +1087,33 @@ class Reports_model extends CI_Model
                return $id_status;
         }
           
+        return false;
+    }
+    
+    // Atualiza a quantidade de ações de acordo com o status no item do escopo
+     public function updateAcoesItemEscopo($id, $data  = array())
+    {  
+        if ($this->db->update('item_evento', $data, array('id' => $id))) {
+         return true;
+        }
+        return false;
+    }
+    
+    // Atualiza a quantidade de ações de acordo com o status no evento do escopo
+     public function updateAcoesEventoEscopo($id, $data  = array())
+    {  
+        if ($this->db->update('eventos', $data, array('id' => $id))) {
+         return true;
+        }
+        return false;
+    }
+    
+    // Atualiza a quantidade de ações de acordo com o status na fase do escopo
+     public function updateAcoesFaseEscopo($id, $data  = array())
+    {  
+        if ($this->db->update('fases_projeto', $data, array('id' => $id))) {
+         return true;
+        }
         return false;
     }
     

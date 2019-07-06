@@ -54,6 +54,10 @@ class Reports extends MY_Controller
      $this->envia_emails_pendentes();
      
      //2 - Salva a porcentagem de conclusão de cada projeto
+     $this->atualizaCompletudeItemEscopoProjetos(); // Item do escopo
+     $this->atualizaCompletudeEventoEscopoProjetos(); // Evento do escopo
+     $this->atualizaCompletudeFasesEscopoProjetos(); // Fase do Escopo
+     
             
     }
      
@@ -388,6 +392,303 @@ class Reports extends MY_Controller
       //  redirect("Historico_Acoes/usuariosComAcoesAtrasadas");
         
                    
+    }
+    
+    
+    /****ATUALIZA A COMPLETUDE DOS ITENS DO ESCOPO - TODOS OS PROJETO ATIVOS**********************/
+    public function atualizaCompletudeItemEscopoProjetos(){
+        
+        $allProjetos = $this->reports_model->getAllProjetos();
+
+        foreach ($allProjetos as $projeto) {
+            $projeto_id = $projeto->projeto_id;
+            $nome_projeto = $projeto->projeto;
+            $empresa_projeto = $projeto->empresa_projeto;
+         
+            $fases = $this->projetos_model->getAllFasesByProjetosReports($projeto_id);
+             foreach ($fases as $tipo) {
+                $fase_id = $tipo->id;
+                $tipo_fase = $tipo->nome_fase;
+          
+
+                $eventos = $this->reports_model->getAllEventosProjetoByFase($fase_id);
+                foreach ($eventos as $evento) {
+                    $id_evento = $evento->id;
+                    $nome_evento = $evento->nome_evento;
+                   // echo 'Evento : '.$id_evento.' : '.$nome_evento.'<Br>';
+                 
+                    $itens_eventos = $this->projetos_model->getAllItemEventosProjeto($id_evento);
+                    foreach ($itens_eventos as $item2) {
+                       $item_id = $item2->id;
+                       $descricao = $item2->descricao;
+                       $soma_peso_acoes_concluidas_item = 0;
+                       $soma_itens_pendentes = 0;
+                       $soma_peso_acoes_atrasadas_item = 0;
+                       $soma_peso_acoes_nao_iniciada_item = 0;
+                        
+                      //  echo '  ----->'.$descricao.' : ';
+                        
+                        $quantidade_acoes_item = $this->reports_model->getQuantidadeAcaoByItemEvento($item_id);
+                        $qtde_acoes = $quantidade_acoes_item->qtde_acoes;
+                        $soma_total_acoes =  $quantidade_acoes_item->quantidade; // soma o peso de todas as ações do item
+                        
+                        if($qtde_acoes == 0){
+                            $soma_total_acoes = 0;
+                        }
+                        
+                      //  echo 'total Ações : '.$soma_total_acoes.' : ';
+                        
+                        if($qtde_acoes > 0){
+                        
+                        
+                        //Qtde de Ações concluídas
+                        $concluido = $this->reports_model->getAcoesConcluidasByPItemEvento($item_id);
+                        $quantidade_acoes_concluidas_item = $concluido->qtde_acoes;
+                        $soma_peso_acoes_concluidas_item = $concluido->quantidade;
+                        
+                        if($quantidade_acoes_concluidas_item > 0){
+                        $porc_acoes_concluidas_itens = ($soma_peso_acoes_concluidas_item * 100) / $soma_total_acoes;
+                        }else{
+                            $porc_acoes_concluidas_itens = 0;
+                            $soma_peso_acoes_concluidas_item = 0;
+                        }
+                     //   echo 'concluídos '. $soma_peso_acoes_concluidas_item;
+                        
+
+                        //Qtde de ações Pendentes
+                        $item_pendente = $this->reports_model->getAcoesPendentesByItemEvento($item_id);
+                        $quantidade_acoes_pendente_item = $item_pendente->qtde_acoes;
+                        $soma_peso_acoes_pendente_item = $item_pendente->quantidade;
+                        
+                        //ações aguardando validação
+                        $item_avalidacao = $this->reports_model->getAcoesAguardandoValidacaoByItemEvento($item_id);
+                        $quantidade_acoes_a_validacao_item = $item_avalidacao->qtde_acoes;
+                        $soma_peso_acoes_a_validacao_item = $item_avalidacao->quantidade;
+                        
+                        
+                        // pendentes = pendentes + aguardando_validação
+                        $total_pendentes = $quantidade_acoes_pendente_item + $quantidade_acoes_a_validacao_item;
+                        if($total_pendentes > 0){
+                            $soma_itens_pendentes = $soma_peso_acoes_pendente_item + $soma_peso_acoes_a_validacao_item;
+                        }else{
+                            $soma_itens_pendentes = 0; 
+                        }
+                        // calcula a porcentagem do item pendente
+                        $porc_itens_pendentes = ($soma_itens_pendentes * 100) / $soma_total_acoes;
+                        
+                     //   echo '| pendentes : '.$soma_itens_pendentes;
+                        
+                       /*******************************************************************************************/
+                        
+                        // ações atrasadas
+                        $atrasadas = $this->reports_model->getAcoesAtrasadasByItemEvento($item_id);
+                        $quantidade_acoes_atrasadas_item = $atrasadas->qtde_acoes;
+                        $soma_peso_acoes_atrasadas_item = $atrasadas->quantidade;
+                        
+                        if ($quantidade_acoes_atrasadas_item > 0) {
+                            $porc_atrasado_itens = ($soma_peso_acoes_atrasadas_item * 100) / $soma_total_acoes;
+                       
+                         } else {
+                            $porc_atrasado_itens = 0;
+                            $soma_peso_acoes_atrasadas_item = 0;
+                        }
+
+                     //   echo '| atrasadas : '.$soma_peso_acoes_atrasadas_item;
+                        
+          
+                        }else{
+                            
+                            
+                            $soma_peso_acoes_nao_iniciada_item = 1;
+                            $porc_atrasado_itens = 0;
+                            $porc_itens_pendentes = 0;
+                            $porc_acoes_concluidas_itens = 0;
+                            
+                            
+                        }
+                          
+                        $data_acoes_itens = array(
+                            'concluido' => $soma_peso_acoes_concluidas_item,
+                            'pendente' => $soma_itens_pendentes,
+                            'atrasado' => $soma_peso_acoes_atrasadas_item,
+                            'nao_iniciado' => $soma_peso_acoes_nao_iniciada_item
+                        );
+                        $this->reports_model->updateAcoesItemEscopo($item_id, $data_acoes_itens);  
+                        
+                        //print_r($data_acoes_itens);
+                       // echo '<br>';
+                           
+                        
+                    }
+
+
+                }
+        
+               
+             }
+
+
+            
+        }
+    }
+    
+    /****ATUALIZA A COMPLETUDE DOS EVENTOS DO ESCOPO - TODOS OS PROJETO ATIVOS**********************/
+    public function atualizaCompletudeEventoEscopoProjetos(){
+        
+        $allProjetos = $this->reports_model->getAllProjetos();
+
+        foreach ($allProjetos as $projeto) {
+            $projeto_id = $projeto->projeto_id;
+            $nome_projeto = $projeto->projeto;
+            $empresa_projeto = $projeto->empresa_projeto;
+         
+            $fases = $this->projetos_model->getAllFasesByProjetosReports($projeto_id);
+             foreach ($fases as $tipo) {
+                $fase_id = $tipo->id;
+                $tipo_fase = $tipo->nome_fase;
+          
+
+                $eventos = $this->reports_model->getAllEventosProjetoByFase($fase_id);
+                foreach ($eventos as $evento) {
+                    
+                    $id_evento = $evento->id;
+                    $nome_evento = $evento->nome_evento;
+                    //  echo 'Evento : '.$id_evento.' - '.$nome_evento.' | '; 
+                   $dados_itens = $this->reports_model->getQtdeAcoesPorItemByEvento($id_evento);
+                   
+                    
+                    if($dados_itens->concluido){
+                        $concluido = $dados_itens->concluido;
+                    }else{
+                        $concluido = 0;
+                    }
+                    if($dados_itens->atrasado){
+                        $atrasado = $dados_itens->atrasado;
+                    }else{
+                        $atrasado = 0;
+                    }
+                    if($dados_itens->pendente){
+                        $pendente = $dados_itens->pendente;
+                    }else{
+                        $pendente = 0;
+                    }
+                    if($dados_itens->nao_iniciado > 0){
+                        $nao_iniciado = $dados_itens->nao_iniciado;
+                    }else{
+                       $nao_iniciado = 0;
+                    }
+                   $soma_acoes = $concluido + $atrasado + $pendente + $nao_iniciado;
+                   
+                   
+                   if($soma_acoes > 0){
+                    
+                 //   echo 'total : '.$soma_acoes. ' = ';
+                    
+                    $data_acoes_itens = array(
+                        'concluido' => $concluido,
+                        'pendente' => $pendente,
+                        'atrasado' => $atrasado,
+                        'nao_iniciado' => $nao_iniciado
+                    );
+                    
+                   
+                    }else{
+                        $data_acoes_itens = array(
+                        'concluido' => 0,
+                        'pendente' => 0,
+                        'atrasado' => 0,
+                        'nao_iniciado' => 1
+                        );
+                    }
+                   // print_r($data_acoes_itens);
+                    
+                     $this->reports_model->updateAcoesEventoEscopo($id_evento, $data_acoes_itens); 
+                    
+                   // echo '<br>';
+                }
+        
+               
+             }
+
+
+            
+        }
+    }
+    
+    /****ATUALIZA A COMPLETUDE DAS FASES DO ESCOPO - TODOS OS PROJETO ATIVOS**********************/
+    public function atualizaCompletudeFasesEscopoProjetos(){
+        
+        $allProjetos = $this->reports_model->getAllProjetos();
+
+        foreach ($allProjetos as $projeto) {
+            $projeto_id = $projeto->projeto_id;
+            $nome_projeto = $projeto->projeto;
+            $empresa_projeto = $projeto->empresa_projeto;
+         
+            $fases = $this->projetos_model->getAllFasesByProjetosReports($projeto_id);
+             foreach ($fases as $tipo) {
+                $fase_id = $tipo->id;
+                $tipo_fase = $tipo->nome_fase;
+              //  echo $tipo_fase;
+
+                $dados_eventos = $this->reports_model->getQtdeAcoesPorEventoByFase($fase_id);
+                
+                    if($dados_eventos->concluido){
+                        $concluido = $dados_eventos->concluido;
+                    }else{
+                        $concluido = 0;
+                    }
+                    if($dados_eventos->atrasado){
+                        $atrasado = $dados_eventos->atrasado;
+                    }else{
+                        $atrasado = 0;
+                    }
+                    if($dados_eventos->pendente){
+                        $pendente = $dados_eventos->pendente;
+                    }else{
+                        $pendente = 0;
+                    }
+                    if($dados_eventos->nao_iniciado > 0){
+                        $nao_iniciado = $dados_eventos->nao_iniciado;
+                    }else{
+                       $nao_iniciado = 0;
+                    }
+                   $soma_acoes = $concluido + $atrasado + $pendente + $nao_iniciado;
+                   
+                   
+                   if($soma_acoes > 0){
+                    
+                 //   echo 'total : '.$soma_acoes. ' = ';
+                    
+                    $data_acoes_itens = array(
+                        'concluido' => $concluido,
+                        'pendente' => $pendente,
+                        'atrasado' => $atrasado,
+                        'nao_iniciado' => $nao_iniciado
+                    );
+                    
+                   
+                    }else{
+                        $data_acoes_itens = array(
+                        'concluido' => 0,
+                        'pendente' => 0,
+                        'atrasado' => 0,
+                        'nao_iniciado' => 1
+                        );
+                    }
+                    
+                    // print_r($data_acoes_itens);
+                    
+                     $this->reports_model->updateAcoesFaseEscopo($fase_id, $data_acoes_itens); 
+                    
+                   // echo '<br>';
+        
+               
+             }
+
+
+            
+        }
     }
     
     

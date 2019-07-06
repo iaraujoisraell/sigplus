@@ -60,7 +60,7 @@
                     <br>
                             <div class="table-responsive">
                                 <div class="box-body">
-                                    <table id="example1" class="table table-bordered table-striped">
+                                    <table id="meus_planos_acao" class="table table-bordered table-striped">
                                     <thead>
                                     <tr>
                                     <th style="width:3%; "><input class="checkbox checkft" type="checkbox" name="check"/></th>    
@@ -175,65 +175,20 @@
  
 
 
-<div  class="modal fade" id="modal-insert">
-          <div style="width: 800px; " class="modal-dialog">
-            <div class="modal-content">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"><i class="fa fa-2x">&times;</i>
-            </button>
-            <h4 class="modal-title" id="myModalLabel"><?php echo lang('Cadastro de Empresa'); ?></h4>
-        </div>
-        <?php $attrib = array('data-toggle' => 'validator', 'role' => 'form', 'id' => 'add-customer-form');
-        echo form_open_multipart("owner/empresas", $attrib); ?>
-        <div class="modal-body">
-           
-
-         
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group ">
-                        <?= lang("Tipo", "tipo"); ?>
-                        <select name="tipo" class="form-control ">
-                            <option value="Jurídica">Jurídica</option>
-                            <option value="Física">Física</option>
-                        </select>
-                    </div>
-                    <div class="form-group company">
-                        <?= lang("Empresa *", "company"); ?>
-                        <?php echo form_input('company', '', 'class="form-control tip" maxlength="300" id="company" required="true" data-bv-notempty="true"'); ?>
-                    </div>
-                    
-                    
-                    
-                  
-                    
-                </div>
-            </div>
-
-
-        </div>
-        <div class="modal-footer">
-            <?php echo form_submit('add_customer', lang('Salvar'), 'class="btn btn-primary"'); ?>
-        </div>
-    </div>
-    <?php echo form_close(); ?>
-            <!-- /.modal-content -->
-          </div>
-        </div>
 
           
- 
- <script>
+
+
+<script>
   $(function () {
-    $('#example1').DataTable()
-    $('#example2').DataTable({
+ 
+    $('#meus_planos_acao').DataTable({
       'paging'      : true,
-      'lengthChange': false,
-      'searching'   : false,
-      'ordering'    : true,
+      'lengthChange': true,
+      'searching'   : true,
       'info'        : true,
-      'autoWidth'   : false
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
 </script>

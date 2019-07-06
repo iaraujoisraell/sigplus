@@ -48,7 +48,7 @@
           <div class="form-group">
             
             <?php
-            $wu_projetos['0'] = 'Todos';
+            $wu_projetos['0'] = 'Projetos';
             $usuario = $this->session->userdata('user_id');
             $projetos_users = $this->atas_model->getAllProjetosUserById_User($usuario);
             foreach ($projetos_users as $projeto_u) {
@@ -61,7 +61,7 @@
         </div>
        <div class="col-md-3">
           <div class="form-group">
-          <?php $pst['0'] = 'Todos';
+          <?php $pst['0'] = 'Status';
               $pst['PENDENTE'] = lang('PENDENTE');
               $pst['ATRASADO'] = lang('ATRASADO');
               $pst['AGUARDANDO VALIDAÇÃO'] = lang('AGUARDANDO VALIDAÇÃO');
@@ -171,17 +171,17 @@
                       <br>
                     <div class="table-responsive">
                         <div class="box-body">
-                            <table style="width: 100%" id="minhas_acoes_usuario" class="table table-bordered table-striped">
+                            <table style="width: 100%;" id="minhas_acoes_usuario" class="table table-bordered table-striped">
                             <thead>
-                                <th style="width: 5%">AÇÃO</th>
-                                <th style="width: 45%">DESCRIÇÃO</th>
-                                <th style="width: 15%">ANDAMENTO</th>
-                                <th>Início</th>
-                                <th>Término</th>
-                                <th>Conclusão</th>
+                                <th style="width: 2%">-</th>
+                                <th style="width: 5%">Projeto</th>
+                                <th style="width: 48%">Descrição</th>
                                 
-                                
-                                <th>AÇÃO </th>
+                                <th style="width: 10%">ANDAMENTO</th>
+                                <th style="width: 10%">Dt Início</th>
+                                <th style="width: 10%">Dt Prazo</th>
+                                <th style="width: 10%">Dt Conclusão</th>
+                                <th style="width: 5%">Abrir </th>
                                 
                             </thead>
                             <tbody>
@@ -271,27 +271,27 @@
                                             
                                             ?>   
 
-                                            <tr   class="odd gradeX">
-                                                <td style="width: 5%">
-                                                    <font title="ID da ação" class="label bg-black-active" style="font-size: 12px; "><?php echo $plano->sequencial; ?></font>
+                                            <tr   >
+                                                <td style="width: 2%">
+                                                    <?php echo $cont++;  ?>
                                                 </td>
-                                                <td style="width: 45%">
-                                                   <?php if($projeto){ ?>
-                                                    <font title="Nome do Projeto " class="label label-primary" style="font-size: 12px; "><?php  echo $projeto; ?> </font>
+                                                <td style="width: 5%">
+                                                    <?php if($projeto){ ?>
+                                                    <font title="Nome do Projeto "  style="font-size: 12px; "><?php  echo $projeto; ?> </font>
                                                     <?php } ?>
-                                                    <font title="Local de onde foi registrado a Ação. Pode ser uma ATA ou um Plano de Ação" class="label label-default" style="font-size: 12px; "><?php if($plano->idatas){ echo 'ATA : '.$plano->idatas; }else if($plano->idplano){ echo 'P.A.: '. $plano->idplano; } ?>  </font>
-                                                    <font class="label bg-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </font>
+                                                </td>
+                                                <td style="width: 48%">
                                                     
-                                                       <h2> 
-                                                           <?php if($qtde_msg_acao == 1){ ?> <small title="Uma nova ação ou Mensagem na ação" class="label bg-green-active">New</small> <?php } ?>
-                                                                <?php echo $plano->descricao; ?>
-                                                       </h2>
-                                                   
-                                                                
-                                                           
-                                                </td>   
+                                                    <label class="label bg-black-active"><?php echo 'Ação: '. $plano->sequencial; ?></label>
+                                                   <label class="label bg-<?php echo $desc_tipo; ?>" style="font-size: 12px; font-weight: bold"><?php echo $novo_status; ?> <?php  if ($novo_status == 'ATRASADO') { echo  '  (' . $qtde_dias . ' dias ) ';   } ?>  </label>
+                                                    <label title="Local de onde foi registrado a Ação. Pode ser uma ATA ou um Plano de Ação" class="label label-default" style="font-size: 12px; "><?php if($plano->idatas){ echo 'ATA : '.$plano->idatas; }else if($plano->idplano){ echo 'P.A.: '. $plano->idplano; } ?>  </label>
+                                                    
+                                                    <?php if($qtde_msg_acao == 1){ ?> <small title="Uma nova ação ou Mensagem na ação" class="label bg-green-active">New</small> <?php } ?>
+                                                    <h4><?php echo $plano->descricao; ?></h4>
+                                                </td>
+                                                
 
-                                                <td style="width: 15%" class="center">
+                                                <td style="width: 10%" class="center">
                                                     <div style="margin-top: 5px;" class="col-md-10">    
                                                         <div style="height: 30px;" class="progress progress-sm active">
                                                             <div class="progress-bar progress-bar-success <?php if($andamento_plano < 100){ ?> progress-bar-striped <?php } ?>" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $andamento_plano; ?>%">
@@ -300,18 +300,18 @@
                                                         </div>      
                                                     </div> 
                                                 </td>
-                                                <td class="center">
-                                                    <font title="Data de Início da ação" style="font-size: 12px;" class="label label-primary"> <?php echo date('d/m/Y', strtotime($plano->data_entrega_demanda)); ?></font> 
+                                                <td style="width: 10%" class="center">
+                                                    <font title="Data de Início da ação" style="font-size: 12px;" > <?php echo date('d/m/Y', strtotime($plano->data_entrega_demanda)); ?></font> 
                                                 </td>     
-                                                <td class="center">
-                                                    <font title="Data prevista para Término da ação" style="font-size: 12px;" class="label bg-navy-active"> <?php echo  date('d/m/Y', strtotime($plano->data_termino)); ?></font>
+                                                <td style="width: 10%" class="center">
+                                                    <font title="Data prevista para Término da ação" style="font-size: 12px;" > <?php echo  date('d/m/Y', strtotime($plano->data_termino)); ?></font>
                                                 </td>
-                                                 <td class="center">
+                                                 <td style="width: 10%" class="center">
                                                   <?php if($plano->status == 'CONCLUÍDO'){ ?>
-                                                  <font style="font-size: 12px;" class="label label-success"> <?php echo  date('d/m/Y', strtotime($plano->data_retorno_usuario)); ?></font>
+                                                  <font style="font-size: 12px;" > <?php echo  date('d/m/Y', strtotime($plano->data_retorno_usuario)); ?></font>
                                                 <?php  } ?> 
                                                 </td>
-                                                <td class="center">
+                                                <td style="width: 5%" class="center">
                                                     <?php if ($plano->status == 'PENDENTE')  { ?>
                                                         <a title="Visualizar o cadastro completo da ação" class="btn btn-primary  fa fa-folder-open-o" href="<?= site_url('welcome/dados_cadastrais_acao/' . $plano->idplanos.'/'.$projeto_filtro.'/'.$status_filtro); ?>"> </a>
                                                     <?php } else  { ?>
@@ -335,12 +335,18 @@
         </div>
     </section>
     <!-- /.content -->
- 
-
- <script>
+      <script>
   $(function () {
-  $('#minhas_acoes_usuario').DataTable({
-      "order": [[ 3, "desc" ]]
+ 
+    $('#minhas_acoes_usuario').DataTable({
+      'paging'      : true,
+      'lengthChange': true,
+      'searching'   : true,
+      'info'        : true,
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
 </script>
+
+ 

@@ -1,66 +1,62 @@
 <?php 
-$usuario =  $this->session->userdata('user_id'); 
+      function exibirData($data){
+	$rData = explode("-", $data);
+	$rData = $rData[2].'/'.$rData[1].'/'.$rData[0];
+	return $rData;
+   }
+    ?>
+<!DOCTYPE html>
+<html lang="en">
 
-?>
-<div class="col-lg-12">
-    <div class="box">
-    <section class="content-header">
-        <h1>
-            <?php echo 'Escopo '; ?>
-            
-            <small><?php echo 'Lista de Fases'; ?> </small>
-        </h1>
-        <ol class="breadcrumb">
-            <li><a href="<?= site_url('project'); ?>"><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Escopo</li>
-        </ol>
-    </section>
-
-    <br>
-    </div>    
-</div>
- <div class="col-lg-12">
-    <!-- Content Header (Page header) -->
-       <?php if ($Settings->mmode) { ?>
-                        <div class="alert alert-warning">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <?= lang('site_is_offline') ?>
-                        </div>
-                    <?php }
-                    if ($error) { ?>
-                        <div class="alert alert-danger">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <ul class="list-group"><?= $error; ?></ul>
-                        </div>
-                    <?php }
-                    if ($message) { ?>
-                        <div class="alert alert-success">
-                            <button data-dismiss="alert" class="close" type="button">×</button>
-                            <ul class="list-group"><?= $message; ?></ul>
-                        </div>
-                    <?php } ?>
-    <!-- Main content -->
-    </div>
+    <?php $this->load->view($this->theme . 'header_dashboard'); ?>
+   
+ 
+  <link rel="stylesheet" href="<?= $assets ?>bi/dist/css/AdminLTE.min.css">
+ 
+  
     
-<br>
+<body>
+
+    <div id="wrapper">
+
+        <div id="page-wrapper">
+
+            <div class="page-content">
+
+                <div class="row">
+                    <?php // $this->load->view($this->theme . 'status_projeto'); ?>
+                </div>
 
 
-    <section  class="content">
-        <div class="col-lg-12">
-            <div class="row">
-                
-                <div class="box">
-                            
-                        <br>
-                            
-                                  <br>
-                            <div class="table-responsive">
-                                <div class="box-body">
-                                    
+
+            <?php
+
+
+            ?>
+                <br><br>
+                <!-- /ATALHOS RÁPIDO -->
+                <div class="row">
+
+                    <!-- LADO ESQUERDO -->
+                    <div class="col-lg-12">
+                        <!-- MEUS PROJETOS -->
+                        <div class="portlet portlet-default">
+                            <div class="portlet-heading">
+                                <div class="portlet-title">
+                                    <h4>Escopo do Projeto</h4>
+                                </div>
+                                <div class="portlet-widgets">
+
+                                    <span class="divider"></span>
+                                    <a data-toggle="collapse" data-parent="#accordion" href="#buttons"><i class="fa fa-chevron-down"></i></a>
+                                </div>
+                                <div class="clearfix"></div>
+                            </div>
+                            <div id="buttons" class="panel-collapse collapse in">
+                                <div class="portlet-body">
                                     <div class="row">
                                         <div class="col-md-12">
                                             <?php
-                                            $cont = 1;
                                             foreach ($tipos as $tipo) {
                                                 $tipo_id = $tipo->id;
                                                 $tipo_fase = $tipo->nome_fase;
@@ -155,7 +151,7 @@ $usuario =  $this->session->userdata('user_id');
                                                         </div>
                                                     </div>
                                                     <!-- /.box-header -->
-                                                    <div id="<?php echo $tipo_id . $cont++; ?>" class="box-body">
+                                                    <div id="<?php echo $tipo_id . $id_evento; ?>" class="box-body">
                                                         <div class="portlet-body">
 
                                                             <?php
@@ -335,7 +331,7 @@ $usuario =  $this->session->userdata('user_id');
                                                                                     ?>
                                                                                     <tr>
                                                                                                     <td style="width:20%; text-align: justify  ">
-                                                                                                        <font style="width: 70%; text-align: justify; color: #000000; "><?php echo $cont_evento . '.' . $cont_item_evento . ' - ' . $item->descricao; ?> </font>
+                                                                                                        <font style="width: 70%; text-align: justify;"><?php echo $cont_evento . '.' . $cont_item_evento . ' - ' . $item->descricao; ?> </font>
                                                                                                     </td>
                                                                                                      <td style="width:45%; ">
                                                                                                         <div class="progress">
@@ -366,7 +362,7 @@ $usuario =  $this->session->userdata('user_id');
                                                                                                                 }
                                                                                                                 ?>% Atrasado
                                                                                                             </div>
-                                                                                                            <div class="progress-bar bg-black" role="progressbar" style="width:<?php echo $porcentagem_nao_iniciado_item; ?>%">
+                                                                                                            <div class="progress-bar bg-gray" role="progressbar" style="width:<?php echo $porcentagem_nao_iniciado_item; ?>%">
                                                                                                                 <?php
                                                                                                                 if ($porcentagem_nao_iniciado_item != 100) {
                                                                                                                     echo substr($porcentagem_nao_iniciado_item, 0, 2);
@@ -390,7 +386,7 @@ $usuario =  $this->session->userdata('user_id');
                                                                                                        <font style="color: red; font-weight: bold"><?php echo $atrasado; ?></font>
                                                                                                     </td>
                                                                                                     <td style="width:5%;">
-                                                                                                       <a target="_blank" href="<?= site_url('project/lista_acoes/51/' . $item->id) ?>" class="btn btn-default">Visualizar <i class="fa fa-chevron-circle-right"></i></a>
+                                                                                                       <a target="_blank" href="<?= site_url('Login_Projetos/eventos_acoes/' . $item->id) ?>" class="btn btn-default">Visualizar <i class="fa fa-chevron-circle-right"></i></a>
                                                                                                     </td>
 
                                                                                                 </tr>
@@ -428,29 +424,42 @@ $usuario =  $this->session->userdata('user_id');
                                         </div>
 
                                     </div>
-                                </div>    
+                                </div>
                             </div>
-
                         </div>
-                
-      <!-- /.row (main row) -->
+                    </div>
+                </div>   
+                <!-- /#wrapper -->
             </div>
         </div>
-    </section>
-    <!-- /.content -->
- 
+    </div>    
+    <!-- GLOBAL SCRIPTS -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <script src="<?= $assets ?>dashboard/js/plugins/bootstrap/bootstrap.min.js"></script>
+    <script src="<?= $assets ?>dashboard/js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <script src="<?= $assets ?>dashboard/js/plugins/popupoverlay/jquery.popupoverlay.js"></script>
+    <script src="<?= $assets ?>dashboard/js/plugins/popupoverlay/defaults.js"></script>
+    <!-- Logout Notification Box -->
 
+    <!-- /#logout -->
+    <!-- Logout Notification jQuery -->
+    <script src="<?= $assets ?>dashboard/js/plugins/popupoverlay/logout.js"></script>
+    <!-- HISRC Retina Images -->
+    <script src="<?= $assets ?>dashboard/js/plugins/hisrc/hisrc.js"></script>
 
- <script>
-  $(function () {
-    $('#example1').DataTable()
-    $('#example2').DataTable({
-      'paging'      : true,
-      'lengthChange': false,
-      'searching'   : false,
-      'ordering'    : true,
-      'info'        : true,
-      'autoWidth'   : false
-    })
-  })
-</script>
+    <!-- PAGE LEVEL PLUGIN SCRIPTS -->
+    <script src="<?= $assets ?>dashboard/js/plugins/ladda/spin.min.js"></script>
+    <script src="<?= $assets ?>dashboard/js/plugins/ladda/ladda.min.js"></script>
+    <script src="<?= $assets ?>dashboard/js/plugins/bootstrap-multiselect/bootstrap-multiselect.js"></script>
+
+    <!-- THEME SCRIPTS -->
+    <script src="<?= $assets ?>dashboard/js/flex.js"></script>
+    <script src="<?= $assets ?>dashboard/js/demo/buttons-demo.js"></script>
+
+    <script src="<?= $assets ?>dashboard/js/demo/calendar-demo.js"></script>
+    <script src="<?= $assets ?>dashboard/js/plugins/fullcalendar/fullcalendar.min.js"></script>
+    <script src="<?= $assets ?>bi/dist/js/adminlte.min.js"></script>
+
+</body>
+
+</html>

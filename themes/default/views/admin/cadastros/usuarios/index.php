@@ -161,7 +161,12 @@
                                         <td style="width: 35%; "><small ><?php echo $user->first_name; ?> <?php if($user->setor){ echo ' - '.$user->setor; }if($user->consultor == 1){ ?> <label class="label label-warning" >Consultor</label> <?php }else{ ?> <label class="label label-primary" ><?php echo $user->cargo; ?></label> <?php } ?></small></td>
                                         <td style="width: 24%; "><small ><?php echo $user->email; ?></small></td> 
                                         <td style="width: 10%;  "><small ><?php echo $confirmou; ?></small></td>
-                                        <td style="width: 10%;  text-align: center;"><small class="label label-<?php echo $label; ?>" ><?php echo $status_ata; ?></small></td> 
+                                        <td style="width: 10%;  text-align: center;">
+                                            <a title="Mudar o status do usuário" class="label label-<?php echo $label; ?>"  href="<?= site_url('admin/alterarStatusUsuario/'.$user->id); ?>" data-toggle="modal" data-target="#myModal">
+                                                <?php echo $status_ata; ?>
+                                            </a>
+                                            </td> 
+                                            
                                         <td style="width: 5%; font-size: 12; text-align: center;">
                                             <?php  if($status == 0){ ?>
                                             <a title="Reenviar E-mail para Validação de Cadastro?" class="btn btn-primary"  href="<?= site_url('admin/reenviaEmailCredenciais/'.$user->id); ?>"><i class="fa fa-envelope"></i></a>
