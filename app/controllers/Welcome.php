@@ -5799,7 +5799,7 @@ class Welcome extends MY_Controller
             $this->session->set_flashdata('warning', 'Please complete your update by synchronizing your database.');
             redirect('sync');
         }
-
+        
         $this->data['error'] = (validation_errors() ? validation_errors() : $this->session->flashdata('error'));
         $usuario = $this->session->userdata('user_id');                     
         
@@ -5818,11 +5818,12 @@ class Welcome extends MY_Controller
         $this->data['data_fim'] = $data_fim;
         
         }else{
+            
         $sql_rat  = $this->networking_model->getRegistroAtividadesByUsuario();  
         $this->data['rats'] = $sql_rat;    
         }
         
-        
+       
         
        
         
@@ -5831,7 +5832,7 @@ class Welcome extends MY_Controller
     }
     
     
-    public function registro_atividade_pdf($view = NULL)
+    public function registro_atividade_pdf($view = null)
     {
         $this->form_validation->set_rules('gerar_pdf', lang("id_cadastro"), 'required');
          
@@ -5863,7 +5864,7 @@ class Welcome extends MY_Controller
              $this->data['valores_pdf'] = $valores_pdf;
              
             //$this->data['plano_acao'] = $this->atas_model->getPlanoAcaoByID($id);  // $this->atas_model->getAtaProjetoByID_ATA($id);
-            $empresa_dados = $this->owner_model->getEmpresaById(6);
+            $empresa_dados = $this->owner_model->getEmpresaById($empresa);
             $logo_empresa = $empresa_dados->logo_empresa;
             $redape_empresa_ata = $empresa_dados->rodape_ata;
             
@@ -5877,7 +5878,7 @@ class Welcome extends MY_Controller
             $name = lang("Registro_de_Atividades") . "_" . str_replace('/', '_', $nome) . ".pdf";
             $html = $this->load->view($this->theme . 'networking/rat/rat_pdf', $this->data, true);
 
-            
+         
           
             
         if ($view) {

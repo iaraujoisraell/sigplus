@@ -216,7 +216,7 @@ $usuario =  $this->session->userdata('user_id');
 
                                                                     ?>
 
-                                                                <div class="box box-default collapsed-box box-solid">
+                                                                <div class="box box-primary collapsed-box box-solid">
                                                                     <div class="box-header with-border">
                                                                       <h3 class="box-title"><font style="font-size: 18px;"><?php echo $cont_evento . ' - ' . $evento->nome_evento; ?></font>  <?php echo '  ( de :  ' . substr($data_inicio_evento, 0, 10) . ' à  ' . substr($data_fim_evento, 0, 10) . ').  Resp. Técnico : ' . $resp_tecnico->first_name . ' ' . $resp_tecnico->last_name; ?></h3>
 
@@ -254,7 +254,7 @@ $usuario =  $this->session->userdata('user_id');
                                                                             }
                                                                             ?>% Atrasado
                                                                         </div>
-                                                                        <div class="progress-bar bg-black" role="progressbar" style="width:<?php echo $porcentagem_nao_iniciado_evento; ?>%">
+                                                                        <div class="progress-bar bg-gray" role="progressbar" style="width:<?php echo $porcentagem_nao_iniciado_evento; ?>%">
                                                                             <?php
                                                                             if ($porcentagem_nao_iniciado_evento != 100) {
                                                                                 echo substr($porcentagem_nao_iniciado_evento, 0, 2);
@@ -366,7 +366,7 @@ $usuario =  $this->session->userdata('user_id');
                                                                                                                 }
                                                                                                                 ?>% Atrasado
                                                                                                             </div>
-                                                                                                            <div class="progress-bar bg-black" role="progressbar" style="width:<?php echo $porcentagem_nao_iniciado_item; ?>%">
+                                                                                                            <div class="progress-bar bg-gray" role="progressbar" style="width:<?php echo $porcentagem_nao_iniciado_item; ?>%">
                                                                                                                 <?php
                                                                                                                 if ($porcentagem_nao_iniciado_item != 100) {
                                                                                                                     echo substr($porcentagem_nao_iniciado_item, 0, 2);

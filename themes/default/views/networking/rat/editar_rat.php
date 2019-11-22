@@ -46,7 +46,10 @@
                     
                     <div class="form-group company">
                          <?= lang("Descrição ", "detalhes"); ?>
-                        <input type='text' name='detalhes' id="detalhes" maxlength="250" value="<?php echo strip_tags($rat_descricao); ?>" required="true" class="form-control">
+                        <textarea  name='detalhes' id="detalhes" required="true" class="form-control">
+                            <?php echo strip_tags($rat_descricao); ?>
+                        </textarea>
+                        
                     </div>
                     <div class="form-group">
                           <label>Data da Rat</label>

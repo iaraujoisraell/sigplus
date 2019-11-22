@@ -506,7 +506,7 @@ foreach ($acoes_arquivos as $arquivo) {
                                                         <div class="form-group">  
                                                         <font  class="label label-<?php echo $label; ?>" style="font-size: 12px; font-weight: bold"><?php echo $cont--.' - '. $observacao->first_name; ?>  </font>
                                                         <font class="label label-default"  style="font-size: 8px; font-style: italic">( <?php echo date('d/m/Y H:i:s', strtotime( $observacao->data_envio)); ?> )</font>
-                                                        <font  style="font-size: 12px;"><?php echo ' : '.  strip_tags($observacao->observacao); ?> </font> 
+                                                        <font  style="font-size: 12px;"><?php echo ' : '.  $observacao->observacao; ?> </font> 
                                                         </div>
                                                     </div>
                                                       <?php if($observacao->anexo != null){  ?> 

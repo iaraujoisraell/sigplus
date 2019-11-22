@@ -1,5 +1,5 @@
   <?php
-  
+   $empresa = $this->session->userdata('empresa');
     $usuario = $this->session->userdata('user_id');
     $dados_user = $this->site->getUser($usuario);
     
@@ -97,14 +97,14 @@ window.onload = function(){
           <div class="box box-widget widget-user">
             <!-- Add the bg color to the header using any of the bg-* classes -->
                  
-            <div class="widget-user-header bg-black" style="background: url('<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png' ?>') center center;">
+            <div class="widget-user-header bg-black" style="background: url('<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png' ?>') center center;">
               
                 <h3 class="widget-user-username"><?php echo $dados_user->first_name; ?></h3>
               <h5 class="widget-user-desc"><?php echo $dados_user->cargo; ?></h5>
              
             </div>
             <div class="widget-user-image">
-                <img style="width: 88px; height: 88px;" class="img-circle" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" alt="User Avatar">
+                <img style="width: 88px; height: 88px;" class="img-circle" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" alt="User Avatar">
             </div>
             <?php 
               $qtde_projetos_users = $this->networking_model->getQuantidadeProjetosEquipe();
@@ -376,7 +376,7 @@ window.onload = function(){
 
 
                          $assets = "themes/default/assets/";
-                         $avatar_profile = "assets/uploads/avatars/thumbs/$avatar";
+                         $avatar_profile = "assets/uploads/$empresa/avatars/thumbs/$avatar";
                          $avatar_genero = "assets/images/$gender".'1'.".png";
 
 
@@ -791,7 +791,7 @@ window.onload = function(){
                                     <h3>Foto de Capa</h3>
                                     <div style="position: relative;">
                                         
-                                        <img alt="" width="100%" src="<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png'; ?>"
+                                        <img alt="" width="100%" src="<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png'; ?>"
                                                  class="profile-image img-thumbnail">
                                               <?php if ($user->foto_capa) { ?>
                                             <a href="#" class="btn btn-danger btn-xs po" style="position: absolute; top: 0;" title="<?= lang('Deletar Foto de Capa?') ?>"

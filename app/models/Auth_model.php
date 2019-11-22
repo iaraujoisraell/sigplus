@@ -586,8 +586,8 @@ class Auth_model extends CI_Model
           //  ->where('consultor', 1)    
             ->limit(1)
             ->get($this->tables['users']);
-        //echo $query->num_rows(); exit;
-        
+       // echo $query->num_rows(); exit;
+        /*
         if ($this->is_time_locked_out($identity)) {
            
             //Hash something anyway, just to take up time
@@ -598,12 +598,14 @@ class Auth_model extends CI_Model
 
             return FALSE;
         }
+         * 
+         */
        
         if ($query->num_rows() === 1) {
             $user = $query->row();
             
             $password = $this->hash_password_db($user->id, $password);
-
+            //echo 'Senha'.$password; exit;
             if ($password === TRUE) {
                
                 if (!isset($this->Settings->single_login)) {
@@ -1700,6 +1702,15 @@ class Auth_model extends CI_Model
     public function updateAvatar($id, $avatar)
     {
         if ($this->db->update($this->tables['users'], array('avatar' => $avatar), array('id' => $id))) {
+            $this->set_message('avatar_updated');
+            return TRUE;
+        }
+        return FALSE;
+    }
+    
+     public function updateCapa($id, $avatar)
+    {
+        if ($this->db->update($this->tables['users'], array('foto_capa' => $avatar), array('id' => $id))) {
             $this->set_message('avatar_updated');
             return TRUE;
         }

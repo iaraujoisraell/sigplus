@@ -184,12 +184,10 @@ $nome_projeto = $projetos->nome_projeto;
                                   <div  class="form-group">
                                         <?= lang("Anotações ", "sldescricao"); ?>
                                        <?php if($statusAta == 1){ ?>
-                                            <?php echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip " disabled="true"  style="height: 120px;" id="sldescricao" required="true" '); ?>   
-                                      <?php }else{ ?>
-                                          
-                                              <?php echo $ata->discussao; ?>
-                                         
-                                        <?php // echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>
+                                       <?php echo $ata->discussao; ?>
+                                       <?php }else{ ?>
+                                              <?php echo form_textarea('anotacao', (isset($_POST['anotacao']) ? $_POST['anotacao'] : $ata->discussao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>   
+                                    <?php // echo form_textarea('discussao', (isset($_POST['descricao']) ? $_POST['descricao'] : $ata->discussao), 'class="form-control  input-tip "   style="height: 120px;" id="sldescricao" required="true" '); ?>
                                       <?php } ?>
                                   </div>
                                 </div>

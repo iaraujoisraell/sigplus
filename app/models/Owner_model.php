@@ -881,7 +881,11 @@ class Owner_model extends CI_Model
     //Retorna todos os módulos da empresa
     public function getAllSetorByEmpresa() {
         $empresa = $this->session->userdata('empresa'); 
-        $q = $this->db->get_where('setores', array('empresa_id' => $empresa));
+         $statement = "SELECT * FROM sig_setores where empresa_id = $empresa order by nome asc";
+        //echo $statement; exit;
+        $q = $this->db->query($statement);
+        
+        //$q = $this->db->get_where('setores', array('empresa_id' => $empresa));
         if ($q->num_rows() > 0) {
             foreach (($q->result()) as $row) {
                 $data[] = $row;

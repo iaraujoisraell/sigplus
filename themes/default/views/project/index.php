@@ -183,8 +183,8 @@
                             <tr>
                               <td><?php echo $cont_p_ativo++; ?></td>
                               <td><?php echo $projeto_nome; ?></td>
-                               <td > <small ><?php echo exibirData($projeto->dt_inicio); ?></small></td>
-                                        <td > <small ><?php echo exibirData($projeto->dt_final); ?></small></td>
+                               <td > <small ><?php echo exibirData($projeto->start_date); ?></small></td>
+                                        <td > <small ><?php echo exibirData($projeto->deadline); ?></small></td>
                                         <td > <small ><?php echo $gerente_projeto; ?></small></td>
                                         <td > <small class="label label-<?php echo $status_label; ?>" ><?php echo $status; ?></small></td>
 
@@ -248,12 +248,16 @@
                             <tr>
                               <td><?php echo $cont_p_ativo++; ?></td>
                               <td><?php echo $projeto_nome; ?></td>
-                               <td > <small ><?php echo exibirData($projeto->dt_inicio); ?></small></td>
-                                        <td > <small ><?php echo exibirData($projeto->dt_final); ?></small></td>
+                               <td > <small ><?php echo exibirData($projeto->start_date); ?></small></td>
+                                        <td > <small ><?php echo exibirData($projeto->deadline); ?></small></td>
                                         <td > <small ><?php echo $gerente_projeto; ?></small></td>
 
 
-                              <td><a title="Para acessar as informações do projeto, deve selecionar o projeto." href="<?= site_url('Project/selecionarProjeto/'.$projeto_id); ?>" class="btn  btn-instagram"> Selecionar <i class="fa fa-sign-in"></i></a></td>
+                              <td>
+                                  <a title="Para acessar as informações do projeto, deve selecionar o projeto." href="<?= site_url('Project/selecionarProjeto/'.$projeto_id); ?>" class="btn  btn-instagram"> Selecionar <i class="fa fa-sign-in"></i></a>
+                                <a title="Editar o cadastro do projeto." href="<?= site_url('Project/editarProjeto/'.$projeto_id); ?>" class="btn  btn-warning">  <i class="fa fa-edit"></i></a>
+   
+                              </td>
                               
 
                                  
@@ -305,8 +309,8 @@
                             <tr>
                               <td><?php echo $cont_p_ativo++; ?></td>
                               <td><?php echo $projeto_nome; ?></td>
-                               <td > <small ><?php echo exibirData($projeto->dt_inicio); ?></small></td>
-                                        <td > <small ><?php echo exibirData($projeto->dt_final); ?></small></td>
+                               <td > <small ><?php echo exibirData($projeto->start_date); ?></small></td>
+                                        <td > <small ><?php echo exibirData($projeto->deadline); ?></small></td>
                                         <td > <small ><?php echo $gerente_projeto; ?></small></td>
                                         <td > <small class="label label-<?php echo $status_label; ?>" ><?php echo $status; ?></small></td>
 
@@ -375,8 +379,8 @@
                             <tr>
                               <td><?php echo $cont_p_ativo++; ?></td>
                               <td><?php echo $projeto_nome; ?></td>
-                               <td > <small ><?php echo exibirData($projeto->dt_inicio); ?></small></td>
-                                        <td > <small ><?php echo exibirData($projeto->dt_final); ?></small></td>
+                               <td > <small ><?php echo exibirData($projeto->start_date); ?></small></td>
+                                        <td > <small ><?php echo exibirData($projeto->deadline); ?></small></td>
                                         <td > <small ><?php echo $gerente_projeto; ?></small></td>
                                         <td > <small class="label label-<?php echo $status_label; ?>" ><?php echo $status; ?></small></td>
 

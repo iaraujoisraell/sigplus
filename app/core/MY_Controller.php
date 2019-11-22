@@ -23,6 +23,7 @@ class MY_Controller extends CI_Controller {
             $this->Settings->user_rtl = $this->Settings->rtl;
         }
         $this->theme = $this->Settings->theme.'/views/';
+        
         if(is_dir(VIEWPATH.$this->Settings->theme.DIRECTORY_SEPARATOR.'assets'.DIRECTORY_SEPARATOR)) {
             $this->data['assets'] = base_url() . 'themes/' . $this->Settings->theme . '/assets/';
         } else {
@@ -220,6 +221,26 @@ class MY_Controller extends CI_Controller {
         $this->load->view($this->theme . 'header_project', $meta);
         $this->load->view($this->theme . $page, $data);    
         $this->load->view($this->theme . 'footer_projeto');
+          //$this->load->view($this->theme . 'footer');
+        
+    }
+    
+    function page_construct_project_acao($page, $meta = array(), $data = array()) {
+        $meta['message'] = isset($data['message']) ? $data['message'] : $this->session->flashdata('message');
+        $meta['error'] = isset($data['error']) ? $data['error'] : $this->session->flashdata('error');
+        $meta['warning'] = isset($data['warning']) ? $data['warning'] : $this->session->flashdata('warning');
+      //  $meta['info'] = $this->site->getNotifications();
+      //  $meta['events'] = $this->site->getUpcomingEvents();
+      //  $meta['ip_address'] = $this->input->ip_address();
+        $meta['Settings'] = $data['Settings'];
+        $meta['dateFormats'] = $data['dateFormats'];
+        $meta['assets'] = $data['assets'];
+        $meta['GP'] = $data['GP'];
+       // $meta['qty_alert_num'] = $this->site->get_total_qty_alerts();
+       // $meta['exp_alert_num'] = $this->site->get_expiring_qty_alerts();
+        $this->load->view($this->theme . 'header_project_acao', $meta);
+        $this->load->view($this->theme . $page, $data);    
+        $this->load->view($this->theme . 'footer_projeto_acao');
           //$this->load->view($this->theme . 'footer');
         
     }
@@ -429,5 +450,17 @@ class MY_Controller extends CI_Controller {
           //$this->load->view($this->theme . 'footer');
         
     }
+    
+    
+     function page_construct_sigplus_v2($page, $meta = array(), $data = array()) {
+       // $meta['qty_alert_num'] = $this->site->get_total_qty_alerts();
+       // $meta['exp_alert_num'] = $this->site->get_expiring_qty_alerts();
+        $this->load->view($this->theme . 'header_sigplus_2', $meta);
+        $this->load->view($this->theme . $page, $data);    
+        $this->load->view($this->theme . 'footer_sigplus_v2');
+          //$this->load->view($this->theme . 'footer');
+        
+    }
+    
 }
 ?>

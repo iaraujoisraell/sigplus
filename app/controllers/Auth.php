@@ -1263,8 +1263,9 @@ class Auth extends MY_Controller
             if ($_FILES['avatar']['size'] > 0) {
 
                 $this->load->library('upload');
-
-                $config['upload_path'] = 'assets/uploads/avatars';
+                $empresa = $this->session->userdata('empresa');
+                
+                $config['upload_path'] = 'assets/uploads/'.$empresa.'/avatars';
                 $config['allowed_types'] = 'gif|jpg|png';
                 //$config['max_size'] = '500';
                 $config['max_width'] = $this->Settings->iwidth;
@@ -1287,8 +1288,8 @@ class Auth extends MY_Controller
                 $this->load->helper('file');
                 $this->load->library('image_lib');
                 $config['image_library'] = 'gd2';
-                $config['source_image'] = 'assets/uploads/avatars/' . $photo;
-                $config['new_image'] = 'assets/uploads/avatars/thumbs/' . $photo;
+                $config['source_image'] = 'assets/uploads/'.$empresa.'/avatars/' . $photo;
+                $config['new_image'] = 'assets/uploads/'.$empresa.'/avatars/thumbs/' . $photo;
                 $config['maintain_ratio'] = TRUE;
                 $config['width'] = 150;
                 $config['height'] = 150;;
@@ -1306,8 +1307,8 @@ class Auth extends MY_Controller
         }
 
         if ($this->form_validation->run() == true && $this->auth_model->updateAvatar($id, $photo)) {
-            unlink('assets/uploads/avatars/' . $user->avatar);
-            unlink('assets/uploads/avatars/thumbs/' . $user->avatar);
+            unlink('assets/uploads/'.$empresa.'/avatars/' . $user->avatar);
+            unlink('assets/uploads/'.$empresa.'/avatars/thumbs/' . $user->avatar);
             $this->session->set_userdata('avatar', $photo);
             $this->session->set_flashdata('message', lang("avatar_updated"));
             redirect("welcome/profile/" . $id);
@@ -1368,7 +1369,7 @@ class Auth extends MY_Controller
         }
        
         if ($this->form_validation->run() == true && $this->auth_model->updateCapa($id, $photo)) {
-             echo 'aqui'; exit;
+            
             unlink('assets/uploads/'.$empresa.'/avatars/' . $user->foto_capa);
             unlink('assets/uploads/'.$empresa.'/avatars/thumbs/' . $user->foto_capa);
             $this->session->set_userdata('foto_capa', $photo);

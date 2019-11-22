@@ -5,7 +5,7 @@
 $config['smtp_host'] = 'mail.sigplus.online';
 $config['smtp_port'] = 465;
 $config['smtp_user'] = 'noreply@sigplus.online';
-$config['smtp_pass'] = 's1gplu$2019';
+$config['smtp_pass'] = 'sig.2019';
 $config['protocol']  = 'smtp';
 $config['validate']  = TRUE;
 $config['mailtype']  = 'html';

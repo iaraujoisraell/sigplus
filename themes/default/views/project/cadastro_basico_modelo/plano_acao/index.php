@@ -83,9 +83,12 @@
                                                 if($status_plano == 1){
                                                     $status_desc = "ATIVO";
                                                     $label_status = "success";
-                                                }else{
+                                                }else  if($status_plano == 0){
                                                     $status_desc = "ABERTO";
                                                     $label_status = "warning";
+                                                }else  if($status_plano == 2){
+                                                    $status_desc = "CANCELADO";
+                                                    $label_status = "default";
                                                 }
                                                //TOTAL DE ACOES
                                                $planos = $this->atas_model->getTotalAcoesByPlanoAcao($ata->id);

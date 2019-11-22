@@ -21,16 +21,19 @@
                     if($status_plano == 1){
                         $status_desc = "ATIVO";
                         $label_status = "success";
-                    }else{
+                    }else  if($status_plano == 0){
                         $status_desc = "ABERTO";
                         $label_status = "warning";
+                    }else  if($status_plano == 2){
+                        $status_desc = "CANCELADO";
+                        $label_status = "default";
                     }
               ?>
               <small class="label label-<?php echo $label_status; ?>"><?php echo $status_desc; ?></small>
                
           </h1>
           <ol class="breadcrumb">
-            <li><a href="<?= site_url('networking'); ?>"><i class="fa fa-home"></i> Home</a></li>
+            <li><a href="<?= site_url('project'); ?>"><i class="fa fa-home"></i> Home</a></li>
             <li class="active">Plano de Ação</li>
           </ol>
 
@@ -66,13 +69,15 @@
     <div class="row">  
         <div class="col-lg-12">
             <div class="col-lg-12">
+              <?php if($status_plano != 2){ ?>   
             <a style="color: #ffffff;" class="btn bg-navy-active  " title="Registro de Ações"  href="<?= site_url('project/adcionar_acao_plano_acao/'.$plano_acao->id); ?>"> Nova Ação <i class="fa fa-plus"></i></a> 
             <a style="color: #ffffff;" class="btn bg-blue-active  " title="Registro de Atas"  href="<?= site_url('project/novaAta/'.$plano_acao->id.'/2'); ?>"> Nova Reunião <i class="fa fa-plus"></i></a> 
+              <?php } ?>
             <a style="color: #ffffff;" class="btn bg-blue-gradient  " title="Visualizar PDF do Plano de Ação"  href="<?= site_url('project/pdf_plano_acao/'.$plano_acao->id); ?>"> PDF <i class="fa fa-download"></i></a>
             <a style="color: #ffffff;" class="btn bg-black-gradient  " title="Visualizar o Gráfico de Gantt" target="_blank"  href="<?= site_url('project/ganttPlanoAcao/'.$plano_acao->id); ?>"> GANNT <i class="fa fa-dashboard"></i></a> 
            
             <a  class="btn btn-danger"   href="<?= site_url('project/plano_acao/89/55'); ?>"><?= lang('Sair') ?> <i class="fa fa-sign-out"></i></a>
-             <?php if($status_plano != 1){ ?>
+             <?php if($status_plano == 0){ ?>
             <a title="O Plano de ação aberto, permite estruturar o plano antes de ativá-lo. Para enviar as ações aos responsáveis é preciso ativar o plano de ação. Após a ativação, é possível cadastrar novas ações. " class="btn btn-success"  href="<?= site_url('project/finalizaPlano/'.$plano_acao->id); ?>"><?= lang('Ativar Plano') ?> <i class="fa fa-check"></i></a>
             <?php } ?>
              </div>
@@ -340,16 +345,16 @@
                                                 </div>
                                             </div>
                                         <br>
-                                       
+                                       <?php if($statusAta == 0){ ?>
                                             <div class="col-lg-12">                          
                                                 <center>
                                                     <div class="col-md-12">
                                                     <?php echo form_submit('add_item', lang("Atualizar"), 'id="add_item" class="btn btn-success " style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
-
+                                                    <a  class="btn btn-danger"   href="<?= site_url('project/plano_acao_update/'.$plano_acao->id); ?>"><?= lang('Cancelar') ?> <i class="fa fa-ban"></i></a>    
                                                      </div>
                                                 </center> 
                                             </div>
-                                       
+                                       <?php } ?>
                                         <?php echo form_close(); ?>
                                         <!-- /.modal-content -->
                               

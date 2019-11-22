@@ -159,10 +159,10 @@ $usuario =  $this->session->userdata('user_id');
                                   
                             <div class="table-responsive">
                                 <div class="box-body">
-                                    <table id="example1" class="table table-bordered table-striped">
+                                    <table id="lista_acoes_project" class="table table-bordered table-striped">
                                     <thead>
                                     <tr>
-                                    <th style="width:5%; "><input class="checkbox checkft" type="checkbox" name="check"/></th>    
+                                    <th style="width:5%; ">Id</th>    
                                    <th style="width:45%;"><?php echo $this->lang->line("Descrição"); ?></th>
                                     <th style="width:10%;"><?php echo $this->lang->line("Responsável"); ?></th>
                                     <th style="width:5%;"><?php echo $this->lang->line("Início"); ?></th>
@@ -233,11 +233,11 @@ $usuario =  $this->session->userdata('user_id');
                                             ?>               
 
                                                 <tr  >
-                                                    <td style="width: 5%;"><input class="checkbox checkft" type="checkbox" name="check"/></td>
-                                                   <td style="width: 60%; "> 
-                                                        <a title="Editar Registro"   href="<?= site_url('project/manutencao_acao_pendente/' .$plano->idplanos); ?>">
+                                                    <td style="width: 5%;"><a title="Editar Registro"   href="<?= site_url('project/manutencao_acao_pendente/' .$plano->idplanos); ?>">
                                                            <small class="label bg-black"><?php echo 'Ação : '. $plano->sequencial; ?></small>
-                                                        </a>   
+                                                        </a> </td>
+                                                   <td style="width: 60%; "> 
+                                                          
                                                        <small class="label bg-<?php echo $label; ?>" ><?php echo $status_desc; ?></small>
                                                        <a title="Acessar Referência de Origem" target="_blank" href="<?= site_url($url); ?>">
                                                         <small  class="label bg-blue-active" ><?php echo $referencia; ?></small>
@@ -271,18 +271,18 @@ $usuario =  $this->session->userdata('user_id');
     </section>
     <!-- /.content -->
  
-
-
- <script>
+   <script>
   $(function () {
-    $('#example1').DataTable()
-    $('#example2').DataTable({
+ 
+    $('#lista_acoes_project').DataTable({
       'paging'      : true,
-      'lengthChange': false,
-      'searching'   : false,
-      'ordering'    : true,
+      'lengthChange': true,
+      'searching'   : true,
       'info'        : true,
-      'autoWidth'   : false
+      'autoWidth'   : true,
+      'iDisplayLength': <?=$Settings->rows_per_page?>
     })
   })
 </script>
+
+ 

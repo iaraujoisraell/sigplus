@@ -155,462 +155,461 @@ right connector from last child*/
 }
 /*#endregion*/
 </style>
+<?php 
+$usuario = $this->session->userdata('user_id');
+$projetos = $this->projetos_model->getProjetoAtualByID_completo();
+ $id_projeto = $projetos->id;
 
-                <?php 
-                $usuario = $this->session->userdata('user_id');
-                $projetos = $this->projetos_model->getProjetoAtualByID_completo();
-                 $id_projeto = $projetos->id;
-                
-                //$projeto = $this->atas_model->getProjetoByID($id_projeto);
+//$projeto = $this->atas_model->getProjetoByID($id_projeto);
 
-                ?>
-                <div class="row">
-                     <a href="<?= site_url('Login_Projetos/eap_pdf/'.$id_projeto) ?>">
-                                                                            
-                        <div   class="container-fluid">
-                            <div class="row">
-                                Imprimir <i class="fa fa-print fa-2x"></i>
-                            </div>
+?>
+<div class="row">
+     <a href="<?= site_url('Login_Projetos/eap_pdf/'.$id_projeto) ?>">
 
-                        </div>
+        <div   class="container-fluid">
+            <div class="row">
+                Imprimir <i class="fa fa-print fa-2x"></i>
+            </div>
 
-                    </a>
-                   <!-- LADO ESQUERDO -->
-                    <div class="col-lg-12">
-                        <!-- MEUS PROJETOS -->
-                        <div class="portlet portlet-default">
-                            <div class="portlet-heading">
-                                <div class="portlet-title">
-                                    <h4>EAP - Estrutura Analítica do Projeto</h4>
-                                </div>
-                                <div class="portlet-widgets">
-                                    <a href="#"><i class="fa fa-gear"></i></a>
-                                    <span class="divider"></span>
-                                    <a href="javascript:;"><i class="fa fa-refresh"></i></a>
-                                    <span class="divider"></span>
-                                    <a data-toggle="collapse" data-parent="#accordion" href="#buttons"><i class="fa fa-chevron-down"></i></a>
-                                </div>
-                                <div class="clearfix"></div>
-                            </div>
-                            <div id="buttons" class="panel-collapse collapse in">
-                                <div class="portlet-body">
+        </div>
+
+    </a>
+   <!-- LADO ESQUERDO -->
+    <div class="col-lg-12">
+        <!-- MEUS PROJETOS -->
+        <div class="portlet portlet-default">
+            <div class="portlet-heading">
+                <div class="portlet-title">
+                    <h4>EAP - Estrutura Analítica do Projeto</h4>
+                </div>
+                <div class="portlet-widgets">
+                    <a href="#"><i class="fa fa-gear"></i></a>
+                    <span class="divider"></span>
+                    <a href="javascript:;"><i class="fa fa-refresh"></i></a>
+                    <span class="divider"></span>
+                    <a data-toggle="collapse" data-parent="#accordion" href="#buttons"><i class="fa fa-chevron-down"></i></a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div id="buttons" class="panel-collapse collapse in">
+                <div class="portlet-body">
+                    <div class="row">
+                            <div class="col-md-12">
+
+                                <?php 
+
+                                $projeto = $this->projetos_model->getProjetoByID($id_projeto);
+
+
+
+
+
+                                ?>
+
+                                <div class="container-fluid " style="margin-top:20px">
                                     <div class="row">
-                                            <div class="col-md-12">
-                                                 
-                                                <?php 
-                                               
-                                                $projeto = $this->projetos_model->getProjetoByID($id_projeto);
-                                                
-                                                
-                                                
-                                                
-                                                
-                                                ?>
-                                                
-                                                <div class="container-fluid " style="margin-top:20px">
-                                                    <div class="row">
-                                                        <div class="col-md-12">
-                                                            <div class="tree">
-                                                                <ul>
-                                                                    <li>
-                                                                        <?php
-                                                                        
-                                                                        
-                                                
-                                                                            $cont_tipo_atrasado = 0;
-                                                                            $cont_tipo_pendente = 0;
-                                                                            $cont_tipo_concluido = 0;
-                                                                            $cont_tipo_total_acao = 0;
-                                                                            
-                                                                            foreach ($tipos as $tipo) {
-                                                                                $tipo_id = $tipo->id;
-                                                                                $tipo_fase = $tipo->nome_fase;
-                                                                                
-                                                                                $tipo_evento2 = urlencode($tipo_evento);
-
-                                                                                                                                                           
-                                                                                 $eventos = $this->projetos_model->getAllEventosProjetoByFase($tipo_id);
-                                                                                 
-                                                                                 foreach ($eventos as $evento) {
-                                                                                
-                                                                                
-                                                                              
-                                                                                $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
-                                                                                   // print_R($intes_eventos);
-                                                                                     
-                                                                                        $soma_total_acao = 0;
-                                                                                        $soma_total_concluida = 0;
-                                                                                        $soma_total_atrasada = 0;
-                                                                                        $soma_total_pendente = 0;
-                                                                                        foreach ($intes_eventos as $item) {
-                                                                                            
-                                                                                           $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item->id);
-                                                                                             //Qtde de Ações concluídas
-                                                                                            $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item->id);
-                                                                                            
-                                                                                            //Qtde de ações Pendentes
-                                                                                            $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item->id);
-                                                                                            $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item->id);
-                                                                                           
-                                                                                            $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item->id);
-                                                                                            
-                                                                                            //Total de ações
-                                                                                            $total_acoes = $quantidade_acoes_item->quantidade;
-                                                                                            $soma_total_acao += $total_acoes;
-                                                                                            //CONCLUÍDAS
-                                                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
-                                                                                            $soma_total_concluida += $quantidade_acoes_concluidas_item;
-                                                                                            //PENDENTES
-                                                                                             $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
-                                                                                             $soma_total_pendente += $itens_pendentes;
-                                                                                             //ATRASADAS
-                                                                                             $quantidade_atrasadas = $atrasadas->quantidade;
-                                                                                             $soma_total_atrasada += $quantidade_atrasadas;
-                                                                                            //echo $quantidade_acoes_item->quantidade;
-                                                                                                    
-                                                                                          // $cont += $total_acoes;
-                                                                                        } 
-                                                                                        
-                                                                                        $cont_tipo_atrasado += $soma_total_atrasada;
-                                                                                        $cont_tipo_pendente += $soma_total_pendente;
-                                                                                        $cont_tipo_concluido += $soma_total_concluida;
-                                                                                        $cont_tipo_total_acao += $soma_total_acao;      
-                                                                                             
-                                                                                    }
-                                                                                }
-                                                                                  
-                                                                                  
-                                                                                   if($cont_tipo_total_acao > 0){
-                                                                                                 
-                                                                                                 if ($cont_tipo_atrasado > 0){
-                                                                                                     $cor = "red";
-                                                                                                     $color = "#ffffff";
-                                                                                                 }else if($cont_tipo_atrasado == 0){
-                                                                                                    
-                                                                                                     if($cont_tipo_pendente > 0){
-                                                                                                          $cor = "orange";
-                                                                                                          $color = "#ffffff";
-                                                                                                     }else if($cont_tipo_pendente == 0){
-                                                                                                         
-                                                                                                         if($cont_tipo_total_acao == $cont_tipo_concluido ){
-                                                                                                             $cor = "green";
-                                                                                                              $color = "#ffffff";
-                                                                                                         }
-                                                                                                         
-                                                                                                     }
-                                                                                                    
-                                                                                                 }
-                                                                                             }else{
-                                                                                                  $cor = "#cbcbcb";
-                                                                                                  $color = "#000000";
-                                                                                             }
-                                                                                             
-                                                                                             
-                                                                                        ?>
-                                                                        <a style="background-color: <?php echo $cor; ?>; color: <?php echo $color; ?>;" href="#">
-                                                                            
-                                                                            <div   class="container-fluid">
-                                                                                <div class="row">
-                                                                                    <?php echo $projeto->projeto; ?>
-                                                                                </div>
-                                                                                <div class="row" style="margin-top: 5px;">
-                                                                                    <i style="color: #000000;" class="fa fa-exclamation-circle fa-2x"></i>
-                                                                                </div>
-                                                                                
-                                                                            </div>
-
-                                                                        </a>
-                                                                        
-                                                                         <?php
-                                                                           
-                                                                            
-                                                                            
-                                                                           // echo $cont;
-                                                                            ?>
-                                                                        <ul>
-                                                                            <?php
-                                                                            $cont = 0;
-                                                                                        
-                                                                                        
-                                                                            foreach ($tipos as $tipo) {
-                                                                                $tipo_id = $tipo->id;
-                                                                                $tipo_fase = $tipo->nome_fase;
-
-                                                                                
-                                                                                 $soma_total_acao_e = 0;
-                                                                                $soma_total_concluida_e = 0;
-                                                                                $soma_total_atrasada_e = 0;
-                                                                                $soma_total_pendente_e = 0;                                                                          
-                                                                                 $eventos = $this->projetos_model->getAllEventosProjetoByFase($tipo_id);
-                                                                                 foreach ($eventos as $evento) {
-                                                                                
-                                                                                        $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
-                                                                                        $soma_total_acoes_eventos = 0;
-                                                                                        $soma_total_concluida = 0;
-                                                                                        $soma_total_atrasada = 0;
-                                                                                        $soma_total_pendente = 0;
-                                                                                        foreach ($intes_eventos as $item) {
-                                                                                            $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item->id);
-                                                                                            //Qtde de Ações concluídas
-                                                                                            $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item->id);
-                                                                                            //Qtde de ações Pendentes
-                                                                                            $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item->id);
-                                                                                            $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item->id);
-                                                                                            $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item->id);
-                                                                                            //Total de ações
-                                                                                            $total_acoes_eventos = $quantidade_acoes_item->quantidade;
-                                                                                            $soma_total_acoes_eventos += $total_acoes_eventos;
-                                                                                            //CONCLUÍDAS
-                                                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
-                                                                                            $soma_total_concluida += $quantidade_acoes_concluidas_item;
-                                                                                            //PENDENTES
-                                                                                             $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
-                                                                                             $soma_total_pendente += $itens_pendentes;
-                                                                                             //ATRASADAS
-                                                                                             $quantidade_atrasadas = $atrasadas->quantidade;
-                                                                                             $soma_total_atrasada += $quantidade_atrasadas;
-                                                                                        //echo $quantidade_acoes_item->quantidade;
-
-                                                                                      // $cont += $total_acoes;
-                                                                                    }
-                                                                                    
-                                                                                   $soma_total_acao_e += $soma_total_acoes_eventos;
-                                                                                     $soma_total_concluida_e += $soma_total_concluida;
-                                                                                      $soma_total_atrasada_e += $soma_total_atrasada;
-                                                                                       $soma_total_pendente_e += $soma_total_pendente;
-
-                                                                                }
-                                                                                 
-                                                                                    
-                                                                                 
-                                                                                  if($soma_total_acao_e > 0){
-                                                                                                 
-                                                                                                 if ($soma_total_atrasada_e > 0){
-                                                                                                     $cor_evento = "red";
-                                                                                                     $color_evento = "#ffffff";
-                                                                                                 }else if($soma_total_atrasada_e == 0){
-                                                                                                    
-                                                                                                     if($soma_total_pendente_e > 0){
-                                                                                                          $cor_evento = "orange";
-                                                                                                          $color_evento = "#ffffff";
-                                                                                                     }else if($soma_total_pendente_e == 0){
-                                                                                                         
-                                                                                                         if($soma_total_acao_e == $soma_total_concluida_e ){
-                                                                                                             $cor_evento = "green";
-                                                                                                              $color_evento = "#ffffff";
-                                                                                                         }
-                                                                                                         
-                                                                                                     }
-                                                                                                    
-                                                                                                 }
-                                                                                             }else{
-                                                                                                  $cor_evento = "#cbcbcb";
-                                                                                                  $color_evento = "#000000";
-                                                                                             }
-                                                                                        ?>
-                                                                            
-                                                                            
-                                                                            <li>
-                                                                                <a style="background-color: <?php echo $cor_evento; ?>; color: <?php echo $color_evento; ?>;" href="<?= site_url('Login_Projetos/eap_tipo/'.$tipo_evento2) ?>">
-
-                                                                                    <div  class="container-fluid">
-                                                                                        <div class="row">
-                                                                                           <?php echo $tipo_fase; ?>
-                                                                                        </div>
-                                                                                        <div class="row" style="margin-top: 15px;">
-                                                                                            
-                                                                                        </div>
-                                                                                        
-                                                                                    </div>
-
-                                                                                </a>
-                                                                                <?php
-                                                                                 $ordem = 'ordem';
-                                                                                 $eventos = $this->projetos_model->getAllEventosProjetoByFase($tipo_id);
-                                                                                 foreach ($eventos as $evento) {
-                                                                                ?>
-                                                                                 <?php
-                                                                                 
-                                                                                $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
-                                                                                    
-                                                                                    ?>
-                                                                      
-
-                                                                                        <?php    
-                                                                                        $soma_total_acao = 0;
-                                                                                        $soma_total_concluida = 0;
-                                                                                        $soma_total_atrasada = 0;
-                                                                                        $soma_total_pendente = 0;
-                                                                                        foreach ($intes_eventos as $item) {
-                                                                                            
-                                                                                           $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item->id);
-                                                                                             //Qtde de Ações concluídas
-                                                                                            $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item->id);
-                                                                                            
-                                                                                            //Qtde de ações Pendentes
-                                                                                            $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item->id);
-                                                                                            $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item->id);
-                                                                                           
-                                                                                            $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item->id);
-                                                                                            
-                                                                                            //Total de ações
-                                                                                            $total_acoes = $quantidade_acoes_item->quantidade;
-                                                                                            $soma_total_acao += $total_acoes;
-                                                                                            //CONCLUÍDAS
-                                                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
-                                                                                            $soma_total_concluida += $quantidade_acoes_concluidas_item;
-                                                                                            //PENDENTES
-                                                                                             $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
-                                                                                             $soma_total_pendente += $itens_pendentes;
-                                                                                             //ATRASADAS
-                                                                                             $quantidade_atrasadas = $atrasadas->quantidade;
-                                                                                             $soma_total_atrasada += $quantidade_atrasadas;
-                                                                                            //echo $quantidade_acoes_item->quantidade;
-                                                                                                    
-                                                                                          // $cont += $total_acoes;
-                                                                                        } 
-                                                                                        
-                                                                                        
-                                                                                        
-                                                                                         if($soma_total_acao > 0){
-                                                                                                 
-                                                                                                 if ($soma_total_atrasada > 0){
-                                                                                                     $cor = "red";
-                                                                                                     $color = "#ffffff";
-                                                                                                     $icon = "exclamation-circle";
-                                                                                                 }else if($soma_total_atrasada == 0){
-                                                                                                    
-                                                                                                     if($soma_total_pendente > 0){
-                                                                                                          $cor = "orange";
-                                                                                                          $color = "#ffffff";
-                                                                                                          $icon = "exclamation-circle";
-                                                                                                     }else if($soma_total_pendente == 0){
-                                                                                                         
-                                                                                                         if($soma_total_acao == $soma_total_concluida ){
-                                                                                                             $cor = "green";
-                                                                                                              $color = "#ffffff";
-                                                                                                              $icon = "check";
-                                                                                                         }
-                                                                                                         
-                                                                                                     }
-                                                                                                    
-                                                                                                 }
-                                                                                             }else{
-                                                                                                  $cor = "#cbcbcb";
-                                                                                                  $color = "#000000";
-                                                                                                  $icon = "exclamation-circle";
-                                                                                             }
-                                                                                        ?>
-                                                                                
-                                                                                <ul >
-                                                                                   
-                                                                                        <a style="background-color: <?php echo $cor; ?>; color: <?php echo $color; ?>;"  href="<?= site_url('Login_Projetos/eap_evento/'.$evento->id) ?>">
-                                                                                            <div  class="container-fluid">
-                                                                                                <div class="row">
-                                                                                                    <?php echo $evento->nome_evento; ?>
-                                                                                                </div>
-                                                                                                <div class="row" style="margin-top: 10px;">
-                                                                                                    <i style="color: #000000;" class="fa fa-<?php echo $icon; ?> fa-2x"></i>
-                                                                                                </div>
-                                                                                                
-                                                                                            </div>
-
-                                                                                        </a>
-                                                                                    
-                                                                                    
-                                                                                </ul>
-                                                                                 <?php
-                                                                                 
-                                                                                   
-                                                                                 
-                                                                                 
-                                                                                 
-                                                                            }
-                                                                            ?>
-                                                                            </li>
-                                                                            <?php
-                                                                            }
-                                                                            
-                                                                            
-                                                                           // echo $cont;
-                                                                            ?>
-                                                                        </ul>
-                                                                    </li>
-                                                                </ul>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                
-                                                
-                                                <br><br><br><br><br>
-                                                    <ul id="tree1">
-                                                     
-                                                    <?php
-                                                    foreach ($tipos as $tipo) {
-                                                        $tipo_evento = $tipo->tipo;
-                                                    
-                                                    ?>
+                                        <div class="col-md-12">
+                                            <div class="tree">
+                                                <ul>
                                                     <li>
-                                                        <a href="#"><?php echo $tipo->tipo; ?></a>
-                                                       
-                                                            <?php
-                                                             $ordem = 'ordem';
-                                                             $eventos = $this->projetos_model->getAllEventosProjetoByTipo($tipo_evento, $id_projeto , $ordem,'asc');
-                                                             foreach ($eventos as $evento) {
-                                                            ?>
-                                                            <ul>
+                                                        <?php
 
-                                                                <li><?php echo $evento->nome_evento; ?>
-                                                                    <ul>
-                                                                        <?php
-                                                                    $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
-                                                                    $cont = 1;
-                                                                    ?>
-                                                                        <table style="width:100%;">
 
-                                                                        <?php    
+
+                                                            $cont_tipo_atrasado = 0;
+                                                            $cont_tipo_pendente = 0;
+                                                            $cont_tipo_concluido = 0;
+                                                            $cont_tipo_total_acao = 0;
+
+                                                            foreach ($tipos as $tipo) {
+                                                                $tipo_id = $tipo->id;
+                                                                $tipo_fase = $tipo->nome_fase;
+
+                                                                $tipo_evento2 = urlencode($tipo_evento);
+
+
+                                                                 $eventos = $this->projetos_model->getAllEventosProjetoByFase($tipo_id);
+
+                                                                 foreach ($eventos as $evento) {
+
+
+
+                                                                $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
+                                                                   // print_R($intes_eventos);
+
+                                                                        $soma_total_acao = 0;
+                                                                        $soma_total_concluida = 0;
+                                                                        $soma_total_atrasada = 0;
+                                                                        $soma_total_pendente = 0;
                                                                         foreach ($intes_eventos as $item) {
-                                                                            
-                                                                            
+
+                                                                           $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item->id);
                                                                              //Qtde de Ações concluídas
                                                                             $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item->id);
-                                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
+
                                                                             //Qtde de ações Pendentes
                                                                             $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item->id);
                                                                             $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item->id);
-                                                                            $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
+
                                                                             $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item->id);
+
+                                                                            //Total de ações
+                                                                            $total_acoes = $quantidade_acoes_item->quantidade;
+                                                                            $soma_total_acao += $total_acoes;
+                                                                            //CONCLUÍDAS
+                                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
+                                                                            $soma_total_concluida += $quantidade_acoes_concluidas_item;
+                                                                            //PENDENTES
+                                                                             $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
+                                                                             $soma_total_pendente += $itens_pendentes;
+                                                                             //ATRASADAS
+                                                                             $quantidade_atrasadas = $atrasadas->quantidade;
+                                                                             $soma_total_atrasada += $quantidade_atrasadas;
+                                                                            //echo $quantidade_acoes_item->quantidade;
+
+                                                                          // $cont += $total_acoes;
+                                                                        } 
+
+                                                                        $cont_tipo_atrasado += $soma_total_atrasada;
+                                                                        $cont_tipo_pendente += $soma_total_pendente;
+                                                                        $cont_tipo_concluido += $soma_total_concluida;
+                                                                        $cont_tipo_total_acao += $soma_total_acao;      
+
+                                                                    }
+                                                                }
+
+
+                                                                   if($cont_tipo_total_acao > 0){
+
+                                                                                 if ($cont_tipo_atrasado > 0){
+                                                                                     $cor = "red";
+                                                                                     $color = "#ffffff";
+                                                                                 }else if($cont_tipo_atrasado == 0){
+
+                                                                                     if($cont_tipo_pendente > 0){
+                                                                                          $cor = "orange";
+                                                                                          $color = "#ffffff";
+                                                                                     }else if($cont_tipo_pendente == 0){
+
+                                                                                         if($cont_tipo_total_acao == $cont_tipo_concluido ){
+                                                                                             $cor = "green";
+                                                                                              $color = "#ffffff";
+                                                                                         }
+
+                                                                                     }
+
+                                                                                 }
+                                                                             }else{
+                                                                                  $cor = "#cbcbcb";
+                                                                                  $color = "#000000";
+                                                                             }
+
+
                                                                         ?>
-                                                                         <tr>
-                                                                             <td style="width:50%;"><?php echo $item->descricao; ?></td>
-                                                                             
-                                                                         </tr>
+                                                        <a style="background-color: <?php echo $cor; ?>; color: <?php echo $color; ?>;" href="#">
+
+                                                            <div   class="container-fluid">
+                                                                <div class="row">
+                                                                    <?php echo $projeto->projeto; ?>
+                                                                </div>
+                                                                <div class="row" style="margin-top: 5px;">
+                                                                    <i style="color: #000000;" class="fa fa-exclamation-circle fa-2x"></i>
+                                                                </div>
+
+                                                            </div>
+
+                                                        </a>
+
+                                                         <?php
 
 
-                                                                        <?php } ?>
-                                                                    </table>
-                                                                    </ul>
-                                                                </li>
 
-                                                            </ul>
-                                                             <?php } ?>
-                                                        </table>
+                                                           // echo $cont;
+                                                            ?>
+                                                        <ul>
+                                                            <?php
+                                                            $cont = 0;
+
+
+                                                            foreach ($tipos as $tipo) {
+                                                                $tipo_id = $tipo->id;
+                                                                $tipo_fase = $tipo->nome_fase;
+
+
+                                                                 $soma_total_acao_e = 0;
+                                                                $soma_total_concluida_e = 0;
+                                                                $soma_total_atrasada_e = 0;
+                                                                $soma_total_pendente_e = 0;                                                                          
+                                                                 $eventos = $this->projetos_model->getAllEventosProjetoByFase($tipo_id);
+                                                                 foreach ($eventos as $evento) {
+
+                                                                        $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
+                                                                        $soma_total_acoes_eventos = 0;
+                                                                        $soma_total_concluida = 0;
+                                                                        $soma_total_atrasada = 0;
+                                                                        $soma_total_pendente = 0;
+                                                                        foreach ($intes_eventos as $item) {
+                                                                            $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item->id);
+                                                                            //Qtde de Ações concluídas
+                                                                            $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item->id);
+                                                                            //Qtde de ações Pendentes
+                                                                            $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item->id);
+                                                                            $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item->id);
+                                                                            $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item->id);
+                                                                            //Total de ações
+                                                                            $total_acoes_eventos = $quantidade_acoes_item->quantidade;
+                                                                            $soma_total_acoes_eventos += $total_acoes_eventos;
+                                                                            //CONCLUÍDAS
+                                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
+                                                                            $soma_total_concluida += $quantidade_acoes_concluidas_item;
+                                                                            //PENDENTES
+                                                                             $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
+                                                                             $soma_total_pendente += $itens_pendentes;
+                                                                             //ATRASADAS
+                                                                             $quantidade_atrasadas = $atrasadas->quantidade;
+                                                                             $soma_total_atrasada += $quantidade_atrasadas;
+                                                                        //echo $quantidade_acoes_item->quantidade;
+
+                                                                      // $cont += $total_acoes;
+                                                                    }
+
+                                                                   $soma_total_acao_e += $soma_total_acoes_eventos;
+                                                                     $soma_total_concluida_e += $soma_total_concluida;
+                                                                      $soma_total_atrasada_e += $soma_total_atrasada;
+                                                                       $soma_total_pendente_e += $soma_total_pendente;
+
+                                                                }
+
+
+
+                                                                  if($soma_total_acao_e > 0){
+
+                                                                                 if ($soma_total_atrasada_e > 0){
+                                                                                     $cor_evento = "red";
+                                                                                     $color_evento = "#ffffff";
+                                                                                 }else if($soma_total_atrasada_e == 0){
+
+                                                                                     if($soma_total_pendente_e > 0){
+                                                                                          $cor_evento = "orange";
+                                                                                          $color_evento = "#ffffff";
+                                                                                     }else if($soma_total_pendente_e == 0){
+
+                                                                                         if($soma_total_acao_e == $soma_total_concluida_e ){
+                                                                                             $cor_evento = "green";
+                                                                                              $color_evento = "#ffffff";
+                                                                                         }
+
+                                                                                     }
+
+                                                                                 }
+                                                                             }else{
+                                                                                  $cor_evento = "#cbcbcb";
+                                                                                  $color_evento = "#000000";
+                                                                             }
+                                                                        ?>
+
+
+                                                            <li>
+                                                                <a style="background-color: <?php echo $cor_evento; ?>; color: <?php echo $color_evento; ?>;" href="<?= site_url('Login_Projetos/eap_tipo/'.$tipo_evento2) ?>">
+
+                                                                    <div  class="container-fluid">
+                                                                        <div class="row">
+                                                                           <?php echo $tipo_fase; ?>
+                                                                        </div>
+                                                                        <div class="row" style="margin-top: 15px;">
+
+                                                                        </div>
+
+                                                                    </div>
+
+                                                                </a>
+                                                                <?php
+                                                                 $ordem = 'ordem';
+                                                                 $eventos = $this->projetos_model->getAllEventosProjetoByFase($tipo_id);
+                                                                 foreach ($eventos as $evento) {
+                                                                ?>
+                                                                 <?php
+
+                                                                $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
+
+                                                                    ?>
+
+
+                                                                        <?php    
+                                                                        $soma_total_acao = 0;
+                                                                        $soma_total_concluida = 0;
+                                                                        $soma_total_atrasada = 0;
+                                                                        $soma_total_pendente = 0;
+                                                                        foreach ($intes_eventos as $item) {
+
+                                                                           $quantidade_acoes_item = $this->projetos_model->getQuantidadeAcaoByItemEvento($item->id);
+                                                                             //Qtde de Ações concluídas
+                                                                            $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item->id);
+
+                                                                            //Qtde de ações Pendentes
+                                                                            $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item->id);
+                                                                            $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item->id);
+
+                                                                            $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item->id);
+
+                                                                            //Total de ações
+                                                                            $total_acoes = $quantidade_acoes_item->quantidade;
+                                                                            $soma_total_acao += $total_acoes;
+                                                                            //CONCLUÍDAS
+                                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
+                                                                            $soma_total_concluida += $quantidade_acoes_concluidas_item;
+                                                                            //PENDENTES
+                                                                             $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
+                                                                             $soma_total_pendente += $itens_pendentes;
+                                                                             //ATRASADAS
+                                                                             $quantidade_atrasadas = $atrasadas->quantidade;
+                                                                             $soma_total_atrasada += $quantidade_atrasadas;
+                                                                            //echo $quantidade_acoes_item->quantidade;
+
+                                                                          // $cont += $total_acoes;
+                                                                        } 
+
+
+
+                                                                         if($soma_total_acao > 0){
+
+                                                                                 if ($soma_total_atrasada > 0){
+                                                                                     $cor = "red";
+                                                                                     $color = "#ffffff";
+                                                                                     $icon = "exclamation-circle";
+                                                                                 }else if($soma_total_atrasada == 0){
+
+                                                                                     if($soma_total_pendente > 0){
+                                                                                          $cor = "orange";
+                                                                                          $color = "#ffffff";
+                                                                                          $icon = "exclamation-circle";
+                                                                                     }else if($soma_total_pendente == 0){
+
+                                                                                         if($soma_total_acao == $soma_total_concluida ){
+                                                                                             $cor = "green";
+                                                                                              $color = "#ffffff";
+                                                                                              $icon = "check";
+                                                                                         }
+
+                                                                                     }
+
+                                                                                 }
+                                                                             }else{
+                                                                                  $cor = "#cbcbcb";
+                                                                                  $color = "#000000";
+                                                                                  $icon = "exclamation-circle";
+                                                                             }
+                                                                        ?>
+
+                                                                <ul >
+
+                                                                        <a style="background-color: <?php echo $cor; ?>; color: <?php echo $color; ?>;"  href="<?= site_url('Login_Projetos/eap_evento/'.$evento->id) ?>">
+                                                                            <div  class="container-fluid">
+                                                                                <div class="row">
+                                                                                    <?php echo $evento->nome_evento; ?>
+                                                                                </div>
+                                                                                <div class="row" style="margin-top: 10px;">
+                                                                                    <i style="color: #000000;" class="fa fa-<?php echo $icon; ?> fa-2x"></i>
+                                                                                </div>
+
+                                                                            </div>
+
+                                                                        </a>
+
+
+                                                                </ul>
+                                                                 <?php
+
+
+
+
+
+                                                            }
+                                                            ?>
+                                                            </li>
+                                                            <?php
+                                                            }
+
+
+                                                           // echo $cont;
+                                                            ?>
+                                                        </ul>
                                                     </li>
-                                                    <?php } ?>
-                                                   
                                                 </ul>
-                                               
                                             </div>
-                                            
                                         </div>
+                                    </div>
                                 </div>
+
+
+                                <br><br><br><br><br>
+                                    <ul id="tree1">
+
+                                    <?php
+                                    foreach ($tipos as $tipo) {
+                                        $tipo_evento = $tipo->tipo;
+
+                                    ?>
+                                    <li>
+                                        <a href="#"><?php echo $tipo->tipo; ?></a>
+
+                                            <?php
+                                             $ordem = 'ordem';
+                                             $eventos = $this->projetos_model->getAllEventosProjetoByTipo($tipo_evento, $id_projeto , $ordem,'asc');
+                                             foreach ($eventos as $evento) {
+                                            ?>
+                                            <ul>
+
+                                                <li><?php echo $evento->nome_evento; ?>
+                                                    <ul>
+                                                        <?php
+                                                    $intes_eventos = $this->projetos_model->getAllItemEventosProjeto($evento->id,'tipo','asc');
+                                                    $cont = 1;
+                                                    ?>
+                                                        <table style="width:100%;">
+
+                                                        <?php    
+                                                        foreach ($intes_eventos as $item) {
+
+
+                                                             //Qtde de Ações concluídas
+                                                            $concluido = $this->projetos_model->getAcoesConcluidasByPItemEvento($item->id);
+                                                            $quantidade_acoes_concluidas_item =  $concluido->quantidade;
+                                                            //Qtde de ações Pendentes
+                                                            $item_pendente =    $this->projetos_model->getAcoesPendentesByItemEvento($item->id);
+                                                            $item_avalidacao =  $this->projetos_model->getAcoesAguardandoValidacaoByItemEvento($item->id);
+                                                            $itens_pendentes =  $item_pendente->quantidade + $item_avalidacao->quantidade;
+                                                            $atrasadas = $this->projetos_model->getAcoesAtrasadasByItemEvento($item->id);
+                                                        ?>
+                                                         <tr>
+                                                             <td style="width:50%;"><?php echo $item->descricao; ?></td>
+
+                                                         </tr>
+
+
+                                                        <?php } ?>
+                                                    </table>
+                                                    </ul>
+                                                </li>
+
+                                            </ul>
+                                             <?php } ?>
+                                        </table>
+                                    </li>
+                                    <?php } ?>
+
+                                </ul>
+
                             </div>
-                         </div>
-                     </div>
-                 </div>   
+
+                        </div>
+                </div>
             </div>
-        </div>    
+         </div>
+     </div>
+ </div>   
+</div>
+</div>    
     <!-- /#wrapper -->
 
     <!-- GLOBAL SCRIPTS -->

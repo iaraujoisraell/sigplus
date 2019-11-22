@@ -136,7 +136,7 @@ class Projetos_model extends CI_Model
        // $tabela_empresa = $empresa_dados->tabela_cliente;
         //echo $tabela_empresa;
        //$empresa_db = $this->load->database('provin_clientes', TRUE);
-       $statement = "SELECT p.id as id, p.projeto as nome_projeto, dt_inicio, dt_final,gerente_area, p.status as status FROM sig_projetos p 
+       $statement = "SELECT p.id as id,p.title as nome_projeto, start_date, deadline,gerente_area, p.status as status FROM sig_projetos p 
            inner join sig_users_projetos up on up.projeto = p. id
                     where up.users = $usuario and p.status = '$status' and empresa_id = $empresa";
       // echo $statement; exit;
@@ -163,7 +163,7 @@ class Projetos_model extends CI_Model
      
         //echo $tabela_empresa;
        //$empresa_db = $this->load->database('provin_clientes', TRUE);
-       $statement = "SELECT p.projeto as projeto, p.* "
+       $statement = "SELECTp.title as projeto, p.* "
                . " FROM sig_projetos p 
                       inner join sig_users_projetos up on up.projeto = p.id
                     where up.users = $usuario and p.empresa_id = $empresa ";
@@ -317,11 +317,11 @@ class Projetos_model extends CI_Model
         $tabela_empresa = $empresa_dados->tabela_cliente;
         //echo $tabela_empresa;
        //$empresa_db = $this->load->database('provin_clientes', TRUE);
-       $statement = "SELECT p.id as id, p.projeto as nome_projeto, dt_inicio, dt_final, gerente_area, gerente_edp, analista,p.status as status 
+       $statement = "SELECT p.id as id, p.title as nome_projeto, start_date, deadline, dt_inicial, dt_final, gerente_area, gerente_edp, analista,p.status as status 
            FROM sig_projetos p 
                     inner join sig_users u on u.projeto_atual = p. id
                     where u.id = $usuario";
-      // echo $statement; exit;
+       //echo $statement; exit;
         $q = $this->db->query($statement);
          
       
@@ -570,7 +570,7 @@ class Projetos_model extends CI_Model
      /**********************************************************
      ************************* LISTA DE AÇÃO ************************
      ********************************************************/
-    public function getAllAcoesByProjetoAtual($tipo, $responsavel, $status){
+    public function getAllAcoesByProjetoAtual($tipo, $responsavel, $status, $item_escopo){
         //$tipo: 1 = (PENDENTE, CONCLUÍDO, CANCELADO)
         //$tipo: 2 = (AGUARDANDO VALIDAÇÃO)
         $usuario = $this->session->userdata('user_id');
@@ -592,6 +592,10 @@ class Projetos_model extends CI_Model
         
         
           
+        if($item_escopo){
+                $statement .= " and eventos = '$item_escopo' ";
+        }
+        
         if($responsavel){
                 $statement .= " and responsavel = '$id_responsavel' and setor = '$setor_responsavel'";
         }
@@ -2454,7 +2458,7 @@ order by su.nome asc
         $usuario = $this->session->userdata('user_id'); 
         $empresa = $this->session->userdata('empresa');
         if($tipo == 1){
-        $q = $this->db->get_where('user_escopo', array('fase' => $fase, 'empresa' => $empresa, 'usuario' => $usuario), 1);
+            $q = $this->db->get_where('user_escopo', array('fase' => $fase, 'empresa' => $empresa, 'usuario' => $usuario), 1);
         }else if($tipo == 2){
             $q = $this->db->get_where('user_escopo', array('evento' => $fase, 'empresa' => $empresa, 'usuario' => $usuario), 1);
         }

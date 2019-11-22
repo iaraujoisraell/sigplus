@@ -45,9 +45,10 @@
       $cont_modulos = $this->owner_model->getContlModulosByEmpresa();
       
       $modulo_admin = $cont_modulos->admin;
+      $modulo_networking = $cont_modulos->networking;
       $modulo_project = $cont_modulos->project;
       
-      $total_modulos = $modulo_admin + $modulo_project;
+      $total_modulos = $modulo_admin + $modulo_project + $modulo_networking;
       
       $cont_modulos = 0;
       foreach ($modulos as $modulo) {
@@ -247,13 +248,13 @@
                 $usuario = $this->session->userdata('user_id');
                 $dados_user = $this->site->getUser($usuario);
                 ?>
-              <img src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="user-image" alt="User Image">
+              <img src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="user-image" alt="User Image">
               <span class="hidden-xs"><?php echo $dados_user->first_name; ?></span>
             </a>
             <ul class="dropdown-menu">
               <!-- User image -->
               <li class="user-header">
-                <img src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="img-circle" alt="User Image">
+                <img src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="img-circle" alt="User Image">
 
                 <p>
                   <?php echo $dados_user->first_name.' - '.$dados_user->cargo; ?>

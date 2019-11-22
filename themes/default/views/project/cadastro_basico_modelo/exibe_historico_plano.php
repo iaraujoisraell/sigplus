@@ -188,7 +188,7 @@ if (isset($_POST)) {
     <div class="form-group">          
         <font class="label label-<?php echo $label; ?>" style="font-size: 10px; font-weight: bold"><?php echo $total_obs--.' - '. $row["first_name"]; ?>  </font> 
           <font class="label label-default" style="font-size: 8px; font-style: italic">( <?php echo date('d/m/Y H:i:s', strtotime($row["data_envio"])); ?> )</font>
-          <font style="font-size: 12px;"> : <?php echo strip_tags($row["observacao"]); ?> </font>
+          <font style="font-size: 12px;"> : <?php echo $row["observacao"]; ?> </font>
           
       <?php if($row["anexo"] != null){  ?> 
       <font style="font-size: 12px;"><a href="<?= base_url() ?>assets/uploads/historico_acoes/<?php echo $row["anexo"]; ?>" target="_blank"><i class="fa fa-chain"></i>Ver Anexo</a></font><?php } ?>

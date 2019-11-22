@@ -71,7 +71,7 @@ $config['url_suffix'] = '';
 | than english.
 |
 */
-$config['language'] = 'english';
+$config['language'] = 'portuguese';
 
 /*
 |--------------------------------------------------------------------------
@@ -378,7 +378,7 @@ $config['sess_regenerate_destroy'] = FALSE;
 |       'cookie_httponly') will also affect sessions.
 |
 */
-$config['cookie_prefix']    = 'sma_';
+$config['cookie_prefix']    = 'sig_';
 $config['cookie_domain']    = '';
 $config['cookie_path']      = '/';
 $config['cookie_secure']    = FALSE;

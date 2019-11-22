@@ -28,7 +28,7 @@
         
          if ($dataHoje <= $data_prazo) {
             $novo_status = 'PENDENTE';
-            $desc_tipo = "primary";
+            $desc_tipo = "warning";
         }
         
           if ($dataHoje > $data_prazo) {
@@ -59,7 +59,7 @@
        
     }else if($acao->status == "CONCLUÍDO"){
         $novo_status = 'CONCLUÍDO';
-         $desc_tipo = "success";
+        $desc_tipo = "success";
     }else if($acao->status == "AGUARDANDO VALIDAÇÃO"){
          $novo_status = 'AGUARDANDO VALIDAÇÃO';
          $desc_tipo = "warning";
@@ -142,11 +142,15 @@
             <div class="col-lg-12">
                 <button  class="btn btn-primary " onclick="history.go(-1)"><i class="fa fa-backward"></i><?= lang('Voltar') ?></button>
                 <?php if($retorno == 1){ ?>
-                <a href="<?= site_url('project/retorno_acao/'.$acao->idplanos); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-olive-active"><i class="fa fa-check"></i> Validar Ação</a>
-            <?php } ?>
-                <a style="color: #ffffff;" class="btn bg-red " title="Cancelar Ação"  href="<?= site_url('project/visualiza_acao/'.$acao->idplanos.'/3'); ?>"> Cancelar Ação <i class="fa fa-ban"></i></a> 
-               
-             </div>
+                <a href="<?= site_url('project/mudar_status_acao_retorno/'.$acao->idplanos.'/1'); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-green-active"><i class="fa fa-check"></i> Concluir Ação</a>
+                <a href="<?= site_url('project/mudar_status_acao_retorno/'.$acao->idplanos.'/2'); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-orange"><i class="fa fa-rotate-left"></i> Retornar como pendente</a>
+                <?php } ?>
+                <a title="Cancelar Ação"  href="<?= site_url('project/mudar_status_acao_retorno/'.$acao->idplanos.'/3'); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-red"><i class="fa fa-ban"></i> Cancelar Ação</a>
+                <?php if($acao->status == "CONCLUÍDO"){ ?>
+                <a title="Tonar a Ação Pendente"  href="<?= site_url('project/mudar_status_acao_retorno/'.$acao->idplanos.'/2'); ?>" data-toggle="modal" data-target="#myModal" class="btn bg-yellow"><i class="fa fa-edit"></i> Tornar Pendente</a>
+                <?php } ?>
+                <!--  <a style="color: #ffffff;" class="btn bg-red " title="Cancelar Ação"  href="<?= site_url('project/visualiza_acao/'.$acao->idplanos.'/3'); ?>"><i class="fa fa-ban"></i> Cancelar Ação </a> -->
+            </div>
         </div>
     </div>  
     
@@ -186,6 +190,7 @@
                                     echo form_open_multipart("project/manutencao_acao_pendente_form/$acao->idplanos", $attrib);
                                     echo form_hidden('id', $acao->idplanos);
                                     echo form_hidden('idatas', $acao->idplano);
+                                    
                                     ?>
                                     <div class="col-md-12">
                                         <!-- ITEM EVENTO -->
@@ -215,7 +220,7 @@
                                         }
                                       //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
                                         echo form_dropdown('categoria', $wu_cat, (isset($_POST['categoria']) ? $_POST['categoria'] : $acao->categoria_plano), 'id="categoria"  class="form-control  select" data-placeholder="' . lang("Selecione o(s) Responsavel(eis)") . ' "   style="width:100%;"   ');
-                              
+                                        
                                         ?>
                                     </div>
                                 </div>    
@@ -316,12 +321,12 @@
                                     <center>
 
                                         <div class="col-md-12">
-<?php echo form_submit('add_item', lang("Atualizar Cadastro"), 'id="add_item" class="btn btn-success" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
-                                            <button  class="btn btn-danger" onclick="history.go(-1)"><?= lang('Sair') ?></button>
+                        <?php echo form_submit('add_item', lang("Atualizar Cadastro"), 'id="add_item" class="btn btn-primary" style="padding: 6px 15px; margin:15px 0;" onclick="alertas();" '); ?>
+                                            <button  class="btn btn-danger" onclick="history.go(-1)"><?= lang('Voltar') ?></button>
 
                                         </div>
                                     </center>
-<?php echo form_close(); ?>
+                    <?php echo form_close(); ?>
                                 </div>       
                             </div>   
                         </div>

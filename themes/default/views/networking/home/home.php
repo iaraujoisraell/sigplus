@@ -32,16 +32,19 @@
         @media (max-width: 767px) {}
     </style>
     <!-- /.col -->
+    <?php 
+    $empresa = $this->session->userdata('empresa');
+    ?>
     <div class="col-md-12">
           <!-- Widget: user widget style 1 -->
           <div class="box box-widget widget-user">
             <!-- Add the bg color to the header using any of the bg-* classes -->
-            <div class="widget-user-header bg-black" style="background: url('<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png' ?>') center center; background-repeat: no-repeat;  width: 100%; ">
+            <div class="widget-user-header bg-black" style="background: url('<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png' ?>') center center; background-repeat: no-repeat;  width: 100%; ">
               <h3 class="widget-user-username"><?php echo $dados_user->first_name; ?></h3>
               <h5 class="widget-user-desc"><?php echo $dados_user->cargo; ?></h5>
             </div>
             <div class="widget-user-image">
-                <img style="width: 88px; height: 88px;" class="img-circle" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" alt="User Avatar">
+                <img style="width: 88px; height: 88px;" class="img-circle" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" alt="User Avatar">
             </div>
             <div class="box-footer">
               <div class="row">

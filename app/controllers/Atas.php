@@ -520,16 +520,15 @@ class Atas extends MY_Controller
         $this->sma->checkPermissions();
       
       
-        $this->form_validation->set_rules('discussao', lang("Discussao"), 'required');
+        $this->form_validation->set_rules('id', lang("Discussao"), 'required');
         $date_cadastro = date('Y-m-d H:i:s');       
         
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
+       
         
           if ($this->form_validation->run() == true) {
-           
-            $discussao = $this->input->post('discussao');
+            
+            $discussao = $this->input->post('anotacao');
+            //echo $discussao; exit;
             $titulo_discussao = $this->input->post('titulo_discussao');
             $id_ata = $this->input->post('id');
             
@@ -539,11 +538,11 @@ class Atas extends MY_Controller
                 'titulo_discussao' => $titulo_discussao
             );
            
-         
+       
             $this->atas_model->updateAta($id_ata, $data_ata);
             
             $this->session->set_flashdata('message', lang("ATA Alterada com Sucesso!!!"));
-            redirect("Atas/plano_acao/".$id_ata);
+            redirect("Atas/exibir_ata/".$id_ata);
             
         } else {
 
@@ -712,12 +711,10 @@ class Atas extends MY_Controller
                     'descricao' => "Ação Criada com sucesso",
                     'empresa' => $empresa
                   );
-                $this->atas_model->add_logPlano($data_log);
+               // $this->atas_model->add_logPlano($data_log);
 
                // LOG GERAL
-                
                 $ip = $_SERVER["REMOTE_ADDR"];
-
                 $logdata = array('date' => date('Y-m-d H:i:s'),
                     'type' => 'INSERT',
                     'description' => 'Cadastro de uma nova Ação, ID: '.$id_acao,
@@ -1519,7 +1516,7 @@ class Atas extends MY_Controller
             $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjeto($projetos_usuario->projeto_atual);   
              
                    
-            $this->page_construct_project('project/cadastro_basico_modelo/atas/ata', $meta, $this->data);
+            $this->page_construct_ata('project/cadastro_basico_modelo/atas/ata', $meta, $this->data);
             
           }
         }
@@ -1841,7 +1838,7 @@ class Atas extends MY_Controller
             $this->data['eventos'] = $this->projetos_model->getAllEventosItemEventoByProjeto($projetos_usuario->projeto_atual);   
              
                    
-            $this->page_construct_project('project/cadastro_basico_modelo/atas/edita_ata', $meta, $this->data);
+            $this->page_construct_ata('project/cadastro_basico_modelo/atas/edita_ata', $meta, $this->data);
             
           }
         }

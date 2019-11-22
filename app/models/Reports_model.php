@@ -11,7 +11,7 @@ class Reports_model extends CI_Model
     /****************** Retorna os Emails não enviado ************************/
     public function getAllEmailsPendentes() {
         
-        $statement = "SELECT * FROM sig_emails where enviado = 0";
+        $statement = "SELECT * FROM sig_emails where enviado = 0 and empresa = 6";
         $q = $this->db->query($statement);
       
         if ($q->num_rows() > 0) {

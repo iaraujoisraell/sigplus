@@ -312,7 +312,7 @@ class Networking_model extends CI_Model
        
         
         $statement = "-- EQUIPE DO PROJETO
-            SELECT distinct m.id as marco, null as invite, null as feriado,   p.projeto as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
+            SELECT distinct m.id as marco, null as invite, null as feriado,   p.title as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
             FROM sig_projetos_marcos m
             inner join sig_projetos p on p.id = m.projetos_id
             inner join sig_projetos_equipes e on e.projeto_id = m.projetos_id
@@ -320,7 +320,7 @@ class Networking_model extends CI_Model
 
             UNION
             -- PARTES INTERESSADA
-            SELECT distinct m.id as marco, null as invite, null as feriado,  p.projeto as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
+            SELECT distinct m.id as marco, null as invite, null as feriado,  p.title as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
             FROM sig_projetos_marcos m
             inner join sig_projetos p on p.id = m.projetos_id
             inner join sig_projetos_partes_interessadas i on i.projetos_id = m.projetos_id
@@ -328,7 +328,7 @@ class Networking_model extends CI_Model
 
             UNION
             -- GERENTE DO PROJETO
-            SELECT distinct m.id as marco, null as invite, null as feriado,  p.projeto as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
+            SELECT distinct m.id as marco, null as invite, null as feriado,  p.title as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
             FROM sig_projetos_marcos m
             inner join sig_projetos p on p.id = m.projetos_id
             inner join sig_users_setor us on us.id = p.gerente_area
@@ -336,7 +336,7 @@ class Networking_model extends CI_Model
 
             UNION
             -- COORDENADOR DO PROJETO
-            SELECT distinct m.id as marco, null as invite, null as feriado,  p.projeto as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
+            SELECT distinct m.id as marco, null as invite, null as feriado,  p.title as projeto, m.empresa_id,m.descricao,m.data_prevista, null as hora_inicio, null as hora_fim, null as tipo_invite
             FROM sig_projetos_marcos m
             inner join sig_projetos p on p.id = m.projetos_id
             inner join sig_users_setor us on us.id = p.edp_id

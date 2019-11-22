@@ -439,7 +439,7 @@ background-color: #f4f4f4;
                                 </div>
                                 <center>
                                     <div class="col-md-12">
-                                <?php echo form_submit('add_acao_arquivo', lang("Adcionar Arquivo"), 'id="add_item" class="btn btn-primary " style="padding: 6px 15px; margin:15px 0;"  " '); ?>
+                                <?php echo form_submit('add_acao_arquivo', lang("Adicionar Arquivo"), 'id="add_item" class="btn btn-primary " style="padding: 6px 15px; margin:15px 0;"  " '); ?>
                                 <?php echo form_close(); ?>
                                     </div>
                                 </center>
@@ -512,6 +512,7 @@ background-color: #f4f4f4;
                                     }
                                     
                                   });
+                                  $('observacao').val('');
                                  document.getElementById("observacao").value = "";
                                 }
                                 
@@ -560,7 +561,7 @@ background-color: #f4f4f4;
                                                         <div class="form-group">  
                                                         <font  class="label label-<?php echo $label; ?>" style="font-size: 12px; font-weight: bold"><?php echo $cont--.' - '. $observacao->first_name; ?>  </font>
                                                         <font class="label label-default"  style="font-size: 8px; font-style: italic">( <?php echo date('d/m/Y H:i:s', strtotime( $observacao->data_envio)); ?> )</font>
-                                                        <font  style="font-size: 12px;"><?php echo ' : '.  strip_tags($observacao->observacao); ?> </font> 
+                                                        <font  style="font-size: 12px;"><?php echo ' : '.  $observacao->observacao; ?> </font> 
                                                         </div>
                                                     </div>
                                                       <?php if($observacao->anexo != null){  ?> 
@@ -578,7 +579,10 @@ background-color: #f4f4f4;
                                <div class="col-md-12">
                                     <div class="form-group">
                                     <?= lang("Descrição ", "observacao"); ?>
-                                        <input class="form-control" onFocus="this.value=''; " id="observacao" name="observacao" maxlength="500" required="true">                            
+                                        <textarea class="form-control" onFocus="this.value=''; " id="observacao" name="observacao" maxlength="500" >
+                                            
+                                        </textarea>
+                                                                   
                                     </div>
                                 </div>
 

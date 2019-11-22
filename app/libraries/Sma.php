@@ -525,7 +525,7 @@ class Sma
         }
     }
     
-    public function generate_pdf_plano_acao($content, $name , $output_type = null, $footer = null, $margin_bottom = null, $header = null, $margin_top = null, $orientation = 'P', $logo_top = null, $logo_bottom = null, $usuario_emitiu, $documentacao)
+    public function generate_pdf_plano_acao($content, $name , $output_type = null, $footer = null, $margin_bottom = null, $header = null, $margin_top = null, $orientation = 'P', $logo_top = null, $logo_bottom = null, $usuario_emitiu, $empresa_ata)
     {
         if (!$output_type) {
             $output_type = 'D';
@@ -561,27 +561,32 @@ class Sma
         
         $pdf->SetFooter($this->Settings->site_name.'<br> Emitido por: '.$usuario_emitiu.' <br> Em : '. date("d/m/Y", strtotime($date_cadastro)).' '.$hotas. '||{PAGENO}/{nbpg}', '', TRUE); // For simple text footer
        
-    
+        
         
         if($logo_top){
-             $imagem_header = '<img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/logos/'.$logo_top.'">';  
+             $imagem_header = '<img  width="70px" height="70px; " src="'.base_url() . 'assets/uploads/'.$empresa_ata.'/logos/'.$logo_top.'">';  
         }else{
-             $imagem_header = '<img  width="70px" height="70px;" src="'. base_url() . 'assets/uploads/logos/logo_sig.jpeg">';  
+             $imagem_header = '<img  width="70px" height="70px; " src="'.base_url() . 'assets/uploads/logos/logo_sig.jpeg">';  
         }
          
          
-              
              
          $conteudo_header = '<table style = "width : 100%;" >'
                               . '<tr>'
-                                    . '<td style = "width : 80%;  "><img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/logos/cabecalho_plano_acao_sig.png"></td>'
-                                    . '<td style = "width : 20%;  position: relative; float: right; ">'.$imagem_header. '</td>'
+                                    . '<td style = "width : 50px;   ">'.$imagem_header. '</td>'
+                                    . '<td style = "width : 10px; padding-left: 70px;   "><p>  </p></td>'
+                                    
+                                    . '<td style = "width : 10px; padding-left: 50px;   "><p>  </p></td>'
+                                    . '<td style = "width = 200px;  "><h2> REGISTRO DE ATIVIDADE DE TRABALHO</h2></td>'
+                                    
                                 . '</tr>'
                               . '</table>';
+          
+         
+          
         
          
          $header = $conteudo_header;
-        
         
         
          if($logo_bottom){
@@ -629,7 +634,7 @@ class Sma
         }
     }
     
-    public function generate_pdf_registro_atividade($content, $name , $output_type = null, $footer = null, $margin_bottom = null, $header = null, $margin_top = null, $orientation = 'L', $logo_top = null, $logo_bottom = null, $usuario_emitiu, $documentacao)
+    public function generate_pdf_registro_atividade($content, $name , $output_type = null, $footer = null, $margin_bottom = null, $header = null, $margin_top = null, $orientation = 'L', $logo_top = null, $logo_bottom = null, $usuario_emitiu, $empresa_ata)
     {
         if (!$output_type) {
             $output_type = 'D';
@@ -666,11 +671,11 @@ class Sma
         $pdf->SetFooter($this->Settings->site_name.'<br> Emitido por: '.$usuario_emitiu.' <br> Em : '. date("d/m/Y", strtotime($date_cadastro)).' '.$hotas. '||{PAGENO}/{nbpg}', '', TRUE); // For simple text footer
        
     
-        
-        if($logo_top){
-             $imagem_header = '<img  width="100%" height="70px; " src="'. base_url() . 'assets/uploads/'.$empresa.'/logos/'.$logo_top.'">';  
+        $logo_top = 'vision.jpg';
+            if($logo_top){
+             $imagem_header = '<img  width="70px" height="70px; " src="'.base_url() . 'assets/uploads/'.$empresa_ata.'/logos/'.$logo_top.'">';  
         }else{
-             $imagem_header = '<img  width="70px" height="70px;" src="'. base_url() . 'assets/uploads/logos/logo_sig.jpeg">';  
+             $imagem_header = '<img  width="70px" height="70px; " src="'.base_url() . 'assets/uploads/logos/logo_sig.jpeg">';  
         }
          
          

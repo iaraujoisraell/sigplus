@@ -1300,7 +1300,7 @@ order by su.nome asc
     {
          
        $empresa = $this->session->userdata('empresa');
-       $statement = "SELECT distinct j.id as id, j.projeto as projeto
+       $statement = "SELECT distinct j.id as id, j.title as projeto
                     FROM sig_planos p
                     left join sig_atas a on a.id = p.idatas
                     left join sig_projetos j on j.id = a.projetos
@@ -1308,7 +1308,7 @@ order by su.nome asc
 
                     UNION
 
-                    SELECT distinct pj.id as id, pj.projeto as projeto
+                    SELECT distinct pj.id as id, pj.title as projeto
                     FROM sig_planos p
                     left join sig_projetos pj on pj.id = p.projeto
                     where responsavel = $usuario and p.empresa = $empresa and p.status != 'ABERTO' and p.projeto != '' ";

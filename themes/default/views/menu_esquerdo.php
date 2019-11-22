@@ -1,5 +1,5 @@
 <?php
-
+$empresa = $this->session->userdata('empresa');
 /* 
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -13,16 +13,17 @@
       <!-- Sidebar user panel -->
       <div  class="user-panel">
         <div  class="pull-left image">
-            <img style="max-height: 50px; max-width: 50px;" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="img-circle"  alt="User Image">
+            <img style="max-height: 50px; max-width: 50px;" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" class="img-circle"  alt="User Image">
         </div>
           <?php
                 $usuario = $this->session->userdata('user_id');
                 $users_dados = $this->site->getUser($usuario);
                 $modulo_atual = $users_dados->modulo_atual;
+                 
                 //retorna o projeto atual
                 $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                 $status_projeto = $projetos->status;
-                
+               //echo 'aqui : '.$status_projeto;
                 $empresa = $this->session->userdata('empresa');
                 $empresa_dados = $this->owner_model->getEmpresaById($empresa);
                 $nome_empresa = $empresa_dados->razaoSocial;

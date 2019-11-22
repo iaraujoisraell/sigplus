@@ -2024,7 +2024,7 @@ class Project extends MY_Controller
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->load->view($this->theme . 'projetos/documentacao/add', $this->data);
 
-            $this->page_construct_project('project/cadastro_basico_modelo/atas/cadastro', $meta, $this->data);
+            $this->page_construct_ata('project/cadastro_basico_modelo/atas/cadastro', $meta, $this->data);
         }
     }
 
@@ -2239,14 +2239,12 @@ class Project extends MY_Controller
     public function plano_acao_detalhes($id_pa)
     {
      
-        if ($this->input->get('id')) {
-            $id = $this->input->get('id');
-        }
+      
         
-         $this->form_validation->set_rules('descricao', lang("Descrição"), 'required');
+       //  $this->form_validation->set_rules('descricao', lang("Descrição"), 'required');
         $this->form_validation->set_rules('data_inicio', lang("Data Início e Término"), 'required');
         $this->form_validation->set_rules('evento', lang("Item do Evento"), 'required');
-       // $this->form_validation->set_rules('responsavel', lang("Responsável"), 'required');
+      //  $this->form_validation->set_rules('id', lang("id"), 'required');
        
       
         
@@ -2262,6 +2260,14 @@ class Project extends MY_Controller
             $evento = $this->input->post('evento'); 
             
             $descricao = $this->input->post('descricao');
+            $descricao = trim($descricao);
+             if(!$descricao){
+                    $this->session->set_flashdata('error', lang("Informe a descrição da ação!!!"));
+                    echo "<script>alert('Informe a descrição da ação!')</script>";
+                    echo "<script>history.go(-1)</script>";
+                    exit;
+                 }
+                 
             $onde = $this->input->post('onde');
             $porque = $this->input->post('porque');
             $como = $this->input->post('como');
@@ -2435,7 +2441,6 @@ class Project extends MY_Controller
                 'onde' => $onde,
                 'como' => $como,
                 'porque' => $porque,
-                'descricao' => $descricao,
                 'custo' => $custo_descricao,
                 'valor_custo' => $valor_custo,
                 'data_entrega_demanda' => $dataInicio, 
@@ -2941,7 +2946,7 @@ class Project extends MY_Controller
                                                             
             $this->data['users'] = $this->atas_model->getAllUsersSetores(); 
             //$this->data['macro'] = $this->atas_model->getAllMacroProcesso();
-          
+    
            // $this->data['projetos'] = $this->atas_model->getAllProjetos();      
             $this->data['ata'] = $id;
             $this->data['plano_acao'] = $this->atas_model->getPlanoAcaoByID($id);
@@ -2959,7 +2964,7 @@ class Project extends MY_Controller
             $this->data['participantes_usuarios'] = $participantes_usuario;
             //$this->data['participantes_lista'] = "$nomes_participantes";
            
-            $this->page_construct_project('project/cadastro_basico_modelo/plano_acao/novaAcao', $meta, $this->data);
+            $this->page_construct_ata('project/cadastro_basico_modelo/plano_acao/novaAcao', $meta, $this->data);
              //$this->load->view($this->theme . 'project/cadastro_basico_modelo/plano_acao/novaAcao', $this->data);
          
     }
@@ -3160,7 +3165,7 @@ class Project extends MY_Controller
                 'status' => 'ABERTO',
                 'data_elaboracao' => $date_cadastro,   
                 'responsavel_elaboracao' => $usuario,
-                'eventos' => $evento,
+                'eventos' => $evento, 
                 'status_tipo' => 1,
                 'sequencial' => $sequencia,
                 'empresa' => $empresa,
@@ -5621,7 +5626,7 @@ class Project extends MY_Controller
     /************************************************************************************************************
      ****************************************** LISTA DE AÇÕES **********************************************
      ************************************************************************************************************/
-    public function lista_acoes($menu)
+    public function lista_acoes($menu, $item_escopo)
     {
         $this->sma->checkPermissions();
 
@@ -5670,6 +5675,8 @@ class Project extends MY_Controller
             }else if($tipo == 5){
                 $status_filtro = 'CANCELADO';
             }
+            
+            
 
             $tipo = 1;
             $this->data['tipo'] = $tipo;
@@ -5678,7 +5685,7 @@ class Project extends MY_Controller
             $this->data['menu'] = $menu;
             $this->data['retorno'] = 0;
             $this->data['responsaveis'] = $this->atas_model->getAllUsersSetores();         
-            $this->data['planos'] = $this->projetos_model->getAllAcoesByProjetoAtual($tipo,$responsavel_filtro, $status_filtro);
+            $this->data['planos'] = $this->projetos_model->getAllAcoesByProjetoAtual($tipo,$responsavel_filtro, $status_filtro, $item_escopo);
             
 
             $this->page_construct_project('project/acoes/index', $meta, $this->data);
@@ -5883,6 +5890,199 @@ class Project extends MY_Controller
             $this->load->view($this->theme . 'project/acoes/acaoRetorno', $this->data);
             
          }
+    }
+    
+    // MODAL DE CONCLUIR AÇÃO
+    public function mudar_status_acao_retorno($id = null, $tipo)
+    {
+     
+        if ($this->input->get('id')) {
+            $id = $this->input->get('id');
+        }
+        
+        $this->form_validation->set_rules('idplano', lang("idplano"), 'required');
+       // $this->form_validation->set_rules('validar', lang("cadastrar"), 'required');
+        
+         if ($this->form_validation->run() == true) {
+             
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');  
+            $idplano = $this->input->post('idplano');
+            $tipo = $this->input->post('tipo');
+            $lista_acoes = $this->input->post('lista_acoes');
+            //$sequencial = $this->input->post('sequencial');
+            $ip = $_SERVER["REMOTE_ADDR"];
+            $envia_email = 1;
+            
+            if($tipo == 1){
+                $status = "CONCLUÍDO";    
+            }else if($tipo == 2){
+                $status = "PENDENTE";    
+            }else if($tipo == 3){
+                $status = "CANCELADO";    
+            }
+            
+            $observacao = trim($this->input->post('observacao')); 
+            
+            $acao = $this->atas_model->getPlanoByID($idplano);
+            $responsavel = $acao->responsavel;  //RESPONSÁVEL ATUAL
+            $sequencial = $acao->sequencial;  //RESPONSÁVEL ATUAL
+            $setor_responsavel_atual = $acao->setor;
+            
+            //echo 'aqui : '.$tipo.'- '.$idplano.'-'.$status.'-'.$responsavel.'-'.$sequencial; exit;
+            
+           
+           
+           
+            // DADOS DO USUÁRIO QUE ESTÁ ENVIANDO
+            $users_dados = $this->site->geUserByID($usuario);
+            $nome_usuario = $users_dados->first_name;
+            
+            
+            
+            $title = "Retorno de Ação ";
+            if($tipo == 1){
+                $texto_msg = "A ação $sequencial foi CONCLUÍDA com sucesso, pelo usuário $nome_usuario, Parabéns! ";
+                
+                $data_acao = array(
+                'status' => $status,
+                'andamento' => 100
+                );
+                
+            }else if($tipo == 2){
+                $texto_msg = "A ação $sequencial foi retornada pelo usuário $nome_usuario como PENDENTE. Favor verificar as observações na Aba comunicação. ";
+                
+                $data_acao = array(
+                'status' => $status
+                );
+            }else if($tipo == 3){
+                $texto_msg = "A ação $sequencial foi Cancelada pelo usuário $nome_usuario. ";
+                
+                $data_acao = array(
+                'status' => $status
+                );
+            }
+            
+           
+            
+            
+            $this->atas_model->updatePlano($idplano, $data_acao);
+            
+            $empresa = $this->session->userdata('empresa');
+             // ENVIA NOTIFICAÇÃO - QDO A AÇÃO NÃO VEM DE PROJETO
+            $data_notificacao = array(
+                'id_from' => $usuario,
+                'id_to' => $responsavel,
+                'title' => "$title",
+                'text' => "$texto_msg",
+                'lida' => 0,
+                'data' => $date_hoje,
+                'email' => $envia_email,
+                'idplano' => $idplano,
+                'empresa' => $empresa
+            );
+            $this->atas_model->add_notificacoes($data_notificacao);
+
+            //ENVIA E-MAIL - QDO A AÇÃO NÃO VEM DE PROJETO
+            $data_email = array(
+                'id_from' => $usuario,
+                'id_to' => $responsavel,
+                'title' => "$title",
+                'text' => "$texto_msg",
+                'lida' => 0,
+                'data' => $date_hoje,
+                'referencia' => "project > retorno_acao",
+                'idplano' => $idplano,
+                'empresa' => $empresa,
+                'enviado' => 0 
+                );
+            $this->atas_model->add_email($data_email);
+
+            
+           
+            
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+            'type' => 'RETORNO DE AÇÃO', 
+            'description' => "O EDP $nome_usuario enviou o retorno da ação: $sequencial. ",  
+            'userid' => $this->session->userdata('user_id'), 
+            'ip_address' => $_SERVER["REMOTE_ADDR"],
+            'tabela' => '',
+            'row' => '',
+            'depois' => '', 
+            'modulo' => 'Project',
+            'funcao' => 'Project/mudar_status_acao_retorno',  
+            'empresa' => $this->session->userdata('empresa'));
+            $this->owner_model->addLog($logdata);  
+            
+            $this->session->set_flashdata('message', lang("Retorno da ação enviada com Sucesso!!!"));
+            if($lista_acoes == 1){
+                redirect("project/lista_acoes/51");
+            }else{
+                redirect("project/acoes_aguardando_validacao/78");
+            }
+            
+            
+         }else{
+            $this->data['idplano'] = $id;
+            $this->data['acoes'] = $this->atas_model->getAllAcoes($id);
+            
+            // TIPO?
+            // 1 - CONCLUÍDO
+            // 2 - PENDENTE
+             $this->data['tipo'] = $tipo;
+            
+              if($tipo == 2){
+                $this->load->view($this->theme . 'project/acoes/pendente_acao_modal', $this->data);
+            } else{
+                
+                $this->load->view($this->theme . 'project/acoes/concluir_acao_modal', $this->data);
+            
+            }
+         }
+    }
+    
+    // cancelar plano de ação
+     public function plano_acao_update($id_pa)
+    {
+     
+         
+       
+               
+            $data_plano = array(
+                'status' => 2
+              
+            );
+            //  print_r($data_plano); exit;
+             $this->atas_model->updatePlanoAcao($id_pa, $data_plano);
+              
+            $date_hoje = date('Y-m-d H:i:s');    
+            $usuario = $this->session->userdata('user_id');
+            $empresa = $this->session->userdata('empresa');
+            $ip = $_SERVER["REMOTE_ADDR"];
+
+             
+            
+            $logdata = array('date' => date('Y-m-d H:i:s'), 
+                'type' => 'UPDATE', 
+                'description' => 'Update Plano de Ação ID:  '.$id_pa,  
+                'userid' => $this->session->userdata('user_id'), 
+                'ip_address' => $_SERVER["REMOTE_ADDR"],
+                'tabela' => $tabela_nome,
+                'row' => $id_pa,
+                'depois' => json_encode($data_campos_cadastro), 
+                'modulo' => 'welcome',
+                'funcao' => 'welcome/plano_acao_networking',  
+                'empresa' => $this->session->userdata('empresa'));
+           
+               $this->owner_model->addLog($logdata);  
+           // exit;
+            
+            $this->session->set_flashdata('message', lang("Cadastro atualizado com Sucesso!!!"));
+            redirect("project/plano_acao_detalhes/$id_pa");
+            
+         
+         
+         
     }
     
     /*

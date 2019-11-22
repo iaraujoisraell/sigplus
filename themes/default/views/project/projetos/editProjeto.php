@@ -10,6 +10,7 @@
           ?>
 
 <?php
+
    $usuario = $this->session->userdata('user_id');
    if(!$projeto->aba){
        $projeto->aba = 1;
@@ -43,10 +44,12 @@
             <li><a href="<?= site_url('project'); ?>"><i class="fa fa-home"></i> Portifólio</a></li>
             
             <li class="active">Editar Projeto</li>
+           
           </ol>
 
         </section>
-        <br>
+         <br><br>
+        
     </div> 
     </div>
     
@@ -125,7 +128,7 @@
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <?= lang("Nome do Projeto", "projeto"); ?>
-                                            <?php echo form_input('projeto', (isset($_POST['projeto']) ? $_POST['projeto'] : $projeto->projeto), 'maxlength="250" required class="form-control input-tip"  id="projeto"'); ?>
+                                            <?php echo form_input('projeto', (isset($_POST['projeto']) ? $_POST['projeto'] : $projeto->title), 'maxlength="250" required class="form-control input-tip"  id="projeto"'); ?>
                                         </div>
                                     </div>
 
@@ -143,7 +146,7 @@
                                                 $wu_cliente[$cliente->id] = $cliente->name;
                                             }
                                             //  echo form_dropdown('responsavel[]', $wu4, (isset($_POST['responsavel']) ? $_POST['responsavel'] : ""), 'id="slResponsavel"  class="form-control  select" data-placeholder="' . lang("Selecione o Responsável") . ' "  style="width:100%;" multiple  required="required"');
-                                            echo form_dropdown('cliente', $wu_cliente, (isset($_POST['cliente']) ? $_POST['cliente'] : "$projeto->cliente"), 'id="cliente" required="true"  class="form-control  select" data-placeholder="' . lang("Selecione o Cliente") . ' "   style="width:100%;" ');
+                                            echo form_dropdown('cliente', $wu_cliente, (isset($_POST['cliente']) ? $_POST['cliente'] : "$projeto->client_id"), 'id="cliente" required="true"  class="form-control  select" data-placeholder="' . lang("Selecione o Cliente") . ' "   style="width:100%;" ');
                                             ?>
 
                                         </div>
@@ -180,7 +183,7 @@
                                                 <i class="fa fa-edit"></i> 
                                             </a>
                                             <?php } ?>
-                                            <input name="data_inicio" <?php if($status == 'ATIVO'){ ?> readonly="true" <?php } ?> required="true" value="<?php echo $projeto->dt_inicio; ?>" class="form-control" type="date" >
+                                            <input name="data_inicio" <?php if($status == 'ATIVO'){ ?> readonly="true" <?php } ?> required="true" value="<?php echo $projeto->start_date; ?>" class="form-control" type="date" >
                                         </div>
                                     </div>
 
@@ -192,7 +195,7 @@
                                                 <i class="fa fa-edit"></i> 
                                             </a>
                                             <?php } ?>
-                                            <input name="data_termino" <?php if($status == 'ATIVO'){ ?> readonly="true" <?php } ?> required="true" value="<?php echo $projeto->dt_final; ?>" class="form-control" type="date" >
+                                            <input name="data_termino" <?php if($status == 'ATIVO'){ ?> readonly="true" <?php } ?> required="true" value="<?php echo $projeto->deadline; ?>" class="form-control" type="date" >
                                         </div>
                                     </div>
                                     <!-- GERENTE -->

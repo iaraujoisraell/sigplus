@@ -178,12 +178,12 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                       <div class="form-group">
                             <?= lang("Item do Evento", "slEvento"); ?>
                              <?php
-                            $wue[''] = '';
+                           // $wue[''] = '';
                           foreach ($eventos as $evento) {
                                 $wue[$evento->id] = $evento->nome_fase.' > '. $evento->nome_evento.' > '. resume($evento->descricao, 100). ' ( '.exibirData($evento->dt_inicio).' - '.exibirData($evento->dt_fim).' ) ';
 
                             }
-                            echo form_dropdown('evento', $wue, (isset($_POST['evento']) ? $_POST['evento'] : ""), 'id="slEvento"  class="form-control  select" data-placeholder="' . lang("Selecione o Item do Evento") . ' " required="required"  style="width:100%;"  ');
+                            echo form_dropdown('evento', $wue, (isset($_POST['evento']) ? $_POST['evento'] : ""), 'id="slEvento"  class="form-control  select" data-placeholder="' . lang("Selecione o Item do Evento") . ' " required="true"  style="width:100%;"  ');
                             ?>
                         </div>
                     </div>
@@ -238,7 +238,7 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                             
                                 <div class="col-md-6">
                                      <!-- QUEM -->
-                                  <div class="form-group">
+                                  <div class="form-group"   >
                                         <?= lang("Responsável ", "slResponsavel"); ?><small>(Quem ?)</small>
                                         <?php
                                         //$wu4[''] = '';
@@ -254,14 +254,14 @@ $projetos = $this->projetos_model->getProjetoAtualByID_completo();
                                 <div class="form-group">
                                 <?= lang("Data Início", "sldate"); ?><small>(Quando ?)</small>
                                 <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
-                                <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_inicio" type="date" value="<?php echo date('Y-m-d'); ?>" class="form-control"> 
+                                <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_inicio" required="true" type="date" value="<?php echo date('Y-m-d'); ?>" class="form-control"> 
 
                                 </div>
                          <!-- PRAZO ATE -->
                                 <div class="form-group">
                                     <?= lang("Data  Término", "sldate"); ?><small>(Quando ?)</small>
                                     <i class="fa fa-info-circle" title="A Data de Início e Término, precisa estar dentro do período de datas do Item do Evento selecionado."></i>
-                                    <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_termino" type="date" value="<?php echo date('Y-m-d'); ?>" class="form-control"> 
+                                    <input title="O período de data da ação, não pode estar fora do período de datas do Item de evento selecionado." name="data_termino" required="true" type="date" value="<?php echo date('Y-m-d'); ?>" class="form-control"> 
 
                                 </div>
                                     

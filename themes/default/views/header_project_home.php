@@ -159,19 +159,12 @@ $gerente_projeto = $resp_tecnico_fase->nome;
                 }
                 $percentagem = ($andamento_dias * 100)/$total_dias;
                 ?>
-                <div class="progress-group">
-                    <span class="progress-text">Dias Completados</span>
-                    <span class="progress-number"><b><?php echo $andamento_dias; ?></b>/<?php echo $total_dias; ?> dias</span>
-
-                    <div class="progress sm">
-                      <div class="progress-bar progress-bar-primary" style="width: <?php echo $percentagem; ?>%"></div>
-                    </div>
-                  </div> 
+                 
           <ol  class="breadcrumb">
               <li ><i class="fa fa-bookmark"></i>    <?php echo $nome_projeto.' '; ?> </li> <small class="label label-<?php echo $status_label; ?>" ><?php echo $status; ?></small>
               <li ><i class="fa fa-user"></i>  Gerente:    <?php echo $gerente_projeto; ?></li>
-              <li  ><i class="fa fa-calendar"></i> Início : <?php echo date("d/m/Y", strtotime($projetos->dt_inicio)); ?> </li>
-              <li ><i class="fa fa-flag-checkered"></i> Fim : <?php echo date("d/m/Y", strtotime($projetos->dt_final)); ?> </li>
+              <li  ><i class="fa fa-calendar"></i> Início : <?php echo date("d/m/Y", strtotime($projetos->start_date)); ?> </li>
+              <li ><i class="fa fa-flag-checkered"></i> Fim : <?php echo date("d/m/Y", strtotime($projetos->deadline)); ?> </li>
                <?php if($status == 'EM AGUARDO'){ ?> 
                      <li class="pull-right"> <a title="O Projeto deve estar ativo para que se possa cadastrar ações e gerencia-lo." href="<?= site_url('Project/ativarProjeto/'.$projetos->id); ?>" ><small class="btn btn-success btn-sm" > ATIVAR PROJETO <i class="fa fa-check"></i></small></a>  </li>
             <?php }  ?>   

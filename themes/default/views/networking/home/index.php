@@ -1,11 +1,13 @@
     <?php
      // $this->load->view($this->theme . 'header_networking_home', $meta);
-  
+
       $usuario = $this->session->userdata('user_id');
       $dados_user = $this->site->getUser($usuario);   
         
     ?>
-  
+   <?php 
+    $empresa = $this->session->userdata('empresa');
+    ?>
         <BR>
     <script>
         /*
@@ -69,12 +71,12 @@
           <!-- Widget: user widget style 1 -->
           <div class="box box-widget widget-user">
             <!-- Add the bg color to the header using any of the bg-* classes -->
-            <div class="widget-user-header bg-black" style="background: url('<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png' ?>') center center; background-repeat: no-repeat;  width: 100%; ">
+            <div class="widget-user-header bg-black" style="background: url('<?= $this->session->userdata('foto_capa') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/' . $this->session->userdata('foto_capa') : $assets . 'bi/dist/img/photo1.png' ?>') center center; background-repeat: no-repeat;  width: 100%; ">
               <h3 class="widget-user-username"><?php echo $dados_user->first_name; ?></h3>
               <h5 class="widget-user-desc"><?php echo $dados_user->cargo; ?></h5>
             </div>
             <div class="widget-user-image">
-                <img style="width: 88px; height: 88px;" class="img-circle" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" alt="User Avatar">
+                <img style="width: 88px; height: 88px;" class="img-circle" src="<?= $this->session->userdata('avatar') ? $assets . '../../../assets/uploads/'.$empresa.'/avatars/thumbs/' . $this->session->userdata('avatar') : $assets . 'images/' . $this->session->userdata('gender') . '.png'; ?>" alt="User Avatar">
             </div>
             <div class="box-footer">
               <div class="row">
@@ -554,7 +556,7 @@
 
 
                                  $assets = "themes/default/assets/";
-                                 $avatar_profile = "assets/uploads/avatars/thumbs/$avatar";
+                                 $avatar_profile = "assets/uploads/$empresa/avatars/thumbs/$avatar";
                                  $avatar_genero = "assets/images/$gender".'1'.".png";
 
 
