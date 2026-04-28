@@ -1,0 +1,22 @@
+[05-Aug-2022 15:03:46 UTC] PHP Warning:  require(vendor/phpmMailer/phpmMailer/src/Exception.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:03:46 UTC] PHP Warning:  require(vendor/phpmMailer/phpmMailer/src/Exception.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:03:46 UTC] PHP Fatal error:  require(): Failed opening required 'vendor/phpmMailer/phpmMailer/src/Exception.php' (include_path='.:/opt/cpanel/ea-php72/root/usr/share/pear') in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:12:10 UTC] PHP Warning:  require(vendor/phpmMailer/phpmMailer/src/Exception.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:12:10 UTC] PHP Warning:  require(vendor/phpmMailer/phpmMailer/src/Exception.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:12:10 UTC] PHP Fatal error:  require(): Failed opening required 'vendor/phpmMailer/phpmMailer/src/Exception.php' (include_path='.:/opt/cpanel/ea-php72/root/usr/share/pear') in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:12:39 UTC] PHP Warning:  require(vendor/phpmMailer/phpmMailer/src/Exception.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:12:39 UTC] PHP Warning:  require(vendor/phpmMailer/phpmMailer/src/Exception.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:12:39 UTC] PHP Fatal error:  require(): Failed opening required 'vendor/phpmMailer/phpmMailer/src/Exception.php' (include_path='.:/opt/cpanel/ea-php72/root/usr/share/pear') in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 4
+[05-Aug-2022 15:14:13 UTC] PHP Fatal error:  Uncaught Error: Class 'PHPMailer' not found in /home/sigplusapp/public_html/servicoEmail/smtp/index.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 9
+[05-Aug-2022 15:14:56 UTC] PHP Fatal error:  Uncaught Error: Class 'PHPMailer' not found in /home/sigplusapp/public_html/servicoEmail/smtp/index.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 9
+[05-Aug-2022 15:15:07 UTC] PHP Fatal error:  Uncaught Error: Class 'PHPMailer' not found in /home/sigplusapp/public_html/servicoEmail/smtp/index.php:9
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/servicoEmail/smtp/index.php on line 9
+[05-Aug-2022 15:18:52 UTC] PHP Fatal error:  Composer detected issues in your platform: Your Composer dependencies require a PHP version ">= 8.0.2". You are running 7.2.34. in /home/sigplusapp/public_html/servicoEmail/smtp/vendor/composer/platform_check.php on line 24

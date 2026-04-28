@@ -1,0 +1,32 @@
+[30-Sep-2023 22:41:40 UTC] PHP Warning:  pathinfo() expects parameter 1 to be string, array given in /home/sigplusapp/public_html/controle_upload/tasks.php on line 8
+[06-Oct-2023 20:49:27 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /home/sigplusapp/public_html/controle_upload/All.php:25
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/controle_upload/All.php on line 25
+[06-Oct-2023 20:55:06 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /home/sigplusapp/public_html/controle_upload/All.php:25
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/controle_upload/All.php on line 25
+[06-Oct-2023 20:56:32 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /home/sigplusapp/public_html/controle_upload/All.php:25
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/controle_upload/All.php on line 25
+[06-Oct-2023 21:05:38 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /home/sigplusapp/public_html/controle_upload/All.php:27
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/controle_upload/All.php on line 27
+[06-Oct-2023 21:07:51 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /home/sigplusapp/public_html/controle_upload/All.php:27
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/controle_upload/All.php on line 27
+[06-Oct-2023 21:08:17 UTC] PHP Fatal error:  Uncaught Error: Using $this when not in object context in /home/sigplusapp/public_html/controle_upload/All.php:27
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/controle_upload/All.php on line 27
+[16-Aug-2024 22:41:43 UTC] PHP Warning:  move_uploaded_file(): Unable to move '/tmp/phpFy72xb' to '../assets/intranet/arquivos/workflow_arquivos/campo_file/workflow-Certidao_De_Obito_651314f65a88c66bfd43bd3c8c-66bfd5a78fb6b.pdf' in /home/sigplusapp/public_html/controle_upload/All.php on line 87
+[16-Aug-2024 22:41:43 UTC] PHP Warning:  move_uploaded_file(): Unable to move '/tmp/phpTkS4Dm' to '../assets/intranet/arquivos/workflow_arquivos/campo_file/workflow-RG_do_Titular_Frente_Verso_6513150662e4f66bfd43bd3d08-66bfd5a790fe0.pdf' in /home/sigplusapp/public_html/controle_upload/All.php on line 87
+[16-Aug-2024 22:41:43 UTC] PHP Warning:  move_uploaded_file(): Unable to move '/tmp/phpDT6LoC' to '../assets/intranet/arquivos/workflow_arquivos/campo_file/workflow-CPF_do_Titular651315159b7ae66bfd43bd3d1a-66bfd5a791212.pdf' in /home/sigplusapp/public_html/controle_upload/All.php on line 87
+[16-Aug-2024 22:41:43 UTC] PHP Warning:  move_uploaded_file(): Unable to move '/tmp/php9u7UsZ' to '../assets/intranet/arquivos/workflow_arquivos/campo_file/workflow-RG_do_Solicitante_Frente_Verso_65131527c360466bfd43bd3d24-66bfd5a7914b6.pdf' in /home/sigplusapp/public_html/controle_upload/All.php on line 87
+[16-Aug-2024 22:41:43 UTC] PHP Warning:  move_uploaded_file(../assets/intranet/arquivos/workflow_arquivos/campo_file/workflow-CPF_do_Solicitante65131741020a766bfd43bd3d2c-66bfd5a791656.pdf): failed to open stream: No space left on device in /home/sigplusapp/public_html/controle_upload/All.php on line 87
+[16-Aug-2024 22:41:43 UTC] PHP Warning:  move_uploaded_file(): Unable to move '/tmp/phpr9Ebar' to '../assets/intranet/arquivos/workflow_arquivos/campo_file/workflow-CPF_do_Solicitante65131741020a766bfd43bd3d2c-66bfd5a791656.pdf' in /home/sigplusapp/public_html/controle_upload/All.php on line 87
+[16-Aug-2024 22:41:43 UTC] PHP Warning:  move_uploaded_file(): Unable to move '/tmp/phpbVLgbV' to '../assets/intranet/arquivos/workflow_arquivos/campo_file/workflow-Termo_de_Ciencia_das_Consequencias_Legais65131533e748666bfd43bd3d34-66bfd5a791788.pdf' in /home/sigplusapp/public_html/controle_upload/All.php on line 87

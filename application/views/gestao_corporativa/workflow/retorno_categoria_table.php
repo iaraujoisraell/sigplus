@@ -1,0 +1,1 @@
+<?php  $table_data = []; $table_data = array_merge($table_data, array('Ordem','Setor', 'Opções')); render_datatable($table_data, 'fluxos'); ?>

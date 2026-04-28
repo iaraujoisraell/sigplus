@@ -1,0 +1,922 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+$empresa_id = $this->session->userdata('empresa_id');
+?>
+
+<?php if (!$intranet) { ?>
+    <?php init_head(); ?>
+<?php } else { ?>
+    <?php init_head_intranet_novo(); ?>
+    <?php $this->load->view('gestao_corporativa/css_background'); ?>
+<?php } ?>
+<?php if (!$intranet) { ?>
+    <div id="wrapper">
+    <?php } ?>
+    <div class="content">
+        <?php if ($intranet) { ?>
+            <ol class="breadcrumb" style="background-color: white;">
+                <li><a href="<?= base_url('gestao_corporativa/intranet'); ?>"><i class="fa fa-home"></i> Home </a></li>  
+                <li><a href="<?= base_url('gestao_corporativa/intranet_admin/index/?group=staffs'); ?>"><i class="fa fa-list"></i> Cadastros- Colaboradores </a></li> 
+                <li class="active"> <?php echo $member->firstname . ' ' . $member->lastname; ?> </li>
+            </ol>
+        <?php } ?>
+        <div class="row">
+            <?php if (isset($member)) { ?>
+                <div class="col-md-12">
+                    <div class="panel_s">
+                        <div class="panel-body no-padding-bottom">
+                            <?php $this->load->view('admin/staff/stats'); ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="member">
+                    <?php echo form_hidden('isedit'); ?>
+                    <?php echo form_hidden('memberid', $member->staffid); ?>
+                </div>
+            <?php } ?>
+            <?php if (isset($member)) { ?>
+
+                <div class="col-md-12">
+
+                    <div class="panel_s">
+                        <div class="panel-body">
+                            <h4 class="no-margin"><?php echo $member->firstname . ' ' . $member->lastname; ?>
+                                <?php if ($member->last_activity && $member->staffid != get_staff_user_id()) { ?>
+                                    <small> - <?php echo _l('last_active'); ?>:
+                                        <span class="text-has-action" data-toggle="tooltip" data-title="<?php echo _dt($member->last_activity); ?>">
+                                            <?php echo time_ago($member->last_activity); ?>
+                                        </span>
+                                    </small>
+                                <?php } ?>
+                                <a href="#" onclick="small_table_full_view(); return false;" data-placement="left" data-toggle="tooltip" data-title="<?php echo _l('toggle_full_view'); ?>" class="toggle_view pull-right">
+                                    <i class="fa fa-expand"></i></a>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+
+            <?php
+            if ($intranet) {
+                echo form_open_multipart($this->uri->uri_string() . '?intranet=intranet', array('class' => 'staff-form', 'autocomplete' => 'off'));
+            } else {
+                echo form_open_multipart($this->uri->uri_string(), array('class' => 'staff-form', 'autocomplete' => 'off'));
+            }
+            ?>
+            <div class="col-md-<?php
+            if (!isset($member)) {
+                echo '8 col-md-offset-2';
+            } else {
+                echo '5';
+            }
+            ?>" id="small-table">
+                <div class="panel_s">
+                    <div class="panel-body">
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active">
+                                <a href="#tab_staff_profile" aria-controls="tab_staff_profile" role="tab" data-toggle="tab">
+                                    <?php echo _l('staff_profile_string'); ?>
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#staff_permissions" aria-controls="staff_permissions" role="tab" data-toggle="tab">
+                                    <?php echo _l('staff_add_edit_permissions'); ?>
+                                </a>
+                            </li>
+                            <li role="presentation">
+                                <a href="#staff_permissions_intranet" aria-controls="staff_permissions_intranet" role="tab" data-toggle="tab">
+                                    Permissões Intranet
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="tab_staff_profile"><?php if ($empresa_id == 2) { ?>
+
+                                    <div class="is-not-staff<?php
+                                    if (isset($member) && $member->admin == 1) {
+                                        echo ' hide';
+                                    }
+                                    ?>">
+                                        <div class="checkbox checkbox-primary">
+                                            <?php
+                                            $checked = '';
+                                            if (isset($member)) {
+                                                if ($member->is_not_staff == 1) {
+                                                    $checked = ' checked';
+                                                }
+                                            }
+                                            ?>
+                                            <input type="checkbox" value="1" name="is_not_staff" id="is_not_staff" <?php echo $checked; ?>>
+                                            <label for="is_not_staff"><?php echo _l('is_not_staff_member'); ?></label>
+                                        </div>
+                                        <hr />
+                                    </div>
+                                <?php } ?>
+
+                                <?php
+                                $this->load->model('Company_model');
+                                $companys = $this->Company_model->get_terceiros();
+                                ?>
+                                <div class="select-placeholder form-group" app-field-wrapper="terceiro_id">
+                                    <label for="terceiro_id" class="control-label">Empresas</label>
+                                    <select id="terceiro_id" name="terceiro_id" class="selectpicker" data-width="100%" data-none-selected-text="Nada selecionado" data-live-search="true">
+                                        <option value=""></option>
+                                        <?php foreach ($companys as $company) { ?>
+                                            <?php
+                                            $compid = '';
+                                            if ($company['id'] == $member->terceiro_id) {
+                                                $compid = 'selected';
+                                            }
+                                            ?>
+                                            <option <?php echo $compid; ?> value="<?php echo $company['id']; ?>"><?php echo $company['company']; ?></option>
+                                        <?php } ?>
+                                    </select>
+                                </div>
+
+                                <?php if ((isset($member) && $member->profile_image == NULL) || !isset($member)) { ?>
+                                    <div class="form-group">
+                                        <label for="profile_image" class="profile-image"><?php echo _l('staff_edit_profile_image'); ?></label>
+                                        <input type="file" name="profile_image" class="form-control" id="profile_image">
+                                    </div>
+                                <?php } ?>
+                                <?php if (isset($member) && $member->profile_image != NULL) { ?>
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-9">
+                                                <?php echo staff_profile_image($member->staffid, array('img', 'img-responsive', 'staff-profile-image-thumb')); ?>
+                                            </div>
+                                            <div class="col-md-3 text-right">
+                                                <a href="<?php echo admin_url('staff/remove_staff_profile_image/' . $member->staffid); ?>"><i class="fa fa-remove"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <?php $value = (isset($member) ? $member->firstname : ''); ?>
+                                        <?php $attrs = (isset($member) ? array() : array('autofocus' => true)); ?>
+                                        <?php echo render_input('firstname', 'staff_add_edit_firstname', $value, 'text', $attrs); ?>
+                                    </div>
+                                    <div class="col-md-6">
+
+                                        <?php $value = (isset($member) ? $member->lastname : ''); ?>
+                                        <?php echo render_input('lastname', 'staff_add_edit_lastname', $value); ?>
+                                    </div>
+                                </div>
+
+
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <?php $value = (isset($member) ? $member->email : ''); ?>
+                                        <?php echo render_input('email', 'staff_add_edit_email', $value, 'email', array('autocomplete' => 'off')); ?>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <?php $value = (isset($member) ? $member->cpf : ''); ?>
+                                        <div class="form-group" app-field-wrapper="cpf">
+                                            <label for="cpf" class="control-label">CPF</label>
+                                            <input type="text" id="cpf" name="cpf" class="form-control"  value="<?php echo $value; ?>" OnKeyPress="formatar('###.###.###-##', this);" maxlength="14">
+                                        </div>                                    
+                                    </div>
+                                    <div class="col-md-6">
+                                        <?php $value = (isset($member) ? $member->cargo : ''); ?>
+                                        <?php echo render_input('cargo', 'Cargo', $value, 'cargo', array('autocomplete' => 'off')); ?>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="data_nascimento" class="control-label"><?php echo 'Data Nascimento'; ?></label>
+                                            <input type="date"<?php if (has_permission_intranet('staff', '', 'edit')) { ?> name="data_nascimento"<?php } else { ?> disabled="true"<?php } ?> class="form-control" value="<?php echo $member->data_nascimento; ?>" id="data_nascimento">
+                                        </div> 
+                                    </div>
+
+                                </div>
+                                <?php
+                                if ($empresa_id == 4) {
+                                    ?>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <?php $value = (isset($member) ? $member->user : ''); ?>
+                                            <?php echo render_input('user', 'Usuário AD', $value, 'text', $attrs); ?>
+                                        </div>
+                                        <div class="col-md-6">
+
+                                            <?php $value = (isset($member) ? $member->num_ramal : ''); ?>
+                                            <?php echo render_input('num_ramal', 'Ramal', $value, 'number'); ?>
+                                        </div>
+                                    </div>
+                                <?php } ?>
+
+                                <?php
+                                if ($empresa_id == 2) {
+                                    $value = $member->usuario_sinconecta;
+                                    ?>
+                                    <?php
+                                    echo render_input('usuario_sinconecta', 'usuario_sinconecta', $value, 'usuario_sinconecta');
+                                    ?>
+
+                                    <?php
+                                    $selected = '';
+                                    foreach ($medicos as $medico) {
+
+                                        if ($medico['medicoid'] == $member->medico_id) {
+                                            $selected = $medico['medicoid'];
+                                        }
+                                    }
+                                    echo render_select('medico_id', $medicos, array('medicoid', array('nome_profissional', 'especialidade')), 'medico', $selected);
+                                }
+                                ?>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <?php $value = (isset($member) ? $member->phonenumber : ''); ?>
+                                        <div class="form-group" app-field-wrapper="phonenumber">
+                                            <label for="phonenumber" class="control-label">Telefone</label>
+                                            <input type="text" id="phonenumber" name="phonenumber" class="form-control"  value="<?php echo $value; ?>" onkeypress="mask(this, mphone);" onblur="mask(this, mphone);">
+                                        </div>                                    
+                                    </div>
+                                    <div class="col-md-6"><!-- comment -->
+                                    </div>
+                                    <div class="col-md-6"><!-- comment -->
+                                        <?php $value = (isset($member) ? $member->num_comercial : ''); ?>
+                                        <div class="form-group" app-field-wrapper="num_comercial">
+                                            <label for="num_comercial" class="control-label">Telefone Comercial</label>
+                                            <input type="text" id="num_comercial" name="num_comercial" class="form-control"  value="<?php echo $value; ?>" onkeypress="mask(this, mphone);" onblur="mask(this, mphone);">
+                                        </div> 
+                                    </div>
+                                </div>
+
+                                <!--<div class="form-group">
+                                    <label for="facebook" class="control-label"><i class="fa fa-facebook"></i> <?php echo _l('staff_add_edit_facebook'); ?></label>
+                                    <input type="text" class="form-control" name="facebook" value="<?php
+                                if (isset($member)) {
+                                    echo $member->facebook;
+                                }
+                                ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="linkedin" class="control-label"><i class="fa fa-linkedin"></i> <?php echo _l('staff_add_edit_linkedin'); ?></label>
+                                    <input type="text" class="form-control" name="linkedin" value="<?php
+                                if (isset($member)) {
+                                    echo $member->linkedin;
+                                }
+                                ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="skype" class="control-label"><i class="fa fa-skype"></i> <?php echo _l('staff_add_edit_skype'); ?></label>
+                                    <input type="text" class="form-control" name="skype" value="<?php
+                                if (isset($member)) {
+                                    echo $member->skype;
+                                }
+                                ?>">
+                                </div>-->
+                                <?php if ($empresa_id == 2) { ?>
+                                    <?php if (!is_language_disabled()) { ?>
+                                        <div class="form-group select-placeholder">
+                                            <label for="default_language" class="control-label"><?php echo _l('localization_default_language'); ?></label>
+                                            <select name="default_language" data-live-search="true" id="default_language" class="form-control selectpicker" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
+                                                <option value=""><?php echo _l('system_default_string'); ?></option>
+                                                <?php
+                                                foreach ($this->app->get_available_languages() as $availableLanguage) {
+                                                    $selected = '';
+                                                    if (isset($member)) {
+                                                        if ($member->default_language == $availableLanguage) {
+                                                            $selected = 'selected';
+                                                        }
+                                                    }
+                                                    ?>
+                                                    <option value="<?php echo $availableLanguage; ?>" <?php echo $selected; ?>><?php echo ucfirst($availableLanguage); ?></option>
+                                                <?php } ?>
+                                            </select>
+                                        </div>
+                                    <?php } ?>
+                                    <i class="fa fa-question-circle pull-left" data-toggle="tooltip" data-title="<?php echo _l('staff_email_signature_help'); ?>"></i>
+                                    <?php $value = (isset($member) ? $member->email_signature : ''); ?>
+                                    <?php echo render_textarea('email_signature', 'settings_email_signature', $value, ['data-entities-encode' => 'true']); ?>
+                                    <div class="form-group select-placeholder">
+                                        <label for="direction"><?php echo _l('document_direction'); ?></label>
+                                        <select class="selectpicker" data-none-selected-text="<?php echo _l('system_default_string'); ?>" data-width="100%" name="direction" id="direction">
+                                            <option value="" <?php
+                                            if (isset($member) && empty($member->direction)) {
+                                                echo 'selected';
+                                            }
+                                            ?>></option>
+                                            <option value="ltr" <?php
+                                            if (isset($member) && $member->direction == 'ltr') {
+                                                echo 'selected';
+                                            }
+                                            ?>>LTR</option>
+                                            <option value="rtl" <?php
+                                            if (isset($member) && $member->direction == 'rtl') {
+                                                echo 'selected';
+                                            }
+                                            ?>>RTL</option>
+                                        </select>
+                                    </div>
+                                <?php } ?>
+                                <div class="form-group row col-md-12">
+                                    <?php if (count($departments) > 0) { ?>
+                                        <label for="departments" class="w-100"><?php echo _l('staff_add_edit_departments'); ?></label>
+                                    <?php } ?>
+                                    <?php foreach ($departments as $department) { ?>
+                                        <div class="checkbox checkbox-primary col-md-6">
+                                            <?php
+                                            $checked = '';
+                                            if (isset($member)) {
+                                                foreach ($staff_departments as $staff_department) {
+                                                    if ($staff_department['departmentid'] == $department['departmentid']) {
+                                                        $checked = ' checked';
+                                                    }
+                                                }
+                                            }
+                                            ?>
+                                            <input type="checkbox" id="dep_<?php echo $department['departmentid']; ?>" name="departments[]" value="<?php echo $department['departmentid']; ?>"<?php echo $checked; ?>>
+                                            <label for="dep_<?php echo $department['departmentid']; ?>"><?php echo $department['name']; ?></label>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                                <?php $rel_id = (isset($member) ? $member->staffid : false); ?>
+                                <?php echo render_custom_fields('staff', $rel_id); ?>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <hr class="hr-10" />
+                                        <?php if (is_admin()) { ?>
+                                            <div class="checkbox checkbox-primary">
+                                                <?php
+                                                $isadmin = '';
+                                                if (isset($member) && ($member->staffid == get_staff_user_id() || is_admin($member->staffid))) {
+                                                    $isadmin = ' checked';
+                                                }
+                                                ?>
+                                                <input type="checkbox" name="administrator" id="administrator" <?php echo $isadmin; ?>>
+                                                <label for="administrator"><?php echo _l('staff_add_edit_administrator'); ?></label>
+                                            </div>
+                                        <?php } ?>
+                                        <?php if (!isset($member) && is_email_template_active('new-staff-created')) { ?>
+                                            <div class="checkbox checkbox-primary">
+                                                <input type="checkbox" name="send_welcome_email" id="send_welcome_email" checked>
+                                                <label for="send_welcome_email"><?php echo _l('staff_send_welcome_email'); ?></label>
+                                            </div>
+                                            <?php echo render_textarea('email_description', 'Descrição de Email Personalizado', '', array('rows' => 5)); ?>
+                                        <?php } ?>
+                                        <div class="checkbox checkbox-primary">
+                                            <input type="checkbox" name="master_portal" id="master_portal" <?php
+                                            if ($member->master_portal == 1) {
+                                                echo 'checked';
+                                            }
+                                            ?>>
+                                            <label for="master_portal">Acesso Master (PORTAL)</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php if (!isset($member) || is_admin() || !is_admin() && $member->admin == 0) { ?>
+                                    <!-- fake fields are a workaround for chrome autofill getting the wrong fields -->
+                                    <input  type="text" class="fake-autofill-field" name="fakeusernameremembered" value='' tabindex="-1"/>
+                                    <input  type="password" class="fake-autofill-field" name="fakepasswordremembered" value='' tabindex="-1"/>
+                                    <div class="clearfix form-group"></div>
+                                    <label for="password" class="control-label"><?php echo _l('staff_add_edit_password'); ?></label>
+                                    <div class="input-group">
+                                        <input type="password" class="form-control password" name="password" autocomplete="off">
+                                        <span class="input-group-addon">
+                                            <a href="#password" class="show_password" onclick="showPassword('password'); return false;"><i class="fa fa-eye"></i></a>
+                                        </span>
+                                        <span class="input-group-addon">
+                                            <a href="#" class="generate_password" onclick="generatePassword(this); return false;"><i class="fa fa-refresh"></i></a>
+                                        </span>
+                                    </div>
+                                    <?php if (isset($member)) { ?>
+                                        <p class="text-muted"><?php echo _l('staff_add_edit_password_note'); ?></p>
+                                        <?php if ($member->last_password_change != NULL) { ?>
+                                            <?php echo _l('staff_add_edit_password_last_changed'); ?>:
+                                            <span class="text-has-action" data-toggle="tooltip" data-title="<?php echo _dt($member->last_password_change); ?>">
+                                                <?php echo time_ago($member->last_password_change); ?>
+                                            </span>
+                                            <?php
+                                        }
+                                    }
+                                    ?>
+                                <?php } ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="staff_permissions">
+                                <?php
+                                hooks()->do_action('staff_render_permissions');
+                                $selected = '';
+                                foreach ($roles as $role) {
+                                    if (isset($member)) {
+                                        if ($member->role == $role['roleid']) {
+                                            $selected = $role['roleid'];
+                                        }
+                                    } else {
+                                        $default_staff_role = get_option('default_staff_role');
+                                        if ($default_staff_role == $role['roleid']) {
+                                            $selected = $role['roleid'];
+                                        }
+                                    }
+                                }
+                                ?>
+                                <?php echo render_select('role', $roles, array('roleid', 'name'), 'staff_add_edit_role', $selected); ?>
+                                <hr />
+                                <h4 class="font-medium mbot15 bold"><?php echo _l('staff_add_edit_permissions'); ?></h4>
+                                <?php
+                                $permissionsData = ['funcData' => ['staff_id' => isset($member) ? $member->staffid : null]];
+                                if (isset($member)) {
+                                    $permissionsData['member'] = $member;
+                                }
+                                $this->load->view('admin/staff/permissions', $permissionsData);
+                                ?>
+                            </div>
+                            <div role="tabpanel" class="tab-pane" id="staff_permissions_intranet">
+                                <?php
+                                hooks()->do_action('staff_render_permissions');
+                                $selected = '';
+                                foreach ($intranet_profile_types as $role) {
+                                    if (isset($member)) {
+                                        if ($member->intranet_profile_type_id == $role['id']) {
+                                            $selected = $role['id'];
+                                        }
+                                    } else {
+                                        $default_staff_role = get_option('default_staff_role');
+                                        if ($default_staff_role == $role['id']) {
+                                            $selected = $role['id'];
+                                        }
+                                    }
+                                }
+                                ?>
+                                <?php echo render_select('intranet_profile_type_id', $intranet_profile_types, array('id', 'name'), 'Tipo de usuário', $selected); ?>
+                                <hr />
+                                <h4 class="font-medium mbot15 bold"><?php echo _l('staff_add_edit_permissions'); ?></h4>
+                                <?php
+                                $permissionsData = ['funcData' => ['staff_id' => isset($member) ? $member->staffid : null]];
+                                if (isset($member)) {
+                                    $permissionsData['member'] = $member;
+                                }
+                                $this->load->view('admin/staff/permissions_intranet', $permissionsData);
+                                ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="btn-bottom-toolbar text-right btn-toolbar-container-out">
+                <button type="submit" class="btn btn-info"><?php echo _l('submit'); ?></button>
+            </div>
+            <?php echo form_close(); ?>
+            <?php if (isset($member)) { ?>
+                <div class="col-md-7 small-table-right-col">
+
+                    <?php if (is_admin()) { ?>
+                        <div class="panel_s">
+                            <div class="panel-body">
+                                <h4 class="no-margin">
+                                    INTRANET - LOG
+                                </h4>
+                                <hr class="hr-panel-heading" />
+
+                                <div class="clearfix"></div>
+                                <div class="mtop15">
+                                    <table class="table dt-table scroll-responsive" data-order-col="2" data-order-type="desc">
+                                        <thead>
+                                            <tr>
+                                                <th width="50%">Ação</th>
+                                                <th>Data</th>
+                                                <th>IP</th>
+                                                <th>Controller</th>
+                                                <th>Função</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $this->load->model('Intranet_general_model');
+                                            $logs = $this->Intranet_general_model->get_logs(get_staff_user_id());
+
+                                            foreach ($logs as $note) {
+                                                ?>
+                                                <tr>
+                                                    <td width="50%"><?php echo $note['action']; ?></td>
+                                                    <td data-order="<?php echo $note['date_created']; ?>"><?php echo _dt($note['date_created']); ?></td>
+                                                    <td><?php echo $note['ip']; ?></td>
+                                                    <td><?php echo $note['controller']; ?></td>
+                                                    <td><?php echo $note['function']; ?></td>
+                                                </tr>
+                                            <?php } ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    <?php } ?>
+                    <div class="panel_s">
+                        <div class="panel-body">
+                            <h4 class="no-margin">
+                                <?php echo _l('staff_add_edit_notes'); ?>
+                            </h4>
+                            <hr class="hr-panel-heading" />
+                            <a href="#" class="btn btn-success" onclick="slideToggle('.usernote'); return false;"><?php echo _l('new_note'); ?></a>
+                            <div class="clearfix"></div>
+                            <hr class="hr-panel-heading" />
+                            <div class="mbot15 usernote hide inline-block full-width">
+                                <?php echo form_open(admin_url('misc/add_note/' . $member->staffid . '/staff')); ?>
+                                <?php echo render_textarea('description', 'staff_add_edit_note_description', '', array('rows' => 5)); ?>
+                                <button class="btn btn-info pull-right mbot15"><?php echo _l('submit'); ?></button>
+                                <?php echo form_close(); ?>
+                            </div>
+                            <div class="clearfix"></div>
+                            <div class="mtop15">
+                                <table class="table dt-table scroll-responsive" data-order-col="2" data-order-type="desc">
+                                    <thead>
+                                        <tr>
+                                            <th width="50%"><?php echo _l('staff_notes_table_description_heading'); ?></th>
+                                            <th><?php echo _l('staff_notes_table_addedfrom_heading'); ?></th>
+                                            <th><?php echo _l('staff_notes_table_dateadded_heading'); ?></th>
+                                            <th><?php echo _l('options'); ?></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($user_notes as $note) { ?>
+                                            <tr>
+                                                <td width="50%">
+                                                    <div data-note-description="<?php echo $note['id']; ?>">
+                                                        <?php echo check_for_links($note['description']); ?>
+                                                    </div>
+                                                    <div data-note-edit-textarea="<?php echo $note['id']; ?>" class="hide inline-block full-width">
+                                                        <textarea name="description" class="form-control" rows="4"><?php echo clear_textarea_breaks($note['description']); ?></textarea>
+                                                        <div class="text-right mtop15">
+                                                            <button type="button" class="btn btn-default" onclick="toggle_edit_note(<?php echo $note['id']; ?>); return false;"><?php echo _l('cancel'); ?></button>
+                                                            <button type="button" class="btn btn-info" onclick="edit_note(<?php echo $note['id']; ?>);"><?php echo _l('update_note'); ?></button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><?php echo $note['firstname'] . ' ' . $note['lastname']; ?></td>
+                                                <td data-order="<?php echo $note['dateadded']; ?>"><?php echo _dt($note['dateadded']); ?></td>
+                                                <td>
+                                                    <?php if ($note['addedfrom'] == get_staff_user_id() || has_permission('staff', '', 'delete')) { ?>
+                                                        <a href="#" class="btn btn-default btn-icon" onclick="toggle_edit_note(<?php echo $note['id']; ?>); return false;"><i class="fa fa-pencil-square-o"></i></a>
+                                                        <a href="<?php echo admin_url('misc/delete_note/' . $note['id']); ?>" class="btn btn-danger btn-icon _delete"><i class="fa fa-remove"></i></a>
+                                                    <?php } ?>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel_s">
+                        <div class="panel-body">
+                            <h4 class="no-margin">
+                                <?php echo _l('task_timesheets'); ?> & <?php echo _l('als_reports'); ?>
+                            </h4>
+                            <hr class="hr-panel-heading" />
+                            <?php echo form_open($this->uri->uri_string(), array('method' => 'GET')); ?>
+                            <?php echo form_hidden('filter', 'true'); ?>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="select-placeholder">
+                                        <select name="range" id="range" class="selectpicker" data-width="100%">
+                                            <option value="this_month" <?php
+                                            if (!$this->input->get('range') || $this->input->get('range') == 'this_month') {
+                                                echo 'selected';
+                                            }
+                                            ?>><?php echo _l('staff_stats_this_month_total_logged_time'); ?></option>
+                                            <option value="last_month" <?php
+                                            if ($this->input->get('range') == 'last_month') {
+                                                echo 'selected';
+                                            }
+                                            ?>><?php echo _l('staff_stats_last_month_total_logged_time'); ?></option>
+                                            <option value="this_week" <?php
+                                            if ($this->input->get('range') == 'this_week') {
+                                                echo 'selected';
+                                            }
+                                            ?>><?php echo _l('staff_stats_this_week_total_logged_time'); ?></option>
+                                            <option value="last_week" <?php
+                                            if ($this->input->get('range') == 'last_week') {
+                                                echo 'selected';
+                                            }
+                                            ?>><?php echo _l('staff_stats_last_week_total_logged_time'); ?></option>
+                                            <option value="period" <?php
+                                            if ($this->input->get('range') == 'period') {
+                                                echo 'selected';
+                                            }
+                                            ?>><?php echo _l('period_datepicker'); ?></option>
+                                        </select>
+                                    </div>
+                                    <div class="row mtop15">
+                                        <div class="col-md-12 period <?php
+                                        if ($this->input->get('range') != 'period') {
+                                            echo 'hide';
+                                        }
+                                        ?>">
+                                                 <?php echo render_date_input('period-from', '', $this->input->get('period-from')); ?>
+                                        </div>
+                                        <div class="col-md-12 period <?php
+                                        if ($this->input->get('range') != 'period') {
+                                            echo 'hide';
+                                        }
+                                        ?>">
+                                                 <?php echo render_date_input('period-to', '', $this->input->get('period-to')); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 text-right">
+                                    <button type="submit" class="btn btn-success apply-timesheets-filters"><?php echo _l('apply'); ?></button>
+                                </div>
+                            </div>
+                            <?php echo form_close(); ?>
+                            <hr class="hr-panel-heading" />
+                            <table class="table dt-table scroll-responsive">
+                                <thead>
+                                <th><?php echo _l('task'); ?></th>
+                                <th><?php echo _l('timesheet_start_time'); ?></th>
+                                <th><?php echo _l('timesheet_end_time'); ?></th>
+                                <th><?php echo _l('task_relation'); ?></th>
+                                <th><?php echo _l('staff_hourly_rate'); ?> (<?php echo _l('als_staff'); ?>)</th>
+                                <th><?php echo _l('time_h'); ?></th>
+                                <th><?php echo _l('time_decimal'); ?></th>
+                                <th data-sortable="false"></th>
+                                </thead>
+                                <tbody>
+                                    <?php
+                                    $total_logged_time = 0;
+                                    foreach ($timesheets as $t) {
+                                        ?>
+                                        <tr>
+                                            <td><a href="#" onclick="init_task_modal(<?php echo $t['task_id']; ?>); return false;"><?php echo $t['name']; ?></a></td>
+                                            <td data-order="<?php echo $t['start_time']; ?>"><?php echo _dt($t['start_time'], true); ?></td>
+                                            <td data-order="<?php echo $t['end_time']; ?>">
+                                                <?php
+                                                // Allow admins or timer user to stop forgotten timers by staff member
+                                                if ($t['not_finished'] && (is_admin() || $t['staff_id'] === get_staff_user_id())) {
+                                                    ?>
+                                                    <a href="#"
+                                                    <?php
+                                                    // Do not show the note popover when there is no associated task
+                                                    // The user will be able to add note and select task in the popup window that will open
+                                                    if ($t['task_id'] != 0) {
+                                                        ?>
+                                                           data-toggle="popover"
+                                                           data-placement="bottom"
+                                                           data-html="true"
+                                                           data-trigger="manual"
+                                                           data-title="<?php echo _l('note'); ?>"
+                                                           data-content='<?php echo render_textarea('timesheet_note'); ?><button type="button"
+                                                           onclick="timer_action(this, <?php echo $t['task_id']; ?>, <?php echo $t['id']; ?>, 1);" class="btn btn-info btn-xs"><?php echo _l('save'); ?></button>'
+                                                           onclick="return false;"
+                                                       <?php } else { ?>
+                                                           onclick="timer_action(this, <?php echo $t['task_id']; ?>, <?php echo $t['id']; ?>, 1); return false;"
+                                                       <?php } ?>
+                                                       class="text-danger"
+                                                       >
+                                                        <i class="fa fa-clock-o"></i>
+                                                        <?php echo _l('task_stop_timer'); ?>
+                                                    </a>
+                                                    <?php
+                                                } else if ($t['not_finished']) {
+                                                    echo '<b>' . _l('timer_not_stopped_yet') . '</b>';
+                                                } else {
+                                                    echo _dt($t['end_time'], true);
+                                                }
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                $rel_data = get_relation_data($t['rel_type'], $t['rel_id']);
+                                                $rel_values = get_relation_values($rel_data, $t['rel_type']);
+                                                echo '<a href="' . $rel_values['link'] . '">' . $rel_values['name'] . '</a>';
+                                                ?>
+                                            </td>
+                                            <td><?php echo app_format_money($t['hourly_rate'], $base_currency); ?></td>
+                                            <td>
+                                                <?php echo '<b>' . seconds_to_time_format($t['end_time'] - $t['start_time']) . '</b>'; ?>
+                                            </td>
+                                            <td data-order="<?php echo sec2qty($t['total']); ?>">
+                                                <?php
+                                                $total_logged_time += $t['total'];
+                                                echo '<b>' . sec2qty($t['total']) . '</b>';
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php
+                                                if (!$t['billed']) {
+                                                    if (has_permission_intranet('tasks', '', 'delete') || (has_permission_intranet('projects', '', 'delete') && $t['rel_type'] == 'project') || $t['staff_id'] == get_staff_user_id()) {
+                                                        echo '<a href="' . admin_url('tasks/delete_timesheet/' . $t['id']) . '" class="pull-right text-danger mtop5"><i class="fa fa-remove"></i></a>';
+                                                    }
+                                                }
+                                                ?>
+                                            </td>
+                                        </tr>
+                                    <?php } ?>
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td align="right"><?php echo '<b>' . _l('total_by_hourly_rate') . ':</b> ' . app_format_money((sec2qty($total_logged_time) * $member->hourly_rate), $base_currency); ?></td>
+                                        <td align="right">
+                                            <?php echo '<b>' . _l('total_logged_hours_by_staff') . ':</b> ' . seconds_to_time_format($total_logged_time); ?>
+                                        </td>
+                                        <td align="right">
+                                            <?php echo '<b>' . _l('total_logged_hours_by_staff') . ':</b> ' . sec2qty($total_logged_time); ?>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="panel_s">
+                        <div class="panel-body">
+                            <h4 class="no-margin">
+                                <?php echo _l('projects'); ?>
+                            </h4>
+                            <hr class="hr-panel-heading" />
+                            <div class="_filters _hidden_inputs hidden staff_projects_filter">
+                                <?php echo form_hidden('staff_id', $member->staffid); ?>
+                            </div>
+                            <?php
+                            render_datatable(array(
+                                _l('project_name'),
+                                _l('project_start_date'),
+                                _l('project_deadline'),
+                                _l('project_status'),
+                                    ), 'staff-projects');
+                            ?>
+                        </div>
+                    </div>
+                </div>
+            <?php } ?>
+        </div>
+        <div class="btn-bottom-pusher"></div>
+    </div>
+    <?php if (!$intranet) { ?>
+    </div>
+<?php } ?>
+<?php init_tail(); ?>
+<script>
+    $(function () {
+    $('input[name="phonenumber"]').val(mphone(document.getElementById("phonenumber").value));
+    $('input[name="num_comercial"]').val(mphone(document.getElementById("num_comercial").value));
+    $('select[name="role"]').on('change', function () {
+    var roleid = $(this).val();
+    init_roles_permissions(roleid, true);
+    });
+    $('select[name="intranet_profile_type_id"]').on('change', function () {
+    var profile_type_id = $(this).val();
+    init_prifile_type_permissions(profile_type_id, true);
+    });
+    function init_prifile_type_permissions(roleid, user_changed) {
+
+    roleid = typeof (roleid) == 'undefined' ? $('select[name="intranet_profile_type_id"]').val() : roleid;
+    var isedit = $('.member > input[name="isedit"]');
+    // Check if user is edit view and user has changed the dropdown permission if not only return
+    if (isedit.length > 0 && typeof (roleid) !== 'undefined' && typeof (user_changed) == 'undefined') {
+    return;
+    }
+
+    // Administrators does not have permissions
+    if ($('input[name="administrator"]').prop('checked') === true) {
+    return;
+    }
+
+    // Last if the roleid is blank return
+    if (roleid === '') {
+    return;
+    }
+
+    // Get all permissions
+    var permissions = $('table.prifile_type').find('tr');
+    requestGetJSON('staff/profile_type_changed/' + roleid).done(function (response) {
+
+    permissions.find('.capability').not('[data-not-applicable="true"]').prop('checked', false).trigger('change');
+    $.each(permissions, function () {
+    var row = $(this);
+    $.each(response, function (feature, obj) {
+    if (row.data('name') == feature) {
+    $.each(obj, function (i, capability) {
+    row.find('input[id="' + feature + '_' + capability + '"]').prop('checked', true);
+    if (capability == 'view') {
+    row.find('[data-can-view]').change();
+    } else if (capability == 'view_own') {
+    row.find('[data-can-view-own]').change();
+    }
+    });
+    }
+    });
+    });
+    });
+    }
+
+
+    $('input[name="administrator"]').on('change', function () {
+    var checked = $(this).prop('checked');
+    var isNotStaffMember = $('.is-not-staff');
+    if (checked == true) {
+    isNotStaffMember.addClass('hide');
+    $('.roles').find('input').prop('disabled', true).prop('checked', false);
+    $('.prifile_type').find('input').prop('disabled', true).prop('checked', false);
+    } else {
+    isNotStaffMember.removeClass('hide');
+    isNotStaffMember.find('input').prop('checked', false);
+    $('.roles').find('.capability').not('[data-not-applicable="true"]').prop('disabled', false);
+    $('.prifile_type').find('.capability').not('[data-not-applicable="true"]').prop('disabled', false)
+    }
+    });
+    $('#is_not_staff').on('change', function () {
+    var checked = $(this).prop('checked');
+    var row_permission_leads = $('tr[data-name="leads"]');
+    if (checked == true) {
+    row_permission_leads.addClass('hide');
+    row_permission_leads.find('input').prop('checked', false);
+    } else {
+    row_permission_leads.removeClass('hide');
+    }
+    });
+    init_roles_permissions();
+    appValidateForm($('.staff-form'), {
+    firstname: 'required',
+            lastname: 'required',
+            username: 'required',
+            password: {
+            required: {
+            depends: function (element) {
+            return ($('input[name="isedit"]').length == 0) ? true : false
+            }
+            }
+            },
+<?php if ($empresa_id == 4) { ?>
+        user: {
+        required: true,
+                remote: {
+                url: admin_url + "misc/staff_user_exists",
+                        type: 'post',
+                        data: {
+                        email: function () {
+                        return $('input[name="user"]').val();
+                        },
+                                memberid: function () {
+                                return $('input[name="memberid"]').val();
+                                }
+                        }
+                }
+        }
+<?php } else { ?>
+        email: {
+        required: true,
+                email: true,
+                remote: {
+                url: admin_url + "misc/staff_email_exists",
+                        type: 'post',
+                        data: {
+                        email: function () {
+                        return $('input[name="email"]').val();
+                        },
+                                memberid: function () {
+                                return $('input[name="memberid"]').val();
+                                }
+                        }
+                }
+        }
+<?php } ?>
+    });
+    });
+    function mask(o, f) {
+    setTimeout(function () {
+    var v = mphone(o.value);
+    if (v != o.value) {
+    o.value = v;
+    }
+    }, 1);
+    }
+    function mphone(v) {
+    if (v != "") {
+    var r = v.replace(/\D/g, "");
+    r = r.replace(/^0/, "");
+    if (r.length > 10) {
+    r = r.replace(/^(\d\d)(\d{5})(\d{4}).*/, "($1) $2-$3");
+    } else if (r.length > 5) {
+    r = r.replace(/^(\d\d)(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+    } else if (r.length > 2) {
+    r = r.replace(/^(\d\d)(\d{0,5})/, "($1) $2");
+    } else {
+    r = r.replace(/^(\d*)/, "($1");
+    }
+    return r;
+    }
+    return v;
+    }
+    function formatar(mascara, documento) {
+    let i = documento.value.length;
+    let saida = '#';
+    let texto = mascara.substring(i);
+    while (texto.substring(0, 1) != saida && texto.length) {
+    documento.value += texto.substring(0, 1);
+    i++;
+    texto = mascara.substring(i);
+    }
+    }
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+diff a/application/views/themes/perfex/views/geral_pdf.php b/application/views/themes/perfex/views/geral_pdf.php	(rejected hunks)
+@@ -79,6 +79,12 @@
+               $color=0;
+               $medicos = $this->ci->Relatorio_escala_model->get_medicos_geral($escala_setor['competencia_id'],$escala_setor['setor_id']); 
+               foreach($medicos as $med){
++                              $hora_inicio = $med['hora_inicio'];
++                              $hora_fim = $med['hora_fim'];
++                              $hora_format_st = date('H', strtotime($hora_inicio));
++                              $hora_format_end = date('H', strtotime($hora_fim));
++                  
++                  
+                         if($color%2==0){
+                           $tblhtml .= '
+                             <tr style="color:#000;" class="w-100" bgcolor="#F0F0F0" align="center">';  

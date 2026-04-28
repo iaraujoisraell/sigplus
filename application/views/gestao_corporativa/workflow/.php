@@ -1,0 +1,973 @@
+<?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
+<?php init_head(false); ?>
+
+<?php $this->load->view('gestao_corporativa/css_background'); ?>
+<?php
+$andamento = $this->Workflow_model->get_fluxos_andamento($workflow->id);
+//print_r($workflow); exit;
+?>
+
+<?php
+if (is_array($info_client)) {
+    $client_email = $info_client['EMAIL'];
+    $client_sms = $info_client['TELEFONE'];
+}
+?>
+<div class="content">
+    <div class="row" >
+        <div class="col-md-12">
+            <div>
+                <ol class="breadcrumb" style="background-color: white;">
+                    <li><a href="<?= base_url('gestao_corporativa/intranet'); ?>"><i class="fa fa-home"></i> Home </a></li> 
+                    <li><a href="<?= base_url('gestao_corporativa/Workflow'); ?>"><i class="fa fa-backward"></i> Workflow </a></li> 
+                    <li class="">WORKFLOW #<?php echo $workflow->id; ?> </li>
+                </ol>
+            </div>
+        </div>
+        <?php if ($in_department == true || $user_created == true) { ?>
+            <?php
+            $classe = 'info';
+            $info = 'EM DIA';
+            if (strtotime(date('Y-m-d')) > strtotime($fluxo_atual->data_prazo)) {
+                $classe = 'danger';
+                $info = 'ATRASADO';
+            }
+            if ($atual == true) {
+                ?>
+                <div class="col-md-12">
+                    <div class="alert alert-<?php echo $classe; ?> alert-dismissible">
+                        <h5><i class="icon fa fa-info-circle"></i> Você está responsável pelo processo atual <span class=" label label-<?php echo $classe; ?> inline-block">
+                                <?php echo date("d/m/Y", strtotime($fluxo_atual->data_prazo)); ?> (<?php echo $info; ?>)
+                            </span></h5>
+                    </div>
+                </div>
+            <?php } ?>
+
+            <?php if ($in_department != true && $user_created == true) {
+                ?>
+                <div class="col-md-2">
+                </div>
+            <?php } ?>
+
+            <div class="col-md-<?php
+            if ($in_department != true && $user_created == true) {
+                echo '8';
+            } else {
+                echo '4';
+            }
+            ?>">
+                <div class="panel_s">
+                    <div class="panel-heading">
+                        WORKFLOW #<?php echo $workflow->id; ?> 
+                        <?php $status = get_ro_status($workflow->status); ?>
+                        <div class="label mtop5 single-ticket-status-label" style="background: <?php echo $status['color']; ?>"><?php echo $status['label']; ?></div>
+                        <?php echo '<a target="_blank" href="' . base_url() . 'gestao_corporativa/workflow/pdf/' . $workflow->id . '" class="' . (is_mobile() ? ' ' : ' mleft15 ') . ' pull-right single-ticket-status-label"><i class="icon fa fa-print"></i></a>'; ?>
+                    </div>
+
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12 mbot20 before-ticket-message">
+                                <?php if ($workflow->user_end_client) { ?>
+                                    <div class="alert alert-warning alert-dismissible">
+                                        <h5><i class="icon fa fa-info-circle"></i> Processo já finalizado com o cliente! </h5>
+                                        <strong class="text-muted">- <?php echo get_staff_full_name($workflow->user_end_client); ?> (<?php echo date('d/m/Y H:i:s', strtotime($workflow->date_end_client)); ?>)</strong>
+                                    </div>
+
+                                <?php } ?>
+                                <?php
+                                if (($workflow->status == 3 || $workflow->status == 4) and $department_responsable == true) {
+                                    echo '<a data-toggle="tooltip" data-title="O workflow retornará aberto para o último departamento com o forumlário do mesmo a ser repreenchido." '
+                                    . 'class="btn btn-warning" style="margin-bottom: 10px;" href="' . base_url('gestao_corporativa/Workflow/open/' . $workflow->id) . '">'
+                                    . '<i class="fa fa-external-link" aria-hidden="true"></i> REABRIR WORKFLOW'
+                                    . '</a>';
+                                }
+                                ?>
+                                <div class="row">
+
+
+                                    <div class="col-md-12">
+                                        <span class="ticket-label label label-default inline-block">
+                                            Categoria: <?php echo $categoria->titulo; ?>
+                                        </span>
+                                        <span class="ticket-label label label-default inline-block">
+                                            Data Inicio: <?php echo date("d/m/Y", strtotime($workflow->date_start)); ?>
+                                        </span>
+                                        <span class="ticket-label label label-default inline-block">
+                                            Usuario Inicio: <?php echo get_staff_full_name($workflow->user_start); ?>
+                                        </span>
+                                        <span class="ticket-label label label-default inline-block">
+                                            Data Prazo: <?php echo date("d/m/Y", strtotime($workflow->date_prazo)); ?>
+                                        </span>
+                                        <span class="ticket-label label label-default inline-block">
+                                            Data Finalização: <?php
+                                            if ($workflow->date_end) {
+                                                echo date("d/m/Y", strtotime($workflow->date_end));
+                                            } else {
+                                                echo 'Não Finalizado.';
+                                            }
+                                            ?>
+                                        </span><!-- comment -->
+                                        <span class="ticket-label label label-default inline-block">
+                                            Usuário Finalização: <?php
+                                            if ($workflow->user_end) {
+                                                echo get_staff_full_name($workflow->user_start);
+                                            } else {
+                                                echo 'Não Finalizado.';
+                                            }
+                                            ?>
+                                        </span>
+                                    </div>
+                                    <?php if (is_array($info_client)) { ?>
+
+                                        <div class="col-md-12 before-ticket-message" style="">
+                                            <br>
+
+
+                                            <p class=""> 
+                                                <?php //print_r($info_client); NOME_ABREV?>
+
+                                                <span class="bold">CLIENTE/CARTEIRINHA: </span><?php echo $info_client['NOME_COMPLETO'] . ' - ' . $info_client['NUMERO_CARTEIRINHA']; ?> <br>
+                                                <span class="bold">EMAIL/TELEFONE </span><?php echo $info_client['EMAIL'] . ' - ' . $info_client['TELEFONE']; ?> <br>
+                                                <span class="bold">CONTRATANTE:</span> <?php echo $info_client['CONTRATANTE']; ?> <br>
+                                                <span class="bold">CPF/CNPJ CONTRATANTE:</span><?php echo $info_client['CPF_CONTRATANTE']; ?> ( <?php echo $info_client['TIPOCONTRATANTE']; ?> ) <br>
+                                                <span class="bold">CONTRATO:</span> <?php echo $info_client['CONTRATO']; ?> - <?php echo $info_client['CONTRATACAO']; ?><br>
+                                                <span class="bold">CPF:</span> <?php echo $info_client['CPF']; ?><br>
+                                                <span class="bold">DATA DE NASCIMENTO:</span> <?php echo $info_client['DATADENASCIMENTO']; ?><br>
+                                                <span class="bold">DATA DE ADESÃO:</span> <?php echo $info_client['DATAADESAO']; ?><br>
+                                                <span class="bold">DATA DE VALIDADE:</span> <?php echo $info_client['VALIDADE']; ?><br>
+                                                <span class="bold">PRODUTO:</span> <?php echo $info_client['PRODUTO']; ?><br>
+                                                <span class="bold">ABRANGENCIA:</span> <?php echo $info_client['ABRANGENCIA']; ?><br>
+                                                <span class="bold">ACOMODAÇÃO:</span> <?php echo $info_client['ACOMODACAO']; ?><br>
+                                                <span class="bold">TITULAR:</span> <?php echo $info_client['TITULAR']; ?><br>
+                                                <span class="bold">REDE:</span> <?php echo $info_client['REDE']; ?><br>
+                                                <span class="bold">CNS:</span> <?php echo $info_client['CNS']; ?><br>
+                                                <span class="bold">SITUAÇÃO:</span> <?php echo $info_client['SITUACAO']; ?><br>
+
+
+                                            </p>
+
+
+
+                                        </div>
+
+                                    <?php } ?>
+                                    <?php if ($workflow->cancel_id == 0) { ?>
+
+                                        <div class="col-md-12">
+                                            <hr>
+                                            <?php
+                                            $diferenca = strtotime(date('Y-m-d')) - strtotime(date("Y-m-d", strtotime($workflow->date_created)));
+                                            $dias = floor($diferenca / (60 * 60 * 24));
+                                            $total = $categoria->prazo;
+                                            $pctm = $dias;
+                                            $porcentagem = $pctm * 100 / $total;
+                                            ?>
+                                            <div class="project-overview-open-tasks">
+                                                <div class="col-md-9">
+                                                    <p class="text-uppercase bold text-dark font-medium">
+                                                        <span><?php echo $porcentagem; ?>% </span> (<?php echo date("d/m/Y", strtotime($workflow->date_created)); ?> - <?php echo date("d/m/Y", strtotime($workflow->date_prazo)); ?>)</p>
+                                                    <p class="text-muted bold"><?php echo $dias ?> / <?php echo $categoria->prazo; ?> DIAS PARA O FIM DO PRAZO</p>
+                                                </div>
+                                                <div class="col-md-12 mtop5">
+                                                    <div class="progress no-margin progress-bar-mini">
+                                                        <div class="progress-bar progress-bar-success no-percent-text not-dynamic" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: <?php echo $porcentagem; ?>%" data-percent="<?php echo $porcentagem; ?>">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="col-md-12">
+                                            <hr>
+                                            <?php
+                                            if ($in_department != true && $user_created == true) {
+                                                $campos = [];
+                                                $values_info['campos'] = $this->Categorias_campos_model->get_values($workflow->id, 'workflow', '0');
+                                                $this->load->view('gestao_corporativa/categorias_campos/values_info3', $values_info);
+                                                echo '<hr>';
+                                            }
+                                            ?>
+
+                                            <div class="activity-feed">
+                                                <?php
+                                                $andamento = $this->Workflow_model->get_fluxos_andamento($workflow->id);
+                                                foreach ($andamento as $item) {
+                                                    if ($item['atribuido_a']) {
+                                                        if ($atual == true) {
+                                                            if ($item['fluxo_sequencia'] == ($fluxo_atual->fluxo_sequencia - 1)) {
+                                                                $fluxo_anterior = $item;
+                                                            }
+                                                        }
+                                                        ?>
+                                                        <div class="feed-item row col-md-12" data-sale-activity-id="">
+                                                            <div class="col-md-<?php
+                                                            if ($in_department != true && $user_created == true) {
+                                                                echo '5';
+                                                            } else {
+                                                                echo '12';
+                                                            }
+                                                            ?>">
+                                                                <div class="date">
+                                                                    <span class="text-has-action" data-toggle="tooltip" data-title="">
+                                                                        <?php echo staff_profile_image($item['atribuido_a'], array('staff-profile-xs-image pull-left mright5')); ?> <?php echo $item['fluxo_sequencia']; ?>° <?php echo get_departamento_nome($item['department_id']); ?> - <?php echo get_staff_full_name($item['atribuido_a']); ?>
+                                                                    </span>
+                                                                </div>
+
+                                                                <!--<div class="text">
+                                                                    Recebido : <?php echo date("d/m/Y H:i:s", strtotime($item['date_created'])); ?>
+                                                                </div>
+                                                                <div class="text">
+                                                                    Assumido : <?php echo date("d/m/Y  H:i:s", strtotime($item['data_assumido'])); ?>
+                                                                </div>
+                                                                <div class="text">
+                                                                    Previsão : <?php echo date("d/m/Y", strtotime($item['data_prazo'])); ?>
+                                                                </div>
+                                                                <div class="text">
+                                                                    Concluído : <?php
+                                                                if ($item['data_concluido']) {
+                                                                    echo date("d/m/Y  H:i:s", strtotime($item['data_concluido']));
+                                                                } else {
+                                                                    echo 'Não Concluído';
+                                                                }
+                                                                ?>
+                                                                </div>-->
+                                                            </div>
+
+                                                            <?php if ($in_department != true && $user_created == true) { ?>
+                                                                <div class="col-md-7">
+                                                                    <?php
+                                                                    $campos = [];
+                                                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($workflow->id, 'workflow', $item['fluxo_id'], false, true);
+                                                                    $this->load->view('gestao_corporativa/categorias_campos/values_info2', $values_info);
+                                                                    ?>
+                                                                </div>
+                                                            <?php }
+                                                            ?>
+
+                                                        </div>
+                                                    <?php } ?>
+
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php if ($workflow->cancel_id != 0) { ?>
+                            <div class="row">
+                                <div class="col-md-12 before-ticket-message">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="alert alert-danger alert-dismissible">
+                                                <h5><i class="icon fa fa-info-circle"></i> ESSE PROCESSO FOI CANCELADO! </h5>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+
+                                            <p class=""><?php echo $workflow->obs; ?></p>
+                                            <p class="bold"><?php echo get_staff_full_name($workflow->user_end); ?> - <?php echo date("d/m/Y H:i:s", strtotime($workflow->date_end)); ?></p> 
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        <?php } ?>
+
+                    </div>
+                    <div class="panel-footer">
+                        WORKFLOW #<?php echo $workflow->id; ?> 
+                        <?php $status = get_ro_status($workflow->status); ?>
+                        <div class="label mtop5 single-ticket-status-label" style="background: <?php echo $status['color']; ?>"><?php echo $status['label']; ?></div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="panel_s">
+                    <div class="panel-heading">
+                        Notas
+                    </div>
+
+                    <div class="panel-body">
+                        <?php $this->load->view('gestao_corporativa/notes/note', ["rel_type" => 'workflow', 'rel_id' => $workflow->id]); ?>
+
+                    </div>
+                </div>
+                <?php if (count($internal_requests) > 0 || $atual == true) { ?>
+                    <div class="panel_s">
+                        <div class="panel-heading">
+                            SOLICITAÇÕES DE PARECER INTERNO
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="row">
+                                <div class="col-md-12" style="text-align: left;">
+                                    <?php if ($atual == true) { ?>
+                                        <a onclick="Internal_request('<?php echo $workflow->id; ?>');" style="margin-bottom: 5px;" class="btn btn-warning">Solicitar Parecer Interno</a>
+                                    <?php } ?>
+                                    <?php foreach ($internal_requests as $request) { ?>
+                                        <div class="panel_s total-column" style="margin-bottom: 3px; text-align: left;">
+                                            <div class="panel-body">
+                                                <!--<h3 class="text-muted _total">
+                                                    00:00     </h3>-->
+                                                <span class="staff_logged_time_text text-success">Solicitação de parecer #<?php echo $request['id']; ?></span>
+
+
+                                                <br>
+                                                <span class="staff_logged_time_text text-dark">De: <?php echo get_staff_full_name($request['user_created']); ?> - <?php echo date('d/m/Y H:i:s', strtotime($request['date_created'])); ?></span><br>
+                                                <span class="staff_logged_time_text text-dark">Para: <?php echo get_staff_full_name($request['staffid']); ?> <?php
+                                                    if ($request['status'] == 1) {
+                                                        echo date('d/m/Y H:i:s', strtotime($request['date']));
+                                                    }
+                                                    ?></span><br>
+                                                <span class="staff_logged_time_text text-dark">Descrição:</span> <?php echo $request['description']; ?><br>
+                                                <span class="staff_logged_time_text text-dark">Situação:</span> 
+                                                <?php if ($request['status'] == 0) { ?>
+                                                    <span class="label label-success">AGUARDANDO</span>
+                                                <?php } else { ?>
+                                                    <span class="label label-warning">RESPONDIDO</span>
+                                                <?php } ?><br>
+                                                <?php if ($request['status'] == 1) { ?>
+                                                    <hr style="margin-top: 5px; margin-bottom: 5px;">
+                                                    <span class="staff_logged_time_text text-dark bold">Resposta:</span> <br>
+                                                    <?php
+                                                    $campos = [];
+                                                    $values_info['rel_type'] = 'workflow';
+                                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($request['id'], 'internal_request_workflow');
+                                                    $this->load->view('gestao_corporativa/categorias_campos/values_info5', $values_info);
+                                                    ?>
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                <?php } ?>
+                <?php if ((count($external_requests) > 0 || $atual == true) and $workflow->registro_atendimento_id) { ?>
+                    <div class="panel_s">
+                        <div class="panel-heading">
+                            SOLICITAÇÕES DE INFORMAÇÕES COMPLEMENTARES
+                        </div>
+                        <div class="panel-body">
+
+                            <div class="row">
+                                <div class="col-md-12" style="text-align: left;">
+                                    <?php if ($atual == true) { ?>
+                                        <a onclick="External_request('<?php echo $workflow->id; ?>');" class="btn btn-warning" style="margin-bottom: 5px;">Solicitar Informações Complementares</a>
+                                    <?php } ?>
+
+                                    <?php foreach ($external_requests as $request) { ?>
+                                        <div class="panel_s total-column" style="margin-bottom: 3px; text-align: left;">
+                                            <div class="panel-body">
+                                                <!--<h3 class="text-muted _total">
+                                                    00:00     </h3>-->
+                                                <span class="staff_logged_time_text text-success">Solicitação de Informações #<?php echo $request['id']; ?></span>
+
+
+                                                <br>
+                                                <span class="staff_logged_time_text text-dark">De: <?php echo get_staff_full_name($request['user_created']); ?> - <?php echo date('d/m/Y H:i:s', strtotime($request['date_created'])); ?></span><br>
+                                                <span class="staff_logged_time_text text-dark">Descrição:</span> <?php echo $request['description']; ?><br>
+                                                <span class="staff_logged_time_text text-dark">Situação:</span> 
+                                                <?php if ($request['status'] == 0) { ?>
+                                                    <span class="label label-success">AGUARDANDO</span>
+                                                <?php } else { ?>
+                                                    <span class="label label-warning">RESPONDIDO</span>
+                                                <?php } ?><br>
+                                                <?php if ($request['status'] == 1) { ?>
+                                                    <hr style="margin-top: 5px; margin-bottom: 5px;">
+                                                    <span class="staff_logged_time_text text-dark bold">Resposta:</span> <br>
+                                                    <?php
+                                                    $campos = [];
+                                                    $values_info['rel_type'] = 'workflow';
+                                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($request['id'], 'external_request_workflow');
+                                                    $this->load->view('gestao_corporativa/categorias_campos/values_info5', $values_info);
+                                                    ?>
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                    <?php } ?>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                <?php } ?>
+                <?php if (count($client_contacts) > 0) { ?>
+                    <div class="panel_s">
+                        <div class="panel-heading">
+                            CONTATOS COM O CLIENTE
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12 before-ticket-message" style="text-align: left;">
+
+
+                                    <?php foreach ($client_contacts as $contact) { ?>
+                                        <strong class="text-muted col-md-12" style="text-transform: uppercase;  font-weight: bold;">- <?php echo get_staff_full_name($contact['user_created']); ?> (<?php echo date('d/m/Y H:i:s', strtotime($contact['date_created'], $baseTimestamp)); ?>)</strong>
+                                    <?php } ?>
+                                    <?php if ($workflow->user_end_client) { ?>
+                                        <strong class="text-muted text-warning col-md-12">FINALIZADO: <?php echo get_staff_full_name($workflow->user_end_client); ?> (<?php echo date('d/m/Y H:i:s', strtotime($workflow->date_end_client)); ?>)</strong>
+
+                                    <?php } ?> 
+
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                <?php } ?>
+                <?php if (count($pdf_views) > 0) { ?>
+                    <div class="panel_s">
+                        <div class="panel-heading">
+                            PDF - VISUALIZAÇÕES
+                        </div>
+                        <div class="panel-body">
+                            <div class="row">
+                                <div class="col-md-12 before-ticket-message" style="text-align: left;">
+
+
+                                    <?php foreach ($pdf_views as $contact) { ?>
+                                        <strong class="text-muted col-md-12" style="text-transform: uppercase;  font-weight: bold;">- <?php echo get_staff_full_name($contact['user_created']); ?> (<?php echo date('d/m/Y H:i:s', strtotime($contact['date_created'], $baseTimestamp)); ?>)</strong>
+                                    <?php } ?>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                <?php } ?>
+            </div>
+            <?php if ($in_department != true && $user_created == true) {
+                ?>
+                <div class="col-md-2">
+                </div>
+            <?php } ?>
+            <?php if ($in_department == true) { ?>
+                <div class="col-md-8">
+                    <div class="panel_s">
+                        <div class="panel-heading">
+                            INFORMAÇÕES DO WORKFLOW
+                        </div>
+
+                        <div class="panel-body">
+                            <div class="horizontal-scrollable-tabs">
+                                <div class="scroller arrow-left"><i class="fa fa-angle-left"></i></div>
+                                <div class="scroller arrow-right"><i class="fa fa-angle-right"></i></div>
+                                <div class="horizontal-tabs">
+                                    <ul class="nav nav-tabs profile-tabs row customer-profile-tabs nav-tabs-horizontal" role="tablist">
+                                        <li role="presentation" class="active">
+                                            <a href="#contact_info1" aria-controls="contact_info1" role="tab" data-toggle="tab">
+                                                Solicitação
+                                            </a>
+                                        </li>
+
+                                        <?php
+                                        if ($atual == true) {
+                                            $classe = 'info';
+                                            if (strtotime(date('Y-m-d')) > strtotime($fluxo_atual->data_prazo)) {
+                                                $classe = 'danger';
+                                            }
+                                            ?>
+                                            <li role="presentation" class="" style="">
+                                                <a href="#contact_info2" aria-controls="contact_info2" role="tab" data-toggle="tab">
+                                                    Responsável - <?php echo get_staff_full_name(get_staff_user_id()); ?> 
+                                                </a>
+                                            </li>
+
+                                        <?php } ?>
+                                        <li role="presentation" class="">
+                                            <a href="#sms" aria-controls="sms" role="tab" data-toggle="tab">
+                                                SMS
+                                            </a>
+                                        </li><!-- comment -->
+                                        <li role="presentation" class="">
+                                            <a href="#email" aria-controls="email" role="tab" data-toggle="tab">
+                                                E-mails
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="tab-content mtop15">
+                                <div role="tabpanel" class="tab-pane active" id="contact_info1">
+
+
+                                    <div class="alert alert-warning alert-dismissible">
+                                        <h5><i class="icon fa fa-info-circle"></i> POR: <?php echo strtoupper(get_staff_full_name($workflow->user_created)); ?> - <?php echo date("d/m/Y", strtotime($workflow->date_created)); ?></h5>
+                                    </div>
+                                    <?php
+                                    $campos = [];
+                                    $values_info['rel_type'] = 'workflow';
+                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($workflow->id, 'workflow', '0');
+                                    $this->load->view('gestao_corporativa/categorias_campos/values_info', $values_info);
+                                    ?>
+
+
+
+
+
+                                </div>
+                                <?php if ($atual == true) { ?>
+                                    <div role="tabpane2" class="tab-pane" id="contact_info2">
+
+                                        <?php echo form_open_multipart("gestao_corporativa/Workflow/concluir_parte/" . $workflow->id, array('onsubmit' => "document.getElementById('disabled').disabled = true;")); ?>
+                                        <input name="categoria_id" type="hidden" value="<?php echo $workflow->categoria_id; ?>">
+                                        <input name="fluxo_id" type="hidden" value="<?php echo $fluxo_atual->fluxo_id; ?>">
+                                        <input name="fluxo_andamento_id" type="hidden" value="<?php echo $fluxo_atual->id; ?>">
+                                        <div class="row">
+
+                                            <div class="col-md-12">
+                                                <div class="alert alert-<?php echo $classe; ?> alert-dismissible">
+                                                    <h5><i class="icon fa fa-info-circle"></i> <?php echo $fluxo_atual->codigo_sequencial; ?> - <?php
+                                                        if ($fluxo_atual->objetivo) {
+                                                            echo $fluxo_atual->objetivo;
+                                                        } else {
+                                                            echo 'Objetivo não cadastrado.';
+                                                        }
+                                                        ?></h5>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <?php
+                                                $campos = $this->Categorias_campos_model->get_categoria_campos($fluxo_atual->categoria_id, $fluxo_atual->fluxo_id);
+
+                                                $data['campos'] = $campos;
+                                                $data['just_campos'] = true;
+                                                $this->load->view('gestao_corporativa/categorias_campos/retorno_categoria', $data);
+                                                ?>
+                                                <?php
+                                                if ($fluxo_atual->contato_cliente == 1) {
+                                                    $disable = 'disabled = "true" data-title="Você precisa fazer contato com o cliente para prosseguir!"';
+                                                    ?>
+                                                    <div class='checkbox checkbox-primary'>
+                                                        <input type='checkbox'  id='client_contact' name="client_contact">
+                                                        <label for='client_contact'>Contato Cliente Realizado!</label>
+                                                    </div>
+                                                <?php } ?>
+
+
+
+                                                <div class="btn-group w-100" >
+                                                    <?php
+                                                    if ($fluxo_atual->finaliza_cliente == 1) {
+                                                        $more = 'E FINALIZAR SOLICITAÇAO COM O CLIENTE';
+                                                        ?>
+                                                        <input type="hidden" id="finaliza" value="1"  name="finaliza">
+
+                                                        <?php
+                                                    }
+                                                    if (count($alternativas) > 0) {
+                                                        if (count($alternativas) == 1) {
+                                                            ?>
+                                                            <input style="display: none;" type="text" id="alternativa" value="<?php echo $alternativas[0]['id']; ?>"  name="alternativa">
+                                                            <button  class="btn btn-primary w-100"  type="submit" id="disabled"  data-toggle="tooltip" <?php echo $disable; ?>>
+                                                                <i class="icon fa fa-check"></i> Concluir <?php echo $more; ?><i class="icon fa fa-check"></i>
+                                                                <p class="font-medium-xs no-mbot text-muted">(<?php echo strtoupper($alternativas[0]['setor_name']); ?>)</p>
+                                                            </button>
+                                                        <?php } else { ?>
+                                                            <div class="panel_s">
+                                                                <div class="panel-heading">
+                                                                    <?php echo $fluxo_atual->question; ?>
+                                                                </div>
+
+                                                                <div class="panel-body">
+
+                                                                    <div class="col-md-12" style="">
+
+                                                                        <br>
+                                                                        <div class="form-group" >
+
+                                                                            <?php foreach ($alternativas as $alternativa) { ?>
+                                                                                <div class="checkbox-inline">
+                                                                                    <input style="padding: 020px 020px 020px 020px; margin: 12px 12px 12px 0px; border-radius: 5px 5px 5px 5px; background-color: #f5f8fb; font-size: 16px;"  
+                                                                                           type="radio" required="true" id="alternativa" value="<?php echo $alternativa['id']; ?>"  name="alternativa">
+                                                                                    <label for="alternativa" style=""><?php echo strtoupper($alternativa['alternativa']); ?><p class="font-medium-xs no-mbot text-muted">(<?php echo strtoupper($alternativa['setor_name']); ?>)</p></label>
+                                                                                </div>
+                                                                            <?php } ?>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <button  class="btn btn-primary w-100"  type="submit" id="disabled" data-toggle="tooltip" <?php echo $disable; ?>>
+                                                                <i class="icon fa fa-check"></i> Concluir <?php echo $more; ?><i class="icon fa fa-check"></i>
+                                                            </button>
+                                                        <?php } ?>
+                                                    <?php } else { ?>
+                                                        <button class="btn btn-success w-100" type="submit" id="disabled" data-toggle="tooltip" >
+                                                            <i class="icon fa fa-check"></i> FINALIZAR WORKFLOW <?php echo $more; ?><i class="icon fa fa-check"></i>
+                                                        </button>
+                                                    <?php } ?>
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+
+                                        <?php echo form_close(); ?>
+                                    </div>
+
+                                <?php } ?>
+                                
+                                    <div role="tabpane56" class="tab-pane" id="sms">
+                                        <div class="row">
+                                            <?php
+                                            $data['rel_type'] = 'workflow';
+                                            $data['rel_id'] = $workflow->id;
+                                            $data['url_retorno'] = 'gestao_corporativa/Workflow/workflow/' . $workflow->id;
+                                            $data['list_email'] = [];
+                                            $data['client_number'] = $client_sms;
+                                            $this->load->view('gestao_corporativa/Sms/index', $data);
+                                            ?>
+                                        </div>
+                                    </div>
+                                    <div role="tabpane3" class="tab-pane" id="email">
+                                        <div class="row">
+                                            <?php
+                                            $data['rel_type'] = 'workflow';
+                                            $data['rel_id'] = $workflow->id;
+                                            $data['url_retorno'] = 'gestao_corporativa/Workflow/workflow/' . $workflow->id;
+                                            $emails_ra = [];
+                                            if ($client_email) {
+                                                array_push($emails_ra, $client_email);
+                                            }
+                                            $data['list_email'] = $emails_ra;
+                                            $data['email'] = $client_email;
+                                            $this->load->view('gestao_corporativa/Email/index', $data);
+                                            ?>
+                                        </div>
+                                    </div>
+                            </div>
+
+                        </div>
+                        <?php if ($workflow->registro_atendimento_id) { ?>
+                            <div class="panel-footer">
+                                REGISTRO DE ATENDIMENTO VINCULADO 
+
+                                <br>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <span class="bold">Protocolo: </span><a href="<?php echo base_url('gestao_corporativa/Atendimento/view/' . $workflow->registro_atendimento_id); ?>"> <?php echo $atendimento->protocolo; ?></a>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <span class="bold">Abertura: </span><span class="text-muted"><?php echo _d($atendimento->date_created); ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <span class="bold">Contato: </span><span class="text-muted"><?php echo $atendimento->contato; ?></span>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <span class="bold">Email: </span><span class="text-muted"><?php echo $atendimento->email; ?></span>
+                                    </div>
+
+                                </div>
+
+                                <?php
+                                $campos = [];
+                                $values_info['campos'] = $this->Categorias_campos_model->get_values($workflow->registro_atendimento_id, 'atendimento');
+                                $this->load->view('gestao_corporativa/categorias_campos/values_info2', $values_info);
+                                ?>
+                            </div>
+
+                        <?php } ?>
+                        <?php if (($atual == true and count($andamento) == 1) || $department_responsable == true and in_array($workflow->status, [1, 2])) { ?>
+                            <div class="panel-footer">
+                                CANCELAR SOLICITAÇÃO?
+                                <a class="label single-ticket-status-label pull-right" style="background: red;" onclick="Cancel('<?php echo $workflow->id; ?>', '<?php echo $fluxo_atual->id; ?>');"><i class="icon fa fa-times"></i> CANCELAR WORKFLOW</a>
+                            </div>
+                        <?php } ?>
+                    </div>
+
+
+                    <?php if ($workflow->cancel_id == 0) { ?>
+                        <?php
+                        $i = 0;
+                        for ($i = 0; $i < count($andamento); $i++) {
+                            $classe = 'success';
+                            $classe_label = 'success';
+                            $info = 'CONCLUÍDO NO PRAZO';
+                            if (strtotime($andamento[$i]['data_concluido']) > strtotime($andamento[$i]['data_prazo'])) {
+                                $info = 'CONCLUÍDO FORA DO PRAZO';
+                                $classe = 'danger';
+                                $classe_label = 'danger';
+                            }
+                            if (!$andamento[$i]['data_concluido']) {
+                                $info = 'EM ANDAMENTO';
+                                $classe = 'info';
+                                $classe_label = 'info';
+                                if (strtotime(date('Y-m-d')) > strtotime($andamento[$i]['data_prazo'])) {
+                                    $info = 'ATRASADO';
+                                    $classe = 'danger';
+                                    $classe_label = 'danger';
+                                }
+                            }
+                            $backs = $this->Workflow_model->get_workflow_back($andamento[$i]['id']);
+                            ?>
+                            <div class="panel_s">
+                                <div class="panel-heading">
+                                    <?php echo $andamento[$i]['fluxo_sequencia']; ?>° - <?php echo get_departamento_nome($andamento[$i]['department_id']); ?> (<?php echo get_staff_full_name($andamento[$i]['atribuido_a']); ?>)
+
+                                    <?php
+                                    if ($fluxo_atual->id == $andamento[$i]['id']) {
+                                        echo '<span class="label label-default ">ATUAL</span>';
+                                    }
+                                    ?>
+
+                                    <?php
+                                    if ($fluxo_atual->id == $andamento[$i]['id'] && $atual == true && count($andamento) > 1) {
+                                        echo '<a target="_blank" data-toggle="tooltip" data-title="Estornar para fluxo anterior" class="' . (is_mobile() ? ' ' : ' mleft15 ') . ' pull-right single-ticket-status-label" onclick="Back(' . "'" . $workflow->id . "', " . "'" . $andamento[$i]['id'] . "', " . "'" . $andamento[$i - 1]['id'] . "'" . ')">'
+                                        . '<i class="fa fa-arrow-circle-up" aria-hidden="true"></i>'
+                                        . '</a>';
+                                    }
+                                    ?>
+                                </div>
+
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-md-12 mbot20 before-ticket-message">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="alert alert-<?php echo $classe; ?> alert-dismissible">
+                                                        <h5><i class="icon fa fa-info-circle"></i> <?php
+                                                            if ($andamento[$i]['objetivo']) {
+                                                                echo $andamento[$i]['objetivo'];
+                                                            } else {
+                                                                echo 'Objetivo não cadastrado.';
+                                                            }
+                                                            ?> <span class="ticket-label label label-<?php echo $classe_label; ?> inline-block">
+                                                                <?php echo $info; ?>
+                                                            </span></h5>
+                                                    </div>
+                                                    <!--<a href="#" class="btn btn-default btn-xs" onclick="convert_ticket_to_task(14,'ticket'); return false;">Converter para ação</a>-->
+                                                    <?php
+                                                    if (count($backs) > 0) {
+                                                        echo '<hr />';
+                                                    }
+                                                    ?>
+                                                    <?php foreach ($backs as $back) { ?>
+
+                                                        <div class="bg-light-gray" style="margin-left: 20px; margin-top: 5px; margin-right: 20px; padding: 5px; border-radius: 6px">
+
+
+                                                            <span class="label label-default mright5 inline-block">PROCESSO ESTORNADO</span>
+                                                            <span class="label label-default mright5 inline-block">DE: <?php echo get_staff_full_name($back['user_created']) ?> </span>
+                                                            <span class="label label-default mright5 inline-block">DATA: <?php echo date('d/m/Y H:i:s', strtotime($back['date_created'])); ?></span>
+
+                                                            <hr style="margin-top: 0; margin-bottom: 1px;">
+                                                            <p style="padding-left: 4px; margin-bottom:0;"> <span class="bold">Motivo:</span> <?php echo $back['obs']; ?></p>
+                                                            <span class="bold" style="padding-left: 4px; margin-top:0;">Formulário estornado:</span>
+                                                            <div class="row" style="">
+                                                                <div class="col-md-12" style="">
+                                                                    <?php
+                                                                    $campos = [];
+                                                                    $values_info['rel_type'] = 'workflow';
+                                                                    $values_info['color'] = 'danger';
+                                                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($back['id'], 'workflow_back');
+                                                                    $this->load->view('gestao_corporativa/categorias_campos/values_info3', $values_info);
+                                                                    ?>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    <?php } ?>
+                                                    <?php
+                                                    if (count($backs) > 0) {
+                                                        echo '<hr />';
+                                                    }
+                                                    ?>
+
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <?php
+                                                    $campos = [];
+                                                    $values_info['rel_type'] = 'workflow';
+                                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($workflow->id, 'workflow', $andamento[$i]['fluxo_id']);
+                                                    $this->load->view('gestao_corporativa/categorias_campos/values_info', $values_info);
+                                                    ?>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    <hr>
+                                                </div>
+
+                                                <div class="col-md-12">
+                                                    <div class="col-md-3">
+                                                        <p class="text-uppercase text-muted">Recebido data</p>
+                                                        <p class="bold font-medium"><?php echo date("d/m/Y  H:i:s", strtotime($andamento[$i]['date_created'])); ?></p>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <p class="text-uppercase text-info">Previsto data</p>
+                                                        <p class="bold font-medium"><?php echo date("d/m/Y", strtotime($andamento[$i]['data_prazo'])); ?></p>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <p class="text-uppercase text-success">Assumido data</p>
+                                                        <p class="bold font-medium"><?php echo date("d/m/Y  H:i:s", strtotime($andamento[$i]['data_assumido'])); ?></p>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <p class="text-uppercase text-danger">Concluido data</p>
+                                                        <p class="bold font-medium"><?php
+                                                            if ($andamento[$i]['data_concluido'] && $andamento[$i]['data_concluido'] != '0000-00-00 00:00:00') {
+                                                                echo date("d/m/Y  H:i:s", strtotime($andamento[$i]['data_concluido']));
+                                                            } else {
+                                                                echo 'Não Concluído';
+                                                            }
+                                                            ?></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        <?php } ?>
+                    <?php } ?>
+                </div>
+            <?php } ?>
+        <?php } else { ?>
+            <div class="col-md-12">
+                <div class="alert alert-danger alert-dismissible">
+                    <h5><i class="icon fa fa-info-circle"></i> Você não tem permissão para esse fluxo.</h5>
+                </div>
+            </div>
+        <?php } ?>
+    </div>
+
+</div>
+<?php init_tail(); ?>
+<div id="modal_wrapper"></div>
+<script>
+
+    $(document).ready(function () {
+        init_selectpicker();
+    });
+
+    $("#client_contact").change(function () {
+        if ($(this).prop("checked") == true) {
+            document.getElementById("disabled").disabled = false;
+        } else {
+            document.getElementById("disabled").disabled = true;
+
+        }
+    });
+
+    function Cancel(el, fluxo_andamento_id) {
+        $("#modal_wrapper").load("<?php echo base_url(); ?>gestao_corporativa/Workflow/modal", {
+            slug: 'cancel',
+            id: el,
+            fluxo_andamento_id: fluxo_andamento_id
+        }, function () {
+            if ($('.modal-backdrop.fade').hasClass('in')) {
+                $('.modal-backdrop.fade').remove();
+            }
+            if ($('#cancel').is(':hidden')) {
+                $('#cancel').modal({
+                    show: true
+                });
+            }
+        });
+    }
+
+    function Back(el, fluxo_andamento_id, fluxo_andamento_id_old) {
+        //alert(el + fluxo_andamento_id + fluxo_andamento_id_old); exit;
+        $("#modal_wrapper").load("<?php echo base_url(); ?>gestao_corporativa/Workflow/modal", {
+            slug: 'back',
+            id: el,
+            fluxo_andamento_id: fluxo_andamento_id,
+            fluxo_andamento_id_old: fluxo_andamento_id_old
+        }, function () {
+            if ($('.modal-backdrop.fade').hasClass('in')) {
+                $('.modal-backdrop.fade').remove();
+            }
+            if ($('#back').is(':hidden')) {
+                $('#back').modal({
+                    show: true
+                });
+            }
+        });
+    }
+
+    function Internal_request(el) {
+        //alert(el + fluxo_andamento_id + fluxo_andamento_id_old); exit;
+        $("#modal_wrapper").load("<?php echo base_url(); ?>gestao_corporativa/Workflow/modal", {
+            slug: 'internal_request',
+            id: el
+        }, function () {
+            if ($('.modal-backdrop.fade').hasClass('in')) {
+                $('.modal-backdrop.fade').remove();
+            }
+            if ($('#internal_request').is(':hidden')) {
+                $('#internal_request').modal({
+                    show: true,
+                    backdrop: 'static'
+                });
+            }
+        });
+    }
+
+    function External_request(el) {
+        //alert(el + fluxo_andamento_id + fluxo_andamento_id_old); exit;
+        $("#modal_wrapper").load("<?php echo base_url(); ?>gestao_corporativa/Workflow/modal", {
+            slug: 'external_request',
+            id: el
+        }, function () {
+            if ($('.modal-backdrop.fade').hasClass('in')) {
+                $('.modal-backdrop.fade').remove();
+            }
+            if ($('#external_request').is(':hidden')) {
+                $('#external_request').modal({
+                    show: true,
+                    backdrop: 'static'
+                });
+            }
+        });
+    }
+
+    function delete_internal_request(id) {
+        $.ajax({
+            type: "POST",
+            url: "<?php echo base_url('gestao_corporativa/Workflow/delete_internal_request'); ?>",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                alert_float('success', 'CANCELADO COM  SUCESSO!');
+            }
+        });
+    }
+    function delete_external_request(id) {
+        $.ajax({
+            type: "POST",
+            url: "<?php echo base_url('gestao_corporativa/Workflow/delete_external_request'); ?>",
+            data: {
+                id: id
+            },
+            success: function (data) {
+                alert_float('success', 'CANCELADO COM  SUCESSO!');
+            }
+        });
+    }
+
+</script>
+</body>
+</html>

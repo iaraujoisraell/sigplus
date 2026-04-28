@@ -1,0 +1,48 @@
+[04-Aug-2022 20:39:58 UTC] PHP Parse error:  syntax error, unexpected '}', expecting end of file in /home/sigplusapp/public_html/servicoEmail/rotinaenviodeemail_protocolo_2.php on line 227
+[04-Aug-2022 20:41:52 UTC] PHP Parse error:  syntax error, unexpected '}', expecting end of file in /home/sigplusapp/public_html/servicoEmail/rotinaenviodeemail_protocolo_2.php on line 227
+[04-Aug-2022 20:42:48 UTC] PHP Parse error:  syntax error, unexpected '}', expecting end of file in /home/sigplusapp/public_html/servicoEmail/rotinaenviodeemail_protocolo_2.php on line 227
+[04-Aug-2022 16:46:33 America/Manaus] PHP Deprecated:  __autoload() is deprecated, use spl_autoload_register() instead in /home/sigplusapp/public_html/servicoEmail/phpmailer/PHPMailerAutoload.php on line 46
+[04-Aug-2022 21:08:27 UTC] PHP Deprecated:  __autoload() is deprecated, use spl_autoload_register() instead in /home/sigplusapp/public_html/servicoEmail/phpmailer/PHPMailerAutoload.php on line 46
+[04-Aug-2022 21:08:28 UTC] PHP Warning:  stream_socket_enable_crypto(): Peer certificate CN=`outlook.com' did not match expected CN=`52.96.191.2' in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.smtp.php on line 343
+[04-Aug-2022 21:09:35 UTC] PHP Fatal error:  Uncaught Error: Class 'PHPMailer' not found in /home/sigplusapp/public_html/servicoEmail/teste2.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/servicoEmail/teste2.php on line 10
+[04-Aug-2022 21:09:51 UTC] PHP Fatal error:  Uncaught Error: Class 'PHPMailer' not found in /home/sigplusapp/public_html/servicoEmail/teste2.php:10
+Stack trace:
+#0 {main}
+  thrown in /home/sigplusapp/public_html/servicoEmail/teste2.php on line 10
+[04-Aug-2022 21:10:01 UTC] PHP Deprecated:  __autoload() is deprecated, use spl_autoload_register() instead in /home/sigplusapp/public_html/servicoEmail/phpmailer/PHPMailerAutoload.php on line 46
+[04-Aug-2022 21:10:01 UTC] PHP Warning:  stream_socket_enable_crypto(): Peer certificate CN=`outlook.com' did not match expected CN=`52.96.229.178' in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.smtp.php on line 343
+[04-Aug-2022 21:11:18 UTC] PHP Deprecated:  __autoload() is deprecated, use spl_autoload_register() instead in /home/sigplusapp/public_html/servicoEmail/phpmailer/PHPMailerAutoload.php on line 41
+[04-Aug-2022 21:11:18 UTC] PHP Warning:  stream_socket_enable_crypto(): Peer certificate CN=`outlook.com' did not match expected CN=`52.96.79.226' in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.smtp.php on line 343
+[04-Aug-2022 21:11:20 UTC] PHP Deprecated:  __autoload() is deprecated, use spl_autoload_register() instead in /home/sigplusapp/public_html/servicoEmail/phpmailer/PHPMailerAutoload.php on line 41
+[04-Aug-2022 21:11:20 UTC] PHP Warning:  stream_socket_enable_crypto(): Peer certificate CN=`outlook.com' did not match expected CN=`52.96.79.226' in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.smtp.php on line 343
+[04-Aug-2022 21:11:29 UTC] PHP Deprecated:  __autoload() is deprecated, use spl_autoload_register() instead in /home/sigplusapp/public_html/servicoEmail/phpmailer/PHPMailerAutoload.php on line 41
+[04-Aug-2022 21:11:29 UTC] PHP Warning:  stream_socket_enable_crypto(): Peer certificate CN=`outlook.com' did not match expected CN=`52.96.190.226' in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.smtp.php on line 343
+[04-Aug-2022 21:16:10 UTC] PHP Deprecated:  __autoload() is deprecated, use spl_autoload_register() instead in /home/sigplusapp/public_html/servicoEmail/phpmailer/PHPMailerAutoload.php on line 46
+[04-Aug-2022 21:22:20 UTC] PHP Fatal error:  Class 'Test\SendTestCase' not found in /home/sigplusapp/public_html/servicoEmail/teste2.php on line 25
+[04-Aug-2022 21:32:30 UTC] PHP Fatal error:  Uncaught Error: Class 'SMTP' not found in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php:1291
+Stack trace:
+#0 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1374): PHPMailer->getSMTPInstance()
+#1 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1311): PHPMailer->smtpConnect(Array)
+#2 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1156): PHPMailer->smtpSend('Date: Thu, 4 Au...', 'Nome: Israel Ar...')
+#3 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1060): PHPMailer->postSend()
+#4 /home/sigplusapp/public_html/servicoEmail/teste2.php(33): PHPMailer->send()
+#5 /home/sigplusapp/public_html/servicoEmail/teste2.php(43): smtpmailer('israel.araujo@u...', 'iaraujo.israel@...', 'Israel Araujo', 'Teste', 'Nome: Israel Ar...')
+#6 {main}
+  thrown in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php on line 1291
+[04-Aug-2022 21:34:46 UTC] PHP Fatal error:  Uncaught Error: Class 'SMTP' not found in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php:1291
+Stack trace:
+#0 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1374): PHPMailer->getSMTPInstance()
+#1 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1311): PHPMailer->smtpConnect(Array)
+#2 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1156): PHPMailer->smtpSend('Date: Thu, 4 Au...', 'Nome: Israel Ar...')
+#3 /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php(1060): PHPMailer->postSend()
+#4 /home/sigplusapp/public_html/servicoEmail/teste2.php(34): PHPMailer->send()
+#5 /home/sigplusapp/public_html/servicoEmail/teste2.php(45): smtpmailer('israel.araujo@u...', 'iaraujo.israel@...', 'Israel Araujo', 'Teste', 'Nome: Israel Ar...')
+#6 {main}
+  thrown in /home/sigplusapp/public_html/servicoEmail/phpmailer/class.phpmailer.php on line 1291
+[04-Aug-2022 21:41:32 UTC] PHP Warning:  require_once(PHPMailer/class.phpmailer.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/teste2.php on line 13
+[04-Aug-2022 21:41:32 UTC] PHP Fatal error:  require_once(): Failed opening required 'PHPMailer/class.phpmailer.php' (include_path='.:/opt/cpanel/ea-php72/root/usr/share/pear') in /home/sigplusapp/public_html/servicoEmail/teste2.php on line 13
+[04-Aug-2022 21:44:00 UTC] PHP Warning:  require_once(PHPMailer/class.phpmailer.php): failed to open stream: No such file or directory in /home/sigplusapp/public_html/servicoEmail/teste2.php on line 13
+[04-Aug-2022 21:44:00 UTC] PHP Fatal error:  require_once(): Failed opening required 'PHPMailer/class.phpmailer.php' (include_path='.:/opt/cpanel/ea-php72/root/usr/share/pear') in /home/sigplusapp/public_html/servicoEmail/teste2.php on line 13
