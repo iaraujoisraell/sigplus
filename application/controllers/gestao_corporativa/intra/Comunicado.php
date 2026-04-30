@@ -120,11 +120,72 @@ class Comunicado extends AdminController {
     }
 
     public function add_comunicado($id = '') {
-
-
-        
+        if (!has_permission_intranet('comunicado_interno', '', 'create') && !is_admin()) {
+            access_denied('Comunicado');
+        }
 
         if ($this->input->post()) {
+            $action = $this->input->post('action') === 'draft' ? 'draft' : 'publish';
+            $titulo = trim((string) $this->input->post('titulo'));
+            $setor_id = (int) $this->input->post('setor_id');
+
+            if ($titulo === '' || $setor_id === 0) {
+                set_alert('danger', 'Título e setor são obrigatórios.');
+                redirect('gestao_corporativa/intra/comunicado/add');
+            }
+
+            $data = [
+                'titulo'      => $titulo,
+                'setor_id'    => $setor_id,
+                'departmentid'=> $setor_id,
+                'descricao'   => $this->input->post('descricao'),
+                'retorno'     => $this->input->post('retorno') ? 1 : 0,
+                'categoria'   => $this->input->post('categoria') ?: null,
+                'prioridade'  => $this->input->post('prioridade') ?: 'normal',
+                'dt_expiracao'=> $this->input->post('dt_expiracao') ?: null,
+                'status'      => $action === 'draft' ? 'draft' : 'published',
+                'ativo'       => $action === 'draft' ? 0 : 1,
+            ];
+            if ($action === 'publish') {
+                $data['dt_publicacao'] = date('Y-m-d H:i:s');
+            }
+
+            $this->Departments_model = $this->Departments_model ?? null;
+            $this->load->model('Departments_model');
+            $department = $this->Departments_model->get($setor_id);
+            $data['sequencial'] = $this->Comunicado_model->get_sequencial($setor_id);
+            $abrev = !empty($department->abreviado) ? $department->abreviado : 'CI';
+            $data['codigo'] = strtoupper($abrev) . ' #' . $data['sequencial'];
+
+            $ci_id = $this->Comunicado_model->add($data, '', null);
+            if (!$ci_id) {
+                set_alert('danger', 'Falha ao salvar comunicado.');
+                redirect('gestao_corporativa/intra/comunicado/add');
+            }
+
+            $this->_save_ci_attachments($ci_id);
+
+            if ($action === 'publish') {
+                $for_staffs = $this->input->post('for_staffs') ?: [];
+                $ccs = $this->input->post('cc') ?: [];
+
+                if (!empty($for_staffs)) {
+                    $this->Comunicado_model->send(['id' => $ci_id, 'for_staffs' => $for_staffs], $ci_id);
+                }
+                if (!empty($ccs)) {
+                    $this->Comunicado_model->cc($ccs, $ci_id);
+                }
+                set_alert('success', 'Comunicado publicado e enviado aos destinatários.');
+            } else {
+                set_alert('success', 'Comunicado salvo como rascunho.');
+            }
+
+            redirect('gestao_corporativa/intra/comunicado');
+            return;
+        }
+
+        // legacy fallback abaixo (mantido temporariamente)
+        if (false) {
             
 //            $arquivos = $_FILES['attachments'];
 //            print_r($arquivos);
@@ -210,6 +271,62 @@ class Comunicado extends AdminController {
 
             $this->load->view('gestao_corporativa/intranet/comunicado/new_c2.php', $view_data);
         }
+    }
+
+    private function _save_ci_attachments($ci_id) {
+        if (empty($_FILES['attachments']) || empty($_FILES['attachments']['name'])) {
+            return [];
+        }
+
+        $destino = './assets/intranet/img/ci/';
+        if (!is_dir($destino)) {
+            @mkdir($destino, 0775, true);
+        }
+
+        $files = $_FILES['attachments'];
+        $is_multi = is_array($files['name']);
+        $count = $is_multi ? count($files['name']) : 1;
+        $saved = [];
+        $first_name = '';
+
+        for ($i = 0; $i < $count; $i++) {
+            $original = $is_multi ? $files['name'][$i] : $files['name'];
+            $tmp      = $is_multi ? $files['tmp_name'][$i] : $files['tmp_name'];
+            $size     = $is_multi ? (int) $files['size'][$i] : (int) $files['size'];
+            $mime     = $is_multi ? $files['type'][$i] : $files['type'];
+            $err      = $is_multi ? $files['error'][$i] : $files['error'];
+
+            if (empty($original) || $err !== UPLOAD_ERR_OK) continue;
+
+            $clean = str_replace(' ', '_', $original);
+            $unique = date('YmdHis') . '_' . substr(md5($clean . $i), 0, 8) . '_' . $clean;
+            $path = $destino . $unique;
+
+            if (move_uploaded_file($tmp, $path)) {
+                $row = [
+                    'ci_id'         => (int) $ci_id,
+                    'filename'      => $unique,
+                    'original_name' => $original,
+                    'size_bytes'    => $size,
+                    'mime'          => $mime,
+                    'uploaded_by'   => get_staff_user_id(),
+                    'uploaded_at'   => date('Y-m-d H:i:s'),
+                    'empresa_id'    => $this->session->userdata('empresa_id'),
+                ];
+                $this->db->insert('tbl_intranet_ci_attachments', $row);
+                $saved[] = $unique;
+                if ($first_name === '') $first_name = $unique;
+            }
+        }
+
+        if ($first_name !== '') {
+            $this->db->where('id', $ci_id)->update('tbl_intranet_ci', [
+                'docs'    => implode(',', $saved),
+                'arqnome' => $first_name,
+            ]);
+        }
+
+        return $saved;
     }
 
     public function delete_doc_ci() {
