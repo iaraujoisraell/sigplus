@@ -281,6 +281,8 @@ function get_available_staff_permissions_intranet($data = []) {
             'name' => 'Módulos',
             'capabilities' => [
                 'view_cis' => 'Comunicados Internos',
+                'view_atas' => 'Atas',
+                'view_planos_acao' => 'Planos de Ação',
                 'view_docs' => 'Documentos',
                 'view_projects' => 'Projetos',
                 'view_tasks' => 'Tarefas',
@@ -330,6 +332,22 @@ function get_available_staff_permissions_intranet($data = []) {
                 'edit' => 'Editar',
                 'delete' => 'Excluir',
                 'manage_all' => 'Gerenciar todos (não só os próprios)',
+            ],
+        ],
+        'atas' => [
+            'name' => 'Atas',
+            'capabilities' => [
+                'create' => 'Criar',
+                'edit' => 'Editar',
+                'delete' => 'Excluir',
+            ],
+        ],
+        'planos_acao' => [
+            'name' => 'Planos de Ação',
+            'capabilities' => [
+                'create' => 'Criar',
+                'edit' => 'Editar',
+                'delete' => 'Excluir',
             ],
         ],
         // --- APLICADO

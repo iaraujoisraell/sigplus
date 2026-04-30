@@ -176,6 +176,8 @@ $me_empresa      = get_option('companyname');
 
                     </div>
 
+                    <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_widgets_atas_planos'); ?>
+
                     <div class="ui-card mini-card news-widget-card">
                         <div class="news-widget-header">
                             <a href="<?php echo base_url('gestao_corporativa/intra/Pubs/ver_todas'); ?>" class="news-widget-title-link">
