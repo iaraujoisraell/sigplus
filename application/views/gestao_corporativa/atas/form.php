@@ -86,7 +86,7 @@
                         <label class="control-label">Quem pode ver</label>
                         <select name="visibilidade" id="visibilidade" class="form-control">
                             <option value="publica" <?php echo ($ata['visibilidade'] ?? 'publica') === 'publica' ? 'selected' : ''; ?>>Toda a empresa</option>
-                            <option value="restrita" <?php echo ($ata['visibilidade'] ?? '') === 'restrita' ? 'selected' : ''; ?>>Somente convidados/participantes/visualizadores</option>
+                            <option value="restrita" <?php echo ($ata['visibilidade'] ?? '') === 'restrita' ? 'selected' : ''; ?>>Restrita (apenas listados em "Quem mais pode visualizar")</option>
                         </select>
                     </div>
                 </div>
@@ -176,7 +176,9 @@
                 <p class="text-muted small" style="margin-top:8px;margin-bottom:0;">
                     <i class="fa fa-info-circle"></i>
                     Quando "Quem pode ver" estiver em <strong>"Toda a empresa"</strong>, esta lista é apenas informativa.
-                    Quando estiver em <strong>"Somente convidados/participantes/visualizadores"</strong>, só os listados terão acesso.
+                    Quando estiver em <strong>"Restrita"</strong>, <strong>somente</strong> os adicionados aqui +
+                    o responsável e o criador da ata terão acesso. Participantes e convidados <strong>não</strong>
+                    dão acesso automático — adicione-os aqui também se precisarem visualizar.
                 </p>
             </div>
         </div>

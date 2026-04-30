@@ -52,21 +52,32 @@ class Ata_model extends App_Model
         $me = (int) get_staff_user_id();
         return (int) $this->db->query("SELECT COUNT(DISTINCT a.id) AS n
             FROM tbl_atas a
-            LEFT JOIN tbl_atas_participantes p ON p.ata_id = a.id AND p.deleted = 0
+            LEFT JOIN tbl_atas_participantes p
+                ON p.ata_id = a.id AND p.deleted = 0 AND p.tipo = 'visualizador' AND p.staff_id = $me
             WHERE a.deleted = 0 AND a.empresa_id = $empresa_id
-              AND (a.responsavel_id = $me OR a.user_create = $me OR p.staff_id = $me)")
+              AND (a.responsavel_id = $me OR a.user_create = $me OR p.id IS NOT NULL)")
             ->row()->n;
     }
 
+    /** "Minhas atas" = onde sou responsável, criador ou visualizador autorizado */
     private function _where_minha($alias)
     {
         $me = (int) get_staff_user_id();
         $this->db->where("({$alias}.responsavel_id = $me OR {$alias}.user_create = $me OR EXISTS (
-            SELECT 1 FROM tbl_atas_participantes pp WHERE pp.ata_id = {$alias}.id AND pp.staff_id = $me AND pp.deleted = 0
+            SELECT 1 FROM tbl_atas_participantes pp
+            WHERE pp.ata_id = {$alias}.id
+              AND pp.staff_id = $me
+              AND pp.tipo = 'visualizador'
+              AND pp.deleted = 0
         ))", null, false);
     }
 
-    /** Aplica filtro de visibilidade: só atas que o user pode ver */
+    /**
+     * Filtro de visibilidade aplicado em SELECTs.
+     * Acesso: admin OU responsável OU criador OU (visibilidade=publica) OU
+     *         está em tbl_atas_participantes COM tipo='visualizador'.
+     * Participantes e convidados NÃO dão acesso automático.
+     */
     private function _where_visivel($alias)
     {
         if (is_admin()) return;
@@ -76,7 +87,10 @@ class Ata_model extends App_Model
             OR {$alias}.user_create = $me
             OR EXISTS (
                 SELECT 1 FROM tbl_atas_participantes pp
-                WHERE pp.ata_id = {$alias}.id AND pp.staff_id = $me AND pp.deleted = 0
+                WHERE pp.ata_id = {$alias}.id
+                  AND pp.staff_id = $me
+                  AND pp.tipo = 'visualizador'
+                  AND pp.deleted = 0
             ))", null, false);
     }
 
@@ -90,6 +104,7 @@ class Ata_model extends App_Model
 
         $count = $this->db->where('ata_id', (int) $ata['id'])
             ->where('staff_id', $staff_id)
+            ->where('tipo', 'visualizador')
             ->where('deleted', 0)
             ->count_all_results('tbl_atas_participantes');
         return $count > 0;
