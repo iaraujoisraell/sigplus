@@ -214,11 +214,27 @@ class Comunicado_model extends App_Model {
      */
     public function get_comunicado_nao_lido() {
 
-        $empresa_id = $this->session->userdata('empresa_id');
-        $staff_id = get_staff_user_id();
-        $sql = "SELECT c.*, c.id as ci, s.id as send_id from tbl_intranet_ci_send s
-        left join tbl_intranet_ci c on c.id = s.ci_id
-        where s.deleted = 0 and c.empresa_id = $empresa_id and s.staff_id = $staff_id and s.status = 0";
+        $empresa_id = (int) $this->session->userdata('empresa_id');
+        $staff_id = (int) get_staff_user_id();
+        $sql = "SELECT
+                    c.*,
+                    c.id AS ci,
+                    s.id AS send_id,
+                    s.dt_send,
+                    s.cc,
+                    CONCAT_WS(' ', autor.firstname, autor.lastname) AS autor_nome,
+                    autor.staffid AS autor_id,
+                    d.name AS setor_nome
+                FROM tbl_intranet_ci_send s
+                LEFT JOIN tbl_intranet_ci c ON c.id = s.ci_id
+                LEFT JOIN tblstaff autor ON autor.staffid = c.user_create
+                LEFT JOIN tbldepartments d ON d.departmentid = c.setor_id
+                WHERE s.deleted = 0
+                  AND c.deleted = 0
+                  AND c.empresa_id = $empresa_id
+                  AND s.staff_id = $staff_id
+                  AND s.status = 0
+                ORDER BY s.dt_send DESC, c.id DESC";
 
         return $this->db->query($sql)->result_array();
     }
