@@ -17,7 +17,10 @@ $total_grupos  = $this->Workgroup_model->count_meus();
     .home-mini-list-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid #e9edf2;}
     .home-mini-list-header h4{margin:0;font-size:15px;font-weight:700;color:#1f2937;display:flex;align-items:center;gap:8px;}
     .home-mini-list-header h4 i{color:#0a66c2;}
+    .home-mini-list-header .right{display:flex;align-items:center;gap:6px;}
     .home-mini-list-header .count{background:#0a66c2;color:#fff;font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;}
+    .home-mini-list-header .add-btn{width:24px;height:24px;border-radius:50%;background:#eaf2fb;color:#0a66c2;display:inline-flex;align-items:center;justify-content:center;text-decoration:none;font-size:13px;transition:.15s;}
+    .home-mini-list-header .add-btn:hover{background:#0a66c2;color:#fff;text-decoration:none;}
     .home-mini-list-body{padding:6px 0;}
     .home-mini-item{display:block;padding:8px 18px;text-decoration:none !important;color:#1f2937;border-bottom:1px solid #f3f4f6;transition:.15s;}
     .home-mini-item:last-child{border-bottom:0;}
@@ -42,7 +45,10 @@ $total_grupos  = $this->Workgroup_model->count_meus();
 <div class="ui-card mini-card home-mini-list-card" style="margin-bottom:14px;">
     <div class="home-mini-list-header">
         <h4><i class="far fa-file-alt"></i> Minhas Atas</h4>
-        <?php if ($total_atas > 0): ?><span class="count"><?php echo $total_atas; ?></span><?php endif; ?>
+        <div class="right">
+            <?php if ($total_atas > 0): ?><span class="count"><?php echo $total_atas; ?></span><?php endif; ?>
+            <a href="<?php echo base_url('gestao_corporativa/Ata/add'); ?>" class="add-btn" title="Nova ata"><i class="fa fa-plus"></i></a>
+        </div>
     </div>
     <div class="home-mini-list-body">
         <?php if (empty($minhas_atas)): ?>
@@ -70,7 +76,10 @@ $total_grupos  = $this->Workgroup_model->count_meus();
 <div class="ui-card mini-card home-mini-list-card" style="margin-bottom:14px;">
     <div class="home-mini-list-header">
         <h4><i class="fas fa-users-cog"></i> Meus Grupos</h4>
-        <?php if ($total_grupos > 0): ?><span class="count"><?php echo $total_grupos; ?></span><?php endif; ?>
+        <div class="right">
+            <?php if ($total_grupos > 0): ?><span class="count"><?php echo $total_grupos; ?></span><?php endif; ?>
+            <a href="<?php echo base_url('gestao_corporativa/Workgroup/add'); ?>" class="add-btn" title="Novo grupo"><i class="fa fa-plus"></i></a>
+        </div>
     </div>
     <div class="home-mini-list-body">
         <?php if (empty($meus_grupos)): ?>
@@ -97,7 +106,10 @@ $total_grupos  = $this->Workgroup_model->count_meus();
 <div class="ui-card mini-card home-mini-list-card" style="margin-bottom:14px;">
     <div class="home-mini-list-header">
         <h4><i class="fas fa-clipboard-list"></i> Meus Planos de Ação</h4>
-        <?php if ($total_planos > 0): ?><span class="count"><?php echo $total_planos; ?></span><?php endif; ?>
+        <div class="right">
+            <?php if ($total_planos > 0): ?><span class="count"><?php echo $total_planos; ?></span><?php endif; ?>
+            <a href="<?php echo base_url('gestao_corporativa/Plano_acao/add'); ?>" class="add-btn" title="Novo plano"><i class="fa fa-plus"></i></a>
+        </div>
     </div>
     <div class="home-mini-list-body">
         <?php if (empty($meus_planos)): ?>

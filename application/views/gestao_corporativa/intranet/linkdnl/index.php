@@ -121,60 +121,7 @@ $me_empresa      = get_option('companyname');
                         <?php } ?>
                     </div>
 
-                    <div class="ui-card mini-card profile-menu">
-
-                        <!-- AÇÕES / TASKS -->
-                        <a href="<?php echo base_url('admin/tasks'); ?>">
-                            <i class="fa fa-bolt"></i>
-                            <span>Ações / Tasks</span>
-                        </a>
-
-                        <!-- PROJETOS -->
-                        <a href="<?php echo base_url('admin/projects'); ?>">
-                            <i class="fa fa-folder-open"></i>
-                            <span>Projetos</span>
-                        </a>
-
-                        <!-- CONTATOS -->
-                        <?php if (has_permission_intranet('menu_top_view', '', 'view_contacts') || is_admin()) { ?>
-                            <a href="<?php echo base_url('gestao_corporativa/intranet/contatos'); ?>">
-                                <i class="fa fa-users"></i>
-                                <span>Contatos</span>
-                            </a>
-                        <?php } ?>
-
-                        <!-- TAREFAS / TODO -->
-                        <?php if (has_permission_intranet('menu_top_view', '', 'view_itens_task') || is_admin()) { ?>
-                            <a href="<?php echo base_url('admin/todo'); ?>">
-                                <i class="fa fa-check-square"></i>
-                                <span>Tarefas / To do</span>
-
-                                <?php if ($total_tarefas > 0) { ?>
-                                    <span class="mini-badge"><?php echo $total_tarefas; ?></span>
-                                <?php } ?>
-                            </a>
-                        <?php } ?>
-
-                        <!-- GRUPOS -->
-                        <a href="#">
-                            <i class="fa fa-users"></i>
-                            <span>Grupos</span>
-                        </a>
-
-                        <!-- COMUNICADOS -->
-                        <a href="<?php echo base_url('gestao_corporativa/intranet/teste_view'); ?>" >
-                            <i class="fa fa-bullhorn"></i>
-                            <span>Comunicados Internos</span>
-                        </a>
-                    
-
-                        <!-- EVENTOS -->
-                        <a href="#">
-                            <i class="fa fa-calendar"></i>
-                            <span>Eventos</span>
-                        </a>
-
-                    </div>
+                    <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_atalhos_pessoais'); ?>
 
                     <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_widgets_atas_planos'); ?>
 
@@ -258,7 +205,9 @@ $me_empresa      = get_option('companyname');
 
                 <!-- DIREITA -->
                 <div>
-                    <?php 
+                    <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_widgets_direita'); ?>
+
+                    <?php
                     function adjustBrightness($hex, $steps) {
                         $steps = max(-255, min(255, $steps));
 
