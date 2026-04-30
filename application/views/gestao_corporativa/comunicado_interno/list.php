@@ -28,6 +28,33 @@
             </div>
             <?php } ?>
             <input type="hidden" value="<?php echo get_staff_user_id(); ?>" name="id_user">
+
+            <div class="panel_s mbot10">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="filtro_titulo" placeholder="Buscar título...">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" class="form-control" name="filtro_dt_ini" placeholder="Início">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" class="form-control" name="filtro_dt_fim" placeholder="Fim">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="filtro_status" class="form-control">
+                                <option value="">Todos</option>
+                                <option value="1">Apenas lidos</option>
+                                <option value="0">Apenas não lidos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-default btn-block" id="btn_limpar_filtros">Limpar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="panel_s">
 
                 <div class="panel-body">
@@ -66,6 +93,8 @@
                                     $table_data = array_merge($table_data, array(
                                         'ID',
                                         'Título',
+                                        'Autor',
+                                        'Setor',
                                         'Recebido em',
                                         'Lido em',
                                         'Ciente em',
@@ -91,6 +120,7 @@
                                     $table_data = array_merge($table_data, array(
                                         'ID',
                                         'Título',
+                                        'Setor',
                                         'Data de Envio',
                                         'Cientes',
                                         'Ações'
@@ -122,20 +152,35 @@
 <script>
 
 
+    var FiltroParams = {
+        filtro_titulo:  '[name="filtro_titulo"]',
+        filtro_dt_ini:  '[name="filtro_dt_ini"]',
+        filtro_dt_fim:  '[name="filtro_dt_fim"]',
+        filtro_status:  '[name="filtro_status"]',
+    };
+
     $(function () {
+        initDataTable('.table-comunicados', '<?php echo base_url(); ?>' + 'gestao_corporativa/intra/intranet/table_comunicado', [0], [0], FiltroParams, [1, 'desc']);
 
-        var Params = {};
-        var tAPI = initDataTable('.table-comunicados', '<?php echo base_url(); ?>' + 'gestao_corporativa/intra/intranet/table_comunicado', [0], [0], Params, [1, 'desc']);
-
-    });
-    $(function () {
-
-        var Params = {};
-        Params['my'] = '[name="id_user"]';
-        initDataTable('.table-comunicados_my', '<?php echo base_url(); ?>' + 'gestao_corporativa/intra/intranet/table_comunicado', [0], [0], Params, [1, 'desc']);
-
+        var ParamsMy = $.extend({}, FiltroParams, { my: '[name="id_user"]' });
+        initDataTable('.table-comunicados_my', '<?php echo base_url(); ?>' + 'gestao_corporativa/intra/intranet/table_comunicado', [0], [0], ParamsMy, [1, 'desc']);
     });
 
+    var filtroTimer = null;
+    function reloadTabelas() {
+        if ($.fn.DataTable.isDataTable('.table-comunicados')) $('.table-comunicados').DataTable().ajax.reload(null, false);
+        if ($.fn.DataTable.isDataTable('.table-comunicados_my')) $('.table-comunicados_my').DataTable().ajax.reload(null, false);
+    }
+    $(document).on('keyup', '[name="filtro_titulo"]', function () {
+        clearTimeout(filtroTimer);
+        filtroTimer = setTimeout(reloadTabelas, 300);
+    });
+    $(document).on('change', '[name="filtro_dt_ini"], [name="filtro_dt_fim"], [name="filtro_status"]', reloadTabelas);
+    $('#btn_limpar_filtros').on('click', function () {
+        $('[name="filtro_titulo"], [name="filtro_dt_ini"], [name="filtro_dt_fim"]').val('');
+        $('[name="filtro_status"]').val('').trigger('change');
+        reloadTabelas();
+    });
 </script>
 </body>
 </html>

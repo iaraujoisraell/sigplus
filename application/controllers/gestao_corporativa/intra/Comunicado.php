@@ -29,25 +29,20 @@ class Comunicado extends AdminController {
     /* List all leads */
 
     public function index() {
-
-
-
-        //$staffs = $this->Staff_model->get();
-        //$view_data["staffs"] = $staffs;
-        //$this->load->view('gestao_corporativa/intranet/comunicado/new_c.php',$view_data);
+        $view_data = [];
         $this->load->view('gestao_corporativa/comunicado_interno/list.php', $view_data);
     }
 
     public function add() {
+        if (!has_permission_intranet('comunicado_interno', '', 'create') && !is_admin()) {
+            access_denied('Comunicado');
+        }
 
-
-
-        $staffs = $this->Staff_model->get();
-
-        $view_data["staffs"] = $staffs;
+        $view_data = [];
+        $view_data['registro_atendimento_id'] = $this->input->get('registro_atendimento_id') ?: '';
         add_admin_tickets_js_assets();
 
-        $this->load->view('gestao_corporativa/ged/add.php', $view_data);
+        $this->load->view('gestao_corporativa/intranet/comunicado/new_c.php', $view_data);
     }
 
     public function see_all() {

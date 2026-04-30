@@ -327,6 +327,9 @@ function get_available_staff_permissions_intranet($data = []) {
             'name' => 'Comunicados Internos',
             'capabilities' => [
                 'create' => 'Criar',
+                'edit' => 'Editar',
+                'delete' => 'Excluir',
+                'manage_all' => 'Gerenciar todos (não só os próprios)',
             ],
         ],
         // --- APLICADO
