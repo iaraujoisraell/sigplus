@@ -227,15 +227,16 @@ class Workgroup_model extends App_Model
 
     public function get_tasks_do_grupo($grupo_id)
     {
-        return $this->db->select('t.id, t.name, t.status, t.duedate, t.priority,
-                                  CONCAT_WS(\' \', s.firstname, s.lastname) AS staff_nome')
-            ->from('tbltasks t')
-            ->join('tbltask_assigned ta', 'ta.taskid = t.id', 'left')
-            ->join('tblstaff s', 's.staffid = ta.staffid', 'left')
-            ->where('t.grupoid', $grupo_id)
-            ->where('t.deleted', 0)
-            ->group_by('t.id')
-            ->order_by('t.id', 'desc')
-            ->get()->result_array();
+        $grupo_id = (int) $grupo_id;
+        $sql = "SELECT t.id, t.name, t.status, t.duedate, t.priority,
+                    (SELECT CONCAT_WS(' ', s.firstname, s.lastname)
+                     FROM tbltask_assigned ta
+                     INNER JOIN tblstaff s ON s.staffid = ta.staffid
+                     WHERE ta.taskid = t.id
+                     LIMIT 1) AS staff_nome
+                FROM tbltasks t
+                WHERE t.grupoid = $grupo_id AND t.deleted = 0
+                ORDER BY t.id DESC";
+        return $this->db->query($sql)->result_array();
     }
 }
