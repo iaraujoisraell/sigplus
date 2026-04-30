@@ -3,7 +3,6 @@
 <?php $this->load->view('gestao_corporativa/css_background'); ?>
 
 <link rel="stylesheet" href="<?php echo base_url() ?>assets/lte/plugins/select2/css/select2.min.css">
-<link rel="stylesheet" href="<?php echo base_url(); ?>assets/plusgins_select/multselect/dist/jquery.tree-multiselect.min.css">
 
 <style>
     .ci-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:14px;}
@@ -14,6 +13,13 @@
     .ci-attach-list{margin-top:8px;}
     .ci-attach-list .file-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f9fafb;border-radius:6px;margin-bottom:4px;font-size:13px;}
     .ci-attach-list .file-row button{margin-left:auto;background:none;border:0;color:#dc2626;cursor:pointer;font-size:14px;}
+    .select2-container--default .select2-selection--multiple{min-height:42px;border:1px solid #d0d5dd;}
+    .select2-container--default .select2-selection--multiple .select2-selection__rendered{padding:4px 8px;}
+    .select2-container--default .select2-selection--multiple .select2-selection__choice{background:#eaf2fb;border:1px solid #c7d7ea;color:#0a66c2;font-size:13px;}
+    .ci-quick-pick{margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap;}
+    .ci-quick-pick button{font-size:12px;padding:4px 10px;background:#f3f6fa;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;}
+    .ci-quick-pick button:hover{background:#e5edf7;color:#0a66c2;}
+    .ck-editor__editable_inline{min-height:240px;}
 </style>
 
 <div class="content">
@@ -104,24 +110,42 @@
                 <div class="ci-card-body">
                     <?php
                     $departments_staffs = $this->Intranet_model->get_departamentos_staffs_selecionados();
-                    $staffs_for_view = [];
+
+                    $grouped = [];
+                    foreach ($departments_staffs as $v) {
+                        $key = $v['name'] ?: '(sem setor)';
+                        $grouped[$key][] = $v;
+                    }
+                    ksort($grouped);
                     ?>
-                    <select name="for_staffs[]" id="select-destinatarios" multiple style="width:100%;" required>
-                        <?php foreach ($departments_staffs as $v): ?>
-                            <option value="<?php echo $v['staffid'] . '-' . $v['staffdepartmentid']; ?>"
-                                    data-section="<?php echo html_escape($v['name']); ?>">
-                                <?php echo html_escape($v['firstname'] . ' ' . $v['lastname']); ?>
-                            </option>
+
+                    <div class="ci-quick-pick">
+                        <span class="text-muted small" style="align-self:center;margin-right:6px;">Atalhos:</span>
+                        <?php foreach (array_keys($grouped) as $g): $gid = 'grp-' . md5($g); ?>
+                            <button type="button" data-group="<?php echo html_escape($g); ?>">+ <?php echo html_escape($g); ?> (<?php echo count($grouped[$g]); ?>)</button>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <select name="for_staffs[]" id="select-destinatarios" multiple data-placeholder="Buscar e selecionar pessoas..." style="width:100%;">
+                        <?php foreach ($grouped as $groupName => $items): ?>
+                            <optgroup label="<?php echo html_escape($groupName); ?>" data-group="<?php echo html_escape($groupName); ?>">
+                                <?php foreach ($items as $v): ?>
+                                    <option value="<?php echo $v['staffid'] . '-' . $v['staffdepartmentid']; ?>"
+                                            data-group="<?php echo html_escape($groupName); ?>">
+                                        <?php echo html_escape($v['firstname'] . ' ' . $v['lastname']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </optgroup>
                         <?php endforeach; ?>
                     </select>
 
-                    <div style="margin-top:14px;">
+                    <div style="margin-top:18px;">
                         <label class="control-label">Cópia (CC)</label>
                         <?php
                         $this->load->model('Staff_model');
                         $staffs = $this->Staff_model->get();
                         ?>
-                        <select class="select2" multiple data-placeholder="Selecione staffs em CC" style="width:100%;" name="cc[]">
+                        <select id="select-cc" multiple data-placeholder="Buscar e selecionar staffs em cópia..." style="width:100%;" name="cc[]">
                             <?php foreach ($staffs as $staff): ?>
                                 <option value="<?php echo (int) $staff['staffid']; ?>">
                                     <?php echo html_escape($staff['firstname'] . ' ' . $staff['lastname']); ?>
@@ -152,22 +176,40 @@
 
 <script src="<?php echo base_url() ?>assets/intranet/ckeditor/ckeditor.js"></script>
 <script src="<?php echo base_url() ?>assets/lte/plugins/select2/js/select2.full.min.js"></script>
-<script src="<?php echo base_url(); ?>assets/plusgins_select/multselect/dist/jquery.tree-multiselect.js"></script>
 
 <script>
-    CKEDITOR.replace('descricao');
+    CKEDITOR.replace('descricao', {
+        height: 260,
+        removePlugins: 'elementspath',
+        resize_enabled: true,
+        toolbarGroups: [
+            { name: 'basicstyles', groups: ['basicstyles', 'cleanup'] },
+            { name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align'] },
+            { name: 'links' },
+            { name: 'insert' },
+            { name: 'styles' },
+            { name: 'colors' },
+            { name: 'tools' },
+            { name: 'document', groups: ['mode'] }
+        ]
+    });
 
     $(function () {
-        $('.select2').select2();
+        $('#select-destinatarios, #select-cc').select2({
+            width: '100%',
+            closeOnSelect: false,
+            allowClear: true,
+        });
 
-        $('#select-destinatarios').treeMultiselect({
-            allowBatchSelection: true,
-            enableSelectAll: false,
-            sortable: false,
-            searchable: true,
-            startCollapsed: true,
-            selectAllText: 'Todos',
-            unselectAllText: 'Remover'
+        $('.ci-quick-pick button').on('click', function () {
+            var grupo = $(this).data('group');
+            var $sel = $('#select-destinatarios');
+            var atuais = $sel.val() || [];
+            $sel.find('option[data-group="' + grupo.replace(/"/g, '\\"') + '"]').each(function () {
+                var v = $(this).attr('value');
+                if (atuais.indexOf(v) === -1) atuais.push(v);
+            });
+            $sel.val(atuais).trigger('change');
         });
 
         var $list = $('#ci-attach-list');
@@ -179,7 +221,7 @@
         });
 
         $('#form-novo-ci').on('submit', function (e) {
-            var dest = $('select[name="for_staffs[]"]').val();
+            var dest = $('#select-destinatarios').val();
             var action = $(document.activeElement).val() || 'publish';
             if (action === 'publish' && (!dest || dest.length === 0)) {
                 e.preventDefault();
