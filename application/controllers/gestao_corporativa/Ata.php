@@ -38,33 +38,36 @@ class Ata extends AdminController
         }
 
         $data = [
-            'title'         => 'Nova Ata',
-            'ata'           => null,
-            'participantes' => [],
-            'decisoes'      => [],
-            'project_id'    => $this->input->get('project_id'),
-            'staffs'        => $this->Staff_model->get(),
-            'projects'      => $this->_get_projects(),
+            'title'          => 'Nova Ata',
+            'ata'            => null,
+            'participantes'  => [],
+            'convidados'     => [],
+            'visualizadores' => [],
+            'decisoes'       => [],
+            'project_id'     => $this->input->get('project_id'),
+            'staffs'         => $this->Staff_model->get(),
+            'projects'       => $this->_get_projects(),
         ];
         $this->load->view('gestao_corporativa/atas/form', $data);
     }
 
     public function edit($id)
     {
-        if (!has_permission_intranet('atas', '', 'edit') && !is_admin()) {
-            access_denied('Atas');
-        }
         $ata = $this->Ata_model->get($id);
         if (!$ata) show_404();
+        if (!$this->Ata_model->pode_editar($ata)) access_denied('Atas');
 
+        $pessoas = $this->Ata_model->get_pessoas($id);
         $data = [
-            'title'         => 'Editar Ata',
-            'ata'           => $ata,
-            'participantes' => $this->Ata_model->get_participantes($id),
-            'decisoes'      => $this->Ata_model->get_decisoes($id),
-            'project_id'    => $ata['project_id'],
-            'staffs'        => $this->Staff_model->get(),
-            'projects'      => $this->_get_projects(),
+            'title'          => 'Editar Ata',
+            'ata'            => $ata,
+            'participantes'  => $pessoas['participantes'],
+            'convidados'     => $pessoas['convidados'],
+            'visualizadores' => $pessoas['visualizadores'],
+            'decisoes'       => $this->Ata_model->get_decisoes($id),
+            'project_id'     => $ata['project_id'],
+            'staffs'         => $this->Staff_model->get(),
+            'projects'       => $this->_get_projects(),
         ];
         $this->load->view('gestao_corporativa/atas/form', $data);
     }
@@ -73,12 +76,19 @@ class Ata extends AdminController
     {
         $ata = $this->Ata_model->get($id);
         if (!$ata) show_404();
+        if (!$this->Ata_model->pode_visualizar($ata)) {
+            access_denied('Atas — você não tem permissão pra ver esta ata.');
+        }
 
+        $pessoas = $this->Ata_model->get_pessoas($id);
         $data = [
-            'title'         => 'Ata: ' . $ata['titulo'],
-            'ata'           => $ata,
-            'participantes' => $this->Ata_model->get_participantes($id),
-            'decisoes'      => $this->Ata_model->get_decisoes($id),
+            'title'          => 'Ata: ' . $ata['titulo'],
+            'ata'            => $ata,
+            'participantes'  => $pessoas['participantes'],
+            'convidados'     => $pessoas['convidados'],
+            'visualizadores' => $pessoas['visualizadores'],
+            'decisoes'       => $this->Ata_model->get_decisoes($id),
+            'pode_editar'    => $this->Ata_model->pode_editar($ata),
         ];
         $this->load->view('gestao_corporativa/atas/view', $data);
     }
@@ -108,7 +118,12 @@ class Ata extends AdminController
             redirect('gestao_corporativa/Ata');
         }
 
-        $this->Ata_model->save_participantes($ata_id, $this->input->post('participantes') ?: []);
+        $this->Ata_model->save_pessoas(
+            $ata_id,
+            $this->input->post('participantes') ?: [],
+            $this->input->post('convidados') ?: [],
+            $this->input->post('visualizadores') ?: []
+        );
 
         $project_id = (int) $this->input->post('project_id') ?: null;
         $this->Ata_model->save_decisoes($ata_id, $this->input->post('decisoes') ?: [], $project_id, true);

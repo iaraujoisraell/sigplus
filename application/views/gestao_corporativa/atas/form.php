@@ -52,7 +52,7 @@
                     <input type="text" name="titulo" class="form-control" required maxlength="250" value="<?php echo html_escape($ata['titulo'] ?? ''); ?>">
                 </div>
 
-                <div class="form-grid-3">
+                <div class="form-grid-4">
                     <div class="form-group">
                         <label class="control-label">Projeto</label>
                         <select name="project_id" id="project_id" class="form-control select2">
@@ -81,7 +81,20 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
+
+                    <div class="form-group">
+                        <label class="control-label">Quem pode ver</label>
+                        <select name="visibilidade" id="visibilidade" class="form-control">
+                            <option value="publica" <?php echo ($ata['visibilidade'] ?? 'publica') === 'publica' ? 'selected' : ''; ?>>Toda a empresa</option>
+                            <option value="restrita" <?php echo ($ata['visibilidade'] ?? '') === 'restrita' ? 'selected' : ''; ?>>Somente convidados/participantes/visualizadores</option>
+                        </select>
+                    </div>
                 </div>
+
+                <style>
+                    .form-grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:14px;}
+                    @media (max-width:900px){.form-grid-4{grid-template-columns:1fr 1fr;}}
+                </style>
 
                 <div class="form-grid-3">
                     <div class="form-group">
@@ -121,17 +134,50 @@
         <div class="form-card">
             <div class="form-card-header">
                 Participantes
-                <small class="text-muted">Adicione internos (staff) ou externos</small>
+                <small class="text-muted">Colaboradores presentes na reunião</small>
             </div>
             <div class="form-card-body">
                 <div id="lista-participantes" class="lista-itens">
-                    <?php if (!empty($participantes)): ?>
-                        <?php foreach ($participantes as $p): ?>
-                            <?php $this->load->view('gestao_corporativa/atas/_participante_row', ['p' => $p, 'staffs' => $staffs]); ?>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                    <?php foreach ($participantes ?? [] as $p): ?>
+                        <?php $this->load->view('gestao_corporativa/atas/_pessoa_row', ['p' => $p, 'tipo' => 'participantes', 'staffs' => $staffs]); ?>
+                    <?php endforeach; ?>
                 </div>
-                <button type="button" class="add-row" id="add-participante"><i class="fa fa-plus"></i> Adicionar participante</button>
+                <button type="button" class="add-row js-add-pessoa" data-tipo="participantes"><i class="fa fa-plus"></i> Adicionar participante</button>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="form-card-header">
+                Convidados
+                <small class="text-muted">Pessoas externas (não colaboradores) — informe nome, e-mail e organização</small>
+            </div>
+            <div class="form-card-body">
+                <div id="lista-convidados" class="lista-itens">
+                    <?php foreach ($convidados ?? [] as $c): ?>
+                        <?php $this->load->view('gestao_corporativa/atas/_convidado_row', ['c' => $c]); ?>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="add-row js-add-convidado"><i class="fa fa-plus"></i> Adicionar convidado</button>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <div class="form-card-header">
+                Quem mais pode visualizar
+                <small class="text-muted">Colaboradores que não estiveram, mas precisam ter acesso à ata</small>
+            </div>
+            <div class="form-card-body">
+                <div id="lista-visualizadores" class="lista-itens">
+                    <?php foreach ($visualizadores ?? [] as $v): ?>
+                        <?php $this->load->view('gestao_corporativa/atas/_pessoa_row', ['p' => $v, 'tipo' => 'visualizadores', 'staffs' => $staffs]); ?>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="add-row js-add-pessoa" data-tipo="visualizadores"><i class="fa fa-plus"></i> Adicionar visualizador</button>
+                <p class="text-muted small" style="margin-top:8px;margin-bottom:0;">
+                    <i class="fa fa-info-circle"></i>
+                    Quando "Quem pode ver" estiver em <strong>"Toda a empresa"</strong>, esta lista é apenas informativa.
+                    Quando estiver em <strong>"Somente convidados/participantes/visualizadores"</strong>, só os listados terão acesso.
+                </p>
             </div>
         </div>
 
@@ -164,22 +210,33 @@
 </div>
 
 <!-- Templates -->
-<template id="tpl-participante">
-    <div class="participante-card">
-        <select name="participantes[__INDEX__][tipo]" class="js-tipo">
-            <option value="interno">Interno</option>
-            <option value="externo">Externo</option>
-        </select>
-        <select name="participantes[__INDEX__][staff_id]" class="js-staff select2">
-            <option value="">Selecionar staff</option>
+<template id="tpl-pessoa">
+    <div class="pessoa-card">
+        <select name="__TIPO__[__INDEX__][staff_id]" class="select2-staff" style="width:100%;">
+            <option value="">Selecionar colaborador</option>
             <?php foreach ($staffs as $s): ?>
                 <option value="<?php echo (int) $s['staffid']; ?>"><?php echo html_escape($s['firstname'] . ' ' . $s['lastname']); ?></option>
             <?php endforeach; ?>
         </select>
-        <input type="text" name="participantes[__INDEX__][nome]" placeholder="Nome (externo)" class="js-nome" style="display:none;">
         <button type="button" class="remove js-remove"><i class="fa fa-trash"></i></button>
     </div>
 </template>
+
+<template id="tpl-convidado">
+    <div class="convidado-card">
+        <input type="text" name="convidados[__INDEX__][nome]" placeholder="Nome" required>
+        <input type="email" name="convidados[__INDEX__][email]" placeholder="E-mail">
+        <input type="text" name="convidados[__INDEX__][organizacao]" placeholder="Organização">
+        <button type="button" class="remove js-remove"><i class="fa fa-trash"></i></button>
+    </div>
+</template>
+
+<style>
+    .pessoa-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+    .convidado-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:8px 10px;display:grid;grid-template-columns:2fr 2fr 2fr auto;gap:8px;align-items:center;}
+    .convidado-card input{width:100%;border:1px solid #d0d5dd;border-radius:6px;padding:7px 10px;font-size:13px;}
+    @media (max-width:900px){.convidado-card{grid-template-columns:1fr;}}
+</style>
 
 <template id="tpl-decisao">
     <div class="item-card">
@@ -207,7 +264,7 @@
 
 <script>
 $(function () {
-    $('.select2').select2({width:'100%'});
+    $('.select2, .select2-staff').select2({width:'100%'});
 
     var snConfig = {
         lang:'pt-BR', height:160,
@@ -215,32 +272,30 @@ $(function () {
     };
     $('#pauta, #discussoes').summernote(snConfig);
 
-    var idxP = <?php echo (int) (isset($participantes) ? count($participantes) : 0) + 100; ?>;
-    var idxD = <?php echo (int) (isset($decisoes) ? count($decisoes) : 0) + 100; ?>;
+    var idxs = { participantes: 100, convidados: 100, visualizadores: 100, decisoes: 100 };
 
-    $('#add-participante').on('click', function () {
-        var html = $('#tpl-participante').html().replace(/__INDEX__/g, idxP++);
+    $('.js-add-pessoa').on('click', function () {
+        var tipo = $(this).data('tipo'); // participantes ou visualizadores
+        var html = $('#tpl-pessoa').html().replace(/__INDEX__/g, idxs[tipo]++).replace(/__TIPO__/g, tipo);
         var $row = $(html);
-        $('#lista-participantes').append($row);
-        $row.find('.select2').select2({width:'100%'});
+        $('#lista-' + tipo).append($row);
+        $row.find('.select2-staff').select2({width:'100%'});
+    });
+
+    $('.js-add-convidado').on('click', function () {
+        var html = $('#tpl-convidado').html().replace(/__INDEX__/g, idxs.convidados++);
+        $('#lista-convidados').append(html);
     });
 
     $('#add-decisao').on('click', function () {
-        var html = $('#tpl-decisao').html().replace(/__INDEX__/g, idxD++);
+        var html = $('#tpl-decisao').html().replace(/__INDEX__/g, idxs.decisoes++);
         var $row = $(html);
         $('#lista-decisoes').append($row);
         $row.find('.select2').select2({width:'100%'});
     });
 
     $(document).on('click', '.js-remove', function () {
-        $(this).closest('.item-card, .participante-card').remove();
-    });
-
-    $(document).on('change', '.js-tipo', function () {
-        var tipo = $(this).val();
-        var $card = $(this).closest('.participante-card');
-        $card.find('.js-staff').toggle(tipo === 'interno').next('.select2-container').toggle(tipo === 'interno');
-        $card.find('.js-nome').toggle(tipo === 'externo');
+        $(this).closest('.item-card, .pessoa-card, .convidado-card').remove();
     });
 });
 </script>

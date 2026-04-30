@@ -37,6 +37,8 @@ class Ata_model extends App_Model
             $this->db->where("(a.titulo LIKE '%{$term}%' OR a.local LIKE '%{$term}%')", null, false);
         }
 
+        $this->_where_visivel('a');
+
         $this->db->order_by('a.data', 'desc');
         $this->db->order_by('a.id', 'desc');
         if ($limit) $this->db->limit($limit, $offset ?: 0);
@@ -62,6 +64,44 @@ class Ata_model extends App_Model
         $this->db->where("({$alias}.responsavel_id = $me OR {$alias}.user_create = $me OR EXISTS (
             SELECT 1 FROM tbl_atas_participantes pp WHERE pp.ata_id = {$alias}.id AND pp.staff_id = $me AND pp.deleted = 0
         ))", null, false);
+    }
+
+    /** Aplica filtro de visibilidade: só atas que o user pode ver */
+    private function _where_visivel($alias)
+    {
+        if (is_admin()) return;
+        $me = (int) get_staff_user_id();
+        $this->db->where("({$alias}.visibilidade = 'publica'
+            OR {$alias}.responsavel_id = $me
+            OR {$alias}.user_create = $me
+            OR EXISTS (
+                SELECT 1 FROM tbl_atas_participantes pp
+                WHERE pp.ata_id = {$alias}.id AND pp.staff_id = $me AND pp.deleted = 0
+            ))", null, false);
+    }
+
+    public function pode_visualizar($ata, $staff_id = null)
+    {
+        if (is_admin()) return true;
+        $staff_id = $staff_id ?? (int) get_staff_user_id();
+        if ((int) ($ata['responsavel_id'] ?? 0) === $staff_id) return true;
+        if ((int) ($ata['user_create'] ?? 0) === $staff_id) return true;
+        if (($ata['visibilidade'] ?? 'publica') === 'publica') return true;
+
+        $count = $this->db->where('ata_id', (int) $ata['id'])
+            ->where('staff_id', $staff_id)
+            ->where('deleted', 0)
+            ->count_all_results('tbl_atas_participantes');
+        return $count > 0;
+    }
+
+    public function pode_editar($ata, $staff_id = null)
+    {
+        if (is_admin()) return true;
+        if (!has_permission_intranet('atas', '', 'edit')) return false;
+        $staff_id = $staff_id ?? (int) get_staff_user_id();
+        return (int) ($ata['responsavel_id'] ?? 0) === $staff_id
+            || (int) ($ata['user_create'] ?? 0) === $staff_id;
     }
 
     public function get($id)
@@ -118,6 +158,7 @@ class Ata_model extends App_Model
             'discussoes'     => $data['discussoes'] ?? null,
             'observacoes'    => $data['observacoes'] ?? null,
             'status'         => in_array($data['status'] ?? '', $this->statuses, true) ? $data['status'] : 'aberta',
+            'visibilidade'   => in_array($data['visibilidade'] ?? '', ['publica', 'restrita'], true) ? $data['visibilidade'] : 'publica',
         ];
 
         if ($id) {
@@ -134,26 +175,67 @@ class Ata_model extends App_Model
         return (int) $this->db->insert_id();
     }
 
-    public function save_participantes($ata_id, $list)
+    /**
+     * Aceita 3 grupos:
+     *  - participantes (staff internos presentes)
+     *  - convidados   (externos com nome/email/org)
+     *  - visualizadores (staff internos que podem ver mas não estiveram)
+     */
+    public function save_pessoas($ata_id, $participantes = [], $convidados = [], $visualizadores = [])
     {
         $this->db->where('ata_id', $ata_id)->update('tbl_atas_participantes', ['deleted' => 1]);
-        if (empty($list) || !is_array($list)) return;
 
-        foreach ($list as $p) {
-            $row = [
-                'ata_id'      => (int) $ata_id,
-                'tipo'        => ($p['tipo'] ?? 'interno') === 'externo' ? 'externo' : 'interno',
-                'staff_id'    => !empty($p['staff_id']) ? (int) $p['staff_id'] : null,
-                'nome'        => !empty($p['nome']) ? trim((string) $p['nome']) : null,
-                'email'       => !empty($p['email']) ? trim((string) $p['email']) : null,
-                'organizacao' => !empty($p['organizacao']) ? trim((string) $p['organizacao']) : null,
-                'presente'    => isset($p['presente']) ? (int) $p['presente'] : null,
-                'deleted'     => 0,
-            ];
-            if ($row['tipo'] === 'interno' && !$row['staff_id']) continue;
-            if ($row['tipo'] === 'externo' && !$row['nome']) continue;
+        $insert = function ($tipo, $row) use ($ata_id) {
+            $row['ata_id']  = (int) $ata_id;
+            $row['tipo']    = $tipo;
+            $row['deleted'] = 0;
             $this->db->insert('tbl_atas_participantes', $row);
+        };
+
+        foreach ((array) $participantes as $p) {
+            $sid = !empty($p['staff_id']) ? (int) $p['staff_id'] : 0;
+            if ($sid <= 0) continue;
+            $insert('participante', [
+                'staff_id' => $sid,
+                'presente' => isset($p['presente']) ? (int) $p['presente'] : 1,
+            ]);
         }
+
+        foreach ((array) $convidados as $c) {
+            $nome = !empty($c['nome']) ? trim((string) $c['nome']) : '';
+            if ($nome === '') continue;
+            $insert('convidado', [
+                'staff_id'    => null,
+                'nome'        => $nome,
+                'email'       => !empty($c['email']) ? trim((string) $c['email']) : null,
+                'organizacao' => !empty($c['organizacao']) ? trim((string) $c['organizacao']) : null,
+            ]);
+        }
+
+        foreach ((array) $visualizadores as $v) {
+            $sid = !empty($v['staff_id']) ? (int) $v['staff_id'] : 0;
+            if ($sid <= 0) continue;
+            $insert('visualizador', ['staff_id' => $sid]);
+        }
+    }
+
+    public function get_pessoas($ata_id)
+    {
+        $rows = $this->db->select('p.*, CONCAT_WS(\' \', s.firstname, s.lastname) AS staff_nome, s.email AS staff_email, s.cargo AS staff_cargo')
+            ->from('tbl_atas_participantes p')
+            ->join('tblstaff s', 's.staffid = p.staff_id', 'left')
+            ->where('p.ata_id', $ata_id)
+            ->where('p.deleted', 0)
+            ->order_by('p.id', 'asc')
+            ->get()->result_array();
+
+        $result = ['participantes' => [], 'convidados' => [], 'visualizadores' => []];
+        foreach ($rows as $r) {
+            $key = $r['tipo'] === 'convidado' ? 'convidados'
+                 : ($r['tipo'] === 'visualizador' ? 'visualizadores' : 'participantes');
+            $result[$key][] = $r;
+        }
+        return $result;
     }
 
     public function save_decisoes($ata_id, $list, $project_id = null, $criar_tasks = false)

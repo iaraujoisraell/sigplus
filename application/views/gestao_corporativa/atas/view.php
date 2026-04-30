@@ -50,14 +50,17 @@
                         <h1><?php echo html_escape($ata['titulo']); ?></h1>
                         <div class="meta-row">
                             <span class="status-pill status-<?php echo $ata['status']; ?>"><?php echo $this->Ata_model->get_status_label($ata['status']); ?></span>
+                            <?php if (($ata['visibilidade'] ?? 'publica') === 'restrita'): ?>
+                                <span style="background:#fef3c7;color:#92400e;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;"><i class="fa fa-lock"></i> Acesso restrito</span>
+                            <?php endif; ?>
                             <?php if (!empty($ata['data'])): ?><span><i class="fa fa-calendar"></i><?php echo date('d/m/Y', strtotime($ata['data'])); ?><?php if (!empty($ata['hora_inicio'])): ?> · <?php echo substr($ata['hora_inicio'], 0, 5); if (!empty($ata['hora_fim'])) echo '–' . substr($ata['hora_fim'], 0, 5); ?><?php endif; ?></span><?php endif; ?>
                             <?php if (!empty($ata['local'])): ?><span><i class="fa fa-map-marker"></i><?php echo html_escape($ata['local']); ?></span><?php endif; ?>
-                            <?php if (!empty($ata['responsavel_nome'])): ?><span><i class="fa fa-user"></i><?php echo html_escape($ata['responsavel_nome']); ?></span><?php endif; ?>
+                            <?php if (!empty($ata['responsavel_nome'])): ?><span><i class="fa fa-user-circle"></i>Responsável: <?php echo html_escape($ata['responsavel_nome']); ?></span><?php endif; ?>
                             <?php if (!empty($ata['project_name'])): ?><span><i class="fa fa-folder-o"></i><?php echo html_escape($ata['project_name']); ?></span><?php endif; ?>
                         </div>
                     </div>
                     <div class="actions">
-                        <?php if (has_permission_intranet('atas', '', 'edit') || is_admin()): ?>
+                        <?php if (!empty($pode_editar)): ?>
                             <a href="<?php echo base_url('gestao_corporativa/Ata/edit/' . (int) $ata['id']); ?>" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</a>
                         <?php endif; ?>
                         <a href="<?php echo base_url('gestao_corporativa/Plano_acao/add?ata_id=' . (int) $ata['id'] . ($ata['project_id'] ? '&project_id=' . (int) $ata['project_id'] : '')); ?>" class="btn btn-info btn-sm"><i class="fa fa-plus"></i> Plano de ação a partir desta ata</a>
@@ -68,14 +71,51 @@
 
         <?php if (!empty($participantes)): ?>
             <div class="ata-card">
-                <div class="ata-card-header">Participantes (<?php echo count($participantes); ?>)</div>
+                <div class="ata-card-header"><i class="fa fa-users"></i> Participantes (<?php echo count($participantes); ?>)</div>
                 <div class="ata-card-body">
                     <div class="participantes-grid">
                         <?php foreach ($participantes as $p): ?>
                             <div class="pp">
                                 <i class="fa fa-user-o"></i>
-                                <span><?php echo html_escape($p['tipo'] === 'interno' ? ($p['staff_nome'] ?? '—') : ($p['nome'] ?? '—')); ?></span>
-                                <span class="badge"><?php echo $p['tipo'] === 'externo' ? 'Externo' : 'Interno'; ?></span>
+                                <span><?php echo html_escape($p['staff_nome'] ?? '—'); ?></span>
+                                <?php if (!empty($p['staff_cargo'])): ?><span class="badge"><?php echo html_escape($p['staff_cargo']); ?></span><?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($convidados)): ?>
+            <div class="ata-card">
+                <div class="ata-card-header"><i class="fa fa-handshake-o"></i> Convidados (<?php echo count($convidados); ?>)</div>
+                <div class="ata-card-body">
+                    <div class="participantes-grid">
+                        <?php foreach ($convidados as $c): ?>
+                            <div class="pp" style="background:#fef9c3;border-color:#fde68a;">
+                                <i class="fa fa-user-o"></i>
+                                <span>
+                                    <?php echo html_escape($c['nome'] ?? '—'); ?>
+                                    <?php if (!empty($c['organizacao'])): ?>
+                                        <small style="display:block;color:#92400e;font-size:11px;"><?php echo html_escape($c['organizacao']); ?></small>
+                                    <?php endif; ?>
+                                </span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if (!empty($visualizadores)): ?>
+            <div class="ata-card">
+                <div class="ata-card-header"><i class="fa fa-eye"></i> Com acesso à ata (<?php echo count($visualizadores); ?>)</div>
+                <div class="ata-card-body">
+                    <div class="participantes-grid">
+                        <?php foreach ($visualizadores as $v): ?>
+                            <div class="pp" style="background:#eef2ff;border-color:#c7d2fe;">
+                                <i class="fa fa-eye"></i>
+                                <span><?php echo html_escape($v['staff_nome'] ?? '—'); ?></span>
                             </div>
                         <?php endforeach; ?>
                     </div>
