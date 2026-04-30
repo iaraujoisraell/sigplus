@@ -174,7 +174,7 @@ class Feed extends AdminController {
 
     public function init_post_likes() {
         $id =  $this->input->post('postid');
-        
+
         $_likes = '';
         $_likes .= '<div class=" user-post-like">';
         if (!$this->newsfeed_model->user_liked_post($id)) {
@@ -279,8 +279,11 @@ class Feed extends AdminController {
     }
 
     public function comment_single($comment) {
+        $status = isset($comment['status']) ? $comment['status'] : 'approved';
+        $is_pending = $status === 'pending';
+        $extra_class = $is_pending ? ' comment-pending' : '';
         $_comments = '';
-        $_comments .= '<div class="comment" data-commentid="' . $comment['id'] . '">';
+        $_comments .= '<div class="comment' . $extra_class . '" data-commentid="' . $comment['id'] . '">';
         $_comments .= '<div class="pull-left comment-image">';
         $_comments .= '<a href="' . admin_url('profile/' . $comment['userid']) . '">' . staff_profile_image($comment['userid'], [
                     'staff-profile-image-small',
@@ -291,6 +294,13 @@ class Feed extends AdminController {
             $_comments .= '<span class="pull-right"><a href="#" class="remove-post-comment" onclick="remove_post_comment(' . $comment['id'] . ',' . $comment['postid'] . '); return false;"><i class="fa fa-remove bold"></i></span></a>';
         }
         $_comments .= '<div class="media-body">';
+        if ($is_pending) {
+            $_comments .= '<span class="comment-status-badge" style="display:inline-block;background:#f59e0b;color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;margin-right:6px;">Aguardando aprovação</span>';
+            if (is_admin()) {
+                $_comments .= ' <a href="#" onclick="moderate_comment(' . $comment['id'] . ',' . $comment['postid'] . ',\'approved\'); return false;" style="font-size:11px;color:#16a34a;font-weight:600;margin-right:4px;"><i class="fa fa-check"></i> Aprovar</a>';
+                $_comments .= ' <a href="#" onclick="moderate_comment(' . $comment['id'] . ',' . $comment['postid'] . ',\'rejected\'); return false;" style="font-size:11px;color:#dc2626;font-weight:600;"><i class="fa fa-times"></i> Rejeitar</a>';
+            }
+        }
         $_comments .= '<p class="no-margin comment-content"><a href="' . admin_url('profile/' . $comment['userid']) . '">' . get_staff_full_name($comment['userid']) . '</a> ' . check_for_links($comment['content']) . '</p>';
         $total_comment_likes = total_rows(db_prefix() . 'newsfeed_comment_likes', [
             'commentid' => $comment['id'],
@@ -509,6 +519,15 @@ class Feed extends AdminController {
         }
         $data['comments'] = $_comments;
         $this->load->view('gestao_corporativa/intranet/retorno_comentarios_feed', $data);
+    }
+
+    public function moderate_comment($id, $status) {
+        if (!is_admin()) {
+            echo json_encode(['ok' => false, 'error' => 'forbidden']);
+            return;
+        }
+        $ok = $this->newsfeed_model->moderate_comment($id, $status);
+        echo json_encode(['ok' => (bool) $ok]);
     }
 
     /* Like post comment */

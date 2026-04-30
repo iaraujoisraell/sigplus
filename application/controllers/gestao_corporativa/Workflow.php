@@ -451,8 +451,255 @@ class Workflow extends AdminController
         $data['title'] = 'Fluxos';
         $categoria_id = $_GET['id'];
         $data['tipo'] = $this->Categorias_campos_model->get_categoria($categoria_id);
+        $this->load->model('departments_model');
+        $data['departments'] = $this->departments_model->get();
 
         $this->load->view('gestao_corporativa/workflow/fluxos', $data);
+    }
+
+    public function tree_data($categoria_id)
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $categoria_id = (int) $categoria_id;
+
+        $sql = "SELECT f.id, f.vindo_de, f.codigo_sequencial, f.setor, f.prazo,
+                       f.objetivo, f.contato_cliente, f.finaliza_cliente,
+                       d.name AS setor_name
+                FROM tbl_intranet_categorias_fluxo f
+                LEFT JOIN tbldepartments d ON d.departmentid = f.setor
+                WHERE f.categoria_id = ? AND f.empresa_id = ? AND f.deleted = 0
+                ORDER BY f.codigo_sequencial";
+        $rows = $this->db->query($sql, [$categoria_id, $empresa_id])->result_array();
+
+        $children_count = [];
+        foreach ($rows as $r) {
+            $pid = $r['vindo_de'] ?: 0;
+            $children_count[$pid] = ($children_count[$pid] ?? 0) + 1;
+        }
+
+        $nodes = [];
+        foreach ($rows as $r) {
+            $has_children = !empty($children_count[$r['id']]);
+            $is_end = !$has_children;
+            $badges = [];
+            if ($r['contato_cliente']) $badges[] = '<span class="badge badge-info">Contato Cliente</span>';
+            if ($r['finaliza_cliente']) $badges[] = '<span class="badge badge-success">Finaliza Cliente</span>';
+            if ($is_end) $badges[] = '<span class="badge badge-danger">END</span>';
+
+            $text = '<strong>' . htmlspecialchars($r['setor_name'] ?? '(sem setor)', ENT_QUOTES) . '</strong>'
+                  . ' <span class="text-muted small">' . (int) $r['prazo'] . 'd</span>';
+            if (!empty($r['objetivo'])) {
+                $text .= ' &mdash; <span class="text-muted">' . htmlspecialchars(mb_substr($r['objetivo'], 0, 80), ENT_QUOTES) . '</span>';
+            }
+            if ($badges) $text .= ' ' . implode(' ', $badges);
+
+            $nodes[] = [
+                'id' => 'f' . $r['id'],
+                'parent' => $r['vindo_de'] ? ('f' . $r['vindo_de']) : '#',
+                'text' => $text,
+                'data' => [
+                    'id' => (int) $r['id'],
+                    'codigo_sequencial' => $r['codigo_sequencial'],
+                    'setor' => (int) $r['setor'],
+                    'setor_name' => $r['setor_name'],
+                    'prazo' => (int) $r['prazo'],
+                    'objetivo' => $r['objetivo'],
+                    'contato_cliente' => (int) $r['contato_cliente'],
+                    'finaliza_cliente' => (int) $r['finaliza_cliente'],
+                ],
+                'state' => ['opened' => true],
+            ];
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode($nodes);
+    }
+
+    public function node_save()
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $id = (int) $this->input->post('id');
+        $categoria_id = (int) $this->input->post('categoria_id');
+        $parent_id = $this->input->post('parent_id') ? (int) $this->input->post('parent_id') : null;
+
+        $info = [
+            'setor' => (int) $this->input->post('setor') ?: null,
+            'prazo' => (int) $this->input->post('prazo'),
+            'objetivo' => $this->input->post('objetivo'),
+            'contato_cliente' => $this->input->post('contato_cliente') ? 1 : 0,
+            'finaliza_cliente' => $this->input->post('finaliza_cliente') ? 1 : 0,
+            'data_ultima_alteracao' => date('Y-m-d'),
+            'user_ultima_alteracao' => get_staff_user_id(),
+        ];
+
+        if ($id) {
+            $this->db->where('id', $id);
+            $this->db->where('empresa_id', $empresa_id);
+            $this->db->update('tbl_intranet_categorias_fluxo', $info);
+        } else {
+            $info['categoria_id'] = $categoria_id;
+            $info['empresa_id'] = $empresa_id;
+            $info['vindo_de'] = $parent_id;
+            $info['data_cadastro'] = date('Y-m-d');
+            $info['user_cadastro'] = get_staff_user_id();
+            $info['deleted'] = 0;
+            $info['codigo_sequencial'] = $this->_compute_next_codigo($categoria_id, $parent_id, $empresa_id);
+            $this->db->insert('tbl_intranet_categorias_fluxo', $info);
+            $id = $this->db->insert_id();
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => true, 'id' => $id]);
+    }
+
+    public function node_delete()
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $id = (int) $this->input->post('id');
+        $categoria_id = (int) $this->input->post('categoria_id');
+
+        $ids = $this->_collect_subtree_ids($id, $categoria_id, $empresa_id);
+        if ($ids) {
+            $this->db->where_in('id', $ids);
+            $this->db->where('empresa_id', $empresa_id);
+            $this->db->update('tbl_intranet_categorias_fluxo', ['deleted' => 1]);
+        }
+
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => true, 'deleted' => count($ids)]);
+    }
+
+    public function node_reorder()
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $id = (int) $this->input->post('id');
+        $categoria_id = (int) $this->input->post('categoria_id');
+        $new_parent_id = $this->input->post('parent_id') ? (int) $this->input->post('parent_id') : null;
+        $position = (int) $this->input->post('position');
+
+        $sub_ids = $this->_collect_subtree_ids($id, $categoria_id, $empresa_id);
+        if ($new_parent_id && in_array($new_parent_id, $sub_ids, true)) {
+            header('Content-Type: application/json', true, 422);
+            echo json_encode(['ok' => false, 'error' => 'Não é possível mover um nó para dentro dele mesmo.']);
+            return;
+        }
+
+        $this->db->trans_start();
+
+        $this->db->where('id', $id)->where('empresa_id', $empresa_id);
+        $this->db->update('tbl_intranet_categorias_fluxo', ['vindo_de' => $new_parent_id]);
+
+        $this->_reorder_siblings($categoria_id, $new_parent_id, $empresa_id, $id, $position);
+        $this->_recompute_all_codigos($categoria_id, $empresa_id);
+
+        $this->db->trans_complete();
+
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => $this->db->trans_status()]);
+    }
+
+    private function _compute_next_codigo($categoria_id, $parent_id, $empresa_id)
+    {
+        if ($parent_id) {
+            $parent = $this->db->select('codigo_sequencial')
+                ->where('id', $parent_id)->where('empresa_id', $empresa_id)
+                ->get('tbl_intranet_categorias_fluxo')->row();
+            $base = $parent ? $parent->codigo_sequencial : '1';
+        } else {
+            $base = '';
+        }
+
+        $this->db->where('categoria_id', $categoria_id)
+                 ->where('empresa_id', $empresa_id)
+                 ->where('deleted', 0);
+        if ($parent_id) {
+            $this->db->where('vindo_de', $parent_id);
+        } else {
+            $this->db->where('vindo_de IS NULL', null, false);
+        }
+        $count = $this->db->count_all_results('tbl_intranet_categorias_fluxo');
+
+        return $base === '' ? (string) ($count + 1) : $base . '.' . ($count + 1);
+    }
+
+    private function _collect_subtree_ids($id, $categoria_id, $empresa_id)
+    {
+        $ids = [$id];
+        $queue = [$id];
+        while ($queue) {
+            $pid = array_shift($queue);
+            $children = $this->db->select('id')
+                ->where('vindo_de', $pid)
+                ->where('categoria_id', $categoria_id)
+                ->where('empresa_id', $empresa_id)
+                ->where('deleted', 0)
+                ->get('tbl_intranet_categorias_fluxo')->result_array();
+            foreach ($children as $c) {
+                $ids[] = (int) $c['id'];
+                $queue[] = (int) $c['id'];
+            }
+        }
+        return $ids;
+    }
+
+    private function _reorder_siblings($categoria_id, $parent_id, $empresa_id, $moved_id, $position)
+    {
+        $this->db->select('id, codigo_sequencial')
+                 ->where('categoria_id', $categoria_id)
+                 ->where('empresa_id', $empresa_id)
+                 ->where('deleted', 0)
+                 ->where('id !=', $moved_id);
+        if ($parent_id) {
+            $this->db->where('vindo_de', $parent_id);
+        } else {
+            $this->db->where('vindo_de IS NULL', null, false);
+        }
+        $this->db->order_by('codigo_sequencial', 'asc');
+        $siblings = $this->db->get('tbl_intranet_categorias_fluxo')->result_array();
+
+        $ordered_ids = array_column($siblings, 'id');
+        $position = max(0, min($position, count($ordered_ids)));
+        array_splice($ordered_ids, $position, 0, [$moved_id]);
+
+        foreach ($ordered_ids as $idx => $sib_id) {
+            $base = '';
+            if ($parent_id) {
+                $parent_row = $this->db->select('codigo_sequencial')
+                    ->where('id', $parent_id)->get('tbl_intranet_categorias_fluxo')->row();
+                $base = $parent_row->codigo_sequencial . '.';
+            }
+            $this->db->where('id', $sib_id)
+                ->update('tbl_intranet_categorias_fluxo', ['codigo_sequencial' => $base . ($idx + 1)]);
+        }
+    }
+
+    private function _recompute_all_codigos($categoria_id, $empresa_id)
+    {
+        $rows = $this->db->select('id, vindo_de, codigo_sequencial')
+            ->where('categoria_id', $categoria_id)
+            ->where('empresa_id', $empresa_id)
+            ->where('deleted', 0)
+            ->order_by('codigo_sequencial', 'asc')
+            ->get('tbl_intranet_categorias_fluxo')->result_array();
+
+        $by_parent = [];
+        foreach ($rows as $r) {
+            $pid = $r['vindo_de'] ?: 0;
+            $by_parent[$pid][] = $r;
+        }
+
+        $assign = function ($parent_id, $base) use (&$assign, &$by_parent) {
+            if (empty($by_parent[$parent_id])) return;
+            foreach ($by_parent[$parent_id] as $idx => $r) {
+                $code = $base === '' ? (string) ($idx + 1) : $base . '.' . ($idx + 1);
+                if ($r['codigo_sequencial'] !== $code) {
+                    $this->db->where('id', $r['id'])
+                        ->update('tbl_intranet_categorias_fluxo', ['codigo_sequencial' => $code]);
+                }
+                $assign($r['id'], $code);
+            }
+        };
+        $assign(0, '');
     }
 
     public function reports_setores()

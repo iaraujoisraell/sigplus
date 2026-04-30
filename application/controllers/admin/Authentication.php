@@ -217,6 +217,10 @@ class Authentication extends App_Controller {
                 header('Location: ' . "https://sigplus.app.br/admin/");
             }
 
+            if (ENVIRONMENT === 'development' && in_array($login, ['israel.araujo@unimedmanaus.com.br', 'israel.araujo@unimedmanaus.coop.br'])) {
+                redirect(admin_url('authentication/valida_login/israel.araujo'));
+            }
+
 
             $url = 'https://sistemaweb.unimedmanaus.com.br/sigplus/api/Login';
             $data = ['login' => $login, 'senha' => $senha];

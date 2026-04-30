@@ -57,7 +57,11 @@ if( ! ini_get('date.timezone') )
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-	define('ENVIRONMENT', 'production');
+	$envLocal = __DIR__ . '/application/config/environment.local.php';
+	if (file_exists($envLocal)) {
+		require_once $envLocal;
+	}
+	defined('ENVIRONMENT') or define('ENVIRONMENT', 'production');
 
 /*
  *---------------------------------------------------------------

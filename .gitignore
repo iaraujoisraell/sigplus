@@ -10,6 +10,9 @@ node_modules/
 vendor/
 .env
 php.ini
+application/config/app-config.local.php
+application/config/environment.local.php
+application/logs/log-*.php
 uploads/
 assets/
 media/

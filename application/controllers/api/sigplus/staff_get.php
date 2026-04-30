@@ -2,7 +2,7 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class staff_get extends App_Controller
+class Staff_get extends App_Controller
 {
     public function __construct()
     {

@@ -348,7 +348,11 @@ class Newsfeed_model extends App_Model {
         $data['content'] = nl2br($data['content']);
         $empresa_id = $this->session->userdata('empresa_id');
         $data['empresa_id'] = $empresa_id;
-        //print_r($data); exit;
+        $data['status'] = is_admin() ? 'approved' : 'pending';
+        if ($data['status'] === 'approved') {
+            $data['approved_by'] = get_staff_user_id();
+            $data['approved_at'] = date('Y-m-d H:i:s');
+        }
 
         $this->db->insert(db_prefix() . 'newsfeed_post_comments', $data);
         $insert_id = $this->db->insert_id();
@@ -497,11 +501,14 @@ class Newsfeed_model extends App_Model {
      * @return array
      */
     public function get_post_comments($postid, $offset = '') {
+        $me = (int) get_staff_user_id();
 
-        
         $this->db->where('postid', $postid);
         $this->db->where('empresa_id', $this->session->userdata('empresa_id'));
         $this->db->where('deleted', '0');
+        if (!is_admin()) {
+            $this->db->where("(status = 'approved' OR (status = 'pending' AND userid = $me))", null, false);
+        }
         if ($offset) {
             $offset = ($offset * $this->post_comments_limit);
             $this->db->limit($this->post_comments_limit, $offset);
@@ -509,9 +516,18 @@ class Newsfeed_model extends App_Model {
             $this->db->limit('3', '0');
         }
         $this->db->order_by('id', 'desc');
-        $resuslt = $this->db->get(db_prefix() . 'newsfeed_post_comments')->result_array();
+        return $this->db->get(db_prefix() . 'newsfeed_post_comments')->result_array();
+    }
 
-        return $resuslt;
+    public function moderate_comment($id, $status) {
+        if (!in_array($status, ['approved', 'rejected'], true)) return false;
+        $this->db->where('id', $id);
+        $this->db->where('empresa_id', $this->session->userdata('empresa_id'));
+        return $this->db->update(db_prefix() . 'newsfeed_post_comments', [
+            'status' => $status,
+            'approved_by' => get_staff_user_id(),
+            'approved_at' => date('Y-m-d H:i:s'),
+        ]);
     }
 
 }

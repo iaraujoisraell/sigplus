@@ -93,3 +93,9 @@ if (!empty($current_user->profile_image)) {
         </button>
     </div>
 </div>
+
+<?php if (!is_admin()): ?>
+    <div style="padding:0 20px 12px; font-size:11px; color:#94a3b8;">
+        <i class="fa fa-info-circle"></i> Comentários passam por aprovação antes de ficarem públicos.
+    </div>
+<?php endif; ?>

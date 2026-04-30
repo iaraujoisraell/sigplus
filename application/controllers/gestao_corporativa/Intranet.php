@@ -130,7 +130,7 @@ class Intranet extends AdminController {
 
         $posts = $this->newsfeed_model->load_newsfeed($this->input->post('page'), $__post_id);
         $view_data["posts"] = $posts;
-        $this->load->view('gestao_corporativa/intranet/index.php', $view_data);
+        $this->load->view('gestao_corporativa/intranet/linkdnl/index.php', $view_data);
         //$_SESSION['intranet'] = true;
     }
 
