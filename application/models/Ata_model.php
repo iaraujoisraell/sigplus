@@ -74,13 +74,12 @@ class Ata_model extends App_Model
 
     /**
      * Filtro de visibilidade aplicado em SELECTs.
-     * Acesso: admin OU responsável OU criador OU (visibilidade=publica) OU
+     * Acesso: responsável OU criador OU (visibilidade=publica) OU
      *         está em tbl_atas_participantes COM tipo='visualizador'.
-     * Participantes e convidados NÃO dão acesso automático.
+     * Participantes/convidados/admin não dão acesso automático.
      */
     private function _where_visivel($alias)
     {
-        if (is_admin()) return;
         $me = (int) get_staff_user_id();
         $this->db->where("({$alias}.visibilidade = 'publica'
             OR {$alias}.responsavel_id = $me
@@ -96,7 +95,6 @@ class Ata_model extends App_Model
 
     public function pode_visualizar($ata, $staff_id = null)
     {
-        if (is_admin()) return true;
         $staff_id = $staff_id ?? (int) get_staff_user_id();
         if ((int) ($ata['responsavel_id'] ?? 0) === $staff_id) return true;
         if ((int) ($ata['user_create'] ?? 0) === $staff_id) return true;
@@ -112,8 +110,7 @@ class Ata_model extends App_Model
 
     public function pode_editar($ata, $staff_id = null)
     {
-        if (is_admin()) return true;
-        if (!has_permission_intranet('atas', '', 'edit')) return false;
+        if (!has_permission_intranet('atas', '', 'edit') && !is_admin()) return false;
         $staff_id = $staff_id ?? (int) get_staff_user_id();
         return (int) ($ata['responsavel_id'] ?? 0) === $staff_id
             || (int) ($ata['user_create'] ?? 0) === $staff_id;
