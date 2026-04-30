@@ -96,17 +96,6 @@
 
                                 <div class="col-md-2 col-sm-6">
                                     <div class="form-group">
-                                        <select name="origem_carteirinha" class="form-control">
-                                            <option value="">ORIGEM</option>
-                                            <option value="UNIMED MANAUS">UNIMED MANAUS</option>
-                                            <option value="UNIMED INTERCÂMBIO">UNIMED INTERCÂMBIO</option>
-                                            <option value="AVULSO">AVULSO</option>
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-2 col-sm-6">
-                                    <div class="form-group">
                                         <input type="number" class="form-control" value="<?php echo isset($filters['id']) ? $filters['id'] : ''; ?>" name="id" placeholder="#WFID">
                                     </div>
                                 </div>
@@ -120,6 +109,12 @@
                                 <div class="col-md-2 col-sm-6">
                                     <div class="form-group">
                                         <input class="form-control" type="number" name="carteirinha" value="<?php echo isset($filters['carteirinha']) ? $filters['carteirinha'] : ''; ?>" placeholder="CARTEIRINHA">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2 col-sm-6">
+                                    <div class="form-group">
+                                        <input class="form-control" type="text" name="colaborador" value="<?php echo isset($filters['colaborador']) ? $filters['colaborador'] : ''; ?>" placeholder="COLABORADOR">
                                     </div>
                                 </div>
 
@@ -240,7 +235,7 @@
         return {
             client: $('[name="client"]').val(),
             carteirinha: $('[name="carteirinha"]').val(),
-            origem_carteirinha: $('[name="origem_carteirinha"]').val(),
+            colaborador: $('[name="colaborador"]').val(),
             id: $('[name="id"]').val(),
             protocolo: $('[name="protocolo"]').val(),
             categoria_id: $('[name="categoria_id"]').val(),
@@ -454,9 +449,9 @@
         $('#btnLimpar').on('click', function() {
             $('[name="client"]').val('');
             $('[name="carteirinha"]').val('');
+            $('[name="colaborador"]').val('');
             $('[name="id"]').val('');
             $('[name="protocolo"]').val('');
-            $('[name="origem_carteirinha"]').val('');
             $('[name="data_inicio"]').val('<?php echo date('Y-m-d'); ?>');
             $('[name="data_fim"]').val('<?php echo date('Y-m-d'); ?>');
             $('#my').prop('checked', true);
@@ -465,8 +460,8 @@
             carregarTudoRA();
         });
 
-        $(document).on('keyup', '[name="client"], [name="carteirinha"], [name="id"], [name="protocolo"]', debounceBuscaRA);
-        $(document).on('change', '[name="categoria_id"], [name="canal_atendimento_id"], [name="origem_carteirinha"], [name="data_inicio"], [name="data_fim"], #my', function() {
+        $(document).on('keyup', '[name="client"], [name="carteirinha"], [name="colaborador"], [name="id"], [name="protocolo"]', debounceBuscaRA);
+        $(document).on('change', '[name="categoria_id"], [name="canal_atendimento_id"], [name="data_inicio"], [name="data_fim"], #my', function() {
             carregarTudoRA();
         });
 

@@ -86,6 +86,7 @@ class Atendimento extends AdminController {
         $filtros = [
             'client'               => trim((string) $this->input->post('client')),
             'carteirinha'          => trim((string) $this->input->post('carteirinha')),
+            'colaborador'          => trim((string) $this->input->post('colaborador')),
             'id'                   => trim((string) $this->input->post('id')),
             'protocolo'            => trim((string) $this->input->post('protocolo')),
             'categoria_id'         => $this->input->post('categoria_id') ?: [],
@@ -101,6 +102,7 @@ class Atendimento extends AdminController {
         $filtersSalvar = [
             ["user_created" => get_staff_user_id(), "date_created" => date('Y-m-d'), "rel_type" => 'ra', "tab" => 0, "filter" => 'client',               "value" => $filtros['client']],
             ["user_created" => get_staff_user_id(), "date_created" => date('Y-m-d'), "rel_type" => 'ra', "tab" => 0, "filter" => 'carteirinha',          "value" => $filtros['carteirinha']],
+            ["user_created" => get_staff_user_id(), "date_created" => date('Y-m-d'), "rel_type" => 'ra', "tab" => 0, "filter" => 'colaborador',          "value" => $filtros['colaborador']],
             ["user_created" => get_staff_user_id(), "date_created" => date('Y-m-d'), "rel_type" => 'ra', "tab" => 0, "filter" => 'id',                   "value" => $filtros['id']],
             ["user_created" => get_staff_user_id(), "date_created" => date('Y-m-d'), "rel_type" => 'ra', "tab" => 0, "filter" => 'protocolo',            "value" => $filtros['protocolo']],
             ["user_created" => get_staff_user_id(), "date_created" => date('Y-m-d'), "rel_type" => 'ra', "tab" => 0, "filter" => 'categoria_id',         "value" => json_encode($filtros['categoria_id'])],

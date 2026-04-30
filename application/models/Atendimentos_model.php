@@ -64,6 +64,11 @@ class Atendimentos_model extends App_Model
             $this->db->like('c.numero_carteirinha', $filtros['carteirinha']);
         }
 
+        if (!empty($filtros['colaborador'])) {
+            $termo = $this->db->escape_like_str($filtros['colaborador']);
+            $this->db->where("CONCAT_WS(' ', s.firstname, s.lastname) LIKE '%{$termo}%'", null, false);
+        }
+
         if (!empty($filtros['protocolo'])) {
             $this->db->like('ra.protocolo', $filtros['protocolo']);
         }
