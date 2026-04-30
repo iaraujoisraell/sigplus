@@ -470,14 +470,15 @@ if (!isset($without_permission) || !$without_permission) {
                     : base_url('gestao_corporativa/cdc/list_');
 
                 $modules = [
-                    ['perm' => 'view_docs',      'href' => $docs_url,                                       'icon' => 'far fa-folder-open',    'label' => 'Documentos'],
-                    ['perm' => 'view_ros',       'href' => base_url('gestao_corporativa/Registro_ocorrencia'), 'icon' => 'far fa-flag',           'label' => 'R.O'],
-                    ['perm' => 'view_ras',       'href' => base_url('gestao_corporativa/Atendimento/index'),    'icon' => 'fas fa-headset',        'label' => 'Atendimentos'],
-                    ['perm' => 'view_workflows', 'href' => base_url('gestao_corporativa/Workflow/index'),       'icon' => 'fas fa-project-diagram','label' => 'Workflow'],
-                    ['perm' => 'view_forms',     'href' => base_url('gestao_corporativa/Formularios'),          'icon' => 'far fa-file-alt',       'label' => 'Formulários'],
-                    ['perm' => 'view_geds',      'href' => base_url('gestao_corporativa/Ged/index'),            'icon' => 'fas fa-database',       'label' => 'GED'],
-                    ['perm' => 'view_projects',  'href' => base_url('admin/projects'),                          'icon' => 'far fa-folder',         'label' => 'Projetos'],
-                    ['perm' => 'view_tasks',     'href' => base_url('admin/tasks/list_tasks'),                  'icon' => 'fas fa-bolt',           'label' => 'Ações'],
+                    ['perm' => 'view_docs',      'href' => $docs_url,                                            'icon' => 'far fa-folder-open',    'label' => 'Documentos'],
+                    ['perm' => 'view_cis',       'href' => base_url('gestao_corporativa/intra/comunicado'),      'icon' => 'fas fa-bullhorn',       'label' => 'CI'],
+                    ['perm' => 'view_ros',       'href' => base_url('gestao_corporativa/Registro_ocorrencia'),   'icon' => 'far fa-flag',           'label' => 'R.O'],
+                    ['perm' => 'view_ras',       'href' => base_url('gestao_corporativa/Atendimento/index'),     'icon' => 'fas fa-headset',        'label' => 'Atendimentos'],
+                    ['perm' => 'view_workflows', 'href' => base_url('gestao_corporativa/Workflow/index'),         'icon' => 'fas fa-project-diagram','label' => 'Workflow'],
+                    ['perm' => 'view_forms',     'href' => base_url('gestao_corporativa/Formularios'),            'icon' => 'far fa-file-alt',       'label' => 'Formulários'],
+                    ['perm' => 'view_geds',      'href' => base_url('gestao_corporativa/Ged/index'),              'icon' => 'fas fa-database',       'label' => 'GED'],
+                    ['perm' => 'view_projects',  'href' => base_url('admin/projects'),                            'icon' => 'far fa-folder',         'label' => 'Projetos'],
+                    ['perm' => 'view_tasks',     'href' => base_url('admin/tasks/list_tasks'),                    'icon' => 'fas fa-bolt',           'label' => 'Ações'],
                 ];
 
                 foreach ($modules as $m) {
