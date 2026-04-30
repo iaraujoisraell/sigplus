@@ -3,6 +3,7 @@
 <?php $this->load->view('gestao_corporativa/css_background'); ?>
 
 <link rel="stylesheet" href="<?php echo base_url() ?>assets/lte/plugins/select2/css/select2.min.css">
+<link rel="stylesheet" href="<?php echo base_url() ?>assets/lte/plugins/summernote/summernote-bs4.min.css">
 
 <style>
     .ci-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:14px;}
@@ -12,14 +13,31 @@
     @media (max-width:768px){.ci-meta-row{grid-template-columns:1fr 1fr;}}
     .ci-attach-list{margin-top:8px;}
     .ci-attach-list .file-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:#f9fafb;border-radius:6px;margin-bottom:4px;font-size:13px;}
-    .ci-attach-list .file-row button{margin-left:auto;background:none;border:0;color:#dc2626;cursor:pointer;font-size:14px;}
-    .select2-container--default .select2-selection--multiple{min-height:42px;border:1px solid #d0d5dd;}
-    .select2-container--default .select2-selection--multiple .select2-selection__rendered{padding:4px 8px;}
-    .select2-container--default .select2-selection--multiple .select2-selection__choice{background:#eaf2fb;border:1px solid #c7d7ea;color:#0a66c2;font-size:13px;}
-    .ci-quick-pick{margin-bottom:8px;display:flex;gap:6px;flex-wrap:wrap;}
-    .ci-quick-pick button{font-size:12px;padding:4px 10px;background:#f3f6fa;border:1px solid #e5e7eb;border-radius:6px;cursor:pointer;}
-    .ci-quick-pick button:hover{background:#e5edf7;color:#0a66c2;}
-    .ck-editor__editable_inline{min-height:240px;}
+
+    /* Dual listbox */
+    .dual-list{display:grid;grid-template-columns:1fr 60px 1fr;gap:10px;align-items:stretch;}
+    .dual-list-pane{border:1px solid #d0d5dd;border-radius:8px;display:flex;flex-direction:column;overflow:hidden;background:#fff;}
+    .dual-list-pane header{padding:8px 12px;background:#f8fafc;border-bottom:1px solid #e5e7eb;font-size:12px;font-weight:600;color:#475569;display:flex;justify-content:space-between;align-items:center;}
+    .dual-list-pane header .count{background:#0a66c2;color:#fff;border-radius:999px;padding:1px 8px;font-size:11px;}
+    .dual-list-pane input.search{border:0;border-bottom:1px solid #eef1f4;padding:8px 12px;font-size:13px;outline:none;}
+    .dual-list-pane input.search:focus{border-bottom-color:#0a66c2;}
+    .dual-list-pane .items{flex:1;overflow-y:auto;max-height:280px;min-height:200px;padding:4px 0;}
+    .dual-list-pane .group-label{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;padding:6px 12px 2px;margin-top:4px;border-top:1px dashed #eef1f4;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
+    .dual-list-pane .group-label:hover{color:#0a66c2;background:#f0f6fb;}
+    .dual-list-pane .group-label .add-all{font-size:10px;color:#0a66c2;font-weight:600;}
+    .dual-list-pane .item{padding:6px 12px;cursor:pointer;font-size:13px;display:flex;justify-content:space-between;align-items:center;}
+    .dual-list-pane .item:hover{background:#eaf2fb;}
+    .dual-list-pane .item.selected{background:#dceaff;color:#0a66c2;font-weight:500;}
+    .dual-list-pane .item .small{color:#94a3b8;font-size:11px;}
+    .dual-list-pane .empty{padding:18px;text-align:center;color:#94a3b8;font-size:12px;}
+    .dual-list-actions{display:flex;flex-direction:column;justify-content:center;gap:6px;}
+    .dual-list-actions button{border:1px solid #d0d5dd;background:#fff;border-radius:6px;padding:6px;cursor:pointer;color:#475569;}
+    .dual-list-actions button:hover{background:#0a66c2;color:#fff;border-color:#0a66c2;}
+    @media (max-width:768px){.dual-list{grid-template-columns:1fr;}.dual-list-actions{flex-direction:row;justify-content:center;}}
+
+    /* Summernote tweaks */
+    .note-editor.note-frame{border:1px solid #d0d5dd;border-radius:6px;}
+    .note-editor.note-frame .note-editing-area .note-editable{min-height:280px;}
 </style>
 
 <div class="content">
@@ -110,48 +128,75 @@
                 <div class="ci-card-body">
                     <?php
                     $departments_staffs = $this->Intranet_model->get_departamentos_staffs_selecionados();
-
                     $grouped = [];
                     foreach ($departments_staffs as $v) {
                         $key = $v['name'] ?: '(sem setor)';
                         $grouped[$key][] = $v;
                     }
                     ksort($grouped);
+
+                    $dest_data = [];
+                    foreach ($grouped as $groupName => $items) {
+                        foreach ($items as $v) {
+                            $dest_data[] = [
+                                'value' => $v['staffid'] . '-' . $v['staffdepartmentid'],
+                                'name'  => trim($v['firstname'] . ' ' . $v['lastname']),
+                                'group' => $groupName,
+                            ];
+                        }
+                    }
+
+                    $this->load->model('Staff_model');
+                    $staffs = $this->Staff_model->get();
+                    $cc_data = [];
+                    foreach ($staffs as $staff) {
+                        $cc_data[] = [
+                            'value' => (int) $staff['staffid'],
+                            'name'  => trim($staff['firstname'] . ' ' . $staff['lastname']),
+                            'group' => '',
+                        ];
+                    }
                     ?>
 
-                    <div class="ci-quick-pick">
-                        <span class="text-muted small" style="align-self:center;margin-right:6px;">Atalhos:</span>
-                        <?php foreach (array_keys($grouped) as $g): $gid = 'grp-' . md5($g); ?>
-                            <button type="button" data-group="<?php echo html_escape($g); ?>">+ <?php echo html_escape($g); ?> (<?php echo count($grouped[$g]); ?>)</button>
-                        <?php endforeach; ?>
+                    <div class="dual-list" data-target="for_staffs[]" data-source='<?php echo htmlspecialchars(json_encode($dest_data), ENT_QUOTES); ?>'>
+                        <div class="dual-list-pane js-pane-available">
+                            <header>Disponíveis <span class="count">0</span></header>
+                            <input type="text" class="search" placeholder="Buscar pessoa ou setor...">
+                            <div class="items"></div>
+                        </div>
+                        <div class="dual-list-actions">
+                            <button type="button" class="js-add-all" title="Adicionar todos visíveis">»»</button>
+                            <button type="button" class="js-add" title="Adicionar selecionados">»</button>
+                            <button type="button" class="js-remove" title="Remover selecionados">«</button>
+                            <button type="button" class="js-remove-all" title="Remover todos">««</button>
+                        </div>
+                        <div class="dual-list-pane js-pane-selected">
+                            <header>Selecionados <span class="count">0</span></header>
+                            <input type="text" class="search" placeholder="Buscar nos selecionados...">
+                            <div class="items"></div>
+                        </div>
                     </div>
 
-                    <select name="for_staffs[]" id="select-destinatarios" multiple data-placeholder="Buscar e selecionar pessoas..." style="width:100%;">
-                        <?php foreach ($grouped as $groupName => $items): ?>
-                            <optgroup label="<?php echo html_escape($groupName); ?>" data-group="<?php echo html_escape($groupName); ?>">
-                                <?php foreach ($items as $v): ?>
-                                    <option value="<?php echo $v['staffid'] . '-' . $v['staffdepartmentid']; ?>"
-                                            data-group="<?php echo html_escape($groupName); ?>">
-                                        <?php echo html_escape($v['firstname'] . ' ' . $v['lastname']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </optgroup>
-                        <?php endforeach; ?>
-                    </select>
-
-                    <div style="margin-top:18px;">
+                    <div style="margin-top:22px;">
                         <label class="control-label">Cópia (CC)</label>
-                        <?php
-                        $this->load->model('Staff_model');
-                        $staffs = $this->Staff_model->get();
-                        ?>
-                        <select id="select-cc" multiple data-placeholder="Buscar e selecionar staffs em cópia..." style="width:100%;" name="cc[]">
-                            <?php foreach ($staffs as $staff): ?>
-                                <option value="<?php echo (int) $staff['staffid']; ?>">
-                                    <?php echo html_escape($staff['firstname'] . ' ' . $staff['lastname']); ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="dual-list" data-target="cc[]" data-source='<?php echo htmlspecialchars(json_encode($cc_data), ENT_QUOTES); ?>'>
+                            <div class="dual-list-pane js-pane-available">
+                                <header>Disponíveis <span class="count">0</span></header>
+                                <input type="text" class="search" placeholder="Buscar pessoa...">
+                                <div class="items"></div>
+                            </div>
+                            <div class="dual-list-actions">
+                                <button type="button" class="js-add-all" title="Adicionar todos visíveis">»»</button>
+                                <button type="button" class="js-add" title="Adicionar selecionados">»</button>
+                                <button type="button" class="js-remove" title="Remover selecionados">«</button>
+                                <button type="button" class="js-remove-all" title="Remover todos">««</button>
+                            </div>
+                            <div class="dual-list-pane js-pane-selected">
+                                <header>Selecionados <span class="count">0</span></header>
+                                <input type="text" class="search" placeholder="Buscar nos selecionados...">
+                                <div class="items"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -174,59 +219,167 @@
 
 <?php init_tail(); ?>
 
-<script src="<?php echo base_url() ?>assets/intranet/ckeditor/ckeditor.js"></script>
-<script src="<?php echo base_url() ?>assets/lte/plugins/select2/js/select2.full.min.js"></script>
+<script src="<?php echo base_url() ?>assets/lte/plugins/summernote/summernote-bs4.min.js"></script>
+<script src="<?php echo base_url() ?>assets/lte/plugins/summernote/lang/summernote-pt-BR.min.js"></script>
 
 <script>
-    CKEDITOR.replace('descricao', {
-        height: 260,
-        removePlugins: 'elementspath',
-        resize_enabled: true,
-        toolbarGroups: [
-            { name: 'basicstyles', groups: ['basicstyles', 'cleanup'] },
-            { name: 'paragraph', groups: ['list', 'indent', 'blocks', 'align'] },
-            { name: 'links' },
-            { name: 'insert' },
-            { name: 'styles' },
-            { name: 'colors' },
-            { name: 'tools' },
-            { name: 'document', groups: ['mode'] }
-        ]
+$(function () {
+    // ===== Editor de descrição =====
+    $('#descricao').summernote({
+        lang: 'pt-BR',
+        height: 280,
+        toolbar: [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'clear']],
+            ['fontsize', ['fontsize']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph']],
+            ['table', ['table']],
+            ['insert', ['link', 'picture']],
+            ['view', ['fullscreen', 'codeview']],
+        ],
+        placeholder: 'Escreva o comunicado...'
     });
 
-    $(function () {
-        $('#select-destinatarios, #select-cc').select2({
-            width: '100%',
-            closeOnSelect: false,
-            allowClear: true,
-        });
+    // ===== Dual listbox =====
+    function escHtml(s){ return String(s).replace(/[&<>"']/g, function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 
-        $('.ci-quick-pick button').on('click', function () {
-            var grupo = $(this).data('group');
-            var $sel = $('#select-destinatarios');
-            var atuais = $sel.val() || [];
-            $sel.find('option[data-group="' + grupo.replace(/"/g, '\\"') + '"]').each(function () {
-                var v = $(this).attr('value');
-                if (atuais.indexOf(v) === -1) atuais.push(v);
-            });
-            $sel.val(atuais).trigger('change');
-        });
+    $('.dual-list').each(function () {
+        var $root = $(this);
+        var name = $root.data('target');
+        var source = $root.data('source') || [];
+        var hasGroups = source.some(function(it){ return it.group && it.group !== ''; });
 
-        var $list = $('#ci-attach-list');
-        $('#ci-files').on('change', function () {
-            $list.empty();
-            Array.from(this.files).forEach(function (f) {
-                $list.append('<div class="file-row"><i class="fa fa-paperclip"></i> ' + f.name + ' <span class="text-muted small">(' + Math.round(f.size/1024) + ' KB)</span></div>');
-            });
-        });
+        var state = {
+            available: source.map(function(x){ return Object.assign({}, x); }),
+            selected: []
+        };
 
-        $('#form-novo-ci').on('submit', function (e) {
-            var dest = $('#select-destinatarios').val();
-            var action = $(document.activeElement).val() || 'publish';
-            if (action === 'publish' && (!dest || dest.length === 0)) {
-                e.preventDefault();
-                alert('Selecione ao menos um destinatário antes de publicar.');
+        function renderPane(which, filter) {
+            var $items = $root.find('.js-pane-' + which + ' .items');
+            var data = state[which];
+            filter = (filter || '').toLowerCase();
+            if (filter) {
+                data = data.filter(function (it) {
+                    return it.name.toLowerCase().indexOf(filter) !== -1 ||
+                           (it.group || '').toLowerCase().indexOf(filter) !== -1;
+                });
             }
+
+            if (data.length === 0) {
+                $items.html('<div class="empty">' + (which === 'available' ? 'Nada disponível' : 'Nenhum selecionado') + '</div>');
+            } else {
+                var html = '';
+                if (hasGroups && which === 'available') {
+                    var byGroup = {};
+                    data.forEach(function (it) {
+                        var g = it.group || '(sem setor)';
+                        (byGroup[g] = byGroup[g] || []).push(it);
+                    });
+                    Object.keys(byGroup).sort().forEach(function (g) {
+                        html += '<div class="group-label" data-group="' + escHtml(g) + '"><span>' + escHtml(g) + ' (' + byGroup[g].length + ')</span><span class="add-all">+ todos</span></div>';
+                        byGroup[g].forEach(function (it) {
+                            html += '<div class="item" data-value="' + escHtml(it.value) + '"><span>' + escHtml(it.name) + '</span></div>';
+                        });
+                    });
+                } else {
+                    data.forEach(function (it) {
+                        html += '<div class="item" data-value="' + escHtml(it.value) + '"><span>' + escHtml(it.name) + '</span>' + (it.group ? '<span class="small">' + escHtml(it.group) + '</span>' : '') + '</div>';
+                    });
+                }
+                $items.html(html);
+            }
+            $root.find('.js-pane-' + which + ' .count').text(state[which].length);
+        }
+
+        function move(direction, all) {
+            var src = direction === 'add' ? 'available' : 'selected';
+            var dst = direction === 'add' ? 'selected' : 'available';
+            var $srcItems = $root.find('.js-pane-' + src + ' .item.selected');
+            var values;
+
+            if (all) {
+                var $visible = $root.find('.js-pane-' + src + ' .items .item');
+                values = $visible.map(function () { return $(this).data('value') + ''; }).get();
+            } else {
+                values = $srcItems.map(function () { return $(this).data('value') + ''; }).get();
+            }
+            if (values.length === 0) return;
+
+            var moving = state[src].filter(function (it) { return values.indexOf(String(it.value)) !== -1; });
+            state[src] = state[src].filter(function (it) { return values.indexOf(String(it.value)) === -1; });
+            state[dst] = state[dst].concat(moving);
+
+            renderPane(src, $root.find('.js-pane-' + src + ' .search').val());
+            renderPane(dst, $root.find('.js-pane-' + dst + ' .search').val());
+            syncHidden();
+        }
+
+        function syncHidden() {
+            $root.find('.dual-hidden-input').remove();
+            state.selected.forEach(function (it) {
+                $('<input type="hidden" class="dual-hidden-input">')
+                    .attr('name', name)
+                    .attr('value', it.value)
+                    .appendTo($root);
+            });
+        }
+
+        // Eventos
+        $root.on('click', '.item', function (e) {
+            $(this).toggleClass('selected');
+        });
+
+        $root.on('dblclick', '.js-pane-available .item', function () {
+            $(this).addClass('selected');
+            move('add', false);
+        });
+        $root.on('dblclick', '.js-pane-selected .item', function () {
+            $(this).addClass('selected');
+            move('remove', false);
+        });
+
+        $root.on('click', '.js-pane-available .group-label', function () {
+            var g = $(this).data('group');
+            $root.find('.js-pane-available .item').each(function () {
+                var $it = $(this);
+                var v = $it.data('value') + '';
+                var found = state.available.find(function (x) { return String(x.value) === v && (x.group || '(sem setor)') === g; });
+                if (found) $it.addClass('selected');
+            });
+            move('add', false);
+        });
+
+        $root.find('.js-add').on('click', function () { move('add', false); });
+        $root.find('.js-remove').on('click', function () { move('remove', false); });
+        $root.find('.js-add-all').on('click', function () { move('add', true); });
+        $root.find('.js-remove-all').on('click', function () { move('remove', true); });
+
+        $root.find('.js-pane-available .search').on('input', function () { renderPane('available', this.value); });
+        $root.find('.js-pane-selected .search').on('input', function () { renderPane('selected', this.value); });
+
+        renderPane('available', '');
+        renderPane('selected', '');
+        syncHidden();
+    });
+
+    // ===== Anexos =====
+    var $list = $('#ci-attach-list');
+    $('#ci-files').on('change', function () {
+        $list.empty();
+        Array.from(this.files).forEach(function (f) {
+            $list.append('<div class="file-row"><i class="fa fa-paperclip"></i> ' + f.name + ' <span class="text-muted small">(' + Math.round(f.size/1024) + ' KB)</span></div>');
         });
     });
+
+    // ===== Submit =====
+    $('#form-novo-ci').on('submit', function (e) {
+        var hasDest = $(this).find('input[name="for_staffs[]"]').length > 0;
+        var action = $(document.activeElement).val() || 'publish';
+        if (action === 'publish' && !hasDest) {
+            e.preventDefault();
+            alert('Selecione ao menos um destinatário antes de publicar.');
+        }
+    });
+});
 </script>
