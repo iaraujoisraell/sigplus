@@ -2,11 +2,14 @@
 <?php
 $this->load->model('Ata_model');
 $this->load->model('Plano_acao_model');
+$this->load->model('Workgroup_model');
 
-$minhas_atas = $this->Ata_model->listar(['minha' => 1], 5);
-$meus_planos = $this->Plano_acao_model->listar(['minha' => 1], 5);
-$total_atas  = $this->Ata_model->count_minhas();
-$total_planos = $this->Plano_acao_model->count_meus();
+$minhas_atas   = $this->Ata_model->listar(['minha' => 1], 5);
+$meus_planos   = $this->Plano_acao_model->listar(['minha' => 1], 5);
+$meus_grupos   = $this->Workgroup_model->listar(['meu' => 1], 5);
+$total_atas    = $this->Ata_model->count_minhas();
+$total_planos  = $this->Plano_acao_model->count_meus();
+$total_grupos  = $this->Workgroup_model->count_meus();
 ?>
 
 <style>
@@ -29,6 +32,7 @@ $total_planos = $this->Plano_acao_model->count_meus();
     .pill-em_execucao{background:#fef9c3;color:#854d0e;}
     .pill-cancelada,.pill-cancelado{background:#fee2e2;color:#991b1b;}
     .pill-atrasado{background:#fecaca;color:#7f1d1d;}
+    .pill-pausado{background:#fef3c7;color:#92400e;}
     .home-mini-empty{padding:18px;text-align:center;color:#94a3b8;font-size:12px;}
     .home-mini-footer{padding:8px 18px;text-align:center;border-top:1px solid #f3f4f6;}
     .home-mini-footer a{color:#0a66c2;font-weight:600;font-size:12px;text-decoration:none;}
@@ -58,6 +62,33 @@ $total_planos = $this->Plano_acao_model->count_meus();
     </div>
     <div class="home-mini-footer">
         <a href="<?php echo base_url('gestao_corporativa/Ata?minha=1'); ?>">Ver todas →</a>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if (has_permission_intranet('modules', '', 'view_grupos') || is_admin()): ?>
+<div class="ui-card mini-card home-mini-list-card" style="margin-bottom:14px;">
+    <div class="home-mini-list-header">
+        <h4><i class="fas fa-users-cog"></i> Meus Grupos</h4>
+        <?php if ($total_grupos > 0): ?><span class="count"><?php echo $total_grupos; ?></span><?php endif; ?>
+    </div>
+    <div class="home-mini-list-body">
+        <?php if (empty($meus_grupos)): ?>
+            <div class="home-mini-empty">Você ainda não participa de grupos</div>
+        <?php else: ?>
+            <?php foreach ($meus_grupos as $g): ?>
+                <a href="<?php echo base_url('gestao_corporativa/Workgroup/view/' . (int) $g['id']); ?>" class="home-mini-item">
+                    <div class="titulo"><?php echo html_escape(mb_strimwidth($g['titulo'], 0, 60, '…')); ?></div>
+                    <div class="meta">
+                        <span class="pill pill-<?php echo $g['status']; ?>"><?php echo $this->Workgroup_model->get_status_label($g['status']); ?></span>
+                        <?php if (!empty($g['lider_nome'])): ?><span><i class="fa fa-star"></i><?php echo html_escape(mb_strimwidth($g['lider_nome'], 0, 20, '…')); ?></span><?php endif; ?>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        <?php endif; ?>
+    </div>
+    <div class="home-mini-footer">
+        <a href="<?php echo base_url('gestao_corporativa/Workgroup?meu=1'); ?>">Ver todos →</a>
     </div>
 </div>
 <?php endif; ?>

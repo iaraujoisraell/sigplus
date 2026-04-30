@@ -160,6 +160,7 @@ class Ata_model extends App_Model
 
         $clean = [
             'project_id'     => !empty($data['project_id']) ? (int) $data['project_id'] : null,
+            'grupo_id'       => !empty($data['grupo_id']) ? (int) $data['grupo_id'] : null,
             'titulo'         => trim((string) ($data['titulo'] ?? '')),
             'data'           => !empty($data['data']) ? $data['data'] : null,
             'hora_inicio'    => !empty($data['hora_inicio']) ? $data['hora_inicio'] : null,
@@ -300,6 +301,9 @@ class Ata_model extends App_Model
 
     private function _criar_task_de_decisao($decisao_id, $row, $project_id, $ata_id)
     {
+        $ata = $this->db->select('grupo_id')->where('id', $ata_id)->get('tbl_atas')->row();
+        $grupo_id = $ata && !empty($ata->grupo_id) ? (int) $ata->grupo_id : null;
+
         $name = mb_substr($row['descricao'], 0, 250);
         $task = [
             'name'        => $name,
@@ -313,6 +317,7 @@ class Ata_model extends App_Model
             'rel_id'      => $project_id ?: null,
             'rel_type'    => $project_id ? 'project' : null,
             'ataid'       => (int) $ata_id,
+            'grupoid'     => $grupo_id,
             'empresa_id'  => (int) $this->session->userdata('empresa_id'),
         ];
         $this->db->insert('tbltasks', $task);

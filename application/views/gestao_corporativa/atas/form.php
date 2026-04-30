@@ -115,6 +115,26 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="control-label">Grupo vinculado <small class="text-muted">(opcional)</small></label>
+                    <?php
+                    $empresa_id = (int) $this->session->userdata('empresa_id');
+                    $me = (int) get_staff_user_id();
+                    $grupo_atual = $this->input->get('grupo_id') ?: ($ata['grupo_id'] ?? null);
+                    $grupos_meus = $this->db->query("SELECT DISTINCT g.id, g.titulo FROM tbl_grupos g
+                        LEFT JOIN tbl_grupos_membros m ON m.grupo_id = g.id AND m.deleted = 0
+                        WHERE g.deleted = 0 AND g.empresa_id = $empresa_id
+                          AND (g.lider_id = $me OR g.user_create = $me OR m.staff_id = $me)
+                        ORDER BY g.titulo")->result_array();
+                    ?>
+                    <select name="grupo_id" class="form-control select2">
+                        <option value="">— sem grupo —</option>
+                        <?php foreach ($grupos_meus as $g): ?>
+                            <option value="<?php echo (int) $g['id']; ?>" <?php echo (int) $grupo_atual === (int) $g['id'] ? 'selected' : ''; ?>><?php echo html_escape($g['titulo']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label class="control-label">Pauta</label>
                     <textarea id="pauta" name="pauta"><?php echo html_escape($ata['pauta'] ?? ''); ?></textarea>
                 </div>

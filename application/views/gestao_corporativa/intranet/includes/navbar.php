@@ -474,6 +474,7 @@ if (!isset($without_permission) || !$without_permission) {
                     ['perm' => 'view_cis',          'href' => base_url('gestao_corporativa/intra/comunicado'),      'icon' => 'fas fa-bullhorn',       'label' => 'CI'],
                     ['perm' => 'view_atas',         'href' => base_url('gestao_corporativa/Ata'),                   'icon' => 'far fa-file-alt',       'label' => 'Atas'],
                     ['perm' => 'view_planos_acao',  'href' => base_url('gestao_corporativa/Plano_acao'),            'icon' => 'fas fa-clipboard-list', 'label' => 'Planos'],
+                    ['perm' => 'view_grupos',       'href' => base_url('gestao_corporativa/Workgroup'),             'icon' => 'fas fa-users-cog',      'label' => 'Grupos'],
                     ['perm' => 'view_ros',          'href' => base_url('gestao_corporativa/Registro_ocorrencia'),   'icon' => 'far fa-flag',           'label' => 'R.O'],
                     ['perm' => 'view_ras',          'href' => base_url('gestao_corporativa/Atendimento/index'),     'icon' => 'fas fa-headset',        'label' => 'Atendimentos'],
                     ['perm' => 'view_workflows',    'href' => base_url('gestao_corporativa/Workflow/index'),         'icon' => 'fas fa-project-diagram','label' => 'Workflow'],

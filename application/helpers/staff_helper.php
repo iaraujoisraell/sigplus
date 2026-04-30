@@ -283,6 +283,7 @@ function get_available_staff_permissions_intranet($data = []) {
                 'view_cis' => 'Comunicados Internos',
                 'view_atas' => 'Atas',
                 'view_planos_acao' => 'Planos de Ação',
+                'view_grupos' => 'Grupos',
                 'view_docs' => 'Documentos',
                 'view_projects' => 'Projetos',
                 'view_tasks' => 'Tarefas',
@@ -348,6 +349,13 @@ function get_available_staff_permissions_intranet($data = []) {
                 'create' => 'Criar',
                 'edit' => 'Editar',
                 'delete' => 'Excluir',
+            ],
+        ],
+        'grupos' => [
+            'name' => 'Grupos',
+            'capabilities' => [
+                'edit' => 'Editar (admin)',
+                'delete' => 'Excluir (admin)',
             ],
         ],
         // --- APLICADO

@@ -103,6 +103,7 @@ class Plano_acao_model extends App_Model
 
         $clean = [
             'project_id'     => !empty($data['project_id']) ? (int) $data['project_id'] : null,
+            'grupo_id'       => !empty($data['grupo_id']) ? (int) $data['grupo_id'] : null,
             'ata_id'         => !empty($data['ata_id']) ? (int) $data['ata_id'] : null,
             'titulo'         => trim((string) ($data['titulo'] ?? '')),
             'descricao'      => $data['descricao'] ?? null,
@@ -180,6 +181,9 @@ class Plano_acao_model extends App_Model
 
     private function _criar_task_de_5w2h($item_id, $row, $project_id, $plano_id)
     {
+        $plano = $this->db->select('grupo_id')->where('id', $plano_id)->get('tbl_planos_acao')->row();
+        $grupo_id = $plano && !empty($plano->grupo_id) ? (int) $plano->grupo_id : null;
+
         $name = mb_substr($row['what'], 0, 250);
         $description = $row['why'] ?? '';
 
@@ -195,6 +199,7 @@ class Plano_acao_model extends App_Model
             'rel_id'       => $project_id ?: null,
             'rel_type'     => $project_id ? 'project' : null,
             'planoacaoid'  => (int) $plano_id,
+            'grupoid'      => $grupo_id,
             'porque'       => $row['why'] ?? null,
             'onde'         => $row['where'] ?? null,
             'como'         => $row['how'] ?? null,
