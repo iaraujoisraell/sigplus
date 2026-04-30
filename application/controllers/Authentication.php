@@ -71,7 +71,7 @@ class Authentication extends ClientsController
         // echo 'jdjjd'; exit;00790843930154003
         // redirect(admin_url('authentication'));    
 
-         echo "aqui"; exit;
+         
 
         if (is_client_logged_in()) {
             //echo "aqui"; exit;
@@ -87,6 +87,9 @@ class Authentication extends ClientsController
         }
         if ($this->form_validation->run() !== false) {
             $this->load->model('Authentication_model');
+            
+
+            $success = true;
             
             $success = $this->Authentication_model->login(
                 $this->input->post('email'),

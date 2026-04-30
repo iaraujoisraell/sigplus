@@ -340,7 +340,7 @@ class Signin extends ClientsController
             $staff  = true;
             $master = '&master=1';
         }
-
+        //echo 'aqui'; exit;
         if (is_client_logged_in()) {
             redirect(base_url('portal/dashboard/index'));
         }
