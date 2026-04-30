@@ -543,7 +543,7 @@ if (!isset($without_permission) || !$without_permission) {
                                 <?php } ?>
                             </a>
 
-                        <a href="#" data-widget="control-sidebar" data-slide="true">
+                        <a href="<?php echo base_url('gestao_corporativa/intranet_admin'); ?>">
                             <i class="fas fa-cogs"></i> Configurações
                         </a>
 
