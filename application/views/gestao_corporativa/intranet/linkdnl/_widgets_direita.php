@@ -121,7 +121,7 @@ $total_eventos = (int) $this->db->query("SELECT COUNT(*) AS n FROM tblevents
                 }
                 $atribuicao = (int) $w['atribuido_a'] === $me ? 'Pra mim' : 'Setor';
             ?>
-                <a href="<?php echo base_url('gestao_corporativa/Workflow/single?workflow_id=' . (int) $w['workflow_id']); ?>" class="home-mini-item">
+                <a href="<?php echo base_url('gestao_corporativa/Workflow/workflow/' . (int) $w['workflow_id']); ?>" class="home-mini-item">
                     <div class="titulo">
                         <?php echo !empty($w['protocolo']) ? '#' . html_escape($w['protocolo']) : 'WF #' . (int) $w['workflow_id']; ?>
                         <?php if (!empty($w['categoria_nome'])): ?> · <?php echo html_escape(mb_strimwidth($w['categoria_nome'], 0, 28, '…')); ?><?php endif; ?>
