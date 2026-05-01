@@ -303,57 +303,6 @@ $me_empresa      = get_option('companyname');
                         </div>
                     </div>
 
-                    <div class="ui-card events-card">
-                        <h4>Próximos eventos</h4>
-
-                        <?php
-                        $meses_abr = ['', 'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
-                        $hoje      = date('Y-m-d');
-                        $futuros   = [];
-                        if (!empty($date)) {
-                            foreach ($date as $ev) {
-                                $start = isset($ev->start) ? $ev->start : (isset($ev->data) ? $ev->data : null);
-                                if ($start && substr($start, 0, 10) >= $hoje) {
-                                    $futuros[] = $ev;
-                                }
-                            }
-                            usort($futuros, function ($a, $b) {
-                                $da = isset($a->start) ? $a->start : (isset($a->data) ? $a->data : '');
-                                $db = isset($b->start) ? $b->start : (isset($b->data) ? $b->data : '');
-                                return strcmp($da, $db);
-                            });
-                        }
-                        $futuros = array_slice($futuros, 0, 4);
-                        ?>
-
-                        <?php if (!empty($futuros)): ?>
-                            <?php foreach ($futuros as $ev):
-                                $when  = isset($ev->start) ? $ev->start : (isset($ev->data) ? $ev->data : '');
-                                $ts    = strtotime($when);
-                                $dia   = $ts ? date('d', $ts) : '--';
-                                $mes   = $ts ? $meses_abr[(int) date('n', $ts)] : '';
-                                $hora  = $ts && date('H:i', $ts) !== '00:00' ? date('H:i', $ts) : '';
-                                $titulo = isset($ev->title) ? $ev->title : (isset($ev->titulo) ? $ev->titulo : 'Evento');
-                                $local  = isset($ev->where) ? $ev->where : (isset($ev->local) ? $ev->local : '');
-                            ?>
-                                <div class="event-item">
-                                    <div class="event-date">
-                                        <span class="day"><?php echo $dia; ?></span>
-                                        <span class="month"><?php echo $mes; ?></span>
-                                    </div>
-
-                                    <div class="event-content">
-                                        <strong><?php echo html_escape($titulo); ?></strong>
-                                        <?php if ($hora || $local): ?>
-                                            <span><?php echo $hora ? $hora : ''; ?><?php echo ($hora && $local) ? ' • ' : ''; ?><?php echo html_escape($local); ?></span>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <div class="text-muted small" style="padding: 6px 2px;">Nenhum evento agendado.</div>
-                        <?php endif; ?>
-                    </div>
                 </div>
 
             </div>

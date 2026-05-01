@@ -3,19 +3,37 @@
 $me = (int) get_staff_user_id();
 $empresa_id = (int) $this->session->userdata('empresa_id');
 
-$meus_workflows = $this->db->query("SELECT w.id, w.status, w.date_prazo,
-        c.titulo AS categoria_nome,
-        ra.protocolo AS protocolo
-    FROM tbl_intranet_workflow w
-    LEFT JOIN tbl_intranet_categorias c ON c.id = w.categoria_id
-    LEFT JOIN tbl_intranet_registro_atendimento ra ON ra.id = w.registro_atendimento_id
-    WHERE w.empresa_id = $empresa_id AND w.deleted = 0 AND w.cancel_id = 0
-      AND (w.user_created = $me OR w.user_start = $me)
-    ORDER BY w.id DESC LIMIT 5")->result_array();
+// Setores do usuário (pra pegar passos atribuídos ao setor)
+$this->load->model('Departments_model');
+$meus_setores_ids = $this->Departments_model->get_staff_departments($me, true);
+$setores_in = !empty($meus_setores_ids) ? implode(',', array_map('intval', $meus_setores_ids)) : '0';
 
-$total_workflows = (int) $this->db->query("SELECT COUNT(*) AS n FROM tbl_intranet_workflow
-    WHERE empresa_id = $empresa_id AND deleted = 0 AND cancel_id = 0
-      AND (user_created = $me OR user_start = $me)")->row()->n;
+// Passos do workflow pendentes pra mim ou pros meus setores
+$sql_wf = "SELECT a.id AS andamento_id, a.workflow_id, a.data_prazo, a.atribuido_a,
+        w.id AS wf_id, w.date_created AS wf_data,
+        c.titulo AS categoria_nome,
+        d.name AS setor_nome,
+        ra.protocolo
+    FROM tbl_intranet_workflow_fluxo_andamento a
+    INNER JOIN tbl_intranet_workflow w ON w.id = a.workflow_id
+    LEFT JOIN tbl_intranet_categorias c ON c.id = a.categoria_id
+    LEFT JOIN tbldepartments d ON d.departmentid = a.department_id
+    LEFT JOIN tbl_intranet_registro_atendimento ra ON ra.id = w.registro_atendimento_id
+    WHERE a.empresa_id = $empresa_id AND a.deleted = 0 AND a.concluido = 0
+      AND a.estornado = 0 AND w.deleted = 0 AND w.cancel_id = 0
+      AND (a.atribuido_a = $me
+           OR (a.atribuido_a = 0 AND a.department_id IN ($setores_in)))
+    ORDER BY (a.data_prazo IS NULL), a.data_prazo ASC, a.id ASC
+    LIMIT 5";
+$meus_workflows = $this->db->query($sql_wf)->result_array();
+
+$total_workflows = (int) $this->db->query("SELECT COUNT(DISTINCT a.workflow_id) AS n
+    FROM tbl_intranet_workflow_fluxo_andamento a
+    INNER JOIN tbl_intranet_workflow w ON w.id = a.workflow_id
+    WHERE a.empresa_id = $empresa_id AND a.deleted = 0 AND a.concluido = 0 AND a.estornado = 0
+      AND w.deleted = 0 AND w.cancel_id = 0
+      AND (a.atribuido_a = $me
+           OR (a.atribuido_a = 0 AND a.department_id IN ($setores_in)))")->row()->n;
 
 $meus_atendimentos = $this->db->query("SELECT ra.id, ra.protocolo, ra.date_created,
         c.company AS cliente_nome, cat.titulo AS categoria_nome
@@ -61,25 +79,60 @@ $total_eventos = (int) $this->db->query("SELECT COUNT(*) AS n FROM tblevents
 </style>
 
 <?php if (has_permission_intranet('modules', '', 'view_workflows') || is_admin()): ?>
+<style>
+    .pill-prazo{font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;}
+    .pill-ok{background:#dcfce7;color:#166534;}
+    .pill-alert{background:#fef3c7;color:#92400e;}
+    .pill-late{background:#fee2e2;color:#991b1b;}
+    .pill-soft{background:#f3f4f6;color:#475569;}
+</style>
 <div class="ui-card mini-card home-mini-list-card" style="margin-bottom:14px;">
     <div class="home-mini-list-header">
-        <h4><i class="fas fa-project-diagram"></i> Meus Workflows</h4>
+        <h4><i class="fas fa-project-diagram"></i> Pendentes pra mim/setor</h4>
         <div class="right">
             <?php if ($total_workflows > 0): ?><span class="count"><?php echo $total_workflows; ?></span><?php endif; ?>
         </div>
     </div>
     <div class="home-mini-list-body">
         <?php if (empty($meus_workflows)): ?>
-            <div class="home-mini-empty">Nenhum workflow seu</div>
+            <div class="home-mini-empty">Nada pendente pra você</div>
         <?php else: ?>
-            <?php foreach ($meus_workflows as $w): ?>
-                <a href="<?php echo base_url('gestao_corporativa/Workflow/single?workflow_id=' . (int) $w['id']); ?>" class="home-mini-item">
+            <?php $hoje = new DateTime(date('Y-m-d')); foreach ($meus_workflows as $w):
+                $prazo_label = '';
+                $prazo_class = 'pill-soft';
+                if (!empty($w['data_prazo'])) {
+                    $prazo = new DateTime($w['data_prazo']);
+                    $diff = (int) $hoje->diff($prazo)->format('%r%a'); // dias com sinal
+                    if ($diff < 0) {
+                        $prazo_label = abs($diff) . 'd atrasado';
+                        $prazo_class = 'pill-late';
+                    } elseif ($diff === 0) {
+                        $prazo_label = 'hoje';
+                        $prazo_class = 'pill-alert';
+                    } elseif ($diff <= 2) {
+                        $prazo_label = 'em ' . $diff . 'd';
+                        $prazo_class = 'pill-alert';
+                    } else {
+                        $prazo_label = 'em ' . $diff . 'd';
+                        $prazo_class = 'pill-ok';
+                    }
+                } else {
+                    $prazo_label = 'sem prazo';
+                }
+                $atribuicao = (int) $w['atribuido_a'] === $me ? 'Pra mim' : 'Setor';
+            ?>
+                <a href="<?php echo base_url('gestao_corporativa/Workflow/single?workflow_id=' . (int) $w['workflow_id']); ?>" class="home-mini-item">
                     <div class="titulo">
-                        <?php echo !empty($w['protocolo']) ? '#' . html_escape($w['protocolo']) : '#' . (int) $w['id']; ?>
-                        <?php if (!empty($w['categoria_nome'])): ?>· <?php echo html_escape(mb_strimwidth($w['categoria_nome'], 0, 32, '…')); ?><?php endif; ?>
+                        <?php echo !empty($w['protocolo']) ? '#' . html_escape($w['protocolo']) : 'WF #' . (int) $w['workflow_id']; ?>
+                        <?php if (!empty($w['categoria_nome'])): ?> · <?php echo html_escape(mb_strimwidth($w['categoria_nome'], 0, 28, '…')); ?><?php endif; ?>
                     </div>
                     <div class="meta">
-                        <?php if (!empty($w['date_prazo'])): ?><span><i class="fa fa-clock-o"></i><?php echo date('d/m', strtotime($w['date_prazo'])); ?></span><?php endif; ?>
+                        <span class="pill-prazo <?php echo $prazo_class; ?>"><i class="fa fa-clock-o"></i> <?php echo $prazo_label; ?></span>
+                        <?php if ($atribuicao === 'Pra mim'): ?>
+                            <span class="pill-prazo pill-ok"><i class="fa fa-user"></i> pra mim</span>
+                        <?php elseif (!empty($w['setor_nome'])): ?>
+                            <span class="pill-prazo pill-soft"><i class="fa fa-building-o"></i> <?php echo html_escape(mb_strimwidth($w['setor_nome'], 0, 18, '…')); ?></span>
+                        <?php endif; ?>
                     </div>
                 </a>
             <?php endforeach; ?>
