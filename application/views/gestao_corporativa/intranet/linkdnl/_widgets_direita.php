@@ -3,10 +3,12 @@
 $me = (int) get_staff_user_id();
 $empresa_id = (int) $this->session->userdata('empresa_id');
 
-$meus_workflows = $this->db->query("SELECT w.id, w.protocolo, w.status, w.date_prazo,
-        c.titulo AS categoria_nome
+$meus_workflows = $this->db->query("SELECT w.id, w.status, w.date_prazo,
+        c.titulo AS categoria_nome,
+        ra.protocolo AS protocolo
     FROM tbl_intranet_workflow w
     LEFT JOIN tbl_intranet_categorias c ON c.id = w.categoria_id
+    LEFT JOIN tbl_intranet_registro_atendimento ra ON ra.id = w.registro_atendimento_id
     WHERE w.empresa_id = $empresa_id AND w.deleted = 0 AND w.cancel_id = 0
       AND (w.user_created = $me OR w.user_start = $me)
     ORDER BY w.id DESC LIMIT 5")->result_array();
