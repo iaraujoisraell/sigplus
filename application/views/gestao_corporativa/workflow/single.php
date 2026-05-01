@@ -62,13 +62,7 @@ if (is_array($info_client)) {
                 </div>
             <?php } ?>
 
-            <div class="col-md-<?php
-                                if ($in_department != true && $user_created == true || is_admin()) {
-                                    echo '8';
-                                } else {
-                                    echo '4';
-                                }
-                                ?>">
+            <div class="col-md-<?php echo $in_department ? '4' : '8'; ?>">
                 <div class="panel_s">
                     <div class="panel-heading">
                         WORKFLOW #<?php echo $workflow->id; ?>
@@ -582,11 +576,9 @@ if (is_array($info_client)) {
                     </div>
                 <?php } ?>
             </div>
-            <?php if ($in_department != true && $user_created == true || is_admin()) {
-            ?>
-                <div class="col-md-2">
-                </div>
-            <?php } ?>
+            <?php if (!$in_department): ?>
+                <div class="col-md-2"></div>
+            <?php endif; ?>
 
             <?php if ($in_department == true) { ?>
                 <div class="col-md-8"> <?php //echo "aqui";
