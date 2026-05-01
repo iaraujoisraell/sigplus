@@ -78,6 +78,12 @@
                         <?php if (!empty($pode_editar)): ?>
                             <a href="<?php echo base_url('gestao_corporativa/Workgroup/edit/' . (int) $grupo['id']); ?>" class="btn btn-default btn-sm"><i class="fa fa-pencil"></i> Editar</a>
                         <?php endif; ?>
+                        <?php if (!empty($pode_sair)): ?>
+                            <a href="<?php echo base_url('gestao_corporativa/Workgroup/sair/' . (int) $grupo['id']); ?>"
+                               class="btn btn-default btn-sm"
+                               onclick="return confirm('Tem certeza que deseja sair deste grupo?');"
+                               style="color:#dc2626;"><i class="fa fa-sign-out"></i> Sair do grupo</a>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -89,13 +95,18 @@
 
         <div class="gp-card">
             <div class="nav-tabs-pill">
-                <button data-tab="atas" class="active"><i class="far fa-file-alt"></i> Atas <span class="count"><?php echo count($atas); ?></span></button>
+                <button data-tab="discussao" class="active"><i class="fa fa-comments"></i> Discussão <span class="count"><?php echo count($posts ?? []); ?></span></button>
+                <button data-tab="atas"><i class="far fa-file-alt"></i> Atas <span class="count"><?php echo count($atas); ?></span></button>
                 <button data-tab="planos"><i class="fas fa-clipboard-list"></i> Planos <span class="count"><?php echo count($planos); ?></span></button>
                 <button data-tab="tasks"><i class="fa fa-tasks"></i> Ações <span class="count"><?php echo count($tasks); ?></span></button>
                 <button data-tab="membros"><i class="fa fa-users"></i> Membros <span class="count"><?php echo count($membros); ?></span></button>
             </div>
             <div class="gp-card-body">
-                <div class="tab-pane active" data-pane="atas">
+                <div class="tab-pane active" data-pane="discussao">
+                    <?php $this->load->view('gestao_corporativa/grupos/_discussao', ['grupo' => $grupo, 'posts' => $posts ?? []]); ?>
+                </div>
+
+                <div class="tab-pane atas-pane" data-pane="atas">
                     <?php if (empty($atas)): ?>
                         <div class="empty">Sem atas vinculadas a este grupo.</div>
                         <p style="text-align:center;"><a href="<?php echo base_url('gestao_corporativa/Ata/add?grupo_id=' . (int) $grupo['id']); ?>" class="btn btn-info btn-sm"><i class="fa fa-plus"></i> Nova ata</a></p>

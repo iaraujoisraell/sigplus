@@ -69,6 +69,11 @@ class Workgroup extends AdminController
             access_denied('Grupos — você não é membro deste grupo.');
         }
 
+        $me = (int) get_staff_user_id();
+        $eh_membro = $this->Workgroup_model->pode_visualizar($grupo)
+            && (int) $grupo['lider_id'] !== $me
+            && (int) $grupo['user_create'] !== $me;
+
         $data = [
             'title'       => 'Grupo: ' . $grupo['titulo'],
             'grupo'       => $grupo,
@@ -76,9 +81,52 @@ class Workgroup extends AdminController
             'atas'        => $this->Workgroup_model->get_atas_do_grupo($id),
             'planos'      => $this->Workgroup_model->get_planos_do_grupo($id),
             'tasks'       => $this->Workgroup_model->get_tasks_do_grupo($id),
+            'posts'       => $this->Workgroup_model->get_posts($id),
             'pode_editar' => $this->Workgroup_model->pode_editar($grupo),
+            'pode_sair'   => $eh_membro,
         ];
         $this->load->view('gestao_corporativa/grupos/view', $data);
+    }
+
+    public function add_post($grupo_id)
+    {
+        $grupo = $this->Workgroup_model->get($grupo_id);
+        if (!$grupo) show_404();
+        if (!$this->Workgroup_model->pode_visualizar($grupo)) access_denied('Grupos');
+
+        $conteudo = trim((string) $this->input->post('conteudo'));
+        $tipo     = $this->input->post('tipo') === 'anotacao' ? 'anotacao' : 'mensagem';
+
+        if ($conteudo === '') {
+            echo json_encode(['ok' => false, 'error' => 'Conteúdo vazio']);
+            return;
+        }
+
+        $post_id = $this->Workgroup_model->add_post($grupo_id, $conteudo, $tipo);
+        echo json_encode(['ok' => (bool) $post_id, 'id' => $post_id]);
+    }
+
+    public function delete_post($post_id)
+    {
+        $ok = $this->Workgroup_model->delete_post($post_id);
+        echo json_encode(['ok' => (bool) $ok]);
+    }
+
+    public function fixar_post($post_id)
+    {
+        $ok = $this->Workgroup_model->toggle_fixado_post($post_id);
+        echo json_encode(['ok' => (bool) $ok]);
+    }
+
+    public function sair($grupo_id)
+    {
+        $ok = $this->Workgroup_model->sair($grupo_id);
+        if ($ok) {
+            set_alert('success', 'Você saiu do grupo.');
+            redirect('gestao_corporativa/Workgroup');
+        }
+        set_alert('danger', 'Não foi possível sair (líder/criador não podem sair sem transferir antes).');
+        redirect('gestao_corporativa/Workgroup/view/' . (int) $grupo_id);
     }
 
     public function save()

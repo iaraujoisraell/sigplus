@@ -155,6 +155,7 @@ class Workgroup_model extends App_Model
         foreach ($atual as $a) $atual_map[(int) $a['staff_id']] = (int) $a['id'];
 
         $manter = [];
+        $novos  = [];
         foreach ((array) $list as $m) {
             $sid = !empty($m['staff_id']) ? (int) $m['staff_id'] : 0;
             $papel = in_array($m['papel'] ?? '', $this->papeis, true) ? $m['papel'] : 'membro';
@@ -165,6 +166,7 @@ class Workgroup_model extends App_Model
                 $this->db->where('id', $atual_map[$sid])->update('tbl_grupos_membros', ['papel' => $papel, 'deleted' => 0]);
             } else {
                 $this->_add_membro($grupo_id, $sid, $papel);
+                $novos[] = ['staff_id' => $sid, 'papel' => $papel];
             }
         }
 
@@ -173,6 +175,136 @@ class Workgroup_model extends App_Model
                 $this->db->where('id', $rid)->update('tbl_grupos_membros', ['deleted' => 1]);
             }
         }
+
+        if (!empty($novos)) {
+            $this->_notificar_novos_membros($grupo_id, $novos);
+        }
+    }
+
+    private function _notificar_novos_membros($grupo_id, $novos)
+    {
+        $grupo = $this->get($grupo_id);
+        if (!$grupo) return;
+        $this->load->model('Comunicacao_model');
+        $this->load->model('Staff_model');
+
+        $link = base_url('gestao_corporativa/Workgroup/view/' . (int) $grupo_id);
+        $autor = trim((string) get_staff_full_name(get_staff_user_id()));
+        $objetivo = !empty($grupo['objetivo']) ? trim($grupo['objetivo']) : '(sem objetivo definido)';
+
+        foreach ($novos as $n) {
+            $staff = $this->Staff_model->get($n['staff_id']);
+            if (!$staff || empty($staff->email)) continue;
+
+            $mensagem  = "<p>Olá " . html_escape($staff->firstname) . ",</p>";
+            $mensagem .= "<p><strong>" . html_escape($autor) . "</strong> adicionou você ao grupo <strong>" . html_escape($grupo['titulo']) . "</strong> como <strong>" . html_escape($n['papel']) . "</strong>.</p>";
+            $mensagem .= "<p><em>Objetivo:</em> " . html_escape($objetivo) . "</p>";
+            $mensagem .= '<p><a href="' . $link . '">Acessar grupo</a></p>';
+
+            $this->Comunicacao_model->addEmail([
+                'data_registro'    => date('Y-m-d H:i:s'),
+                'usuario_registro' => get_staff_user_id(),
+                'email_destino'    => $staff->email,
+                'staff_id'         => (int) $staff->staffid,
+                'assunto'          => 'Você foi adicionado ao grupo: ' . $grupo['titulo'],
+                'mensagem'         => $mensagem,
+                'rel_type'         => 'grupo',
+                'rel_id'           => (int) $grupo_id,
+                'empresa_id'       => (int) $this->session->userdata('empresa_id'),
+            ]);
+        }
+
+        $nomes = array_map(function ($n) {
+            $s = $this->Staff_model->get($n['staff_id']);
+            return $s ? trim($s->firstname . ' ' . $s->lastname) : '#' . $n['staff_id'];
+        }, $novos);
+        $this->add_post($grupo_id, '<i class="fa fa-user-plus"></i> ' . html_escape($autor) . ' adicionou: ' . html_escape(implode(', ', $nomes)), 'sistema');
+    }
+
+    public function sair($grupo_id, $staff_id = null)
+    {
+        $staff_id = $staff_id ?? (int) get_staff_user_id();
+        $grupo = $this->get($grupo_id);
+        if (!$grupo) return false;
+
+        // Líder e criador não podem sair (precisariam transferir antes)
+        if ((int) $grupo['lider_id'] === $staff_id || (int) $grupo['user_create'] === $staff_id) {
+            return false;
+        }
+
+        $this->db->where('grupo_id', $grupo_id)
+            ->where('staff_id', $staff_id)
+            ->where('deleted', 0)
+            ->update('tbl_grupos_membros', ['deleted' => 1]);
+
+        $nome = trim((string) get_staff_full_name($staff_id));
+        $this->add_post($grupo_id, '<i class="fa fa-sign-out"></i> ' . html_escape($nome) . ' saiu do grupo.', 'sistema', $staff_id);
+        return true;
+    }
+
+    /* ---------------- Posts / Discussão ---------------- */
+
+    public function get_posts($grupo_id)
+    {
+        return $this->db->select('p.*, CONCAT_WS(\' \', s.firstname, s.lastname) AS autor_nome,
+                                  s.profile_image, s.cargo AS autor_cargo')
+            ->from('tbl_grupos_posts p')
+            ->join('tblstaff s', 's.staffid = p.autor_id', 'left')
+            ->where('p.grupo_id', $grupo_id)
+            ->where('p.deleted', 0)
+            ->order_by('p.fixado', 'desc')
+            ->order_by('p.dt_created', 'desc')
+            ->get()->result_array();
+    }
+
+    public function add_post($grupo_id, $conteudo, $tipo = 'mensagem', $autor_id = null)
+    {
+        $tipo = in_array($tipo, ['mensagem', 'anotacao', 'sistema'], true) ? $tipo : 'mensagem';
+        $autor_id = $autor_id ?? (int) get_staff_user_id();
+        $conteudo = trim((string) $conteudo);
+        if ($conteudo === '') return false;
+
+        $this->db->insert('tbl_grupos_posts', [
+            'grupo_id'   => (int) $grupo_id,
+            'autor_id'   => $autor_id,
+            'tipo'       => $tipo,
+            'conteudo'   => $conteudo,
+            'fixado'     => 0,
+            'dt_created' => date('Y-m-d H:i:s'),
+            'deleted'    => 0,
+        ]);
+        return (int) $this->db->insert_id();
+    }
+
+    public function delete_post($post_id, $staff_id = null)
+    {
+        $staff_id = $staff_id ?? (int) get_staff_user_id();
+        $post = $this->db->where('id', $post_id)->get('tbl_grupos_posts')->row_array();
+        if (!$post) return false;
+
+        $grupo = $this->get($post['grupo_id']);
+        $is_owner_post = (int) $post['autor_id'] === $staff_id;
+        $is_owner_grupo = $grupo && ((int) $grupo['lider_id'] === $staff_id || (int) $grupo['user_create'] === $staff_id);
+
+        if (!$is_owner_post && !$is_owner_grupo && !is_admin()) return false;
+
+        $this->db->where('id', $post_id)->update('tbl_grupos_posts', ['deleted' => 1]);
+        return true;
+    }
+
+    public function toggle_fixado_post($post_id, $staff_id = null)
+    {
+        $staff_id = $staff_id ?? (int) get_staff_user_id();
+        $post = $this->db->where('id', $post_id)->get('tbl_grupos_posts')->row_array();
+        if (!$post) return false;
+
+        $grupo = $this->get($post['grupo_id']);
+        if (!$grupo || !$this->pode_editar($grupo, $staff_id)) return false;
+
+        $this->db->where('id', $post_id)->update('tbl_grupos_posts', [
+            'fixado' => $post['fixado'] ? 0 : 1,
+        ]);
+        return true;
     }
 
     private function _add_membro($grupo_id, $staff_id, $papel)
