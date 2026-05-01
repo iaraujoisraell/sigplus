@@ -27,7 +27,7 @@ if (is_array($info_client)) {
         </div>
         <?php
         $staffid = get_staff_user_id();
-        if ($in_department == true || $user_created == true || $staffid == 1460) { ?>
+        if ($in_department == true || $user_created == true || is_admin()) { ?>
             <?php
             $classe = 'info';
             $info = 'EM DIA';
@@ -56,14 +56,14 @@ if (is_array($info_client)) {
             <?php } ?>
 
 
-            <?php if ($in_department != true && $user_created == true || $staffid == 1460) {
+            <?php if ($in_department != true && $user_created == true || is_admin()) {
             ?>
                 <div class="col-md-2">
                 </div>
             <?php } ?>
 
             <div class="col-md-<?php
-                                if ($in_department != true && $user_created == true || $staffid == 1460) {
+                                if ($in_department != true && $user_created == true || is_admin()) {
                                     echo '8';
                                 } else {
                                     echo '4';
@@ -259,7 +259,7 @@ if (is_array($info_client)) {
                                             <hr>
 
                                             <?php
-                                            if ($in_department != true && $user_created == true || $staffid == 1460) {
+                                            if ($in_department != true && $user_created == true || is_admin()) {
                                                 $campos = [];
                                                 $values_info['campos'] = $this->Categorias_campos_model->get_values($workflow->id, 'workflow', '0');
                                                 $this->load->view('gestao_corporativa/categorias_campos/values_info3', $values_info);
@@ -281,7 +281,7 @@ if (is_array($info_client)) {
 
                                                         <div class="feed-item row col-md-12" data-sale-activity-id="">
                                                             <div class="col-md-<?php
-                                                                                if ($in_department != true && $user_created == true || $staffid == 1460) {
+                                                                                if ($in_department != true && $user_created == true || is_admin()) {
                                                                                     echo '5';
                                                                                 } else {
                                                                                     echo '12';
@@ -319,7 +319,7 @@ if (is_array($info_client)) {
                                                                 </div>-->
                                                             </div>
 
-                                                            <?php if ($in_department != true && $user_created == true || $staffid == 1460) {  ?>
+                                                            <?php if ($in_department != true && $user_created == true || is_admin()) {  ?>
                                                                 <div class="col-md-7">
                                                                     <?php
                                                                     $campos = [];
@@ -582,7 +582,7 @@ if (is_array($info_client)) {
                     </div>
                 <?php } ?>
             </div>
-            <?php if ($in_department != true && $user_created == true || $staffid == 1460) {
+            <?php if ($in_department != true && $user_created == true || is_admin()) {
             ?>
                 <div class="col-md-2">
                 </div>

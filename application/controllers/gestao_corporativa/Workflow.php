@@ -207,7 +207,24 @@ class Workflow extends AdminController
 
         $data['departments'] = $this->Departments_model->get();
 
-        //print_r($data['departments']); exit;
+        // defaults pra evitar undefined na view legada
+        $data = array_merge([
+            'in_department'         => false,
+            'user_created'          => false,
+            'atual'                 => false,
+            'correcao'              => false,
+            'alternativas'          => [],
+            'department_responsable'=> false,
+            'staff_responsable'     => false,
+            'info_client'           => null,
+            'fluxo_atual'           => null,
+            'atendimento'           => null,
+            'client_contacts'       => [],
+            'pdf_views'             => [],
+            'internal_requests'     => [],
+            'external_requests'     => [],
+        ], $data);
+
         $this->load->view('gestao_corporativa/workflow/single', $data);
     }
 
