@@ -65,6 +65,15 @@ $is_owner_grupo = (int) $grupo['lider_id'] === $me_id || (int) $grupo['user_crea
 <script>
 $(function () {
     var GRUPO_ID = <?php echo $grupo_id; ?>;
+    var CSRF = {
+        name: '<?php echo $this->security->get_csrf_token_name(); ?>',
+        hash: '<?php echo $this->security->get_csrf_hash(); ?>'
+    };
+    function withCsrf(data) {
+        data = data || {};
+        data[CSRF.name] = CSRF.hash;
+        return data;
+    }
 
     $('#gp-post-enviar').on('click', function () {
         var conteudo = $('#gp-post-conteudo').val().trim();
@@ -72,20 +81,23 @@ $(function () {
         var tipo = $('input[name="gp-post-tipo"]:checked').val() || 'mensagem';
 
         var $btn = $(this).prop('disabled', true).text('Publicando...');
-        $.post('<?php echo base_url('gestao_corporativa/Workgroup/add_post'); ?>/' + GRUPO_ID, {
+        $.post('<?php echo base_url('gestao_corporativa/Workgroup/add_post'); ?>/' + GRUPO_ID, withCsrf({
             conteudo: conteudo,
             tipo: tipo
-        }, function (resp) {
+        }), function (resp) {
             if (resp && resp.ok) location.reload();
-            else { alert('Falha ao publicar.'); $btn.prop('disabled', false).text('Publicar'); }
-        }, 'json').fail(function () { alert('Erro de rede.'); $btn.prop('disabled', false).text('Publicar'); });
+            else { alert('Falha ao publicar: ' + (resp && resp.error ? resp.error : 'desconhecido')); $btn.prop('disabled', false).text('Publicar'); }
+        }, 'json').fail(function (xhr) {
+            alert('Erro (' + xhr.status + '). Recarregando token CSRF — tenta de novo.');
+            $btn.prop('disabled', false).text('Publicar');
+        });
     });
 
     $(document).on('click', '.gp-post-delete', function (e) {
         e.preventDefault();
         if (!confirm('Excluir esta mensagem?')) return;
         var pid = $(this).data('id');
-        $.post('<?php echo base_url('gestao_corporativa/Workgroup/delete_post'); ?>/' + pid, {}, function (resp) {
+        $.post('<?php echo base_url('gestao_corporativa/Workgroup/delete_post'); ?>/' + pid, withCsrf(), function (resp) {
             if (resp && resp.ok) location.reload();
         }, 'json');
     });
@@ -93,7 +105,7 @@ $(function () {
     $(document).on('click', '.gp-post-fixar', function (e) {
         e.preventDefault();
         var pid = $(this).data('id');
-        $.post('<?php echo base_url('gestao_corporativa/Workgroup/fixar_post'); ?>/' + pid, {}, function (resp) {
+        $.post('<?php echo base_url('gestao_corporativa/Workgroup/fixar_post'); ?>/' + pid, withCsrf(), function (resp) {
             if (resp && resp.ok) location.reload();
         }, 'json');
     });

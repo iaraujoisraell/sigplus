@@ -284,6 +284,7 @@ function get_available_staff_permissions_intranet($data = []) {
                 'view_atas' => 'Atas',
                 'view_planos_acao' => 'Planos de Ação',
                 'view_grupos' => 'Grupos',
+                'view_eventos_intra' => 'Eventos (intranet)',
                 'view_docs' => 'Documentos',
                 'view_projects' => 'Projetos',
                 'view_tasks' => 'Tarefas',
@@ -356,6 +357,14 @@ function get_available_staff_permissions_intranet($data = []) {
             'capabilities' => [
                 'edit' => 'Editar (admin)',
                 'delete' => 'Excluir (admin)',
+            ],
+        ],
+        'eventos' => [
+            'name' => 'Eventos',
+            'capabilities' => [
+                'create' => 'Criar',
+                'edit' => 'Editar',
+                'delete' => 'Excluir',
             ],
         ],
         // --- APLICADO

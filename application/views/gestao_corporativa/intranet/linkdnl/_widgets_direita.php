@@ -30,10 +30,12 @@ $total_atendimentos = (int) $this->db->query("SELECT COUNT(*) AS n FROM tbl_intr
     WHERE empresa_id = $empresa_id AND deleted = 0 AND user_created = $me")->row()->n;
 
 $hoje = date('Y-m-d');
-$meus_eventos = $this->db->query("SELECT e.eventid AS id, e.title, e.start, e.color
+$meus_eventos = $this->db->query("SELECT e.eventid AS id, e.title, e.start, e.color, e.onde
     FROM tblevents e
     WHERE e.userid = $me AND e.deleted = 0 AND DATE(e.start) >= '$hoje'
     ORDER BY e.start ASC LIMIT 5")->result_array();
+$total_eventos = (int) $this->db->query("SELECT COUNT(*) AS n FROM tblevents
+    WHERE userid = $me AND empresa_id = $empresa_id AND deleted = 0 AND DATE(start) >= '$hoje'")->row()->n;
 ?>
 
 <style>
@@ -126,7 +128,8 @@ $meus_eventos = $this->db->query("SELECT e.eventid AS id, e.title, e.start, e.co
     <div class="home-mini-list-header">
         <h4><i class="far fa-calendar-alt"></i> Meus Eventos</h4>
         <div class="right">
-            <a href="<?php echo base_url('admin/utilities/calendar'); ?>" class="add-btn" title="Calendário"><i class="fa fa-calendar"></i></a>
+            <?php if ($total_eventos > 0): ?><span class="count"><?php echo $total_eventos; ?></span><?php endif; ?>
+            <a href="<?php echo base_url('gestao_corporativa/Eventoplus/add'); ?>" class="add-btn" title="Novo evento"><i class="fa fa-plus"></i></a>
         </div>
     </div>
     <div class="home-mini-list-body">
@@ -134,19 +137,20 @@ $meus_eventos = $this->db->query("SELECT e.eventid AS id, e.title, e.start, e.co
             <div class="home-mini-empty">Nenhum evento próximo</div>
         <?php else: ?>
             <?php foreach ($meus_eventos as $e): ?>
-                <a href="<?php echo base_url('admin/utilities/calendar?event_id=' . (int) $e['id']); ?>" class="home-mini-item">
+                <a href="<?php echo base_url('gestao_corporativa/Eventoplus/view/' . (int) $e['id']); ?>" class="home-mini-item">
                     <div class="titulo">
                         <span class="ev-dot" style="background:<?php echo html_escape($e['color'] ?? '#0a66c2'); ?>;"></span>
                         <?php echo html_escape(mb_strimwidth($e['title'], 0, 60, '…')); ?>
                     </div>
                     <div class="meta">
                         <?php if (!empty($e['start'])): ?><span><i class="fa fa-clock-o"></i><?php echo date('d/m H:i', strtotime($e['start'])); ?></span><?php endif; ?>
+                        <?php if (!empty($e['onde'])): ?><span><i class="fa fa-map-marker"></i><?php echo html_escape(mb_strimwidth($e['onde'], 0, 22, '…')); ?></span><?php endif; ?>
                     </div>
                 </a>
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
     <div class="home-mini-footer">
-        <a href="<?php echo base_url('admin/utilities/calendar'); ?>">Ver calendário →</a>
+        <a href="<?php echo base_url('gestao_corporativa/Eventoplus?meu=1'); ?>">Ver todos →</a>
     </div>
 </div>
