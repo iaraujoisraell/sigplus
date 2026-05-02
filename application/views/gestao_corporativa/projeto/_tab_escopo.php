@@ -35,9 +35,9 @@ $statuses = $this->Projeto_fase_model->get_statuses();
 <div class="row" style="padding-top:10px;">
     <div class="col-md-12">
         <div class="escopo-toolbar">
-            <button type="button" class="btn btn-info btn-sm" id="btn-add-fase-raiz"><i class="fa fa-plus"></i> Fase raiz</button>
-            <button type="button" class="btn btn-default btn-sm" id="btn-expand"><i class="fa fa-expand"></i> Expandir</button>
-            <button type="button" class="btn btn-default btn-sm" id="btn-collapse"><i class="fa fa-compress"></i> Recolher</button>
+            <button type="button" class="btn btn-info btn-sm" id="btn-add-fase-raiz" onclick="if(window.SigEscopo){SigEscopo.openCreate('');}else{console.error('SigEscopo não inicializado');}"><i class="fa fa-plus"></i> Fase raiz</button>
+            <button type="button" class="btn btn-default btn-sm" id="btn-expand" onclick="if(window.SigEscopo){SigEscopo.expand();}"><i class="fa fa-expand"></i> Expandir</button>
+            <button type="button" class="btn btn-default btn-sm" id="btn-collapse" onclick="if(window.SigEscopo){SigEscopo.collapse();}"><i class="fa fa-compress"></i> Recolher</button>
             <input type="text" id="fase-search" class="form-control input-sm" placeholder="Buscar fase...">
         </div>
 
@@ -227,8 +227,16 @@ window.SigEscopo = (function () {
         searchTimer = setTimeout(function () { $tree().jstree(true).search(v); }, 200);
     });
 
-    jQuery(function () { buildTree(); });
+    jQuery(function () {
+        console.log('SigEscopo init, project=' + PID);
+        buildTree();
+    });
 
-    return { build: buildTree, openCreate: openCreate };
+    return {
+        build: buildTree,
+        openCreate: openCreate,
+        expand:   function () { $tree().jstree('open_all'); },
+        collapse: function () { $tree().jstree('close_all'); }
+    };
 })();
 </script>
