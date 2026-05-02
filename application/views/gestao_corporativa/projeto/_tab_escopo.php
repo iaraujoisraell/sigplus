@@ -116,12 +116,22 @@ $statuses = $this->Projeto_fase_model->get_statuses();
     </div>
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
 <script>
 function _bootSigEscopo() {
     if (typeof window.jQuery === 'undefined') {
         return setTimeout(_bootSigEscopo, 50);
     }
+    if (typeof jQuery.fn.jstree === 'undefined') {
+        var s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js';
+        s.onload = _initSigEscopoBody;
+        s.onerror = function () { console.error('jstree falhou ao carregar'); _initSigEscopoBody(); };
+        document.head.appendChild(s);
+        return;
+    }
+    _initSigEscopoBody();
+}
+function _initSigEscopoBody() {
 window.SigEscopo = (function () {
     var PID  = <?php echo $pid; ?>;
     var URL_TREE     = '<?php echo base_url('gestao_corporativa/Projeto_fase/tree_data'); ?>/' + PID;
@@ -220,7 +230,11 @@ window.SigEscopo = (function () {
                     return;
                 }
                 if (resp && resp.ok) {
-                    $tree().jstree(true).refresh();
+                    if (jQuery.fn.jstree) {
+                        try { $tree().jstree(true).refresh(); } catch (e) { location.reload(); return; }
+                    } else {
+                        location.reload(); return;
+                    }
                     clearSide();
                 } else {
                     alert('Servidor retornou: ' + raw);
@@ -267,8 +281,8 @@ window.SigEscopo = (function () {
     return {
         build: buildTree,
         openCreate: openCreate,
-        expand:   function () { $tree().jstree('open_all'); },
-        collapse: function () { $tree().jstree('close_all'); }
+        expand:   function () { if (jQuery.fn.jstree) $tree().jstree('open_all'); },
+        collapse: function () { if (jQuery.fn.jstree) $tree().jstree('close_all'); }
     };
 })();
 }
