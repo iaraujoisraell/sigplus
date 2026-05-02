@@ -104,6 +104,7 @@ class Plano_acao_model extends App_Model
         $clean = [
             'project_id'     => !empty($data['project_id']) ? (int) $data['project_id'] : null,
             'grupo_id'       => !empty($data['grupo_id']) ? (int) $data['grupo_id'] : null,
+            'fase_id'        => !empty($data['fase_id']) ? (int) $data['fase_id'] : null,
             'ata_id'         => !empty($data['ata_id']) ? (int) $data['ata_id'] : null,
             'titulo'         => trim((string) ($data['titulo'] ?? '')),
             'descricao'      => $data['descricao'] ?? null,

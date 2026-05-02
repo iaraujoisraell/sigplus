@@ -37,6 +37,48 @@ function app_init_project_tabs()
 {
     $CI = &get_instance();
 
+    $CI->app_tabs->add_project_tab('project_dashboard_corp', [
+        'name'     => 'Dashboard',
+        'icon'     => 'fa fa-tachometer',
+        'view'     => 'gestao_corporativa/projeto/_tab_dashboard',
+        'position' => 1,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_escopo', [
+        'name'     => 'Escopo / Fases',
+        'icon'     => 'fa fa-sitemap',
+        'view'     => 'gestao_corporativa/projeto/_tab_escopo',
+        'position' => 2,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_atas', [
+        'name'     => 'Atas',
+        'icon'     => 'far fa-file-alt',
+        'view'     => 'gestao_corporativa/projeto/_tab_atas',
+        'position' => 3,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_planos_acao', [
+        'name'     => 'Planos de Ação',
+        'icon'     => 'fas fa-clipboard-list',
+        'view'     => 'gestao_corporativa/projeto/_tab_planos',
+        'position' => 4,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_grupos', [
+        'name'     => 'Grupos',
+        'icon'     => 'fas fa-users-cog',
+        'view'     => 'gestao_corporativa/projeto/_tab_grupos',
+        'position' => 6,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_eventos', [
+        'name'     => 'Eventos',
+        'icon'     => 'far fa-calendar-alt',
+        'view'     => 'gestao_corporativa/projeto/_tab_eventos',
+        'position' => 7,
+    ]);
+
     $CI->app_tabs->add_project_tab('project_overview', [
         'name'     => _l('project_overview'),
         'icon'     => 'fa fa-th',
