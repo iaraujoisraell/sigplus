@@ -62,7 +62,7 @@ if (is_array($info_client)) {
                 </div>
             <?php } ?>
 
-            <div class="col-md-<?php echo $in_department ? '4' : '8'; ?>">
+            <div class="col-md-<?php echo $in_department ? '8' : '12'; ?>">
                 <div class="panel_s">
                     <div class="panel-heading">
                         WORKFLOW #<?php echo $workflow->id; ?>
@@ -418,170 +418,138 @@ if (is_array($info_client)) {
 
                     </div>
                 </div>
-                <?php if (count($internal_requests) > 0 || $atual == true) { ?>
+                <?php
+                $tab_pareceres_show = count($internal_requests) > 0 || $atual == true;
+                $tab_info_show      = (count($external_requests) > 0 || $atual == true) && $workflow->registro_atendimento_id;
+                $tab_contatos_show  = count($client_contacts) > 0;
+                $tab_pdfs_show      = count($pdf_views) > 0;
+                $any_tab_show       = $tab_pareceres_show || $tab_info_show || $tab_contatos_show || $tab_pdfs_show;
+                ?>
+                <?php if ($any_tab_show): ?>
                     <div class="panel_s">
-                        <div class="panel-heading">
-                            SOLICITAÇÕES DE PARECER INTERNO
-                        </div>
+                        <div class="panel-heading">Interações</div>
                         <div class="panel-body">
+                            <ul class="nav nav-tabs" role="tablist" id="wf-interacoes-tabs">
+                                <?php $first = true; ?>
+                                <?php if ($tab_pareceres_show): ?>
+                                    <li role="presentation" class="<?php echo $first ? 'active' : ''; ?>"><a href="#wf-pareceres" data-toggle="tab"><i class="fa fa-comments-o"></i> Pareceres internos <span class="label label-default mleft5"><?php echo count($internal_requests); ?></span></a></li>
+                                    <?php $first = false; ?>
+                                <?php endif; ?>
+                                <?php if ($tab_info_show): ?>
+                                    <li role="presentation" class="<?php echo $first ? 'active' : ''; ?>"><a href="#wf-info-comp" data-toggle="tab"><i class="fa fa-info-circle"></i> Info. complementares <span class="label label-default mleft5"><?php echo count($external_requests); ?></span></a></li>
+                                    <?php $first = false; ?>
+                                <?php endif; ?>
+                                <?php if ($tab_contatos_show): ?>
+                                    <li role="presentation" class="<?php echo $first ? 'active' : ''; ?>"><a href="#wf-contatos" data-toggle="tab"><i class="fa fa-phone"></i> Contatos com cliente <span class="label label-default mleft5"><?php echo count($client_contacts); ?></span></a></li>
+                                    <?php $first = false; ?>
+                                <?php endif; ?>
+                                <?php if ($tab_pdfs_show): ?>
+                                    <li role="presentation" class="<?php echo $first ? 'active' : ''; ?>"><a href="#wf-pdfs" data-toggle="tab"><i class="fa fa-file-pdf-o"></i> Visualizações PDF <span class="label label-default mleft5"><?php echo count($pdf_views); ?></span></a></li>
+                                    <?php $first = false; ?>
+                                <?php endif; ?>
+                            </ul>
+                            <div class="tab-content mtop15" style="text-align:left;">
+                                <?php $first = true; ?>
 
-                            <div class="row">
-                                <div class="col-md-12" style="text-align: left;">
-                                    <?php if ($atual == true) { ?>
-                                        <a onclick="Internal_request('<?php echo $workflow->id; ?>');" style="margin-bottom: 5px;" class="btn btn-warning">Solicitar Parecer Interno</a>
-                                    <?php } ?>
-                                    <?php foreach ($internal_requests as $request) { ?>
-                                        <div class="panel_s total-column" style="margin-bottom: 3px; text-align: left;">
-                                            <div class="panel-body">
-                                                <!--<h3 class="text-muted _total">
-                                                    00:00     </h3>-->
-                                                <span class="staff_logged_time_text text-success">Solicitação de parecer #<?php echo $request['id']; ?></span>
-
-
-                                                <br>
-                                                <span class="staff_logged_time_text text-dark">De: <?php echo get_staff_full_name($request['user_created']); ?> - <?php echo date('d/m/Y H:i:s', strtotime($request['date_created'])); ?></span><br>
-                                                <span class="staff_logged_time_text text-dark">Para: <?php echo get_staff_full_name($request['staffid']); ?> <?php
-                                                                                                                                                                if ($request['status'] == 1) {
-                                                                                                                                                                    echo date('d/m/Y H:i:s', strtotime($request['date']));
-                                                                                                                                                                }
-                                                                                                                                                                ?></span><br>
-                                                <span class="staff_logged_time_text text-dark">Descrição:</span> <?php echo $request['description']; ?><br>
-                                                <span class="staff_logged_time_text text-dark">Situação:</span>
-                                                <?php if ($request['status'] == 0) { ?>
-                                                    <span class="label label-success">AGUARDANDO</span>
-                                                <?php } else { ?>
-                                                    <span class="label label-warning">RESPONDIDO</span>
-                                                <?php } ?><br>
-                                                <?php if ($request['status'] == 1) { ?>
-                                                    <hr style="margin-top: 5px; margin-bottom: 5px;">
-                                                    <span class="staff_logged_time_text text-dark bold">Resposta:</span> <br>
-                                                    <?php
-                                                    $campos = [];
-                                                    $values_info['rel_type'] = 'workflow';
-                                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($request['id'], 'internal_request_workflow');
-                                                    $this->load->view('gestao_corporativa/categorias_campos/values_info5', $values_info);
-                                                    ?>
-                                                <?php } ?>
+                                <?php if ($tab_pareceres_show): ?>
+                                    <div role="tabpanel" class="tab-pane <?php echo $first ? 'active' : ''; ?>" id="wf-pareceres">
+                                        <?php if ($atual == true): ?>
+                                            <a onclick="Internal_request('<?php echo $workflow->id; ?>');" style="margin-bottom: 5px;" class="btn btn-warning"><i class="fa fa-plus"></i> Solicitar parecer interno</a>
+                                        <?php endif; ?>
+                                        <?php foreach ($internal_requests as $request): ?>
+                                            <div class="panel_s total-column" style="margin-bottom: 3px;">
+                                                <div class="panel-body">
+                                                    <span class="staff_logged_time_text text-success">Solicitação de parecer #<?php echo $request['id']; ?></span><br>
+                                                    <span class="text-dark">De: <?php echo get_staff_full_name($request['user_created']); ?> · <?php echo date('d/m/Y H:i', strtotime($request['date_created'])); ?></span><br>
+                                                    <span class="text-dark">Para: <?php echo get_staff_full_name($request['staffid']); ?><?php if ($request['status'] == 1) echo ' · ' . date('d/m/Y H:i', strtotime($request['date'])); ?></span><br>
+                                                    <span class="text-dark">Descrição:</span> <?php echo $request['description']; ?><br>
+                                                    <span class="text-dark">Situação:</span>
+                                                    <?php if ($request['status'] == 0): ?>
+                                                        <span class="label label-success">AGUARDANDO</span>
+                                                    <?php else: ?>
+                                                        <span class="label label-warning">RESPONDIDO</span>
+                                                    <?php endif; ?>
+                                                    <?php if ($request['status'] == 1): ?>
+                                                        <hr style="margin:5px 0;">
+                                                        <span class="text-dark bold">Resposta:</span><br>
+                                                        <?php
+                                                        $values_info['rel_type'] = 'workflow';
+                                                        $values_info['campos']   = $this->Categorias_campos_model->get_values($request['id'], 'internal_request_workflow');
+                                                        $this->load->view('gestao_corporativa/categorias_campos/values_info5', $values_info);
+                                                        ?>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
-                                        </div>
-                                    <?php } ?>
-                                </div>
-                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <?php $first = false; ?>
+                                <?php endif; ?>
 
-                        </div>
-
-
-                    </div>
-                <?php } ?>
-                <?php if ((count($external_requests) > 0 || $atual == true) and $workflow->registro_atendimento_id) { ?>
-                    <div class="panel_s">
-                        <div class="panel-heading">
-                            SOLICITAÇÕES DE INFORMAÇÕES COMPLEMENTARES
-                        </div>
-                        <div class="panel-body">
-
-                            <div class="row">
-                                <div class="col-md-12" style="text-align: left;">
-                                    <?php if ($atual == true) { ?>
-                                        <a onclick="External_request('<?php echo $workflow->id; ?>');" class="btn btn-warning" style="margin-bottom: 5px;">Solicitar Informações Complementares</a>
-                                    <?php } ?>
-
-                                    <?php foreach ($external_requests as $request) { ?>
-                                        <div class="panel_s total-column" style="margin-bottom: 3px; text-align: left;">
-                                            <div class="panel-body">
-                                                <!--<h3 class="text-muted _total">
-                                                    00:00     </h3>-->
-                                                <span class="staff_logged_time_text text-success">Solicitação de Informações #<?php echo $request['id']; ?></span>
-
-
-                                                <br>
-                                                <span class="staff_logged_time_text text-dark">De: <?php echo get_staff_full_name($request['user_created']); ?> - <?php echo date('d/m/Y H:i:s', strtotime($request['date_created'])); ?></span><br>
-                                                <span class="staff_logged_time_text text-dark">Descrição:</span> <?php echo $request['description']; ?><br>
-                                                <span class="staff_logged_time_text text-dark">Situação:</span>
-                                                <?php if ($request['status'] == 0) { ?>
-                                                    <span class="label label-success">AGUARDANDO</span>
-                                                <?php } else { ?>
-                                                    <span class="label label-warning">RESPONDIDO</span>
-                                                <?php } ?><br>
-                                                <?php if ($request['status'] == 1) { ?>
-                                                    <hr style="margin-top: 5px; margin-bottom: 5px;">
-                                                    <span class="staff_logged_time_text text-dark bold">Resposta:</span> <br>
-                                                    <?php
-                                                    $campos = [];
-                                                    $values_info['rel_type'] = 'workflow';
-                                                    $values_info['campos'] = $this->Categorias_campos_model->get_values($request['id'], 'external_request_workflow');
-                                                    $this->load->view('gestao_corporativa/categorias_campos/values_info5', $values_info);
-                                                    ?>
-                                                <?php } ?>
+                                <?php if ($tab_info_show): ?>
+                                    <div role="tabpanel" class="tab-pane <?php echo $first ? 'active' : ''; ?>" id="wf-info-comp">
+                                        <?php if ($atual == true): ?>
+                                            <a onclick="External_request('<?php echo $workflow->id; ?>');" class="btn btn-warning" style="margin-bottom: 5px;"><i class="fa fa-plus"></i> Solicitar informações complementares</a>
+                                        <?php endif; ?>
+                                        <?php foreach ($external_requests as $request): ?>
+                                            <div class="panel_s total-column" style="margin-bottom: 3px;">
+                                                <div class="panel-body">
+                                                    <span class="text-success">Solicitação de Informações #<?php echo $request['id']; ?></span><br>
+                                                    <span class="text-dark">De: <?php echo get_staff_full_name($request['user_created']); ?> · <?php echo date('d/m/Y H:i', strtotime($request['date_created'])); ?></span><br>
+                                                    <span class="text-dark">Descrição:</span> <?php echo $request['description']; ?><br>
+                                                    <span class="text-dark">Situação:</span>
+                                                    <?php if ($request['status'] == 0): ?>
+                                                        <span class="label label-success">AGUARDANDO</span>
+                                                    <?php else: ?>
+                                                        <span class="label label-warning">RESPONDIDO</span>
+                                                    <?php endif; ?>
+                                                    <?php if ($request['status'] == 1): ?>
+                                                        <hr style="margin:5px 0;">
+                                                        <span class="text-dark bold">Resposta:</span><br>
+                                                        <?php
+                                                        $values_info['rel_type'] = 'workflow';
+                                                        $values_info['campos']   = $this->Categorias_campos_model->get_values($request['id'], 'external_request_workflow');
+                                                        $this->load->view('gestao_corporativa/categorias_campos/values_info5', $values_info);
+                                                        ?>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
-                                        </div>
-                                    <?php } ?>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <?php $first = false; ?>
+                                <?php endif; ?>
 
-                                </div>
+                                <?php if ($tab_contatos_show): ?>
+                                    <div role="tabpanel" class="tab-pane <?php echo $first ? 'active' : ''; ?>" id="wf-contatos">
+                                        <?php foreach ($client_contacts as $contact): ?>
+                                            <div style="padding:6px 0;border-bottom:1px solid #eef1f4;">
+                                                <strong class="text-muted" style="text-transform:uppercase;">- <?php echo get_staff_full_name($contact['user_created']); ?> (<?php echo date('d/m/Y H:i', strtotime($contact['date_created'], $baseTimestamp ?? null)); ?>)</strong>
+                                            </div>
+                                        <?php endforeach; ?>
+                                        <?php if ($workflow->user_end_client): ?>
+                                            <div style="padding:8px 0;color:#92400e;">
+                                                <strong>FINALIZADO: <?php echo get_staff_full_name($workflow->user_end_client); ?> (<?php echo date('d/m/Y H:i', strtotime($workflow->date_end_client)); ?>)</strong>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php $first = false; ?>
+                                <?php endif; ?>
+
+                                <?php if ($tab_pdfs_show): ?>
+                                    <div role="tabpanel" class="tab-pane <?php echo $first ? 'active' : ''; ?>" id="wf-pdfs">
+                                        <?php foreach ($pdf_views as $contact): ?>
+                                            <div style="padding:6px 0;border-bottom:1px solid #eef1f4;">
+                                                <strong class="text-muted" style="text-transform:uppercase;">- <?php echo get_staff_full_name($contact['user_created']); ?> (<?php echo date('d/m/Y H:i', strtotime($contact['date_created'], $baseTimestamp ?? null)); ?>)</strong>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
-
                         </div>
-
-
                     </div>
-                <?php } ?>
-                <?php if (count($client_contacts) > 0) { ?>
-                    <div class="panel_s">
-                        <div class="panel-heading">
-                            CONTATOS COM O CLIENTE
-                        </div>
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-12 before-ticket-message" style="text-align: left;">
-
-
-                                    <?php foreach ($client_contacts as $contact) { ?>
-                                        <strong class="text-muted col-md-12" style="text-transform: uppercase;  font-weight: bold;">- <?php echo get_staff_full_name($contact['user_created']); ?> (<?php echo date('d/m/Y H:i:s', strtotime($contact['date_created'], $baseTimestamp)); ?>)</strong>
-                                    <?php } ?>
-                                    <?php if ($workflow->user_end_client) { ?>
-                                        <strong class="text-muted text-warning col-md-12">FINALIZADO: <?php echo get_staff_full_name($workflow->user_end_client); ?> (<?php echo date('d/m/Y H:i:s', strtotime($workflow->date_end_client)); ?>)</strong>
-
-                                    <?php } ?>
-
-
-                                </div>
-                            </div>
-
-                        </div>
-
-
-                    </div>
-                <?php } ?>
-                <?php if (count($pdf_views) > 0) { ?>
-                    <div class="panel_s">
-                        <div class="panel-heading">
-                            PDF - VISUALIZAÇÕES
-                        </div>
-                        <div class="panel-body">
-                            <div class="row">
-                                <div class="col-md-12 before-ticket-message" style="text-align: left;">
-
-
-                                    <?php foreach ($pdf_views as $contact) { ?>
-                                        <strong class="text-muted col-md-12" style="text-transform: uppercase;  font-weight: bold;">- <?php echo get_staff_full_name($contact['user_created']); ?> (<?php echo date('d/m/Y H:i:s', strtotime($contact['date_created'], $baseTimestamp)); ?>)</strong>
-                                    <?php } ?>
-
-
-                                </div>
-                            </div>
-
-                        </div>
-
-
-                    </div>
-                <?php } ?>
+                <?php endif; ?>
             </div>
-            <?php if (!$in_department): ?>
-                <div class="col-md-2"></div>
-            <?php endif; ?>
-
             <?php if ($in_department == true) { ?>
-                <div class="col-md-8"> <?php //echo "aqui";
+                <div class="col-md-4"> <?php //echo "aqui";
                                         ?>
                     <div class="panel_s">
                         <div class="panel-heading">
