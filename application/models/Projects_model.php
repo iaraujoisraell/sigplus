@@ -2820,21 +2820,19 @@ class Projects_model extends App_Model
      */
     public function get_next_sequencial()
     {
-        $tblprojects = 'tblprojects';
-        $sql = "SELECT sequencial, count(*) as todos FROM $tblprojects "
-                . " WHERE $tblprojects.empresa_id = $this->empresa_id AND $tblprojects.deleted = 0 "
-                . " ORDER BY $tblprojects.sequencial DESC LIMIT 1";
+        $sql = "SELECT MAX(sequencial) AS max_seq, COUNT(*) AS todos
+                FROM tblprojects
+                WHERE empresa_id = $this->empresa_id AND deleted = 0";
 
-        //echo $sql; exit;
         $ultimo =  $this->db->query($sql)->row();
-       
-        if($ultimo != null){
-            if($ultimo->sequencial == 0 or $ultimo->sequencial == ''){
-                $sequencia = $ultimo->todos;
+
+        if ($ultimo != null) {
+            if ((int) $ultimo->max_seq <= 0) {
+                $sequencia = (int) $ultimo->todos;
             } else {
-                $sequencia = $ultimo->sequencial;
+                $sequencia = (int) $ultimo->max_seq;
             }
-           return $sequencia + 1;
+            return $sequencia + 1;
         } else {
             return 1;
         }
