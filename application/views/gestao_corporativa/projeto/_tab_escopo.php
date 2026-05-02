@@ -202,11 +202,37 @@ window.SigEscopo = (function () {
             percentual: jQuery('#fase-pct').val() || 0,
             descricao: jQuery('#fase-desc').val(),
         });
-        jQuery('#fase-save').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
-        jQuery.post(URL_SAVE, payload, function () {
-            $tree().jstree(true).refresh();
-            clearSide();
-        }, 'json').fail(function (xhr) { alert('Falha ao salvar (' + xhr.status + ')'); jQuery('#fase-save').prop('disabled', false).html('<i class="fa fa-save"></i> Salvar'); });
+        var $btn = jQuery('#fase-save');
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Salvando...');
+
+        jQuery.ajax({
+            url: URL_SAVE,
+            type: 'POST',
+            data: payload,
+            dataType: 'text',
+            success: function (raw) {
+                console.log('escopo save raw response:', raw);
+                var resp = null;
+                try { resp = JSON.parse(raw); } catch (e) {
+                    console.error('escopo: resposta não é JSON', e);
+                    alert('Falha ao salvar — resposta inválida do servidor (veja console).');
+                    $btn.prop('disabled', false).html('<i class="fa fa-save"></i> Salvar');
+                    return;
+                }
+                if (resp && resp.ok) {
+                    $tree().jstree(true).refresh();
+                    clearSide();
+                } else {
+                    alert('Servidor retornou: ' + raw);
+                    $btn.prop('disabled', false).html('<i class="fa fa-save"></i> Salvar');
+                }
+            },
+            error: function (xhr) {
+                console.error('escopo save error:', xhr.status, xhr.responseText);
+                alert('Falha ao salvar (HTTP ' + xhr.status + '). Veja o console.');
+                $btn.prop('disabled', false).html('<i class="fa fa-save"></i> Salvar');
+            }
+        });
     }
 
     function confirmDelete(id) {
