@@ -118,6 +118,10 @@ $statuses = $this->Projeto_fase_model->get_statuses();
 
 <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
 <script>
+function _bootSigEscopo() {
+    if (typeof window.jQuery === 'undefined') {
+        return setTimeout(_bootSigEscopo, 50);
+    }
 window.SigEscopo = (function () {
     var PID  = <?php echo $pid; ?>;
     var URL_TREE     = '<?php echo base_url('gestao_corporativa/Projeto_fase/tree_data'); ?>/' + PID;
@@ -239,4 +243,6 @@ window.SigEscopo = (function () {
         collapse: function () { $tree().jstree('close_all'); }
     };
 })();
+}
+_bootSigEscopo();
 </script>
