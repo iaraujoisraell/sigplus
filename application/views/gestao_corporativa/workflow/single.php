@@ -56,12 +56,6 @@ if (is_array($info_client)) {
             <?php } ?>
 
 
-            <?php if ($in_department != true && $user_created == true || is_admin()) {
-            ?>
-                <div class="col-md-2">
-                </div>
-            <?php } ?>
-
             <div class="col-md-<?php echo $in_department ? '8' : '12'; ?>">
                 <div class="panel_s">
                     <div class="panel-heading">
