@@ -224,8 +224,23 @@ function app_init_project_tabs()
  */
 function filter_project_visible_tabs($tabs, $applied_settings)
 {
+    // Abas corporativas (custom sigplus) ficam sempre visíveis,
+    // sem depender da config available_features por projeto.
+    $sig_corp_always = [
+        'project_dashboard_corp',
+        'project_escopo',
+        'project_atas',
+        'project_planos_acao',
+        'project_grupos',
+        'project_eventos',
+    ];
+
     $newTabs = [];
     foreach ($tabs as $key => $tab) {
+        if (in_array($key, $sig_corp_always, true)) {
+            $newTabs[$tab['slug']] = $tab;
+            continue;
+        }
         $dropdown = isset($tab['collapse']) ? true : false;
 
         if ($dropdown) {
