@@ -118,7 +118,7 @@ $statuses = $this->Projeto_fase_model->get_statuses();
 
 <script src="https://cdn.jsdelivr.net/npm/jstree@3.3.16/dist/jstree.min.js"></script>
 <script>
-(function () {
+window.SigEscopo = (function () {
     var PID  = <?php echo $pid; ?>;
     var URL_TREE     = '<?php echo base_url('gestao_corporativa/Projeto_fase/tree_data'); ?>/' + PID;
     var URL_SAVE     = '<?php echo base_url('gestao_corporativa/Projeto_fase/save'); ?>';
@@ -128,92 +128,107 @@ $statuses = $this->Projeto_fase_model->get_statuses();
                  hash: '<?php echo $this->security->get_csrf_hash(); ?>' };
     function withCsrf(d){ d=d||{}; d[CSRF.name]=CSRF.hash; return d; }
 
-    var $tree = $('#fases-tree');
-    var $side = $('#fase-side');
-    var formTpl = $('#fase-form-tpl').html();
+    function $tree(){ return jQuery('#fases-tree'); }
+    function $side(){ return jQuery('#fase-side'); }
+    function formTpl(){ return jQuery('#fase-form-tpl').html(); }
 
     function buildTree() {
-        $tree.jstree('destroy');
-        $tree.jstree({
+        var $t = $tree();
+        if (!$t.length || typeof jQuery.fn.jstree === 'undefined') {
+            console.warn('escopo: jstree ou container ausente');
+            return;
+        }
+        $t.jstree('destroy');
+        $t.jstree({
             core: { data: { url: URL_TREE, dataType: 'json' }, check_callback: true, themes: { stripes: true, dots: false } },
             plugins: ['dnd', 'wholerow', 'contextmenu', 'search'],
             search: { show_only_matches: true, show_only_matches_children: true },
             contextmenu: {
                 items: function (node) {
                     return {
-                        add: { label: 'Adicionar sub-fase', icon: 'fa fa-plus', action: function () { openCreate(node.data.id); } },
-                        edit: { label: 'Editar', icon: 'fa fa-pencil', action: function () { openEdit(node); } },
+                        add:  { label: 'Adicionar sub-fase', icon: 'fa fa-plus',     action: function () { openCreate(node.data.id); } },
+                        edit: { label: 'Editar',             icon: 'fa fa-pencil',   action: function () { openEdit(node); } },
                         sep: '---',
-                        del: { label: 'Excluir (cascata)', icon: 'fa fa-trash', action: function () { confirmDelete(node.data.id); } }
+                        del:  { label: 'Excluir (cascata)',  icon: 'fa fa-trash',    action: function () { confirmDelete(node.data.id); } }
                     };
                 }
             }
         });
-        $tree.on('select_node.jstree', function (_e, sel) { openEdit(sel.node); });
-        $tree.on('move_node.jstree', function (_e, data) {
+        $t.on('select_node.jstree', function (_e, sel) { openEdit(sel.node); });
+        $t.on('move_node.jstree', function (_e, data) {
             var parent = data.parent === '#' ? '' : data.parent.replace(/^f/, '');
-            $.post(URL_REORDER, withCsrf({ id: data.node.data.id, parent_id: parent, position: data.position }))
-                .always(function () { $tree.jstree(true).refresh(); });
+            jQuery.post(URL_REORDER, withCsrf({ id: data.node.data.id, parent_id: parent, position: data.position }))
+                .always(function () { $tree().jstree(true).refresh(); });
         });
     }
 
-    function clearSide(){ $side.html('<div class="empty"><i class="fa fa-arrow-left"></i><br>Selecione uma fase ou crie uma nova.</div>'); }
+    function clearSide(){ $side().html('<div class="empty"><i class="fa fa-arrow-left"></i><br>Selecione uma fase ou crie uma nova.</div>'); }
 
     function renderForm(d, parent_id) {
-        $side.html(formTpl);
-        $('#fase-form-title').text(d ? 'Editar fase' : 'Nova fase');
-        $('#fase-id').val(d ? d.id : '');
-        $('#fase-parent-id').val(parent_id || '');
-        $('#fase-titulo').val(d ? d.titulo : '');
-        $('#fase-status').val(d ? d.status : 'planejada');
-        $('#fase-dt-ini').val(d ? (d.dt_inicio_prev || '') : '');
-        $('#fase-dt-fim').val(d ? (d.dt_fim_prev || '') : '');
-        $('#fase-resp').val(d ? d.responsavel_id : '');
-        $('#fase-pct').val(d ? d.percentual : 0);
-        $('#fase-desc').val(d ? (d.descricao || '') : '');
+        $side().html(formTpl());
+        jQuery('#fase-form-title').text(d ? 'Editar fase' : 'Nova fase');
+        jQuery('#fase-id').val(d ? d.id : '');
+        jQuery('#fase-parent-id').val(parent_id || '');
+        jQuery('#fase-titulo').val(d ? d.titulo : '').focus();
+        jQuery('#fase-status').val(d ? d.status : 'planejada');
+        jQuery('#fase-dt-ini').val(d ? (d.dt_inicio_prev || '') : '');
+        jQuery('#fase-dt-fim').val(d ? (d.dt_fim_prev || '') : '');
+        jQuery('#fase-resp').val(d ? d.responsavel_id : '');
+        jQuery('#fase-pct').val(d ? d.percentual : 0);
+        jQuery('#fase-desc').val(d ? (d.descricao || '') : '');
         if (typeof init_selectpicker === 'function') init_selectpicker();
-
-        $('#fase-save').on('click', save);
-        $('#fase-cancel').on('click', clearSide);
     }
     function openEdit(node){ renderForm(node.data, ''); }
     function openCreate(parent_id){ renderForm(null, parent_id || ''); }
 
     function save() {
-        var titulo = $('#fase-titulo').val().trim();
+        var titulo = (jQuery('#fase-titulo').val() || '').trim();
         if (!titulo) { alert('Título obrigatório.'); return; }
         var payload = withCsrf({
-            id: $('#fase-id').val(),
+            id: jQuery('#fase-id').val(),
             project_id: PID,
-            parent_id: $('#fase-parent-id').val(),
+            parent_id: jQuery('#fase-parent-id').val(),
             titulo: titulo,
-            status: $('#fase-status').val(),
-            dt_inicio_prev: $('#fase-dt-ini').val(),
-            dt_fim_prev: $('#fase-dt-fim').val(),
-            responsavel_id: $('#fase-resp').val(),
-            percentual: $('#fase-pct').val() || 0,
-            descricao: $('#fase-desc').val(),
+            status: jQuery('#fase-status').val(),
+            dt_inicio_prev: jQuery('#fase-dt-ini').val(),
+            dt_fim_prev: jQuery('#fase-dt-fim').val(),
+            responsavel_id: jQuery('#fase-resp').val(),
+            percentual: jQuery('#fase-pct').val() || 0,
+            descricao: jQuery('#fase-desc').val(),
         });
-        $('#fase-save').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
-        $.post(URL_SAVE, payload, function () {
-            $tree.jstree(true).refresh();
+        jQuery('#fase-save').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i>');
+        jQuery.post(URL_SAVE, payload, function () {
+            $tree().jstree(true).refresh();
             clearSide();
-        }, 'json');
+        }, 'json').fail(function (xhr) { alert('Falha ao salvar (' + xhr.status + ')'); jQuery('#fase-save').prop('disabled', false).html('<i class="fa fa-save"></i> Salvar'); });
     }
 
     function confirmDelete(id) {
         if (!confirm('Excluir esta fase e todas as sub-fases?')) return;
-        $.post(URL_DELETE + '/' + id, withCsrf(), function () {
-            $tree.jstree(true).refresh();
+        jQuery.post(URL_DELETE + '/' + id, withCsrf(), function () {
+            $tree().jstree(true).refresh();
             clearSide();
         }, 'json');
     }
 
-    $('#btn-add-fase-raiz').on('click', function(){ openCreate(''); });
-    $('#btn-expand').on('click', function(){ $tree.jstree('open_all'); });
-    $('#btn-collapse').on('click', function(){ $tree.jstree('close_all'); });
-    var t; $('#fase-search').on('keyup', function(){ clearTimeout(t); var v=$(this).val(); t=setTimeout(function(){$tree.jstree(true).search(v);},200); });
+    // Event delegation no document — funciona mesmo se o botão for re-renderizado
+    jQuery(document)
+        .off('click.escopo')
+        .on('click.escopo', '#btn-add-fase-raiz', function () { openCreate(''); })
+        .on('click.escopo', '#btn-expand',        function () { $tree().jstree('open_all'); })
+        .on('click.escopo', '#btn-collapse',      function () { $tree().jstree('close_all'); })
+        .on('click.escopo', '#fase-save',         function () { save(); })
+        .on('click.escopo', '#fase-cancel',       function () { clearSide(); });
 
-    buildTree();
+    var searchTimer;
+    jQuery(document).off('keyup.escopo').on('keyup.escopo', '#fase-search', function () {
+        clearTimeout(searchTimer);
+        var v = jQuery(this).val();
+        searchTimer = setTimeout(function () { $tree().jstree(true).search(v); }, 200);
+    });
+
+    jQuery(function () { buildTree(); });
+
+    return { build: buildTree, openCreate: openCreate };
 })();
 </script>
