@@ -92,7 +92,7 @@ $statuses = $this->Projeto_fase_model->get_statuses();
 
     <div class="form-group">
         <label>Responsável</label>
-        <select class="form-control selectpicker" id="fase-resp" data-live-search="true" data-width="100%">
+        <select class="form-control" id="fase-resp" style="width:100%;">
             <option value="">— selecionar —</option>
             <?php foreach ($staffs as $s): ?>
                 <option value="<?php echo (int) $s['staffid']; ?>"><?php echo html_escape($s['firstname'] . ' ' . $s['lastname']); ?></option>
@@ -180,7 +180,9 @@ window.SigEscopo = (function () {
         jQuery('#fase-resp').val(d ? d.responsavel_id : '');
         jQuery('#fase-pct').val(d ? d.percentual : 0);
         jQuery('#fase-desc').val(d ? (d.descricao || '') : '');
-        if (typeof init_selectpicker === 'function') init_selectpicker();
+        if (jQuery.fn.select2) {
+            jQuery('#fase-resp').select2({ width: '100%', placeholder: '— selecionar —', allowClear: true });
+        }
     }
     function openEdit(node){ renderForm(node.data, ''); }
     function openCreate(parent_id){ renderForm(null, parent_id || ''); }
