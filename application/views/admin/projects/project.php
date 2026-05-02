@@ -103,7 +103,7 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group select-placeholder">
-                                <label for="clientid" class="control-label"><?php echo _l('project_customer'); ?></label>
+                                <label for="clientid" class="control-label"><?php echo _l('project_customer'); ?> <small class="text-muted">(opcional para projetos internos)</small></label>
                                 <select id="clientid" name="clientid" data-live-search="true" data-width="100%" class="ajax-search" data-none-selected-text="<?php echo _l('dropdown_non_selected_tex'); ?>">
                                     <?php
                                     $selected = (isset($project) ? $project->clientid : '');
@@ -523,7 +523,7 @@
             }
         });
 
-        appValidateForm($('form'), {name: 'required', clientid: 'required', start_date: 'required', billing_type: 'required'});
+        appValidateForm($('form'), {name: 'required', start_date: 'required', billing_type: 'required'});
 
         $('select[name="status"]').on('change', function () {
             var status = $(this).val();

@@ -314,7 +314,12 @@ class Projects_model extends App_Model
                 }
 
                 $project->client_data = new StdClass();
-                $project->client_data = $this->clients_model->get($project->clientid);
+                if (!empty($project->clientid)) {
+                    $project->client_data = $this->clients_model->get($project->clientid);
+                }
+                if (empty($project->client_data)) {
+                    $project->client_data = (object) ['userid' => 0, 'company' => 'Projeto interno'];
+                }
                 $this->load->model('staff_model');
                 if($project->analista){
                     $project->analista_data = $this->staff_model->get($project->analista);
@@ -333,7 +338,7 @@ class Projects_model extends App_Model
         }
 
         $this->db->select('*,' . get_sql_select_client_company());
-        $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid=' . db_prefix() . 'projects.clientid');
+        $this->db->join(db_prefix() . 'clients', db_prefix() . 'clients.userid=' . db_prefix() . 'projects.clientid', 'left');
         $this->db->order_by('id', 'desc');
 
         return $this->db->get(db_prefix() . 'projects')->result_array();
@@ -1084,6 +1089,8 @@ class Projects_model extends App_Model
 
         $empresa_id = $this->session->userdata('empresa_id');
        $data['empresa_id'] = $empresa_id;
+
+        if (empty($data['clientid'])) $data['clientid'] = null;
 
         $data['project_cost']    = !empty($data['project_cost']) ? $data['project_cost'] : null;
         $data['estimated_hours'] = !empty($data['estimated_hours']) ? $data['estimated_hours'] : null;
