@@ -138,9 +138,15 @@ window.SigEscopo = (function () {
     var URL_SAVE     = '<?php echo base_url('gestao_corporativa/Projeto_fase/save'); ?>';
     var URL_DELETE   = '<?php echo base_url('gestao_corporativa/Projeto_fase/delete'); ?>';
     var URL_REORDER  = '<?php echo base_url('gestao_corporativa/Projeto_fase/reorder'); ?>';
-    var CSRF = { name: '<?php echo $this->security->get_csrf_token_name(); ?>',
-                 hash: '<?php echo $this->security->get_csrf_hash(); ?>' };
-    function withCsrf(d){ d=d||{}; d[CSRF.name]=CSRF.hash; return d; }
+    var CSRF = {
+        name:   '<?php echo $this->security->get_csrf_token_name(); ?>',
+        cookie: '<?php echo $this->config->item('csrf_cookie_name'); ?>'
+    };
+    function getCsrfHash() {
+        var m = document.cookie.match(new RegExp('(?:^|; )' + CSRF.cookie + '=([^;]+)'));
+        return m ? decodeURIComponent(m[1]) : '<?php echo $this->security->get_csrf_hash(); ?>';
+    }
+    function withCsrf(d){ d=d||{}; d[CSRF.name]=getCsrfHash(); return d; }
 
     function $tree(){ return jQuery('#fases-tree'); }
     function $side(){ return jQuery('#fase-side'); }
