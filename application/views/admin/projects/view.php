@@ -1,5 +1,11 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head(); ?>
+<?php init_head_intranet_novo(false); ?>
+<style>
+    body{font-family:'Open Sans';background:#f1f1f1;}
+    #wrapper{margin-left:0!important;padding-left:0!important;width:100%;}
+    #wrapper > .content{padding-top:14px;}
+    #header{background:#fff;border-bottom:1px solid #e5e7eb;}
+</style>
 <div id="wrapper">
    <?php echo form_hidden('project_id',$project->id) ?>
    <div class="content">

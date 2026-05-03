@@ -17,6 +17,12 @@ class Projeto_fase extends AdminController
         echo json_encode($this->Projeto_fase_model->tree_data((int) $project_id));
     }
 
+    public function list_options($project_id)
+    {
+        header('Content-Type: application/json');
+        echo json_encode($this->Projeto_fase_model->list_options((int) $project_id));
+    }
+
     public function save()
     {
         $id  = (int) $this->input->post('id');

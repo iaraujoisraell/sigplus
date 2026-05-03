@@ -471,7 +471,7 @@ $config['csrf_token_name']   = defined('APP_CSRF_TOKEN_NAME') ? APP_CSRF_TOKEN_N
 $config['csrf_cookie_name']  = defined('APP_CSRF_COOKIE_NAME') ? APP_CSRF_COOKIE_NAME : 'csrf_cookie_name';
 $config['csrf_expire']       = defined('APP_CSRF_EXPIRE') ? APP_CSRF_EXPIRE : 3660;
 $config['csrf_regenerate']   = false;
-$config['csrf_exclude_uris'] = ['admin/custom_email_and_sms_notifications/email_sms/sendEmailSms', 'forms/wtl/[0-9a-z]+', 'forms/ticket', 'api\/.+'];
+$config['csrf_exclude_uris'] = ['admin/custom_email_and_sms_notifications/email_sms/sendEmailSms', 'forms/wtl/[0-9a-z]+', 'forms/ticket', 'api\/.+', 'painel\/.+'];
 
 if (isset($app_csrf_exclude_uris)) {
     $config['csrf_exclude_uris'] = array_merge($config['csrf_exclude_uris'], $app_csrf_exclude_uris);

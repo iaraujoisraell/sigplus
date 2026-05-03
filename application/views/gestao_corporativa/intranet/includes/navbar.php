@@ -38,7 +38,14 @@ if (!isset($without_permission) || !$without_permission) {
     }
 
     .sig-topbar{
-        background: #44546a;
+        background: linear-gradient(135deg, #0a66c2 0%, #1e3a8a 65%, #312e81 100%);
+        position: relative;
+    }
+    .sig-topbar::after{
+        content:"";
+        position:absolute;left:0;right:0;bottom:0;height:3px;
+        background: linear-gradient(90deg, #38bdf8 0%, #0a66c2 50%, #6366f1 100%);
+        opacity:.85;
     }
 
     .sig-topbar-inner{
@@ -465,22 +472,10 @@ if (!isset($without_permission) || !$without_permission) {
              <!-- MÓDULOS NO MEIO -->
             <div class="sig-modulebar-inline">
                 <?php
-                $docs_url = $empresa_id == 2
-                    ? base_url('gestao_corporativa/intra/documentos/list_')
-                    : base_url('gestao_corporativa/cdc/list_');
-
+                // Topbar: só acervo institucional (GED).
+                // CI, Gestão e Qualidade vivem nos cards da home.
                 $modules = [
-                    ['perm' => 'view_docs',         'href' => $docs_url,                                            'icon' => 'far fa-folder-open',    'label' => 'Documentos'],
-                    ['perm' => 'view_cis',          'href' => base_url('gestao_corporativa/intra/comunicado'),      'icon' => 'fas fa-bullhorn',       'label' => 'CI'],
-                    ['perm' => 'view_atas',         'href' => base_url('gestao_corporativa/Ata'),                   'icon' => 'far fa-file-alt',       'label' => 'Atas'],
-                    ['perm' => 'view_planos_acao',  'href' => base_url('gestao_corporativa/Plano_acao'),            'icon' => 'fas fa-clipboard-list', 'label' => 'Planos'],
-                    ['perm' => 'view_grupos',       'href' => base_url('gestao_corporativa/Workgroup'),             'icon' => 'fas fa-users-cog',      'label' => 'Grupos'],
-                    ['perm' => 'view_ros',          'href' => base_url('gestao_corporativa/Registro_ocorrencia'),   'icon' => 'far fa-flag',           'label' => 'R.O'],
-                    ['perm' => 'view_ras',          'href' => base_url('gestao_corporativa/Atendimento/index'),     'icon' => 'fas fa-headset',        'label' => 'Atendimentos'],
-                    ['perm' => 'view_workflows',    'href' => base_url('gestao_corporativa/Workflow/index'),         'icon' => 'fas fa-project-diagram','label' => 'Workflow'],
-                    ['perm' => 'view_forms',        'href' => base_url('gestao_corporativa/Formularios'),            'icon' => 'far fa-file',           'label' => 'Formulários'],
-                    ['perm' => 'view_geds',         'href' => base_url('gestao_corporativa/Ged/index'),              'icon' => 'fas fa-database',       'label' => 'GED'],
-                    ['perm' => 'view_projects',     'href' => base_url('admin/projects'),                            'icon' => 'far fa-folder',         'label' => 'Projetos'],
+                    ['perm' => 'view_geds', 'href' => base_url('gestao_corporativa/Ged/index'), 'icon' => 'fas fa-database', 'label' => 'GED'],
                 ];
 
                 foreach ($modules as $m) {

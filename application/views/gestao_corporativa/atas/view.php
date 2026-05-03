@@ -169,6 +169,16 @@
                 <div class="ata-card-body"><div class="secao-content"><?php echo nl2br(html_escape($ata['observacoes'])); ?></div></div>
             </div>
         <?php endif; ?>
+
+        <?php $this->load->view('gestao_corporativa/formularios/_lista_vinculada', [
+            'vinculo_tipo' => 'ata',
+            'vinculo_id'   => (int) $ata['id'],
+        ]); ?>
+
+        <?php $this->load->view('gestao_corporativa/documentos/_lista_vinculada', [
+            'vinculo_tipo' => 'ata',
+            'vinculo_id'   => (int) $ata['id'],
+        ]); ?>
     </div>
 </div>
 

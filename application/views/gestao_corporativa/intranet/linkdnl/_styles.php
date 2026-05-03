@@ -1044,52 +1044,68 @@
         gap:12px;
     }
 
+    .quick-access-grid{
+        display:flex !important;
+        flex-direction:column;
+        grid-template-columns:none !important;
+        gap:0 !important;
+    }
+
     .quick-access-item{
         position:relative;
-        min-height:64px;
-        border-radius:0;
         text-decoration:none !important;
-        color:#fff !important;
+        color:#64748b !important;
+        background:transparent;
+        border:0;
         display:flex;
-        flex-direction:column;
+        flex-direction:row !important;
         align-items:center;
-        justify-content:center;
-        padding:12px 10px 10px;
-        transition:.18s ease;
-        overflow:visible;
+        justify-content:flex-start;
+        gap:8px;
+        padding:5px 4px;
+        transition:.12s ease;
+        border-bottom:0;
+        min-height:auto;
+        border-radius:4px;
     }
 
     .quick-access-item:hover{
-        transform:translateY(-1px);
-        box-shadow:0 6px 14px rgba(0,0,0,.10);
-        color:#fff !important;
+        color:var(--qa-color, #0a66c2) !important;
+        background:transparent;
+        transform:none;
+        box-shadow:none;
     }
+    .quick-access-item:hover .quick-access-name{color:var(--qa-color, #0a66c2);}
 
     .quick-access-item i{
-        font-size:20px;
+        font-size:11px;
         line-height:1;
-        margin-bottom:8px;
+        margin-bottom:0;
+        width:14px;
+        text-align:center;
+        color:var(--qa-color, #cbd5e1);
+        flex-shrink:0;
     }
 
     .quick-access-name{
         font-size:12px;
-        font-weight:700;
-        line-height:1.15;
-        text-align:center;
-        text-transform:uppercase;
+        font-weight:400;
+        line-height:1.2;
+        text-align:left;
+        color:#64748b;
+        text-transform:none;
     }
 
     .quick-access-badge{
-        position:absolute;
-        top:-4px;
-        right:-4px;
-        background:#6b7280;
-        color:#fff;
-        border-radius:6px;
-        padding:2px 7px;
-        font-size:10px;
-        font-weight:700;
-        line-height:1;
+        position:static;
+        margin-left:auto;
+        background:#e5e7eb;
+        color:#475569;
+        border-radius:4px;
+        padding:1px 6px;
+        font-size:9px;
+        font-weight:600;
+        line-height:1.4;
         z-index:2;
     }
 

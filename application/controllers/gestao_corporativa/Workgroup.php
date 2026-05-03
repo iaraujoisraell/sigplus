@@ -12,15 +12,18 @@ class Workgroup extends AdminController
         }
         $this->load->model('Workgroup_model');
         $this->load->model('Staff_model');
+        $this->load->model('Projeto_fase_model');
     }
 
     public function index()
     {
         $filtros = [
-            'status'     => $this->input->get('status'),
-            'project_id' => $this->input->get('project_id'),
-            'meu'        => $this->input->get('meu'),
-            'busca'      => $this->input->get('busca'),
+            'status'          => $this->input->get('status'),
+            'project_id'      => $this->input->get('project_id'),
+            'meu'             => $this->input->get('meu'),
+            'criei'           => $this->input->get('criei'),
+            'responsavel_meu' => $this->input->get('responsavel_meu'),
+            'busca'           => $this->input->get('busca'),
         ];
         $data = [
             'title'   => 'Grupos',

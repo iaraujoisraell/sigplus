@@ -65,10 +65,21 @@
                     <option value="<?php echo (int) $p['id']; ?>" <?php echo ((int) ($filtros['project_id'] ?? 0)) === (int) $p['id'] ? 'selected' : ''; ?>><?php echo html_escape($p['name']); ?></option>
                 <?php endforeach; ?>
             </select>
-            <select name="minha">
+            <?php $visao = !empty($filtros['criei']) ? 'criei' : (!empty($filtros['responsavel_meu']) ? 'resp' : (!empty($filtros['minha']) ? 'minha' : '')); ?>
+            <select name="visao" onchange="
+                this.form.querySelector('input[name=criei]').value           = this.value === 'criei' ? 1 : '';
+                this.form.querySelector('input[name=responsavel_meu]').value = this.value === 'resp'  ? 1 : '';
+                this.form.querySelector('input[name=minha]').value           = this.value === 'minha' ? 1 : '';
+                this.form.submit();
+            ">
                 <option value="">Todos</option>
-                <option value="1" <?php echo !empty($filtros['minha']) ? 'selected' : ''; ?>>Apenas meus</option>
+                <option value="criei" <?php echo $visao === 'criei' ? 'selected' : ''; ?>>Que criei</option>
+                <option value="resp"  <?php echo $visao === 'resp'  ? 'selected' : ''; ?>>Sou responsável</option>
+                <option value="minha" <?php echo $visao === 'minha' ? 'selected' : ''; ?>>Tudo que envolve eu</option>
             </select>
+            <input type="hidden" name="criei" value="<?php echo $visao === 'criei' ? 1 : ''; ?>">
+            <input type="hidden" name="responsavel_meu" value="<?php echo $visao === 'resp' ? 1 : ''; ?>">
+            <input type="hidden" name="minha" value="<?php echo $visao === 'minha' ? 1 : ''; ?>">
             <button type="submit" class="btn btn-default">Filtrar</button>
         </form>
 

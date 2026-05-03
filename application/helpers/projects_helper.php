@@ -79,6 +79,48 @@ function app_init_project_tabs()
         'position' => 7,
     ]);
 
+    $CI->app_tabs->add_project_tab('project_formularios', [
+        'name'     => 'Formulários',
+        'icon'     => 'fa fa-list-alt',
+        'view'     => 'gestao_corporativa/projeto/_tab_formularios',
+        'position' => 8,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_documentos', [
+        'name'     => 'Documentos',
+        'icon'     => 'far fa-folder-open',
+        'view'     => 'gestao_corporativa/projeto/_tab_documentos',
+        'position' => 9,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_indicadores', [
+        'name'     => 'Indicadores',
+        'icon'     => 'fa fa-chart-line',
+        'view'     => 'gestao_corporativa/projeto/_tab_indicadores',
+        'position' => 10,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_treinamentos', [
+        'name'     => 'Treinamentos',
+        'icon'     => 'fa fa-graduation-cap',
+        'view'     => 'gestao_corporativa/projeto/_tab_treinamentos',
+        'position' => 11,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_riscos', [
+        'name'     => 'Riscos',
+        'icon'     => 'fa fa-shield-alt',
+        'view'     => 'gestao_corporativa/projeto/_tab_riscos',
+        'position' => 12,
+    ]);
+
+    $CI->app_tabs->add_project_tab('project_auditorias', [
+        'name'     => 'Auditorias',
+        'icon'     => 'fa fa-clipboard-check',
+        'view'     => 'gestao_corporativa/projeto/_tab_auditorias',
+        'position' => 13,
+    ]);
+
     $CI->app_tabs->add_project_tab('project_overview', [
         'name'     => _l('project_overview'),
         'icon'     => 'fa fa-th',
@@ -233,6 +275,12 @@ function filter_project_visible_tabs($tabs, $applied_settings)
         'project_planos_acao',
         'project_grupos',
         'project_eventos',
+        'project_formularios',
+        'project_documentos',
+        'project_indicadores',
+        'project_treinamentos',
+        'project_riscos',
+        'project_auditorias',
     ];
 
     $newTabs = [];

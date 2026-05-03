@@ -93,6 +93,20 @@ class Projeto_fase_model extends App_Model
             ->get('tbl_projeto_fases')->row_array();
     }
 
+    public function list_options($project_id)
+    {
+        $empresa_id = (int) $this->session->userdata('empresa_id');
+        $project_id = (int) $project_id;
+        if ($project_id <= 0) return [];
+        return $this->db->select('id, codigo_sequencial, titulo, status')
+            ->from('tbl_projeto_fases')
+            ->where('project_id', $project_id)
+            ->where('empresa_id', $empresa_id)
+            ->where('deleted', 0)
+            ->order_by('codigo_sequencial', 'asc')
+            ->get()->result_array();
+    }
+
     public function save($data, $id = null)
     {
         $empresa_id = (int) $this->session->userdata('empresa_id');

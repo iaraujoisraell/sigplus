@@ -37,6 +37,8 @@ class Workgroup_model extends App_Model
                 WHERE m.grupo_id = g.id AND m.staff_id = $me AND m.deleted = 0
             ))", null, false);
         }
+        if (!empty($filtros['criei']))           $this->db->where('g.user_create', $me);
+        if (!empty($filtros['responsavel_meu'])) $this->db->where('g.lider_id', $me);
 
         if (!empty($filtros['busca'])) {
             $term = $this->db->escape_like_str($filtros['busca']);
@@ -115,6 +117,7 @@ class Workgroup_model extends App_Model
 
         $clean = [
             'project_id'      => !empty($data['project_id']) ? (int) $data['project_id'] : null,
+            'fase_id'         => !empty($data['fase_id']) ? (int) $data['fase_id'] : null,
             'titulo'          => trim((string) ($data['titulo'] ?? '')),
             'descricao'       => $data['descricao'] ?? null,
             'objetivo'        => $data['objetivo'] ?? null,

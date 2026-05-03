@@ -1,10 +1,15 @@
 <?php
 
-//echo APPPATH.'third_party/tcpdf/tcpdf.php'; exit;
-//require_once APPPATH . 'third_party/tcpdf/tcpdf.php'; // Caminho para o arquivo TCPDF
-//require_once APPPATH . 'libraries/setasign/autoload.php'; // Caminho para o arquivo TCPDF
 require_once APPPATH . '/libraries/fpdi/autoload.php';
-require_once APPPATH . '/libraries/tcpdf/tcpdf.php';
+if (!class_exists('TCPDF')) {
+    $_tcpdf_paths = [
+        APPPATH . 'libraries/tcpdf/tcpdf.php',
+        APPPATH . 'vendor/tecnickcom/tcpdf/tcpdf.php',
+    ];
+    foreach ($_tcpdf_paths as $_p) {
+        if (is_file($_p)) { require_once $_p; break; }
+    }
+}
 
 use setasign\Fpdi\Tcpdf\Fpdi;
 use Dompdf\Options;

@@ -114,25 +114,43 @@
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="control-label">Grupo vinculado <small class="text-muted">(opcional)</small></label>
-                    <?php
-                    $empresa_id = (int) $this->session->userdata('empresa_id');
-                    $me = (int) get_staff_user_id();
-                    $grupo_atual = $this->input->get('grupo_id') ?: ($ata['grupo_id'] ?? null);
-                    $grupos_meus = $this->db->query("SELECT DISTINCT g.id, g.titulo FROM tbl_grupos g
-                        LEFT JOIN tbl_grupos_membros m ON m.grupo_id = g.id AND m.deleted = 0
-                        WHERE g.deleted = 0 AND g.empresa_id = $empresa_id
-                          AND (g.lider_id = $me OR g.user_create = $me OR m.staff_id = $me)
-                        ORDER BY g.titulo")->result_array();
-                    ?>
-                    <select name="grupo_id" class="form-control select2">
-                        <option value="">— sem grupo —</option>
-                        <?php foreach ($grupos_meus as $g): ?>
-                            <option value="<?php echo (int) $g['id']; ?>" <?php echo (int) $grupo_atual === (int) $g['id'] ? 'selected' : ''; ?>><?php echo html_escape($g['titulo']); ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label class="control-label">Grupo vinculado <small class="text-muted">(opcional)</small></label>
+                        <?php
+                        $empresa_id = (int) $this->session->userdata('empresa_id');
+                        $me = (int) get_staff_user_id();
+                        $grupo_atual = $this->input->get('grupo_id') ?: ($ata['grupo_id'] ?? null);
+                        $grupos_meus = $this->db->query("SELECT DISTINCT g.id, g.titulo FROM tbl_grupos g
+                            LEFT JOIN tbl_grupos_membros m ON m.grupo_id = g.id AND m.deleted = 0
+                            WHERE g.deleted = 0 AND g.empresa_id = $empresa_id
+                              AND (g.lider_id = $me OR g.user_create = $me OR m.staff_id = $me)
+                            ORDER BY g.titulo")->result_array();
+                        ?>
+                        <select name="grupo_id" class="form-control select2">
+                            <option value="">— sem grupo —</option>
+                            <?php foreach ($grupos_meus as $g): ?>
+                                <option value="<?php echo (int) $g['id']; ?>" <?php echo (int) $grupo_atual === (int) $g['id'] ? 'selected' : ''; ?>><?php echo html_escape($g['titulo']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label">Fase do projeto <small class="text-muted">(opcional)</small></label>
+                        <?php
+                        $fase_atual = (int) ($ata['fase_id'] ?? 0);
+                        $project_sel = (int) ($ata['project_id'] ?? $project_id ?? 0);
+                        $fases_iniciais = $project_sel > 0 ? $this->Projeto_fase_model->list_options($project_sel) : [];
+                        ?>
+                        <select name="fase_id" id="fase_id" class="form-control select2" data-current="<?php echo $fase_atual; ?>">
+                            <option value="">— sem fase —</option>
+                            <?php foreach ($fases_iniciais as $f): ?>
+                                <option value="<?php echo (int) $f['id']; ?>" <?php echo $fase_atual === (int) $f['id'] ? 'selected' : ''; ?>><?php echo html_escape($f['codigo_sequencial'] . ' ' . $f['titulo']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
                 </div>
+                <style>.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}@media(max-width:900px){.form-grid-2{grid-template-columns:1fr;}}</style>
 
                 <div class="form-group">
                     <label class="control-label">Pauta</label>
@@ -318,6 +336,24 @@ $(function () {
 
     $(document).on('click', '.js-remove', function () {
         $(this).closest('.item-card, .pessoa-card, .convidado-card').remove();
+    });
+
+    var $fase = $('#fase_id');
+    var faseInicial = $fase.data('current') ? String($fase.data('current')) : '';
+    function recarregarFases(pid, manterSelecao) {
+        $fase.empty().append('<option value="">— sem fase —</option>');
+        if (!pid) { $fase.trigger('change.select2'); return; }
+        $.getJSON('<?php echo base_url('gestao_corporativa/Projeto_fase/list_options'); ?>/' + pid, function (data) {
+            (data || []).forEach(function (f) {
+                var opt = $('<option>').val(f.id).text(f.codigo_sequencial + ' ' + f.titulo);
+                if (manterSelecao && String(f.id) === faseInicial) opt.prop('selected', true);
+                $fase.append(opt);
+            });
+            $fase.trigger('change.select2');
+        });
+    }
+    $('#project_id').on('change', function () {
+        recarregarFases($(this).val(), false);
     });
 });
 </script>

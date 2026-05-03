@@ -29,9 +29,12 @@ class Ata_model extends App_Model
         $this->db->where('a.deleted', 0);
         $this->db->where('a.empresa_id', $empresa_id);
 
-        if (!empty($filtros['project_id'])) $this->db->where('a.project_id', (int) $filtros['project_id']);
-        if (!empty($filtros['status']))     $this->db->where('a.status', $filtros['status']);
-        if (!empty($filtros['minha']))      $this->_where_minha('a');
+        $me = (int) get_staff_user_id();
+        if (!empty($filtros['project_id']))      $this->db->where('a.project_id', (int) $filtros['project_id']);
+        if (!empty($filtros['status']))          $this->db->where('a.status', $filtros['status']);
+        if (!empty($filtros['minha']))           $this->_where_minha('a');
+        if (!empty($filtros['criei']))           $this->db->where('a.user_create', $me);
+        if (!empty($filtros['responsavel_meu'])) $this->db->where('a.responsavel_id', $me);
         if (!empty($filtros['busca'])) {
             $term = $this->db->escape_like_str($filtros['busca']);
             $this->db->where("(a.titulo LIKE '%{$term}%' OR a.local LIKE '%{$term}%')", null, false);

@@ -94,11 +94,30 @@
         </div>
 
         <div class="gp-card">
+            <?php
+            $this->load->model('Formulario_model');
+            $formularios_grupo = $this->Formulario_model->listar(['grupo_id' => (int) $grupo['id']]);
+            ?>
             <div class="nav-tabs-pill">
                 <button data-tab="discussao" class="active"><i class="fa fa-comments"></i> Discussão <span class="count"><?php echo count($posts ?? []); ?></span></button>
                 <button data-tab="atas"><i class="far fa-file-alt"></i> Atas <span class="count"><?php echo count($atas); ?></span></button>
                 <button data-tab="planos"><i class="fas fa-clipboard-list"></i> Planos <span class="count"><?php echo count($planos); ?></span></button>
                 <button data-tab="tasks"><i class="fa fa-tasks"></i> Ações <span class="count"><?php echo count($tasks); ?></span></button>
+                <button data-tab="formularios"><i class="fa fa-list-alt"></i> Formulários <span class="count"><?php echo count($formularios_grupo); ?></span></button>
+                <?php
+                $this->load->model('Documentos_model');
+                $documentos_grupo = $this->Documentos_model->listar(['grupo_id' => (int) $grupo['id']]);
+                $this->load->model('Treinamento_model');
+                $treinamentos_grupo = $this->Treinamento_model->listar(['grupo_id' => (int) $grupo['id']]);
+                $this->load->model('Risco_model');
+                $riscos_grupo = $this->Risco_model->listar(['grupo_id' => (int) $grupo['id']]);
+                $this->load->model('Auditoria_model');
+                $auditorias_grupo = $this->Auditoria_model->listar(['grupo_id' => (int) $grupo['id']]);
+                ?>
+                <button data-tab="documentos"><i class="far fa-folder-open"></i> Documentos <span class="count"><?php echo count($documentos_grupo); ?></span></button>
+                <button data-tab="treinamentos"><i class="fa fa-graduation-cap"></i> Treinamentos <span class="count"><?php echo count($treinamentos_grupo); ?></span></button>
+                <button data-tab="riscos"><i class="fa fa-shield-alt"></i> Riscos <span class="count"><?php echo count($riscos_grupo); ?></span></button>
+                <button data-tab="auditorias"><i class="fa fa-clipboard-check"></i> Auditorias <span class="count"><?php echo count($auditorias_grupo); ?></span></button>
                 <button data-tab="membros"><i class="fa fa-users"></i> Membros <span class="count"><?php echo count($membros); ?></span></button>
             </div>
             <div class="gp-card-body">
@@ -165,6 +184,41 @@
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
+                </div>
+
+                <div class="tab-pane" data-pane="formularios">
+                    <?php $this->load->view('gestao_corporativa/formularios/_lista_vinculada', [
+                        'vinculo_tipo' => 'grupo',
+                        'vinculo_id'   => (int) $grupo['id'],
+                    ]); ?>
+                </div>
+
+                <div class="tab-pane" data-pane="documentos">
+                    <?php $this->load->view('gestao_corporativa/documentos/_lista_vinculada', [
+                        'vinculo_tipo' => 'grupo',
+                        'vinculo_id'   => (int) $grupo['id'],
+                    ]); ?>
+                </div>
+
+                <div class="tab-pane" data-pane="treinamentos">
+                    <?php $this->load->view('gestao_corporativa/treinamentos/_lista_vinculada', [
+                        'vinculo_tipo' => 'grupo',
+                        'vinculo_id'   => (int) $grupo['id'],
+                    ]); ?>
+                </div>
+
+                <div class="tab-pane" data-pane="riscos">
+                    <?php $this->load->view('gestao_corporativa/riscos/_lista_vinculada', [
+                        'vinculo_tipo' => 'grupo',
+                        'vinculo_id'   => (int) $grupo['id'],
+                    ]); ?>
+                </div>
+
+                <div class="tab-pane" data-pane="auditorias">
+                    <?php $this->load->view('gestao_corporativa/auditorias/_lista_vinculada', [
+                        'vinculo_tipo' => 'grupo',
+                        'vinculo_id'   => (int) $grupo['id'],
+                    ]); ?>
                 </div>
 
                 <div class="tab-pane" data-pane="membros">

@@ -170,6 +170,31 @@
                 </div>
             </div>
         <?php endif; ?>
+
+        <?php $this->load->view('gestao_corporativa/formularios/_lista_vinculada', [
+            'vinculo_tipo' => 'plano',
+            'vinculo_id'   => (int) $plano['id'],
+        ]); ?>
+
+        <?php $this->load->view('gestao_corporativa/documentos/_lista_vinculada', [
+            'vinculo_tipo' => 'plano',
+            'vinculo_id'   => (int) $plano['id'],
+        ]); ?>
+
+        <?php $this->load->view('gestao_corporativa/treinamentos/_lista_vinculada', [
+            'vinculo_tipo' => 'plano',
+            'vinculo_id'   => (int) $plano['id'],
+        ]); ?>
+
+        <?php $this->load->view('gestao_corporativa/riscos/_lista_vinculada', [
+            'vinculo_tipo' => 'plano',
+            'vinculo_id'   => (int) $plano['id'],
+        ]); ?>
+
+        <?php $this->load->view('gestao_corporativa/auditorias/_lista_vinculada', [
+            'vinculo_tipo' => 'plano',
+            'vinculo_id'   => (int) $plano['id'],
+        ]); ?>
     </div>
 </div>
 

@@ -35,12 +35,14 @@ class Plano_acao_model extends App_Model
         $this->db->where('pa.empresa_id', $empresa_id);
 
         if (!empty($filtros['project_id'])) $this->db->where('pa.project_id', (int) $filtros['project_id']);
-        if (!empty($filtros['ata_id']))     $this->db->where('pa.ata_id', (int) $filtros['ata_id']);
-        if (!empty($filtros['status']))     $this->db->where('pa.status', $filtros['status']);
+        $me = (int) get_staff_user_id();
+        if (!empty($filtros['ata_id']))          $this->db->where('pa.ata_id', (int) $filtros['ata_id']);
+        if (!empty($filtros['status']))          $this->db->where('pa.status', $filtros['status']);
         if (!empty($filtros['minha'])) {
-            $me = (int) get_staff_user_id();
             $this->db->where("(pa.responsavel_id = $me OR pa.user_create = $me)", null, false);
         }
+        if (!empty($filtros['criei']))           $this->db->where('pa.user_create', $me);
+        if (!empty($filtros['responsavel_meu'])) $this->db->where('pa.responsavel_id', $me);
         if (!empty($filtros['busca'])) {
             $term = $this->db->escape_like_str($filtros['busca']);
             $this->db->where("(pa.titulo LIKE '%{$term}%' OR pa.descricao LIKE '%{$term}%')", null, false);

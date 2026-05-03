@@ -180,19 +180,19 @@ class Intranet_model extends App_Model {
         $user = get_staff_user_id();
         $empresa_id = $this->session->userdata('empresa_id');
 
-        $sql = "SELECT d.* FROM tbl_intranet_documento d
+        // O subselect já garante 1 aprovacao por doc (LIMIT 1) — GROUP BY redundante
+        // e incompatível com only_full_group_by no MySQL 8.
+        $sql = "SELECT d.*, a.fluxo_sequencia FROM tbl_intranet_documento d
         INNER JOIN tbl_intranet_documento_aprovacao a ON a.doc_id = d.id
         WHERE a.staff_id = $user AND d.deleted = 0 AND d.publicado = 0
         AND d.empresa_id = $empresa_id AND a.deleted = 0 AND a.status = 0
-            
         AND a.id = (SELECT ap.id
-        FROM tbl_intranet_documento dp
-        LEFT JOIN tbl_intranet_documento_aprovacao  ap ON ap.doc_id = dp.id
-        WHERE dp.id = d.id
-        AND dp.deleted = 0 AND dp.empresa_id = $empresa_id AND ap.deleted = 0 AND ap.status = 0
-        ORDER BY ap.fluxo_sequencia ASC Limit 1)
-        
-        GROUP BY a.doc_id
+            FROM tbl_intranet_documento dp
+            LEFT JOIN tbl_intranet_documento_aprovacao ap ON ap.doc_id = dp.id
+            WHERE dp.id = d.id
+              AND dp.deleted = 0 AND dp.empresa_id = $empresa_id
+              AND ap.deleted = 0 AND ap.status = 0
+            ORDER BY ap.fluxo_sequencia ASC LIMIT 1)
         ORDER BY a.fluxo_sequencia ASC";
 
         return $this->db->query($sql)->result_array();

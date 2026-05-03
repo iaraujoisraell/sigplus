@@ -44,10 +44,15 @@ $me_empresa      = get_option('companyname');
                         </div>
                     </div>
 
-                    <div class="ui-card mini-card quick-access-card">
-                    <!-- <div class="mini-card-title">Acesse rapidamente os links</div> -->
+                    <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_card_gestao'); ?>
 
-                        <div class="quick-access-grid" style="margin-top:14px;">
+                    <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_card_qualidade'); ?>
+
+                    <div class="ui-card mini-card quick-access-card" style="background:transparent;border:0;box-shadow:none;">
+                        <div class="header" style="padding:6px 4px 8px;font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px;">
+                            <i class="fa fa-external-link-alt" style="color:#cbd5e1;font-size:10px;"></i> Sistemas externos
+                        </div>
+                        <div class="quick-access-grid" style="padding:0 4px;">
                             <?php
                             $this->load->model('Link_model');
                             $links = $this->Link_model->get_link_department_for_user_id();
@@ -57,7 +62,7 @@ $me_empresa      = get_option('companyname');
                                     class="quick-access-item"
                                     target="_blank"
                                     href="<?php echo $link['url']; ?>"
-                                    style="background: <?php echo $link['color']; ?>;"
+                                    style="--qa-color: <?php echo $link['color']; ?>;"
                                 >
                                     <?php if (!empty($link['titulo'])) { ?>
                                         <span class="quick-access-badge"><?php echo $link['titulo']; ?></span>
@@ -120,8 +125,6 @@ $me_empresa      = get_option('companyname');
                             <?php } ?>
                         <?php } ?>
                     </div>
-
-                    <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_atalhos_pessoais'); ?>
 
                     <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_widgets_atas_planos'); ?>
 

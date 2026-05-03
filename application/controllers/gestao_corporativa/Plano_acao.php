@@ -14,16 +14,19 @@ class Plano_acao extends AdminController
         $this->load->model('Ata_model');
         $this->load->model('Staff_model');
         $this->load->model('projects_model');
+        $this->load->model('Projeto_fase_model');
     }
 
     public function index()
     {
         $filtros = [
-            'project_id' => $this->input->get('project_id'),
-            'ata_id'     => $this->input->get('ata_id'),
-            'status'     => $this->input->get('status'),
-            'minha'      => $this->input->get('minha'),
-            'busca'      => $this->input->get('busca'),
+            'project_id'      => $this->input->get('project_id'),
+            'ata_id'          => $this->input->get('ata_id'),
+            'status'          => $this->input->get('status'),
+            'minha'           => $this->input->get('minha'),
+            'criei'           => $this->input->get('criei'),
+            'responsavel_meu' => $this->input->get('responsavel_meu'),
+            'busca'           => $this->input->get('busca'),
         ];
         $data = [
             'title'   => 'Planos de Ação',
