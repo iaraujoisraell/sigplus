@@ -179,10 +179,10 @@
                                             <th>REQUISIÇÕES</th>
                                             <th>CANAL</th>
                                             <th>CLIENTE</th>
-                                            <th>ORIGEM</th>
                                             <th>CATEGORIA</th>
                                             <th>CONTATO</th>
                                             <th>INF. CHAVE</th>
+                                            <th>COLABORADOR</th>
                                             <th>CADASTRO</th>
                                         </tr>
                                     </thead>
@@ -204,9 +204,9 @@
                                             <th>PROTOCOLO</th>
                                             <th>REQUISIÇÕES</th>
                                             <th>CLIENTE</th>
-                                            <th>ORIGEM</th>
                                             <th>CONTATO</th>
                                             <th>INF. CHAVE</th>
+                                            <th>COLABORADOR</th>
                                             <th>CADASTRO</th>
                                         </tr>
                                     </thead>

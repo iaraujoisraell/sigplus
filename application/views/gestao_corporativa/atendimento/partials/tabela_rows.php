@@ -1,7 +1,7 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
 <?php
 $portal = isset($portal) ? (int) $portal : 0;
-$colspan = $portal ? 7 : 9;
+$colspan = $portal ? 8 : 10;
 ?>
 
 <?php if (empty($rows)) : ?>
@@ -57,8 +57,12 @@ $colspan = $portal ? 7 : 9;
         // CONTATO
         $contato = strtoupper($row['contato']) . '<br>' . $row['email'];
 
-        // CADASTRO
-        $cadastro = '<font style="font-size: 12px">' . $row['firstname'] . '<br>' . _dt($row['date_created']) . '</font>';
+        // COLABORADOR (nome completo)
+        $colaborador_nome = trim(($row['firstname'] ?? '') . ' ' . ($row['lastname'] ?? ''));
+        $colaborador = '<font style="font-size: 12px">' . ($colaborador_nome !== '' ? $colaborador_nome : '—') . '</font>';
+
+        // CADASTRO (só data)
+        $cadastro = '<font style="font-size: 12px">' . _dt($row['date_created']) . '</font>';
     ?>
         <tr class="has-row-options">
             <td>#<?php echo $rel_id; ?></td>
@@ -77,6 +81,7 @@ $colspan = $portal ? 7 : 9;
 
             <td><?php echo $contato; ?></td>
             <td><?php echo $informacoes; ?></td>
+            <td><?php echo $colaborador; ?></td>
             <td><?php echo $cadastro; ?></td>
         </tr>
     <?php endforeach; ?>
