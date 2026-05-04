@@ -19,6 +19,32 @@ class Categorias_campos extends AdminController
 
     public function index() {}
 
+    /** Upload de anexo fixo da categoria (Tipos de Solicitação Rápida). Retorna JSON. */
+    public function upload_anexo_categoria()
+    {
+        header('Content-Type: application/json');
+        if (empty($_FILES['arquivo']['name'])) {
+            echo json_encode(['ok' => false, 'erro' => 'Nenhum arquivo enviado']); return;
+        }
+        $dir = FCPATH . 'assets/intranet/arquivos/categorias_anexos/';
+        if (!is_dir($dir)) @mkdir($dir, 0777, true);
+
+        $orig = $_FILES['arquivo']['name'];
+        $ext  = pathinfo($orig, PATHINFO_EXTENSION);
+        $base = preg_replace('/[^a-z0-9._-]/i', '_', pathinfo($orig, PATHINFO_FILENAME));
+        $name = $base . '_' . time() . ($ext ? '.' . $ext : '');
+        $dest = $dir . $name;
+
+        if (!move_uploaded_file($_FILES['arquivo']['tmp_name'], $dest)) {
+            echo json_encode(['ok' => false, 'erro' => 'Falha ao mover arquivo']); return;
+        }
+        echo json_encode([
+            'ok'   => true,
+            'name' => $name,
+            'url'  => base_url('assets/intranet/arquivos/categorias_anexos/' . $name),
+        ]);
+    }
+
     public function modal()
     {
 
@@ -186,6 +212,12 @@ class Categorias_campos extends AdminController
 
         $_info = [];
         $rel_type = $this->input->post('rel_type');
+
+        // Tipos de solicitação rápida — descrição livre + anexo fixo da categoria
+        if ($rel_type == 'ra_atendimento_rapido') {
+            $info['descricao'] = $FORM['descricao'] ?? null;
+            if (isset($FORM['anexo'])) $info['anexo'] = $FORM['anexo'];
+        }
 
         if ($rel_type == 'r.o' || $rel_type == 'workflow' || $rel_type == 'cdc' || $rel_type == 'atendimento' || $rel_type == 'api' || $rel_type == 'cdc') {
 

@@ -21,6 +21,32 @@ class Atendimento extends AdminController {
         $this->load->model('Intranet_general_model');
     }
 
+    /** Busca dados do paciente no Tasy (com timeout pra não travar a página). */
+    private function _buscar_info_tasy($carteirinha)
+    {
+        if (defined('ENVIRONMENT') && ENVIRONMENT === 'development') return null;
+        $carteirinha = (string) $carteirinha;
+        if ($carteirinha === '') return null;
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => 'http://189.2.65.2/sigplus/api/Informacoes_sistema_tasy',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 2,
+            CURLOPT_TIMEOUT        => 5,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST  => 'POST',
+            CURLOPT_POSTFIELDS     => json_encode(['carteirinha' => $carteirinha]),
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json; charset=utf-8'],
+        ]);
+        $response = curl_exec($ch);
+        $err = curl_errno($ch);
+        curl_close($ch);
+        if ($err || !$response) return null;
+        $info = json_decode($response, true);
+        return is_array($info) ? $info : null;
+    }
+
     /* List all staff roles */
 
     public function index_old() {
@@ -172,31 +198,7 @@ class Atendimento extends AdminController {
         if ($data['info']->client_id) {
             $this->load->model('Clients_model');
             $client = $this->Clients_model->get($data['info']->client_id);
-            //print_r($client); exit;
-
-            $ch = curl_init();
-
-            curl_setopt_array($ch, array(
-                CURLOPT_URL => 'http://189.2.65.2/sigplus/api/Informacoes_sistema_tasy',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'POST',
-                CURLOPT_POSTFIELDS => '{ "carteirinha": "' . $client->numero_carteirinha . '"
-                                }',
-                CURLOPT_HTTPHEADER => array(
-                    'Content-Type: application/json; charset=utf-8'
-                ),
-            ));
-
-            $response = curl_exec($ch);
-            //echo $response; exit;
-            $info = json_decode($response, true);
-
-            $data['info_client'] = $info;
+            $data['info_client'] = $this->_buscar_info_tasy($client->numero_carteirinha ?? '');
         }
 
         $permission = false;

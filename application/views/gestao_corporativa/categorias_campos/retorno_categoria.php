@@ -12,12 +12,15 @@ if ($categoria_id) {
             Campos Obrigatórios da Categoria
         </div>
         <div class="panel-body">
-            <?php if ($categoria->orientacoes_client || count($doctos) > 0) { ?>
+            <?php if ($categoria->orientacoes_client || !empty($categoria->descricao) || count($doctos) > 0) { ?>
                 <div class="panel_s" style="margin-bottom: 10px;">
                     <div class="panel-heading">
                         ORIENTAÇÕES DA CATEGORIA
                     </div>
                     <div class="panel-body">
+                        <?php if (!empty($categoria->descricao)) { ?>
+                            <div style="font-size:13px;color:#1f2937;line-height:1.5;margin-bottom:8px;"><?php echo nl2br(html_escape($categoria->descricao)); ?></div>
+                        <?php } ?>
                         <?php if ($categoria->orientacoes_client) { ?>
                             <span class="bold "><?php echo strtoupper($categoria->orientacoes_client); ?></span>
                             <br><br>
@@ -172,6 +175,19 @@ if ($categoria_id) {
                         }
                     }
                     ?>
+
+                    <?php if (!empty($categoria->anexo)) { ?>
+                        <div class="col-md-12">
+                            <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 14px;margin-top:8px;display:flex;align-items:center;gap:10px;">
+                                <i class="fa fa-paperclip" style="color:#0a66c2;font-size:16px;"></i>
+                                <div style="flex:1;">
+                                    <div style="font-size:11px;color:#64748b;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Anexo desta categoria</div>
+                                    <a href="<?php echo base_url('assets/intranet/arquivos/categorias_anexos/' . $categoria->anexo); ?>" target="_blank" style="font-size:13px;color:#0a66c2;font-weight:600;"><?php echo html_escape($categoria->anexo); ?></a>
+                                </div>
+                                <a href="<?php echo base_url('assets/intranet/arquivos/categorias_anexos/' . $categoria->anexo); ?>" target="_blank" download class="btn btn-success btn-xs"><i class="fa fa-download"></i> Baixar</a>
+                            </div>
+                        </div>
+                    <?php } ?>
                 </div>
                 <?php if ($just_campos != true) { ?>
                 </div>

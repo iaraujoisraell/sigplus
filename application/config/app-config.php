@@ -63,6 +63,8 @@ defined('APP_DB_PASSWORD') or define('APP_DB_PASSWORD', 'Sigplus*2024');
  defined('APP_DB_NAME_DEFAULT') or define('APP_DB_NAME_DEFAULT', 'wwsigp_sigplus');
 //define('APP_DB_NAME_DEFAULT', 'sigplusapp_sigplus');
 
+defined('APP_MEMORY_LIMIT') or define('APP_MEMORY_LIMIT', '512M');
+
 //define('APP_DB_USERNAME', 'sigplus_admin');
 /**
  * The password used to connect to the database

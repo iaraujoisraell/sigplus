@@ -56,6 +56,28 @@ $tabela = str_replace($vowels, "", $rel_type);
                         <textarea class="form-control" rows="3" placeholder="" id="description"><?php echo $categoria->description; ?></textarea>
                     </div>
                 <?php } ?>
+
+                <?php if ($rel_type == 'ra_atendimento_rapido') { ?>
+                    <div class="form-group">
+                        <label class="control-label">Descrição / Orientação <small class="text-muted">(opcional, aparece pro atendente)</small></label>
+                        <textarea class="form-control" rows="3" name="descricao" id="descricao" placeholder="Ex: detalhe sobre quando usar este tipo, informações que devem ser coletadas, etc."><?php echo html_escape($categoria->descricao ?? ''); ?></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="control-label"><i class="fa fa-paperclip"></i> Anexo fixo da categoria <small class="text-muted">(opcional — modelo de doc, instrução, etc.)</small></label>
+                        <input type="hidden" name="anexo" id="anexo_filename" value="<?php echo html_escape($categoria->anexo ?? ''); ?>">
+
+                        <div id="anexo-atual" style="<?php echo empty($categoria->anexo) ? 'display:none;' : ''; ?>margin-bottom:6px;padding:8px 12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                            <span><i class="fa fa-file"></i> <a id="anexo-link" href="<?php echo !empty($categoria->anexo) ? base_url('assets/intranet/arquivos/categorias_anexos/' . $categoria->anexo) : '#'; ?>" target="_blank"><?php echo html_escape($categoria->anexo ?? ''); ?></a></span>
+                            <button type="button" class="btn btn-default btn-xs" onclick="removerAnexoCategoria()"><i class="fa fa-times"></i> Remover</button>
+                        </div>
+
+                        <div style="display:flex;gap:6px;align-items:center;">
+                            <input type="file" id="anexo_file" class="form-control" style="flex:1;">
+                            <button type="button" class="btn btn-info btn-sm" onclick="enviarAnexoCategoria()"><i class="fa fa-upload"></i> Enviar</button>
+                            <span id="anexo-status" style="font-size:12px;color:#94a3b8;"></span>
+                        </div>
+                    </div>
+                <?php } ?>
                 <?php
                 if ($rel_type == 'api') {
                     echo render_input("caminho", 'Caminho', $categoria->caminho, 'text', array('required' => 'true'));
@@ -459,6 +481,10 @@ $tabela = str_replace($vowels, "", $rel_type);
                 id: id,
                 rel_type: '<?php echo $rel_type; ?>',
                 titulo: titulo,
+                <?php if ($rel_type == 'ra_atendimento_rapido') { ?>
+                    descricao: $('#descricao').val(),
+                    anexo: $('#anexo_filename').val(),
+                <?php } ?>
                 <?php if ($rel_type == 'atendimento') { ?>
                     //                /is_portal: is_portal,
                 <?php } ?>
@@ -515,6 +541,46 @@ $tabela = str_replace($vowels, "", $rel_type);
                 reload_categoria<?php echo $tabela; ?>();
             }
         });
+    }
+
+    // ============ Anexo da categoria (Tipos de Solicitação Rápida) ============
+    function enviarAnexoCategoria() {
+        var input = document.getElementById('anexo_file');
+        if (!input || !input.files || !input.files[0]) {
+            alert('Selecione um arquivo primeiro.');
+            return;
+        }
+        var fd = new FormData();
+        fd.append('arquivo', input.files[0]);
+        // CSRF token (lê do cookie atual pra evitar 419)
+        var csrfName = '<?php echo $this->security->get_csrf_token_name(); ?>';
+        var csrfCookie = '<?php echo $this->config->item('csrf_cookie_name'); ?>';
+        var match = document.cookie.match(new RegExp('(?:^|; )' + csrfCookie + '=([^;]+)'));
+        var csrfHash = match ? decodeURIComponent(match[1]) : '<?php echo $this->security->get_csrf_hash(); ?>';
+        fd.append(csrfName, csrfHash);
+        $('#anexo-status').text('enviando…').css('color', '#94a3b8');
+        $.ajax({
+            url: '<?php echo base_url('gestao_corporativa/Categorias_campos/upload_anexo_categoria'); ?>',
+            type: 'POST', data: fd, processData: false, contentType: false,
+            success: function (resp) {
+                var r = typeof resp === 'string' ? JSON.parse(resp) : resp;
+                if (r.ok) {
+                    $('#anexo_filename').val(r.name);
+                    $('#anexo-link').attr('href', r.url).text(r.name);
+                    $('#anexo-atual').show();
+                    $('#anexo_file').val('');
+                    $('#anexo-status').text('arquivo carregado · salve para vincular').css('color', '#16a34a');
+                } else {
+                    $('#anexo-status').text('falha: ' + (r.erro || 'erro')).css('color', '#dc2626');
+                }
+            },
+            error: function () { $('#anexo-status').text('falha no upload').css('color', '#dc2626'); }
+        });
+    }
+    function removerAnexoCategoria() {
+        $('#anexo_filename').val('');
+        $('#anexo-atual').hide();
+        $('#anexo-status').text('anexo removido · salve para confirmar').css('color', '#f59e0b');
     }
 </script>
 <?php if ($rel_type == 'cdc') { ?>
