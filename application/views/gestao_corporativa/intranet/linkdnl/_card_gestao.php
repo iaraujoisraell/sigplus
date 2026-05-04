@@ -16,16 +16,14 @@ $contagens = [
     'view_grupos'      => $cnt('tbl_grupos'),
     'view_tasks'       => (int) $this->db->where('empresa_id', $empresa_id)->where('deleted', 0)->where('status !=', 5)->count_all_results('tbltasks'),
     'view_eventos'     => $cnt('tbl_intranet_eventos'),
-    'view_cis'         => $cnt('tbl_intranet_ci'),
 ];
 
 $gestao_modules = [
-    ['perm' => 'view_projects', 'href' => base_url('admin/projects'),                       'icon' => 'far fa-folder-open',  'label' => 'Projetos',     'cor' => '#0a66c2'],
-    ['perm' => 'view_atas',     'href' => base_url('gestao_corporativa/Ata'),               'icon' => 'far fa-file-alt',     'label' => 'Atas',         'cor' => '#7c3aed'],
-    ['perm' => 'view_grupos',   'href' => base_url('gestao_corporativa/Workgroup'),         'icon' => 'fas fa-users-cog',    'label' => 'Grupos',       'cor' => '#ea580c'],
-    ['perm' => 'view_tasks',    'href' => base_url('gestao_corporativa/Acao'),              'icon' => 'fa fa-tasks',         'label' => 'Ações',        'cor' => '#dc2626'],
-    ['perm' => 'view_eventos',  'href' => base_url('gestao_corporativa/Eventoplus'),        'icon' => 'far fa-calendar-alt', 'label' => 'Eventos',      'cor' => '#0891b2'],
-    ['perm' => 'view_cis',      'href' => base_url('gestao_corporativa/intra/comunicado'),  'icon' => 'fas fa-bullhorn',     'label' => 'CI',           'cor' => '#f59e0b'],
+    ['perm' => 'view_projects', 'href' => base_url('admin/projects'),                'icon' => 'far fa-folder-open',  'label' => 'Projetos', 'cor' => '#0a66c2'],
+    ['perm' => 'view_atas',     'href' => base_url('gestao_corporativa/Ata'),        'icon' => 'far fa-file-alt',     'label' => 'Atas',     'cor' => '#7c3aed'],
+    ['perm' => 'view_grupos',   'href' => base_url('gestao_corporativa/Workgroup'),  'icon' => 'fas fa-users-cog',    'label' => 'Grupos',   'cor' => '#ea580c'],
+    ['perm' => 'view_tasks',    'href' => base_url('gestao_corporativa/Acao'),       'icon' => 'fa fa-tasks',         'label' => 'Ações',    'cor' => '#dc2626'],
+    ['perm' => 'view_eventos',  'href' => base_url('gestao_corporativa/Eventoplus'), 'icon' => 'far fa-calendar-alt', 'label' => 'Eventos',  'cor' => '#0891b2'],
 ];
 ?>
 <style>

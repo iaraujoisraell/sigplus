@@ -44,13 +44,15 @@ $me_empresa      = get_option('companyname');
                         </div>
                     </div>
 
+                    <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_card_comunicacao'); ?>
+
                     <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_card_gestao'); ?>
 
                     <?php $this->load->view('gestao_corporativa/intranet/linkdnl/_card_qualidade'); ?>
 
                     <div class="ui-card mini-card quick-access-card" style="background:transparent;border:0;box-shadow:none;">
                         <div class="header" style="padding:6px 4px 8px;font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.06em;display:flex;align-items:center;gap:6px;">
-                            <i class="fa fa-external-link-alt" style="color:#cbd5e1;font-size:10px;"></i> Sistemas externos
+                            <i class="fa fa-external-link-alt" style="color:#cbd5e1;font-size:10px;"></i> Links externos
                         </div>
                         <div class="quick-access-grid" style="padding:0 4px;">
                             <?php
@@ -64,10 +66,6 @@ $me_empresa      = get_option('companyname');
                                     href="<?php echo $link['url']; ?>"
                                     style="--qa-color: <?php echo $link['color']; ?>;"
                                 >
-                                    <?php if (!empty($link['titulo'])) { ?>
-                                        <span class="quick-access-badge"><?php echo $link['titulo']; ?></span>
-                                    <?php } ?>
-
                                     <?php if (!empty($link['icon'])) { ?>
                                         <i class="<?php echo $link['icon']; ?>"></i>
                                     <?php } ?>

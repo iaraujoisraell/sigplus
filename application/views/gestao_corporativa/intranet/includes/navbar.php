@@ -472,11 +472,8 @@ if (!isset($without_permission) || !$without_permission) {
              <!-- MÓDULOS NO MEIO -->
             <div class="sig-modulebar-inline">
                 <?php
-                // Topbar: só acervo institucional (GED).
-                // CI, Gestão e Qualidade vivem nos cards da home.
-                $modules = [
-                    ['perm' => 'view_geds', 'href' => base_url('gestao_corporativa/Ged/index'), 'icon' => 'fas fa-database', 'label' => 'GED'],
-                ];
+                // Topbar limpo — todos os módulos vivem nos cards da home (Gestão, Qualidade, Comunicação).
+                $modules = [];
 
                 foreach ($modules as $m) {
                     if (has_permission_intranet('modules', '', $m['perm']) || is_admin()) {

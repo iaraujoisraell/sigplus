@@ -13,30 +13,22 @@ $contagens = [
     'view_docs'         => $cnt('tbl_intranet_documento', 'publicado = 1'),
     'view_planos_acao'  => $cnt('tbl_planos_acao', "status IN ('aberto','em_execucao')"),
     'view_forms'        => $cnt('tbl_intranet_formularios', 'form_pai = 0'),
-    'view_ros'          => $cnt('tbl_intranet_registro_ocorrencia', 'status IN (1,2,4)'),
     'view_indicadores'  => $cnt('tbl_indicadores', "status = 'ativo'"),
     'view_treinamentos' => $cnt('tbl_treinamentos', "status IN ('planejado','inscricoes_abertas','em_andamento')"),
     'view_riscos'       => $cnt('tbl_riscos', "status NOT IN ('fechado','mitigado')"),
     'view_auditorias'   => $cnt('tbl_auditorias', "status IN ('planejada','em_execucao')"),
     'view_rac'          => $cnt('tbl_rac', "status IN ('planejada','em_execucao')"),
-    'view_ras'          => (int) $this->db->where('empresa_id', $empresa_id)->where('deleted', 0)
-                              ->where('data_encerramento IS NULL', null, false)
-                              ->count_all_results('tbl_intranet_registro_atendimento'),
-    'view_workflows'    => 0,
 ];
 
 $qualidade_modules = [
-    ['perm' => 'view_docs',        'href' => base_url('gestao_corporativa/Documento'),            'icon' => 'far fa-folder-open',     'label' => 'Documentos',  'cor' => '#0d9488'],
-    ['perm' => 'view_planos_acao', 'href' => base_url('gestao_corporativa/Plano_acao'),           'icon' => 'fas fa-clipboard-list',  'label' => 'Plano de Ação','cor' => '#16a34a'],
-    ['perm' => 'view_forms',       'href' => base_url('gestao_corporativa/Formulario'),           'icon' => 'fa fa-list-alt',         'label' => 'Formulários', 'cor' => '#0a66c2'],
-    ['perm' => 'view_ros',         'href' => base_url('gestao_corporativa/Registro_ocorrencia'),  'icon' => 'far fa-flag',            'label' => 'Ocorrências', 'cor' => '#dc2626'],
-    ['perm' => 'view_indicadores', 'href' => base_url('gestao_corporativa/Indicador'),            'icon' => 'fa fa-chart-line',       'label' => 'Indicadores', 'cor' => '#0891b2'],
-    ['perm' => 'view_treinamentos','href' => base_url('gestao_corporativa/Treinamento'),          'icon' => 'fa fa-graduation-cap',   'label' => 'Treinamentos','cor' => '#ea580c'],
-    ['perm' => 'view_riscos',      'href' => base_url('gestao_corporativa/Risco'),                'icon' => 'fa fa-shield-alt',       'label' => 'Riscos',      'cor' => '#dc2626'],
-    ['perm' => 'view_auditorias',  'href' => base_url('gestao_corporativa/Auditoria'),            'icon' => 'fa fa-clipboard-check',  'label' => 'Auditorias',  'cor' => '#7c3aed'],
-    ['perm' => 'view_rac',         'href' => base_url('gestao_corporativa/Rac'),                  'icon' => 'fa fa-balance-scale',    'label' => 'RAC',         'cor' => '#312e81'],
-    ['perm' => 'view_ras',         'href' => base_url('gestao_corporativa/Atendimento/index'),    'icon' => 'fas fa-headset',         'label' => 'Atendimentos','cor' => '#7c3aed'],
-    ['perm' => 'view_workflows',   'href' => base_url('gestao_corporativa/Workflow/index'),       'icon' => 'fas fa-project-diagram', 'label' => 'Workflow',    'cor' => '#475569'],
+    ['perm' => 'view_docs',        'href' => base_url('gestao_corporativa/Documento'),   'icon' => 'far fa-folder-open',     'label' => 'Documentos',  'cor' => '#0d9488'],
+    ['perm' => 'view_planos_acao', 'href' => base_url('gestao_corporativa/Plano_acao'),  'icon' => 'fas fa-clipboard-list',  'label' => 'Plano de Ação','cor' => '#16a34a'],
+    ['perm' => 'view_forms',       'href' => base_url('gestao_corporativa/Formulario'),  'icon' => 'fa fa-list-alt',         'label' => 'Formulários', 'cor' => '#0a66c2'],
+    ['perm' => 'view_indicadores', 'href' => base_url('gestao_corporativa/Indicador'),   'icon' => 'fa fa-chart-line',       'label' => 'Indicadores', 'cor' => '#0891b2'],
+    ['perm' => 'view_treinamentos','href' => base_url('gestao_corporativa/Treinamento'), 'icon' => 'fa fa-graduation-cap',   'label' => 'Treinamentos','cor' => '#ea580c'],
+    ['perm' => 'view_riscos',      'href' => base_url('gestao_corporativa/Risco'),       'icon' => 'fa fa-shield-alt',       'label' => 'Riscos',      'cor' => '#dc2626'],
+    ['perm' => 'view_auditorias',  'href' => base_url('gestao_corporativa/Auditoria'),   'icon' => 'fa fa-clipboard-check',  'label' => 'Auditorias',  'cor' => '#7c3aed'],
+    ['perm' => 'view_rac',         'href' => base_url('gestao_corporativa/Rac'),         'icon' => 'fa fa-balance-scale',    'label' => 'RAC',         'cor' => '#312e81'],
 ];
 ?>
 <style>
