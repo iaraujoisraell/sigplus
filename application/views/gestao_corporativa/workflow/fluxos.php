@@ -88,6 +88,38 @@
     </div>
 </div>
 
+<div class="modal fade" id="wf-copy-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary">
+                <h4 class="modal-title">Copiar nó para outro fluxo</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="wf-copy-node-id">
+                <div class="form-group">
+                    <label>Categoria destino</label>
+                    <select id="wf-copy-target-categoria" class="form-control" data-live-search="true">
+                        <option value="">— carregando —</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Nó pai destino <span class="text-muted small">(opcional, vazio = raiz)</span></label>
+                    <select id="wf-copy-target-parent" class="form-control" data-live-search="true">
+                        <option value="">— Raiz —</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="wf-copy-confirm">
+                    <i class="fa fa-copy"></i> Copiar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script id="wf-form-tpl" type="text/template">
     <h4 id="wf-form-title">Editar fluxo</h4>
     <input type="hidden" id="wf-id">
@@ -139,11 +171,15 @@
 <script>
 (function () {
     const CATEGORIA_ID = <?= (int) $tipo->id; ?>;
-    const URL_TREE     = '<?= base_url('gestao_corporativa/Workflow/tree_data'); ?>/' + CATEGORIA_ID;
-    const URL_SAVE     = '<?= base_url('gestao_corporativa/Workflow/node_save'); ?>';
-    const URL_DELETE   = '<?= base_url('gestao_corporativa/Workflow/node_delete'); ?>';
-    const URL_REORDER  = '<?= base_url('gestao_corporativa/Workflow/node_reorder'); ?>';
-    const URL_SPACE    = '<?= base_url('gestao_corporativa/Workflow/mudar_space'); ?>';
+    const URL_TREE      = '<?= base_url('gestao_corporativa/Workflow/tree_data'); ?>/' + CATEGORIA_ID;
+    const URL_SAVE      = '<?= base_url('gestao_corporativa/Workflow/node_save'); ?>';
+    const URL_DELETE    = '<?= base_url('gestao_corporativa/Workflow/node_delete'); ?>';
+    const URL_REORDER   = '<?= base_url('gestao_corporativa/Workflow/node_reorder'); ?>';
+    const URL_SPACE     = '<?= base_url('gestao_corporativa/Workflow/mudar_space'); ?>';
+    const URL_DUPLICATE = '<?= base_url('gestao_corporativa/Workflow/node_duplicate'); ?>';
+    const URL_COPY      = '<?= base_url('gestao_corporativa/Workflow/node_copy_to_categoria'); ?>';
+    const URL_LIST_CAT  = '<?= base_url('gestao_corporativa/Workflow/list_workflow_categorias'); ?>';
+    const URL_LIST_NODE = '<?= base_url('gestao_corporativa/Workflow/list_categoria_nodes'); ?>';
 
     const $tree = $('#wf-tree');
     const $side = $('#wf-side');
@@ -164,7 +200,10 @@
                     return {
                         add: { label: 'Adicionar filho', icon: 'fa fa-plus', action: () => openCreateForm(node.data.id) },
                         edit: { label: 'Editar', icon: 'fa fa-pencil', action: () => openEditForm(node) },
-                        sep: '---',
+                        sep1: '---',
+                        dup: { label: 'Duplicar (com filhos)', icon: 'fa fa-clone', action: () => duplicateNode(node.data.id) },
+                        copy: { label: 'Copiar para outro fluxo...', icon: 'fa fa-copy', action: () => openCopyModal(node.data.id) },
+                        sep2: '---',
                         del: { label: 'Excluir (cascata)', icon: 'fa fa-trash', action: () => confirmDelete(node.data.id) }
                     };
                 }
@@ -243,6 +282,67 @@
             clearSide();
         });
     }
+
+    function duplicateNode(id) {
+        if (!confirm('Duplicar este nó e todos os filhos como irmão no mesmo nível?')) return;
+        $.post(URL_DUPLICATE, { id, categoria_id: CATEGORIA_ID }).done((res) => {
+            if (res && res.ok) {
+                $tree.jstree(true).refresh();
+                clearSide();
+            } else {
+                alert((res && res.error) || 'Falha ao duplicar.');
+            }
+        }).fail(() => alert('Falha ao duplicar.'));
+    }
+
+    function openCopyModal(id) {
+        $('#wf-copy-node-id').val(id);
+        const $cat = $('#wf-copy-target-categoria').html('<option value="">— carregando —</option>');
+        const $parent = $('#wf-copy-target-parent').html('<option value="">— Raiz —</option>');
+
+        $.getJSON(URL_LIST_CAT, { exclude: CATEGORIA_ID }).done((rows) => {
+            $cat.empty().append('<option value="">— Selecione —</option>');
+            rows.forEach(r => $cat.append('<option value="' + r.id + '">' + $('<div>').text(r.titulo).html() + '</option>'));
+        }).fail(() => $cat.html('<option value="">erro ao carregar</option>'));
+
+        $('#wf-copy-modal').modal('show');
+    }
+
+    $('#wf-copy-target-categoria').on('change', function () {
+        const cid = $(this).val();
+        const $parent = $('#wf-copy-target-parent').html('<option value="">— Raiz —</option>');
+        if (!cid) return;
+        $.getJSON(URL_LIST_NODE, { categoria_id: cid }).done((rows) => {
+            rows.forEach(r => {
+                const label = (r.codigo_sequencial || '') + ' · ' + (r.setor_name || '(sem setor)');
+                $parent.append('<option value="' + r.id + '">' + $('<div>').text(label).html() + '</option>');
+            });
+        });
+    });
+
+    $('#wf-copy-confirm').on('click', function () {
+        const id = $('#wf-copy-node-id').val();
+        const target_categoria_id = $('#wf-copy-target-categoria').val();
+        const target_parent_id = $('#wf-copy-target-parent').val();
+        if (!target_categoria_id) { alert('Selecione a categoria destino.'); return; }
+
+        const $btn = $(this).prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Copiando...');
+        $.post(URL_COPY, {
+            id,
+            source_categoria_id: CATEGORIA_ID,
+            target_categoria_id,
+            target_parent_id
+        }).done((res) => {
+            if (res && res.ok) {
+                $('#wf-copy-modal').modal('hide');
+                alert('Copiado com sucesso para a outra categoria.');
+            } else {
+                alert((res && res.error) || 'Falha ao copiar.');
+            }
+        }).fail(() => alert('Falha ao copiar.')).always(() => {
+            $btn.prop('disabled', false).html('<i class="fa fa-copy"></i> Copiar');
+        });
+    });
 
     function loadSpace(slug, id) {
         $('#wf-extras-panel').html('<i class="fa fa-spinner fa-spin"></i>');

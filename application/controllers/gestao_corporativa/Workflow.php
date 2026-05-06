@@ -723,6 +723,213 @@ class Workflow extends AdminController
         $assign(0, '');
     }
 
+    public function node_duplicate()
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $id = (int) $this->input->post('id');
+        $categoria_id = (int) $this->input->post('categoria_id');
+
+        if (!$id || !$categoria_id) {
+            header('Content-Type: application/json', true, 400);
+            echo json_encode(['ok' => false, 'error' => 'Parâmetros ausentes.']);
+            return;
+        }
+
+        $source = $this->db->where('id', $id)
+            ->where('empresa_id', $empresa_id)
+            ->where('categoria_id', $categoria_id)
+            ->where('deleted', 0)
+            ->get('tbl_intranet_categorias_fluxo')->row_array();
+
+        if (!$source) {
+            header('Content-Type: application/json', true, 404);
+            echo json_encode(['ok' => false, 'error' => 'Nó não encontrado.']);
+            return;
+        }
+
+        $this->db->trans_start();
+        $new_root_id = $this->_clone_subtree($id, $categoria_id, $empresa_id, $source['vindo_de'] ?: null);
+        $this->_recompute_all_codigos($categoria_id, $empresa_id);
+        $this->db->trans_complete();
+
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => $this->db->trans_status(), 'id' => $new_root_id]);
+    }
+
+    public function node_copy_to_categoria()
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $id = (int) $this->input->post('id');
+        $source_categoria_id = (int) $this->input->post('source_categoria_id');
+        $target_categoria_id = (int) $this->input->post('target_categoria_id');
+        $target_parent_id = $this->input->post('target_parent_id') ? (int) $this->input->post('target_parent_id') : null;
+
+        if (!$id || !$source_categoria_id || !$target_categoria_id) {
+            header('Content-Type: application/json', true, 400);
+            echo json_encode(['ok' => false, 'error' => 'Parâmetros ausentes.']);
+            return;
+        }
+
+        $target = $this->db->where('id', $target_categoria_id)
+            ->where('empresa_id', $empresa_id)
+            ->where('deleted', 0)
+            ->where('rel_type', 'workflow')
+            ->get('tbl_intranet_categorias')->row();
+        if (!$target) {
+            header('Content-Type: application/json', true, 404);
+            echo json_encode(['ok' => false, 'error' => 'Categoria destino inválida.']);
+            return;
+        }
+
+        if ($target_parent_id) {
+            $tp = $this->db->where('id', $target_parent_id)
+                ->where('empresa_id', $empresa_id)
+                ->where('categoria_id', $target_categoria_id)
+                ->where('deleted', 0)
+                ->get('tbl_intranet_categorias_fluxo')->row();
+            if (!$tp) {
+                header('Content-Type: application/json', true, 404);
+                echo json_encode(['ok' => false, 'error' => 'Nó pai destino inválido.']);
+                return;
+            }
+        }
+
+        $source = $this->db->where('id', $id)
+            ->where('empresa_id', $empresa_id)
+            ->where('categoria_id', $source_categoria_id)
+            ->where('deleted', 0)
+            ->get('tbl_intranet_categorias_fluxo')->row();
+        if (!$source) {
+            header('Content-Type: application/json', true, 404);
+            echo json_encode(['ok' => false, 'error' => 'Nó origem não encontrado.']);
+            return;
+        }
+
+        $this->db->trans_start();
+        $new_root_id = $this->_clone_subtree($id, $source_categoria_id, $empresa_id, $target_parent_id, $target_categoria_id);
+        $this->_recompute_all_codigos($target_categoria_id, $empresa_id);
+        $this->db->trans_complete();
+
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => $this->db->trans_status(), 'id' => $new_root_id]);
+    }
+
+    public function list_workflow_categorias()
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $exclude = (int) $this->input->get('exclude');
+
+        $this->db->select('id, titulo')
+            ->where('empresa_id', $empresa_id)
+            ->where('deleted', 0)
+            ->where('rel_type', 'workflow')
+            ->where('active', 1);
+        if ($exclude) $this->db->where('id !=', $exclude);
+        $this->db->order_by('titulo', 'asc');
+        $rows = $this->db->get('tbl_intranet_categorias')->result_array();
+
+        header('Content-Type: application/json');
+        echo json_encode($rows);
+    }
+
+    public function list_categoria_nodes()
+    {
+        $empresa_id = $this->session->userdata('empresa_id');
+        $categoria_id = (int) $this->input->get('categoria_id');
+
+        if (!$categoria_id) {
+            header('Content-Type: application/json');
+            echo json_encode([]);
+            return;
+        }
+
+        $sql = "SELECT f.id, f.codigo_sequencial, d.name AS setor_name
+                FROM tbl_intranet_categorias_fluxo f
+                LEFT JOIN tbldepartments d ON d.departmentid = f.setor
+                WHERE f.categoria_id = ? AND f.empresa_id = ? AND f.deleted = 0
+                ORDER BY f.codigo_sequencial";
+        $rows = $this->db->query($sql, [$categoria_id, $empresa_id])->result_array();
+
+        header('Content-Type: application/json');
+        echo json_encode($rows);
+    }
+
+    private function _clone_subtree($source_id, $source_categoria_id, $empresa_id, $new_root_parent_id, $target_categoria_id = null)
+    {
+        if (!$target_categoria_id) {
+            $target_categoria_id = $source_categoria_id;
+        }
+
+        $sub_ids = $this->_collect_subtree_ids($source_id, $source_categoria_id, $empresa_id);
+        if (!$sub_ids) return null;
+
+        $rows = $this->db->where_in('id', $sub_ids)
+            ->where('empresa_id', $empresa_id)
+            ->get('tbl_intranet_categorias_fluxo')->result_array();
+
+        $rows_by_id = [];
+        foreach ($rows as $r) $rows_by_id[$r['id']] = $r;
+
+        $id_map = [];
+        $new_root_id = null;
+
+        foreach ($sub_ids as $old_id) {
+            if (!isset($rows_by_id[$old_id])) continue;
+            $row = $rows_by_id[$old_id];
+            $old_parent = $row['vindo_de'];
+
+            $new_row = $row;
+            unset($new_row['id']);
+            $new_row['categoria_id'] = $target_categoria_id;
+            $new_row['empresa_id'] = $empresa_id;
+            $new_row['data_cadastro'] = date('Y-m-d');
+            $new_row['user_cadastro'] = get_staff_user_id();
+            $new_row['data_ultima_alteracao'] = date('Y-m-d');
+            $new_row['user_ultima_alteracao'] = get_staff_user_id();
+            $new_row['deleted'] = 0;
+
+            if ($old_id == $source_id) {
+                $new_row['vindo_de'] = $new_root_parent_id;
+            } else {
+                $new_row['vindo_de'] = $id_map[$old_parent] ?? null;
+            }
+
+            $this->db->insert('tbl_intranet_categorias_fluxo', $new_row);
+            $new_id = $this->db->insert_id();
+            $id_map[$old_id] = $new_id;
+            if ($old_id == $source_id) $new_root_id = $new_id;
+
+            $campos = $this->db->where('preenchido_por', $old_id)
+                ->where('categoria_id', $source_categoria_id)
+                ->where('empresa_id', $empresa_id)
+                ->where('deleted', 0)
+                ->get('tbl_intranet_categorias_campo')->result_array();
+            foreach ($campos as $campo) {
+                $old_campo_id = $campo['id'];
+                unset($campo['id']);
+                $campo['categoria_id'] = $target_categoria_id;
+                $campo['preenchido_por'] = $new_id;
+                $campo['user_cadastro'] = get_staff_user_id();
+                $campo['data_cadastro'] = date('Y-m-d H:i:s');
+                $campo['user_ultima_alteracao'] = get_staff_user_id();
+                $campo['data_ultima_alteracao'] = date('Y-m-d H:i:s');
+                $this->db->insert('tbl_intranet_categorias_campo', $campo);
+                $new_campo_id = $this->db->insert_id();
+
+                $opts = $this->db->where('campo_id', $old_campo_id)
+                    ->where('deleted', 0)
+                    ->get('tbl_intranet_categorias_campo_options')->result_array();
+                foreach ($opts as $opt) {
+                    unset($opt['id']);
+                    $opt['campo_id'] = $new_campo_id;
+                    $this->db->insert('tbl_intranet_categorias_campo_options', $opt);
+                }
+            }
+        }
+
+        return $new_root_id;
+    }
+
     public function reports_setores()
     {
         // close_setup_menu();

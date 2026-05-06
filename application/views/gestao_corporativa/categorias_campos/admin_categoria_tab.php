@@ -11,22 +11,23 @@ $tabela = str_replace($vowels, "", $rel_type);
         if ($tabela == 'ra_atendimento_rapido') {
             $permisson = 'atendimento';
         }
-        if (has_permission_intranet($permisson . '_settings', '', 'create_categoria') || $rel_type == 'api') {
-            ?>
-            <div class="_buttons">
+        ?>
+        <div class="_buttons">
+            <?php if (has_permission_intranet($permisson . '_settings', '', 'create_categoria') || $rel_type == 'api') { ?>
                 <a onclick="Update_categoria<?php echo $tabela; ?>('');" class="btn btn-info pull-left" ><?php
-                    if ($rel_type != 'api') {
-                        echo 'Nova Categoria';
-                    } else {
-                        echo 'Nova API';
-                    }
-                    ?></a>
+                    echo ($rel_type != 'api') ? 'Nova Categoria' : 'Nova API';
+                ?></a>
+            <?php } ?>
 
-            </div>
-            <div class="clearfix"></div>
+            <label class="checkbox-inline pull-right" style="margin-top: 7px;">
+                <input type="checkbox" id="show_inactive_chk_<?php echo $tabela; ?>" onchange="$('#show_inactive_<?php echo $tabela; ?>').val(this.checked ? '1' : '0'); reload_categoria<?php echo $tabela; ?>();">
+                Mostrar inativos
+            </label>
+            <input type="hidden" id="show_inactive_<?php echo $tabela; ?>" name="show_inactive_<?php echo $tabela; ?>" value="0">
+        </div>
+        <div class="clearfix"></div>
 
-            <hr class="hr-panel-heading" />
-        <?php } ?>
+        <hr class="hr-panel-heading" />
         <?php
         $table_data = [];
 
@@ -114,6 +115,7 @@ $tabela = str_replace($vowels, "", $rel_type);
     $(function () {
         var Params = {};
         Params['rel_type'] = '[name="rel_type<?php echo $rel_type; ?>"]';
+        Params['show_inactive'] = '#show_inactive_<?php echo $tabela; ?>';
         if('<?php echo $rel_type; ?>' == 'links' || '<?php echo $rel_type; ?>' == 'links_destaque'){
             var search = 2;
             var sort = 2;
@@ -236,6 +238,7 @@ $tabela = str_replace($vowels, "", $rel_type);
             $('.table-categorias<?php echo $tabela; ?>').DataTable().destroy();
         }
         Params['rel_type'] = '[name="rel_type<?php echo $rel_type; ?>"]';
+        Params['show_inactive'] = '#show_inactive_<?php echo $tabela; ?>';
         if('<?php echo $rel_type; ?>' == 'links' || '<?php echo $rel_type; ?>' == 'links_destaque'){
             var search = 2;
             var sort = 2;

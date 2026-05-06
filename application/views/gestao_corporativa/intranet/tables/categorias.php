@@ -35,6 +35,12 @@ $additionalSelect = [
 $empresa_id = $this->ci->session->userdata('empresa_id');
 
 array_push($where, 'AND ' . db_prefix() . '_intranet_categorias.deleted = 0');
+
+$show_inactive = $this->ci->input->post('show_inactive');
+if ($show_inactive != '1') {
+    array_push($where, 'AND ' . db_prefix() . '_intranet_categorias.active = 1');
+}
+
 if ($this->ci->input->post('rel_type')) {
     $rel_type = $this->ci->input->post('rel_type');
     $vowels = array(".");
