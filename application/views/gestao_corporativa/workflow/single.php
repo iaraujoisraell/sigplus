@@ -56,7 +56,7 @@ if (is_array($info_client)) {
             <?php } ?>
 
 
-            <div class="col-md-<?php echo $in_department ? '8' : '12'; ?>">
+            <div class="col-md-12">
                 <div class="panel_s">
                     <div class="panel-heading">
                         WORKFLOW #<?php echo $workflow->id; ?>
@@ -543,7 +543,7 @@ if (is_array($info_client)) {
                 <?php endif; ?>
             </div>
             <?php if ($in_department == true) { ?>
-                <div class="col-md-4"> <?php //echo "aqui";
+                <div class="col-md-12"> <?php //echo "aqui";
                                         ?>
                     <div class="panel_s">
                         <div class="panel-heading">
