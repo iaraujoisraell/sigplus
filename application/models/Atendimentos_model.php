@@ -520,11 +520,17 @@ class Atendimentos_model extends App_Model
         $empresa_id = $this->session->userdata('empresa_id');
         $tbl_values = 'tbl_intranet_categorias_campo_values';
         $tbl_campos = 'tbl_intranet_categorias_campo';
+        $tbl_categoria = 'tbl_intranet_categorias';
 
-        $sql = "SELECT $tbl_campos.categoria_id as categoria, $tbl_campos.nome as nome_campo, $tbl_campos.id as id_campo, $tbl_campos.type as tipo_campo, $tbl_campos.name as name_campo, "
-            . "$tbl_campos.options as opcoes_select, $tbl_campos.tam_coluna as tamanho, $tbl_values.value, $tbl_values.id as value_id from $tbl_values "
+        $sql = "SELECT $tbl_campos.categoria_id as categoria, $tbl_categoria.titulo as categoria_titulo, "
+            . "$tbl_campos.nome as nome_campo, $tbl_campos.id as id_campo, $tbl_campos.type as tipo_campo, $tbl_campos.name as name_campo, "
+            . "$tbl_campos.options as opcoes_select, $tbl_campos.tam_coluna as tamanho, $tbl_campos.ordem as ordem_campo, "
+            . "$tbl_values.value, $tbl_values.id as value_id, $tbl_values.data_cadastro, $tbl_values.user_cadastro "
+            . "from $tbl_values "
             . "INNER JOIN $tbl_campos ON $tbl_campos.id = $tbl_values.campo_id "
-            . "WHERE $tbl_values.empresa_id = $empresa_id AND $tbl_values.deleted = 0 AND $tbl_campos.deleted = 0 and $tbl_values.rel_type = 'ra_atendimento_rapido' and rel_id = $id ORDER BY $tbl_campos.ordem asc ";
+            . "LEFT JOIN $tbl_categoria ON $tbl_categoria.id = $tbl_campos.categoria_id "
+            . "WHERE $tbl_values.empresa_id = $empresa_id AND $tbl_values.deleted = 0 AND $tbl_campos.deleted = 0 and $tbl_values.rel_type = 'ra_atendimento_rapido' and rel_id = $id "
+            . "ORDER BY $tbl_values.data_cadastro DESC, $tbl_values.id DESC, $tbl_campos.ordem asc ";
 
         return $this->db->query($sql)->result_array();
     }

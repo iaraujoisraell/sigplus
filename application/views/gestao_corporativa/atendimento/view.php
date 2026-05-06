@@ -764,37 +764,56 @@
 
                                         <div class="clearfix"></div>
                                         <div class="mtop15">
-                                            <table class="table dt-table scroll-responsive" data-order-col="2" data-order-type="desc">
-                                                <thead>
-                                                    <tr>
-                                                        <th >
-                                                            <?php echo 'Descrição'; ?>
-                                                        </th>
-                                                        <th>
-                                                            <?php echo 'Valor'; ?>
-                                                        </th>
-
-                                                        <th>
-                                                            <?php echo _l('options'); ?>
-                                                        </th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <?php foreach ($registros_rapidos as $rr) { ?>
-                                                        <tr>
-                                                            <td >
-                                                                <?php echo $rr['nome_campo']; ?>
-                                                            </td>
-                                                            <td >
-                                                                <?php echo $rr['value']; ?>
-                                                            </td>
-                                                            <td >
-                                                                <?php //echo $ro['date'];            ?>
-                                                            </td>
-                                                        </tr>
-                                                    <?php } ?>
-                                                </tbody>
-                                            </table>
+                                            <?php
+                                            $solicitacoes_agrupadas = [];
+                                            foreach ($registros_rapidos as $rr) {
+                                                $chave = ($rr['data_cadastro'] ?? '') . '|' . ($rr['categoria'] ?? '') . '|' . ($rr['user_cadastro'] ?? '');
+                                                if (!isset($solicitacoes_agrupadas[$chave])) {
+                                                    $solicitacoes_agrupadas[$chave] = [
+                                                        'categoria_titulo' => $rr['categoria_titulo'] ?? 'Sem categoria',
+                                                        'data_cadastro'    => $rr['data_cadastro'] ?? null,
+                                                        'user_cadastro'    => $rr['user_cadastro'] ?? null,
+                                                        'campos'           => [],
+                                                    ];
+                                                }
+                                                $solicitacoes_agrupadas[$chave]['campos'][] = $rr;
+                                            }
+                                            ?>
+                                            <?php if (empty($solicitacoes_agrupadas)) { ?>
+                                                <p class="text-muted">Nenhuma solicitação rápida cadastrada.</p>
+                                            <?php } else { ?>
+                                                <?php foreach ($solicitacoes_agrupadas as $sol) { ?>
+                                                    <div class="panel_s mbot15">
+                                                        <div class="panel-heading">
+                                                            <strong><?php echo $sol['categoria_titulo']; ?></strong>
+                                                            <span class="text-muted mleft10">
+                                                                <?php if ($sol['data_cadastro']) {
+                                                                    echo '· ' . date('d/m/Y H:i', strtotime($sol['data_cadastro']));
+                                                                } ?>
+                                                                <?php if ($sol['user_cadastro']) {
+                                                                    echo ' · por ' . get_staff_full_name($sol['user_cadastro']);
+                                                                } ?>
+                                                            </span>
+                                                        </div>
+                                                        <div class="panel-body">
+                                                            <table class="table table-condensed no-margin">
+                                                                <tbody>
+                                                                    <?php foreach ($sol['campos'] as $rr) { ?>
+                                                                        <tr>
+                                                                            <td style="width: 35%; font-weight: 600;">
+                                                                                <?php echo $rr['nome_campo']; ?>
+                                                                            </td>
+                                                                            <td>
+                                                                                <?php echo get_value('ra_rapido', $rr['value'], $rr['tipo_campo'], true, true); ?>
+                                                                            </td>
+                                                                        </tr>
+                                                                    <?php } ?>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </div>
+                                                <?php } ?>
+                                            <?php } ?>
                                         </div>
                                     </div>
                                 </div>
