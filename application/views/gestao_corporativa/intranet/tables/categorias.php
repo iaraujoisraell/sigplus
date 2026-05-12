@@ -158,10 +158,12 @@ foreach ($rResult as $aRow) {
     if (has_permission_intranet($permission . '_settings', '', 'delete_categoria')) {
         $options .= '<a class="btn btn-danger btn-xs mleft5 _delete" data-toggle="tooltip" title="Deletar Categoria" onclick="delete_categoria' . $tabela . '(' . $aRow['id'] . ');"><i class="fa fa-trash"></i></a>';
     }
-    if ($rel_type == 'workflow') {
+    if ($rel_type == 'workflow' || $rel_type == 'ra_atendimento_rapido') {
         if (has_permission_intranet($permission . '_settings', '', 'duplicate_categoria')) {
             $options .= '<a class="btn btn-warning btn-xs mleft5" data-toggle="tooltip" title="Duplicar Categoria" onclick="duplicate_categoria' . $tabela . '(' . $aRow['id'] . ');"><i class="fa fa-clone"></i></a>';
         }
+    }
+    if ($rel_type == 'workflow') {
         $options .= '<a class="btn btn-default btn-xs mleft5" data-toggle="tooltip" title="Documentos" onclick="Doctos' . $tabela . '(' . $aRow['id'] . ');"><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a>';
     }
     if ($rel_type == 'cdc') {
