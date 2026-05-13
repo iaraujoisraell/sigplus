@@ -313,6 +313,17 @@ class Categorias_campos extends AdminController
 
             $info = $array;
 
+            // Permite limpar explicitamente anexo/descrição em ra_atendimento_rapido
+            // (o array_filter acima derrubaria valores vazios, mantendo o antigo no banco)
+            if ($rel_type == 'ra_atendimento_rapido') {
+                if (array_key_exists('anexo', $FORM)) {
+                    $info['anexo'] = trim((string) $FORM['anexo']);
+                }
+                if (array_key_exists('descricao', $FORM)) {
+                    $info['descricao'] = $FORM['descricao'];
+                }
+            }
+
             //print_r($info); exit;
 
             $this->db->where('id', $this->input->post('id'));

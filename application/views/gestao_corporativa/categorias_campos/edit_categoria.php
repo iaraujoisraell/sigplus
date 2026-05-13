@@ -64,10 +64,11 @@ $tabela = str_replace($vowels, "", $rel_type);
                     </div>
                     <div class="form-group">
                         <label class="control-label"><i class="fa fa-paperclip"></i> Anexo fixo da categoria <small class="text-muted">(opcional — modelo de doc, instrução, etc.)</small></label>
-                        <input type="hidden" name="anexo" id="anexo_filename" value="<?php echo html_escape($categoria->anexo ?? ''); ?>">
+                        <?php $anexo_atual = trim($categoria->anexo ?? ''); ?>
+                        <input type="hidden" name="anexo" id="anexo_filename" value="<?php echo html_escape($anexo_atual); ?>">
 
-                        <div id="anexo-atual" style="<?php echo empty($categoria->anexo) ? 'display:none;' : ''; ?>margin-bottom:6px;padding:8px 12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
-                            <span><i class="fa fa-file"></i> <a id="anexo-link" href="<?php echo !empty($categoria->anexo) ? base_url('assets/intranet/arquivos/categorias_anexos/' . $categoria->anexo) : '#'; ?>" target="_blank"><?php echo html_escape($categoria->anexo ?? ''); ?></a></span>
+                        <div id="anexo-atual" style="<?php echo $anexo_atual === '' ? 'display:none;' : ''; ?>margin-bottom:6px;padding:8px 12px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:6px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                            <span><i class="fa fa-file"></i> <a id="anexo-link" href="<?php echo $anexo_atual !== '' ? base_url('assets/intranet/arquivos/categorias_anexos/' . $anexo_atual) : '#'; ?>" target="_blank"><?php echo html_escape($anexo_atual); ?></a></span>
                             <button type="button" class="btn btn-default btn-xs" onclick="removerAnexoCategoria()"><i class="fa fa-times"></i> Remover</button>
                         </div>
 
@@ -582,6 +583,12 @@ $tabela = str_replace($vowels, "", $rel_type);
         $('#anexo-atual').hide();
         $('#anexo-status').text('anexo removido · salve para confirmar').css('color', '#f59e0b');
     }
+
+    // Defesa: se chegou aqui sem filename, esconde o card mesmo se server renderizou visível
+    $(function () {
+        var v = ($('#anexo_filename').val() || '').trim();
+        if (v === '') $('#anexo-atual').hide();
+    });
 </script>
 <?php if ($rel_type == 'cdc') { ?>
     <script>
