@@ -68,6 +68,7 @@ class Registro_ocorrencia extends AdminController
             $filters[$tab][$filter['filter']] = $filter['value'];
         }
         $data['filters'] = $filters;
+        $data['kpis'] = $this->Registro_ocorrencia_model->get_kpis_overview(get_staff_user_id(), is_admin());
         $this->load->view('gestao_corporativa/registro_ocorrencia/list', $data);
     }
 
@@ -162,6 +163,12 @@ class Registro_ocorrencia extends AdminController
 
             $info['status'] = '1';
 
+            // Validade prevista = hoje + prazo da categoria (se definido)
+            $cat_for_validade = $this->Categorias_campos_model->get_categoria($this->input->post('categoria_id'));
+            if ($cat_for_validade && !empty($cat_for_validade->prazo)) {
+                $info['validade'] = date('Y-m-d', strtotime('+' . (int) $cat_for_validade->prazo . ' days'));
+            }
+
             $id = $this->Registro_ocorrencia_model->add($info);
             $this->Intranet_general_model->add_log(["rel_type" => "r.o", "controller" => "Registro_ocorrencia", "function" => "add", "action" => "Registro de ocorrência registrado ($id)"]);
 
@@ -249,6 +256,63 @@ class Registro_ocorrencia extends AdminController
     {
 
         $this->app->get_table_data_intranet('registro_ocorrencia');
+    }
+
+    /**
+     * Metadata da categoria pro card de SLA no cadastro: setor responsável,
+     * prazo, validade prevista, atuantes e quem será notificado.
+     */
+    public function get_categoria_meta($categoria_id = 0)
+    {
+        $categoria_id = (int) $categoria_id;
+        $empresa_id = (int) $this->session->userdata('empresa_id');
+
+        header('Content-Type: application/json');
+
+        if (!$categoria_id) {
+            echo json_encode(['ok' => false, 'error' => 'categoria_id ausente']);
+            return;
+        }
+
+        $cat = $this->Categorias_campos_model->get_categoria($categoria_id);
+        if (!$cat || (int) $cat->empresa_id !== $empresa_id) {
+            echo json_encode(['ok' => false, 'error' => 'categoria não encontrada']);
+            return;
+        }
+
+        $this->load->model('departments_model');
+        $setor_nome = $cat->responsavel ? get_departamento_nome($cat->responsavel) : null;
+
+        $atuantes = [];
+        if (!empty($cat->atuantes)) {
+            $rows = $this->Registro_ocorrencia_model->get_categoria_atuantes($cat->atuantes);
+            if (is_array($rows)) {
+                foreach ($rows as $a) $atuantes[] = $a['titulo'];
+            }
+        }
+
+        $notificados = [];
+        if ($cat->responsavel) {
+            $this->load->model('Departments_model');
+            $staffs = $this->Departments_model->get_department_staffs($cat->responsavel);
+            foreach ($staffs as $s) {
+                $notificados[] = trim($s['firstname'] . ' ' . $s['lastname']);
+            }
+        }
+
+        $prazo = $cat->prazo ? (int) $cat->prazo : null;
+        $validade = $prazo ? date('Y-m-d', strtotime("+{$prazo} days")) : null;
+
+        echo json_encode([
+            'ok'              => true,
+            'titulo'          => $cat->titulo,
+            'setor_nome'      => $setor_nome,
+            'prazo'           => $prazo,
+            'validade_iso'    => $validade,
+            'validade_br'     => $validade ? date('d/m/Y', strtotime($validade)) : null,
+            'atuantes'        => $atuantes,
+            'notificados'     => $notificados,
+        ]);
     }
 
     public function table_atuantes()

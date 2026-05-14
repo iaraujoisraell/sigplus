@@ -278,7 +278,21 @@ foreach ($rResult as $aRow) {
     $row[] = $data;
 
     if ($aRow['date']) {
-        $validade = date("d/m/Y", strtotime($aRow['date']));
+        $validade_fmt = date("d/m/Y", strtotime($aRow['date']));
+        $validade = $validade_fmt;
+        // semáforo de SLA: só pinta enquanto o RO estiver ativo (status 1 ou 2)
+        if (in_array((int) $aRow['status'], [1, 2], true)) {
+            $hoje = strtotime(date('Y-m-d'));
+            $venc = strtotime($aRow['date']);
+            $dias = (int) floor(($venc - $hoje) / 86400);
+            if ($dias < 0) {
+                $validade = '<span style="color:#dc2626;font-weight:600;" title="Vencido há ' . abs($dias) . ' dia(s)"><i class="fa fa-exclamation-triangle"></i> ' . $validade_fmt . '</span>';
+            } elseif ($dias <= 2) {
+                $validade = '<span style="color:#d97706;font-weight:600;" title="Vence em ' . $dias . ' dia(s)"><i class="fa fa-clock-o"></i> ' . $validade_fmt . '</span>';
+            } else {
+                $validade = '<span style="color:#16a34a;" title="No prazo"><i class="fa fa-check-circle"></i> ' . $validade_fmt . '</span>';
+            }
+        }
     } else {
         $validade = '';
     }

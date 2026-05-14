@@ -30,6 +30,25 @@
 
             <br><br>
 
+            <?php
+            $kpi_cards = [
+                ['label' => 'Abertos',              'value' => $kpis['abertos']        ?? 0, 'border' => '#ff2d42', 'bg' => '#fff5f5'],
+                ['label' => 'Em progresso',         'value' => $kpis['em_progresso']   ?? 0, 'border' => '#03a9f4', 'bg' => '#eaf6fc'],
+                ['label' => 'Atrasados',            'value' => $kpis['atrasados']      ?? 0, 'border' => '#f59e0b', 'bg' => '#fff7ed'],
+                ['label' => 'Concluídos no mês',    'value' => $kpis['concluidos_mes'] ?? 0, 'border' => '#84c529', 'bg' => '#ecfdf5'],
+            ];
+            ?>
+            <div class="row" style="margin-bottom: 14px;">
+                <?php foreach ($kpi_cards as $c): ?>
+                    <div class="col-md-3 col-sm-6">
+                        <div style="background:<?= $c['bg']; ?>;border-left:4px solid <?= $c['border']; ?>;border-radius:6px;padding:14px 16px;">
+                            <div style="font-size:11px;color:#7a8a99;font-weight:700;text-transform:uppercase;letter-spacing:.04em;"><?= $c['label']; ?></div>
+                            <div style="font-size:28px;color:#1f2d3d;font-weight:700;line-height:1.1;margin-top:2px;"><?= $c['value']; ?></div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
             <div class="panel_s">
 
                 <div class="panel-body">

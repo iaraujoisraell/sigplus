@@ -520,6 +520,48 @@ class Registro_ocorrencia_model extends App_Model {
     }
 
     /**
+     * KPIs do painel de visão geral. Escopo: R.O.s onde o usuário é
+     * notificante, atribuído, atuante, ou pertence ao setor responsável
+     * da categoria. Admin vê tudo da empresa.
+     */
+    public function get_kpis_overview($staffid = 0, $is_admin = false) {
+        $empresa_id = (int) $this->session->userdata('empresa_id');
+        $staffid = (int) $staffid;
+        $mes_atual = date('Y-m-01');
+
+        $scope_sql = '';
+        if (!$is_admin) {
+            $scope_sql = " AND (
+                ro.user_created = $staffid
+                OR ro.atribuido_a = $staffid
+                OR EXISTS(SELECT 1 FROM tbl_intranet_registro_ocorrencia_atuantes_por_registro apr
+                          WHERE apr.registro_id = ro.id AND apr.staff_id = $staffid AND apr.deleted = 0)
+                OR EXISTS(SELECT 1 FROM tblstaff_departments sd
+                          JOIN tbl_intranet_categorias cat ON cat.responsavel = sd.departmentid
+                          WHERE cat.id = ro.categoria_id AND sd.staffid = $staffid)
+            )";
+        }
+
+        $sql = "SELECT
+                  SUM(CASE WHEN ro.status = 1 THEN 1 ELSE 0 END) AS abertos,
+                  SUM(CASE WHEN ro.status = 2 THEN 1 ELSE 0 END) AS em_progresso,
+                  SUM(CASE WHEN ro.status IN (1,2) AND ro.validade IS NOT NULL AND ro.validade < CURDATE() THEN 1 ELSE 0 END) AS atrasados,
+                  SUM(CASE WHEN ro.status = 3 AND ro.date_end >= '$mes_atual' THEN 1 ELSE 0 END) AS concluidos_mes
+                FROM tbl_intranet_registro_ocorrencia ro
+                WHERE ro.deleted = 0
+                  AND ro.empresa_id = $empresa_id
+                  $scope_sql";
+
+        $row = $this->db->query($sql)->row_array();
+        return [
+            'abertos'        => (int) ($row['abertos'] ?? 0),
+            'em_progresso'   => (int) ($row['em_progresso'] ?? 0),
+            'atrasados'      => (int) ($row['atrasados'] ?? 0),
+            'concluidos_mes' => (int) ($row['concluidos_mes'] ?? 0),
+        ];
+    }
+
+    /**
      * 21/11/2022
      * @WannaLuiza
      * Retorna uma categoria pelo hash
