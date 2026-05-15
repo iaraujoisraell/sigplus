@@ -254,14 +254,21 @@ class Atendimentos_model extends App_Model
                 if (empty($campo['value'])) {
                     continue;
                 }
-                $texto .= "\n- " . $campo['nome_campo'] . ': ' . trim(strip_tags($campo['value']));
+                $valor = trim(strip_tags(get_value('atendimento', $campo['value'], $campo['tipo_campo'], false)));
+                if ($valor === '') {
+                    continue;
+                }
+                $texto .= "\n- " . $campo['nome_campo'] . ': ' . $valor;
             }
         }
 
         if (!empty($rapidos)) {
             $texto .= "\n\nSolicitações rápidas registradas:";
             foreach ($rapidos as $item) {
-                $valor = trim(strip_tags($item['value']));
+                if (empty($item['value'])) {
+                    continue;
+                }
+                $valor = trim(strip_tags(get_value('ra_rapido', $item['value'], $item['tipo_campo'], false)));
                 if ($valor === '') {
                     continue;
                 }

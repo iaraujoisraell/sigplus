@@ -306,19 +306,6 @@
 <div class="content">
 
     <div class="row">
-        <div class="col-md-12">
-
-            <h2>Protocolo: <?php echo $info->protocolo; ?></h2>
-            <div>
-                <ol class="breadcrumb" style="background-color: white;">
-                    <li><a href="<?= base_url('gestao_corporativa/intranet'); ?>"><i class="fa fa-home"></i> Home </a></li> 
-                    <li ><a href="<?= base_url('gestao_corporativa/Atendimento'); ?>"><i class="fa fa-user"></i> Registro de Atendimento </a></li>
-                    <li class="active"><a href="#"><i class="fa fa-user"></i> <?php echo $info->protocolo; ?> </a></li>
-                </ol>
-            </div>
-
-        </div>
-
         <?php
         $data_encerramento = $info->data_encerramento;
         $data_hora_inicial = $info->date_created;
@@ -351,121 +338,87 @@
         $minutos = str_pad((floor($segundos / 60)), 2, '0', STR_PAD_LEFT);
         $segundos -= $minutos * 60;
         $segundos = str_pad($segundos, 2, '0', STR_PAD_LEFT);
-
-        //
         ?>
 
         <div class="col-md-12">
-            <?php if (!$data_encerramento) { ?>
-                <label style="font-size: 25px;" id="counter" class="label label-warning">00:00:00</label>
-          <!--  <input type="button" value="Parar" onclick="para();"> <input type="button" value="Iniciar" onclick="inicia();"> <input type="button" value="Zerar" onclick="zera();"> -->
-                <a  class="btn btn-primary pull-right" title = "" href="<?php echo site_url('gestao_corporativa/Atendimento/encerrar_atendimento/' . $info->id); ?> " <?php
-                if ($permission == false) {
-                    echo 'disabled style="pointer-events: none; cursor: default;"';
-                }
-                ?>>Encerrar Atendimento</a>
-                <?php } else { ?>
-                <label style="font-size: 25px;" id="counter" class="label label-success"><?php echo 'Tempo de Atendimento : ' . "$horas:$minutos:$segundos"; ?></label>
-            <?php } ?>
+            <ol class="breadcrumb" style="background-color: white; margin-bottom: 8px;">
+                <li><a href="<?= base_url('gestao_corporativa/intranet'); ?>"><i class="fa fa-home"></i> Home</a></li>
+                <li><a href="<?= base_url('gestao_corporativa/Atendimento'); ?>"><i class="fa fa-user"></i> Registro de Atendimento</a></li>
+                <li class="active"><i class="fa fa-user"></i> <?php echo $info->protocolo; ?></li>
+            </ol>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; background:#fff; border:1px solid #e6ebef; border-radius:8px; padding:12px 16px; margin-bottom:14px;">
+                <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span style="font-size:18px; font-weight:700; color:#1f2d3d;">Protocolo <?php echo $info->protocolo; ?></span>
+                    <?php if (!$data_encerramento) { ?>
+                        <span style="background:#fef3c7; color:#92400e; border:1px solid #fcd34d; padding:3px 10px; border-radius:14px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">
+                            <i class="fa fa-circle" style="font-size:7px; vertical-align:middle;"></i> Em aberto
+                        </span>
+                    <?php } else { ?>
+                        <span style="background:#dcfce7; color:#166534; border:1px solid #86efac; padding:3px 10px; border-radius:14px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.04em;">
+                            <i class="fa fa-check" style="font-size:10px; vertical-align:middle;"></i> Encerrado
+                        </span>
+                    <?php } ?>
+                    <?php if ($info->canal_atendimento_id != 0): ?>
+                        <span style="font-size:12px; color:#64748b;">Atendente: <strong style="color:#1f2d3d;"><?php echo $info->firstname . ' ' . $info->lastname; ?></strong></span>
+                    <?php elseif ($info->canal_atendimento_id == 0 && $info->user_created != ''): ?>
+                        <span style="font-size:12px; color:#64748b;">Acesso master portal: <strong style="color:#1f2d3d;"><?php echo get_staff_full_name($info->user_created); ?></strong></span>
+                    <?php endif; ?>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <?php if (!$data_encerramento) { ?>
+                        <label style="font-size:20px; margin:0;" id="counter" class="label label-warning">00:00:00</label>
+                        <a class="btn btn-primary" href="<?php echo site_url('gestao_corporativa/Atendimento/encerrar_atendimento/' . $info->id); ?>" <?php if ($permission == false) echo 'disabled style="pointer-events: none; cursor: default;"'; ?>>
+                            <i class="fa fa-check"></i> Encerrar Atendimento
+                        </a>
+                    <?php } else { ?>
+                        <label style="font-size:20px; margin:0;" id="counter" class="label label-success">Tempo: <?php echo "$horas:$minutos:$segundos"; ?></label>
+                    <?php } ?>
+                    <a target="_blank" href="<?php echo base_url('gestao_corporativa/atendimento/pdf/' . $info->id); ?>" class="btn btn-default">
+                        <i class="fa fa-print"></i> Imprimir PDF
+                    </a>
+                </div>
+            </div>
         </div>
 
-        <div class="col-md-12">
-            <br>
-        </div>
-
 
         <div class="col-md-12">
 
+            <style>
+                .at-kv { padding: 6px 0; }
+                .at-kv label { display:block; font-size:10px; color:#94a3b8; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin:0 0 2px; }
+                .at-kv .v { font-size:14px; color:#1f2d3d; font-weight:500; word-break:break-word; min-height: 18px; }
+                .at-kv .v.empty { color:#cbd5e1; font-style:italic; font-weight:400; }
+            </style>
             <div class="panel_s">
                 <div class="panel-heading">
                     Informações do Atendimento
-                    <a target="_blank"
-                        href="<?php echo base_url('gestao_corporativa/atendimento/pdf/' . $info->id); ?>"
-                        class="btn btn-info btn-sm pull-right mleft10"
-                        style="margin-top:-5px;">
-                            <i class="fa fa-print"></i> Imprimir PDF Completo
-                        </a>
-                    <label class="pull-right">
-
-                        <?php if ($info->canal_atendimento_id != 0) { ?>
-                            Atendente : <?php echo $info->firstname . ' ' . $info->lastname; ?>
-                        <?php } elseif ($info->canal_atendimento_id == 0 and $info->user_created != '') { ?>
-                            ACESSO MASTER PORTAL : <?php echo get_staff_full_name($info->user_created); ?>
-                        <?php } ?>
-
-                    </label>
                 </div>
                 <div class="panel-body">
                     <?php
-                    // print_r($info); exit;
                     $this->load->model('Clients_model');
                     $client = $this->Clients_model->get($info->client_id);
+                    $kv = function ($label, $value) {
+                        $v = trim((string) $value);
+                        $cls = $v === '' ? 'v empty' : 'v';
+                        $shown = $v === '' ? '—' : htmlspecialchars($v, ENT_QUOTES);
+                        echo '<div class="at-kv"><label>' . htmlspecialchars($label, ENT_QUOTES) . '</label><div class="' . $cls . '">' . $shown . '</div></div>';
+                    };
+                    $canal_label = ($info->canal_atendimento_id == 0) ? 'PORTAL DO CLIENTE' : $info->canal;
+                    $categoria_label = ($info->categoria_id == 0) ? 'PORTAL DO CLIENTE' : $info->titulo;
                     ?>
                     <div class="row">
-                        <div class="col-md-<?php
-                        if (is_array($info_client)) {
-                            echo '8';
-                        } else {
-                            echo '12';
-                        }
-                        ?>">
+                        <div class="col-md-<?php echo is_array($info_client) ? '8' : '12'; ?>">
                             <div class="row">
-                                <div class="col-md-4">
-                                    <label>#RA</label>
-                                    <input type="text" name="protocolo" value="#<?php echo $info->sequencial; ?>" class="form-control" disabled="true">       
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Canal Atendimento</label>
-                                    <input type="text" name="categoria" value="<?php
-                                    if ($info->canal_atendimento_id == 0) {
-                                        echo 'PORTAL DO CLIENTE';
-                                    } else {
-                                        echo $info->canal;
-                                    }
-                                    ?>" class="form-control" disabled="true">       
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Cliente</label>
-                                    <input type="text" name="categoria" value="<?php echo $client->company; ?>" class="form-control" disabled="true">       
-                                </div>
-                            </div>
-                            <br>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label>Categoria</label>
-                                    <input type="text" name="protocolo" value="<?php
-                                    if ($info->categoria_id == 0) {
-                                        echo 'PORTAL DO CLIENTE';
-                                    } else {
-                                        echo $info->titulo;
-                                    }
-                                    ?>" class="form-control" disabled="true">       
-                                </div>
-                                <div class="col-md-4">
-                                    <label>E-mail</label>
-                                    <input type="text" name="categoria" value="<?php echo $info->email; ?>" class="form-control" disabled="true">       
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Carteirinha</label>
-                                    <input type="text" name="carteirinha" value="<?php echo $client->numero_carteirinha; ?>" class="form-control" disabled="true">       
-                                </div>
-
-                            </div>
-                            <br>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <label>Protocolo</label>
-                                    <input type="text" name="categoria" value="<?php echo $info->protocolo; ?>" class="form-control" disabled="true">       
-                                </div>
-                                <div class="col-md-4">
-                                    <label>Contato</label>
-                                    <input type="text" name="protocolo" value="<?php echo $info->contato; ?>" class="form-control" disabled="true">       
-                                </div>
-                                <div class="col-md-4">
-                                    <label>CPF</label>
-                                    <input type="text" name="cpf" value="<?php echo $client->vat; ?>" class="form-control" disabled="true">       
-                                </div>
-
+                                <div class="col-md-4"><?php $kv('#RA', '#' . $info->sequencial); ?></div>
+                                <div class="col-md-4"><?php $kv('Canal Atendimento', $canal_label); ?></div>
+                                <div class="col-md-4"><?php $kv('Cliente', $client->company ?? ''); ?></div>
+                                <div class="col-md-4"><?php $kv('Categoria', $categoria_label); ?></div>
+                                <div class="col-md-4"><?php $kv('E-mail', $info->email); ?></div>
+                                <div class="col-md-4"><?php $kv('Carteirinha', $client->numero_carteirinha ?? ''); ?></div>
+                                <div class="col-md-4"><?php $kv('Protocolo', $info->protocolo); ?></div>
+                                <div class="col-md-4"><?php $kv('Contato', $info->contato); ?></div>
+                                <div class="col-md-4"><?php $kv('CPF', $client->vat ?? ''); ?></div>
                             </div>
 
                         </div>
