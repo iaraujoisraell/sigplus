@@ -44,6 +44,7 @@ class Intranet_general extends AdminController
             $view['rel_type'] = $data['rel_type'];
             $view['rel_id'] = $data['rel_id'];
 
+            $note_files = [];
             foreach ($_FILES as $fileKey => $file_one) {
                 if (isset($file_one['error']) && $file_one['error'] === UPLOAD_ERR_OK) {
                     $file = $file_one['name'];
@@ -69,7 +70,6 @@ class Intranet_general extends AdminController
                     }
                 }
             }
-            // print_r($note_files); exit;
             foreach ($note_files as $file_) {
                 //echo $file_; exit;
                 $data_file['url'] = base_url("/assets/intranet/arquivos/files/" . $file_);
