@@ -256,7 +256,7 @@ $categoria = ($info->categoria_id == 0) ? 'PORTAL DO CLIENTE' : $info->titulo;
                 <?php foreach ($registros_rapidos as $rr) { ?>
                     <tr class="zebra">
                         <td><?php echo $rr['nome_campo']; ?></td>
-                        <td><?php echo $rr['value']; ?></td>
+                        <td><?php echo get_value('ra_rapido', $rr['value'], $rr['tipo_campo'], false); ?></td>
                     </tr>
                 <?php } ?>
             </tbody>
