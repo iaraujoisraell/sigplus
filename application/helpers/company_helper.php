@@ -296,18 +296,12 @@ function get_value($rel_type, $value, $tipo, $link = true, $sub_ = false, $sub =
     } elseif ($tipo == 'setores') {
         $setores = explode(',', $value);
         $deps = [];
-        if (is_array($setores)) {
-            foreach ($setores as $setor) {
-                if (is_numeric($setor)) {
-                    $deps[] = get_departamento_nome($setor);
-                }
-            }
-            echo implode(' | ', $deps);
-        } else {
-            if ($value) {
-                return get_departamento_nome($value);
+        foreach ($setores as $setor) {
+            if (is_numeric($setor)) {
+                $deps[] = get_departamento_nome($setor);
             }
         }
+        return implode(' | ', $deps);
     } elseif ($tipo == 'funcionarios') {
         if ($value) {
             return get_staff_full_name($value);

@@ -1174,20 +1174,24 @@
             inicia();
 <?php } ?>
 
-        init_ajax_search('contact', '#contactid.ajax-search', {
-            tickets_contacts: true,
-            contact_userid: function () {
-                // when ticket is directly linked to project only search project client id contacts
-                var uid = $('select[data-auto-project="true"]').attr('data-project-userid');
-                if (uid) {
-                    return uid;
-                } else {
-                    return '';
+        if (typeof init_ajax_search === 'function') {
+            init_ajax_search('contact', '#contactid.ajax-search', {
+                tickets_contacts: true,
+                contact_userid: function () {
+                    // when ticket is directly linked to project only search project client id contacts
+                    var uid = $('select[data-auto-project="true"]').attr('data-project-userid');
+                    if (uid) {
+                        return uid;
+                    } else {
+                        return '';
+                    }
                 }
-            }
-        });
+            });
+        }
 
-        validate_new_ticket_form();
+        if (typeof validate_new_ticket_form === 'function') {
+            validate_new_ticket_form();
+        }
 
 <?php if (isset($project_id) || isset($contact)) { ?>
             $('body.ticket select[name="contactid"]').change();
