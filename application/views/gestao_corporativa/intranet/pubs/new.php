@@ -1,12 +1,23 @@
 <?php defined('BASEPATH') or exit('No direct script access allowed'); ?>
-<?php init_head_intranet_novo(); ?>
-<?php $this->load->view('gestao_corporativa/css_background'); ?>
+<?php
+$__embed = $this->input->get('embed');
+$aviso = isset($aviso) && is_object($aviso) ? $aviso : (object) ['id' => '', 'foto' => '', 'titulo' => '', 'tipo' => '', 'fim' => '', 'link' => '', 'descricao' => ''];
+$registro_atendimento_id = isset($registro_atendimento_id) ? $registro_atendimento_id : '';
+$categories = isset($categories) ? $categories : [];
+?>
+<?php if ($__embed): ?>
+    <?php $this->load->view('admin/includes/intranet/head'); ?>
+<?php else: ?>
+    <?php init_head_intranet_novo(); ?>
+    <?php $this->load->view('gestao_corporativa/css_background'); ?>
+<?php endif; ?>
 <div class="content">
 
     <div class="row">
         <?php echo form_open_multipart('gestao_corporativa/intra/Pubs/add_aviso'); ?>
         <input type="hidden" name="registro_atendimento_id" id="registro_atendimento_id"
             value="<?php echo $registro_atendimento_id; ?>">
+        <?php if (!$__embed): ?>
         <div class="col-md-12">
             <div>
                 <ol class="breadcrumb" style="background-color: white;">
@@ -18,6 +29,7 @@
                 </ol>
             </div>
         </div>
+        <?php endif; ?>
         <div class="col-md-12">
 
             <div class="panel_s">

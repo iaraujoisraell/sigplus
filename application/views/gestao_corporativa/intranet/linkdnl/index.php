@@ -175,24 +175,27 @@ $me_empresa      = get_option('companyname');
 
                 <!-- CENTRO -->
                 <div>
+                    <?php
+                    $can_pub = has_permission_intranet('publicacoes', '', 'create') || is_admin();
+                    $url_pub = base_url('gestao_corporativa/intra/Pubs/novo?embed=1');
+                    ?>
+
+                    <?php if ($can_pub): ?>
                     <div class="ui-card feed-compose">
                         <div class="feed-compose-top">
                             <img class="feed-compose-avatar" src="<?php echo $me_avatar; ?>" alt="<?php echo html_escape($me_nome); ?>">
-                            <div class="feed-compose-input">Começar publicação</div>
+                            <div class="feed-compose-input" role="button"
+                                 onclick="abrirComposeModal('<?php echo $url_pub; ?>','pubs/novo','Nova Publicação')">Começar publicação</div>
                         </div>
 
                         <div class="feed-compose-actions">
-                            <div class="feed-compose-action">
+                            <div class="feed-compose-action" role="button"
+                                 onclick="abrirComposeModal('<?php echo $url_pub; ?>','pubs/novo','Nova Publicação')">
                                 <i class="fa fa-picture-o" style="color:#378fe9;"></i> Foto
-                            </div>
-                            <div class="feed-compose-action">
-                                <i class="fa fa-file-text-o" style="color:#e16745;"></i> Comunicado
-                            </div>
-                            <div class="feed-compose-action">
-                                <i class="fa fa-calendar-check-o" style="color:#1a8754;"></i> Evento
                             </div>
                         </div>
                     </div>
+                    <?php endif; ?>
 
                     <div class="feed-sort">
                         <div class="line"></div>
@@ -310,5 +313,96 @@ $me_empresa      = get_option('companyname');
         </div>
     </div>
 </div>
+
+<div id="composeModal" class="compose-modal-overlay" aria-hidden="true">
+    <div class="compose-modal-dialog">
+        <div class="compose-modal-header">
+            <span class="compose-modal-title" id="composeModalTitle">Nova publicação</span>
+            <button type="button" class="compose-modal-close" onclick="fecharComposeModal(false)" aria-label="Fechar">&times;</button>
+        </div>
+        <div class="compose-modal-body">
+            <div class="compose-modal-loader" id="composeModalLoader">
+                <i class="fa fa-spinner fa-spin"></i> Carregando...
+            </div>
+            <iframe id="composeModalFrame" class="compose-modal-iframe" src="about:blank"
+                    title="Formulário" onload="composeFrameLoaded()"></iframe>
+        </div>
+    </div>
+</div>
+
+<style>
+    .compose-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:11000;display:none;align-items:center;justify-content:center;padding:24px;}
+    .compose-modal-overlay.open{display:flex;}
+    .compose-modal-dialog{background:#fff;width:100%;max-width:1100px;height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;}
+    .compose-modal-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid #e5e7eb;}
+    .compose-modal-title{font-weight:600;color:#1f2937;font-size:15px;}
+    .compose-modal-close{border:0;background:transparent;font-size:26px;line-height:1;color:#94a3b8;cursor:pointer;padding:0 6px;}
+    .compose-modal-close:hover{color:#ef4444;}
+    .compose-modal-body{position:relative;flex:1;background:#f8fafc;}
+    .compose-modal-iframe{width:100%;height:100%;border:0;display:block;}
+    .compose-modal-loader{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:14px;gap:8px;background:#f8fafc;}
+</style>
+
+<script>
+(function () {
+    var overlay = document.getElementById('composeModal');
+    var frame   = document.getElementById('composeModalFrame');
+    var loader  = document.getElementById('composeModalLoader');
+    var titleEl = document.getElementById('composeModalTitle');
+    var formMarker = '';
+    var firstLoadDone = false;
+
+    window.abrirComposeModal = function (url, marker, title) {
+        formMarker = (marker || '').toLowerCase();
+        firstLoadDone = false;
+        titleEl.textContent = title || 'Nova publicação';
+        loader.style.display = 'flex';
+        frame.src = url;
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    };
+
+    window.fecharComposeModal = function (reload) {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        frame.src = 'about:blank';
+        if (reload) { window.location.reload(); }
+    };
+
+    window.composeFrameLoaded = function () {
+        loader.style.display = 'none';
+        var path;
+        try {
+            path = frame.contentWindow.location.pathname.toLowerCase();
+        } catch (e) {
+            // cross-origin/redirect que não conseguimos ler -> assume sucesso
+            if (firstLoadDone) { window.fecharComposeModal(true); }
+            return;
+        }
+
+        if (!firstLoadDone) {
+            firstLoadDone = true;
+            return; // primeiro load = formulário
+        }
+
+        // Ainda no formulário (re-render por validação) -> mantém aberto.
+        // Saiu do formulário (redirect de sucesso) -> fecha e recarrega.
+        if (formMarker && path.indexOf(formMarker) === -1) {
+            window.fecharComposeModal(true);
+        }
+    };
+
+    overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) { window.fecharComposeModal(false); }
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) {
+            window.fecharComposeModal(false);
+        }
+    });
+})();
+</script>
 
 <?php init_tail(); ?>

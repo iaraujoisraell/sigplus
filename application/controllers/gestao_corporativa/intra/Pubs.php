@@ -25,6 +25,10 @@ class Pubs extends AdminController
 
     public function novo()
     {
+        if (!has_permission_intranet('publicacoes', '', 'create') && !is_admin()) {
+            access_denied('Publicações');
+        }
+
         $this->load->model('Categorias_campos_model');
         $_d['categories'] = $this->Categorias_campos_model->get('', 'atendimento', array('portal' => 1));
 
@@ -74,6 +78,9 @@ class Pubs extends AdminController
 
     function add_aviso()
     {
+        if (!has_permission_intranet('publicacoes', '', 'create') && !is_admin()) {
+            access_denied('Publicações');
+        }
 
         $id = $this->input->post('id');
         $config['upload_path'] = './assets/intranet/img/avisos/'; //pastaaaaa
