@@ -191,7 +191,7 @@ $me_empresa      = get_option('companyname');
                         <div class="feed-compose-actions">
                             <div class="feed-compose-action" role="button"
                                  onclick="abrirComposeModal('<?php echo $url_pub; ?>','pubs/novo','Nova Publicação')">
-                                <i class="fa fa-picture-o" style="color:#378fe9;"></i> Foto
+                                <i class="fa fa-pencil-square-o" style="color:#378fe9;"></i> Publicar
                             </div>
                         </div>
                     </div>
