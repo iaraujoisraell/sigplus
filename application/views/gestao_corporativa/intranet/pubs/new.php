@@ -66,48 +66,12 @@ $categories = isset($categories) ? $categories : [];
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="align-items-center row"
-                                        style="align-items: center; justify-content: center;">
-                                        <div class="icheck-primary d-inline mr-3 col-md-4">
-                                            <input type="radio" id="radioPrimary1" name="radio" value="1" <?php if ($aviso->tipo == 1) {
-                                                echo 'checked';
-                                            } ?>>
-                                            <label for="radioPrimary1">
-                                                <span class="control-label">Banner</span><br><span
-                                                    id="dimension1">1200x500</span>
-                                            </label>
-                                        </div>
-                                        <div class="icheck-primary d-inline mr-3 col-md-4">
-                                            <input type="radio" id="radioPrimary2" name="radio" value="2" <?php if ($aviso->tipo == 2) {
-                                                echo 'checked';
-                                            } ?>>
-                                            <label for="radioPrimary2">
-                                                <span class="control-label">Pop-up</span><br><span
-                                                    id="dimension2">284x224</span>
-                                            </label>
-                                        </div>
-                                        <div class="icheck-primary d-inline col-md-4">
-                                            <input type="radio" id="radioPrimary3" name="radio" value="3" <?php if ($aviso->tipo == 3) {
-                                                echo 'checked';
-                                            } ?>>
-                                            <label for="radioPrimary3">
-                                                <span class="control-label">Noticia</span><br><span
-                                                    id="dimension3">400x320</span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
 
-                            <br>
-                            <div class="form-group row">
-                                <label class="col-sm-3 col-form-label">Disponível até:</label>
-                                <div class="col-sm-9">
-                                    <input class="form-control" type="date" value="<?php echo date($aviso->fim); ?>"
-                                        name="fim">
-                                </div>
-                            </div>
+                            <?php // Publicação pela home: tipo fixo (Notícia) e validade longa ?>
+                            <input type="hidden" name="radio" value="<?php echo $aviso->tipo ?: 3; ?>">
+                            <input type="hidden" name="fim" value="<?php echo $aviso->fim && $aviso->fim != '0000-00-00' ? $aviso->fim : '2099-12-31'; ?>">
+
                             <br>
                             <div class="form-group row">
                                 <label class="col-sm-3 col-form-label">Link:</label>
@@ -173,21 +137,6 @@ $categories = isset($categories) ? $categories : [];
 <?php init_tail(); ?>
 
 <script src="<?php echo base_url() ?>assets/intranet/ckeditor/ckeditor.js"></script>
-<script>
-    document.getElementById('categoria_id').addEventListener('change', function () {
-        var selectedValue = this.value;
-
-        if (selectedValue > 0) {
-            document.getElementById('dimension1').innerText = '1106x475';
-            //document.getElementById('dimension2').innerText = '800x600';
-            document.getElementById('dimension3').innerText = '2100x400';
-        } else {
-            document.getElementById('dimension1').innerText = '1200x500';
-            //document.getElementById('dimension2').innerText = 'XXXxXXX';
-            document.getElementById('dimension3').innerText = '400x320';
-        }
-    });
-</script>
 <script>
     CKEDITOR.replace('descricao');
 </script>

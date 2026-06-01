@@ -367,11 +367,16 @@ $me_empresa      = get_option('companyname');
         overlay.classList.remove('open');
         overlay.setAttribute('aria-hidden', 'true');
         document.body.style.overflow = '';
+        firstLoadDone = false;
         frame.src = 'about:blank';
         if (reload) { window.location.reload(); }
     };
 
     window.composeFrameLoaded = function () {
+        // Ignora loads de about:blank (load inicial da página e ao fechar o modal)
+        var src = frame.getAttribute('src') || '';
+        if (src === '' || src === 'about:blank') { return; }
+
         loader.style.display = 'none';
         var path;
         try {
