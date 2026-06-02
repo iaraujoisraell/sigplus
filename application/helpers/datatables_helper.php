@@ -290,6 +290,184 @@ function data_tables_init($aColumns, $sIndexColumn, $sTable, $join = [], $where 
     ];
 }
 
+/**
+ * Versao otimizada do data_tables_init usada SOMENTE pela listagem do Workflow.
+ * Diferencas em relacao ao data_tables_init padrao:
+ *  - NAO usa SQL_CALC_FOUND_ROWS (deprecated no MySQL 8 e forca varrer todo o
+ *    conjunto + ORDER BY ignorando o LIMIT, encarecendo ate paginas pequenas).
+ *    A contagem vai numa query COUNT(*) separada, sem ORDER BY e selecionando
+ *    apenas a coluna de indice -> o otimizador escolhe um plano bem mais barato.
+ *  - Limita o "Exibir todos" (length = -1) a um teto seguro pra nao travar o
+ *    servidor quando o resultado for muito grande.
+ * Mantem a mesma assinatura/retorno de data_tables_init pra ser plugavel.
+ */
+function data_tables_init_workflow($aColumns, $sIndexColumn, $sTable, $join = [], $where = [], $additionalSelect = [], $sGroupBy = '', $searchAs = [], $orderBy = '', $staff = '')
+{
+    $CI = &get_instance();
+    $__post = $CI->input->post();
+
+    // Teto pra "Exibir todos". Acima disso o navegador trava e o ganho e nulo.
+    $max_all_rows = 2000;
+
+    /*
+     * Paging
+     */
+    $sLimit = '';
+    if ($CI->input->post('length') == '-1') {
+        // "Exibir todos" -> aplica teto de seguranca em vez de buscar sem limite
+        $sLimit = 'LIMIT 0, ' . $max_all_rows;
+    } elseif (is_numeric($CI->input->post('start'))) {
+        $sLimit = 'LIMIT ' . intval($CI->input->post('start')) . ', ' . intval($CI->input->post('length'));
+    }
+
+    $_aColumns = [];
+    foreach ($aColumns as $column) {
+        if (substr_count($column, '.') == 1 && strpos($column, ' as ') === false) {
+            $_column = explode('.', $column);
+            if (isset($_column[1])) {
+                if (startsWith($_column[0], db_prefix())) {
+                    $_prefix = prefixed_table_fields_wildcard($_column[0], $_column[0], $_column[1]);
+                    array_push($_aColumns, $_prefix);
+                } else {
+                    array_push($_aColumns, $column);
+                }
+            } else {
+                array_push($_aColumns, $_column[0]);
+            }
+        } else {
+            array_push($_aColumns, $column);
+        }
+    }
+
+    /*
+     * Ordering
+     */
+    $nullColumnsAsLast = get_null_columns_that_should_be_sorted_as_last();
+    $sOrder = '';
+    if ($CI->input->post('order')) {
+        $sOrder = 'ORDER BY ';
+        foreach ($CI->input->post('order') as $key => $val) {
+            $columnName = $aColumns[intval($__post['order'][$key]['column'])];
+            $dir = strtoupper($__post['order'][$key]['dir']);
+
+            if (strpos($columnName, ' as ') !== false) {
+                $columnName = strbefore($columnName, ' as');
+            }
+            if (
+                (in_array($sTable . '.' . $columnName, $nullColumnsAsLast)
+                    || in_array($columnName, $nullColumnsAsLast))
+            ) {
+                $sOrder .= $columnName . ' IS NULL ' . $dir . ', ' . $columnName;
+            } else {
+                $sOrder .= hooks()->apply_filters('datatables_query_order_column', $columnName, $sTable);
+            }
+            $sOrder .= ' ' . $dir . ', ';
+        }
+        if (trim($sOrder) == 'ORDER BY') {
+            $sOrder = '';
+        }
+        $sOrder = rtrim($sOrder, ', ');
+    }
+
+    /*
+     * Filtering (busca global da caixa do datatable)
+     */
+    $sWhere = '';
+    if ((isset($__post['search'])) && $__post['search']['value'] != '') {
+        $search_value = trim($__post['search']['value']);
+        $sWhere = 'WHERE (';
+        for ($i = 0; $i < count($aColumns); $i++) {
+            $columnName = $aColumns[$i];
+            if (strpos($columnName, ' as ') !== false) {
+                $columnName = strbefore($columnName, ' as');
+            }
+            if (stripos($columnName, 'AVG(') !== false || stripos($columnName, 'SUM(') !== false) {
+                continue;
+            }
+            if (($__post['columns'][$i]) && $__post['columns'][$i]['searchable'] == 'true') {
+                if (isset($searchAs[$i])) {
+                    $columnName = $searchAs[$i];
+                }
+                $sWhere .= 'convert(' . $columnName . ' USING utf8)' . " LIKE '%" . $CI->db->escape_like_str($search_value) . "%' OR ";
+            }
+        }
+        if (count($additionalSelect) > 0) {
+            foreach ($additionalSelect as $searchAdditionalField) {
+                if (strpos($searchAdditionalField, ' as ') !== false) {
+                    $searchAdditionalField = strbefore($searchAdditionalField, ' as');
+                }
+                $sWhere .= 'convert(' . $searchAdditionalField . ' USING utf8)' . " LIKE '%" . $CI->db->escape_like_str($search_value) . "%' OR ";
+            }
+        }
+        $sWhere = substr_replace($sWhere, '', -3);
+        $sWhere .= ')';
+    }
+
+    /*
+     * SQL queries
+     */
+    $_additionalSelect = '';
+    if (count($additionalSelect) > 0) {
+        $_additionalSelect = ',' . implode(',', $additionalSelect);
+    }
+
+    $where = implode(' ', $where);
+    if ($sWhere == '') {
+        $where = trim($where);
+        if (startsWith($where, 'AND') || startsWith($where, 'OR')) {
+            if (startsWith($where, 'OR')) {
+                $where = substr($where, 2);
+            } else {
+                $where = substr($where, 3);
+            }
+            $where = 'WHERE ' . $where;
+        }
+    }
+
+    $join = implode(' ', $join);
+
+    if ($orderBy) {
+        $sOrder = $orderBy;
+    }
+
+    // FROM/JOIN/WHERE/GROUP BY identicos entre dados e contagem -> totais batem
+    $sFrom = "
+    FROM $sTable
+    " . $join . "
+    $sWhere
+    " . $where . "
+    $sGroupBy ";
+
+    $sQuery = '
+    SELECT ' . str_replace(' , ', ' ', implode(', ', $_aColumns)) . ' ' . $_additionalSelect . "
+    $sFrom
+    $sOrder $sLimit
+    ";
+    $rResult = $CI->db->query($sQuery)->result_array();
+    $rResult = hooks()->apply_filters('datatables_sql_query_results', $rResult, [
+        'table' => $sTable,
+        'limit' => $sLimit,
+        'order' => $sOrder,
+    ]);
+
+    /* Total filtrado: COUNT(*) barato (sem ORDER BY, so a coluna de indice) */
+    $countQuery = "SELECT COUNT(*) AS cnt FROM (SELECT $sTable.$sIndexColumn $sFrom) dt_count";
+    $cRes = $CI->db->query($countQuery)->result_array();
+    $iFilteredTotal = $cRes[0]['cnt'];
+
+    $output = [
+        'draw' => $__post['draw'] ? intval($__post['draw']) : 0,
+        'iTotalRecords' => 0,
+        'iTotalDisplayRecords' => $iFilteredTotal,
+        'aaData' => [],
+    ];
+
+    return [
+        'rResult' => $rResult,
+        'output' => $output,
+    ];
+}
+
 function data_tables_init_escala_fixa($aColumns, $sIndexColumn, $sTable, $join = [], $where = [], $additionalSelect = [], $sGroupBy = '', $searchAs = [], $orderBy = '')
 {
     $CI = &get_instance();

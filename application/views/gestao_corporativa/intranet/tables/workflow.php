@@ -308,9 +308,31 @@ $this->ci->Intranet_general_model->update_filters($filters, 'workflow', $type);
 
 //$qtd_filtro = count($filtro);
 
-$result = data_tables_init($aColumns, $sIndexColumn, $sTable, $join, $where, $additionalSelect, $GroupBy, "", "", get_staff_user_id());
+$result = data_tables_init_workflow($aColumns, $sIndexColumn, $sTable, $join, $where, $additionalSelect, $GroupBy, "", "", get_staff_user_id());
 $output = $result['output'];
 $rResult = $result['rResult'];
+
+// Campos chave em lote: 1 query pra todas as linhas em vez de 1 por workflow
+// (evita N+1 na tabela gigante tbl_intranet_categorias_campo_values).
+$campos_chave_map = [];
+if ($post['settings_campos_chaves_id'] && count($rResult)) {
+    $ids_cc = array_map(function ($r) {
+        return (int) $r['id'];
+    }, $rResult);
+    $ids_in = implode(',', $ids_cc);
+    $empresa_cc = $this->ci->session->userdata('empresa_id');
+    $sql_cc = "SELECT v.rel_id, c.nome AS nome_campo, v.value, c.type AS tipo_campo
+               FROM tbl_intranet_categorias_campo_values v
+               LEFT JOIN tbl_intranet_categorias_campo c ON c.id = v.campo_id
+               WHERE v.empresa_id = $empresa_cc AND v.deleted = 0 AND v.rel_type = 'workflow'
+                 AND v.rel_id IN ($ids_in) AND c.chave = 1
+               ORDER BY c.ordem ASC";
+    $rows_cc = $this->ci->db->query($sql_cc)->result_array();
+    foreach ($rows_cc as $rc) {
+        $valor = get_value('workflow', $rc['value'], $rc['tipo_campo']);
+        $campos_chave_map[$rc['rel_id']][] = $rc['nome_campo'] . ': ' . $valor;
+    }
+}
 
 foreach ($rResult as $aRow) {
 
@@ -370,19 +392,10 @@ foreach ($rResult as $aRow) {
 
     
     if ($post['settings_campos_chaves_id']) {
-         $chaves = $this->ci->Categorias_campos_model->get_values($aRow['id'], 'workflow', '0', true, false, true);
-         $informacoes_campos_chave = "";
-         foreach ($chaves as $info) {
-             $informacoes_campos_chave .= '' . $info['nome_campo'] . ': ' . $info['value'] . '<br>';
-         }
-         $campos_chave = strtoupper($informacoes_campos_chave) ;
-         
-         //. '<br>' . $informacoes;
- 
-       //  print_r($categoria); exit;
- 
-         $row[] = $campos_chave;
-     }
+        $linhas_cc = isset($campos_chave_map[$aRow['id']]) ? $campos_chave_map[$aRow['id']] : [];
+        $informacoes_campos_chave = $linhas_cc ? implode('<br>', $linhas_cc) . '<br>' : '';
+        $row[] = strtoupper($informacoes_campos_chave);
+    }
 
 
 

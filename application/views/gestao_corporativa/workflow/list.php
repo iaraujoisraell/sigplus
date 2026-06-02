@@ -4,6 +4,72 @@
 
 <?php $this->load->view('gestao_corporativa/css_background'); ?>
 
+<style>
+    .wf-active-filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+        margin: 10px 0;
+        padding: 8px 10px;
+        background: #f7f8fa;
+        border: 1px solid #e4e7eb;
+        border-radius: 6px;
+    }
+    .wf-active-filters .wf-chips-label {
+        font-size: 11px;
+        font-weight: bold;
+        color: #84909b;
+        margin-right: 4px;
+        text-transform: uppercase;
+    }
+    .wf-chip {
+        display: inline-flex;
+        align-items: center;
+        font-size: 12px;
+        line-height: 1;
+        background: #fff;
+        border: 1px solid #cfd6dd;
+        border-radius: 14px;
+        padding: 5px 8px 5px 10px;
+        color: #34495e;
+        white-space: nowrap;
+        max-width: 320px;
+    }
+    .wf-chip.wf-chip-mode {
+        background: #2c3e50;
+        border-color: #2c3e50;
+        color: #fff;
+    }
+    .wf-chip b {
+        font-weight: 600;
+        margin-right: 4px;
+    }
+    .wf-chip .wf-chip-text {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .wf-chip .wf-chip-x {
+        margin-left: 7px;
+        cursor: pointer;
+        color: #b0461f;
+        font-weight: bold;
+        border: 0;
+        background: transparent;
+        font-size: 14px;
+        line-height: 1;
+        padding: 0;
+    }
+    .wf-chip .wf-chip-x:hover {
+        color: #e74c3c;
+    }
+    .wf-active-filters .wf-chips-edit {
+        font-size: 11px;
+        margin-left: auto;
+        cursor: pointer;
+    }
+</style>
+
 
 
 <div class="content">
@@ -74,6 +140,10 @@
                                 ?>
                                 <a href="#" data-toggle="modal" data-target="#tickets_bulk_actions" class="bulk-actions-btn table-btn hide" data-table=".table-tickets"><?php echo _l('bulk_actions'); ?></a>
                                 <div class="clearfix"></div>
+
+                                <!-- BARRA DE FILTROS ATIVOS (chips) -->
+                                <div id="active_filters" class="wf-active-filters" style="display:none;"></div>
+
                                 <?php
                                 $table_data = [];
 
@@ -929,10 +999,114 @@
 
             initDataTable('.table-workflow', '<?php echo base_url(); ?>' + 'gestao_corporativa/workflow/table', [let], [let], Params, <?php echo hooks()->apply_filters('customers_table_default_order', json_encode(array(1, 'desc'))); ?>);
 
+            renderFilterChips();
+
             $('#filters').modal('hide');
             document.getElementById('btn_submit').disabled = false;
         });
     });
+
+    // ===== Barra de filtros ativos (chips) =====
+    var WF_FILTER_LABELS = {
+        categoria_id: 'Categoria',
+        departments: 'Setor',
+        status: 'Status',
+        period: 'Período',
+        concluido: 'Objetivo',
+        workflow_id: 'ID',
+        id: 'ID',
+        protocolo: 'Protocolo',
+        client: 'Cliente',
+        carteirinha: 'Carteirinha',
+        phase: 'Fase',
+        goal: 'Objetivo'
+    };
+
+    var WF_TYPE_LABELS = {
+        '0': 'Busca Geral',
+        '1': 'Meus (Cadastrados)',
+        '2': 'Objetivos Assumidos',
+        '3': 'Objetivos (Setor)'
+    };
+
+    function wfEscapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, function(c) {
+            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        });
+    }
+
+    function wfFieldText(name) {
+        var $el = $('#filters_form [name="' + name + '"], #filters_form [name="' + name + '[]"]').first();
+        if (!$el.length) return '';
+        if ($el.is('select')) {
+            var texts = [];
+            $el.find('option:selected').each(function() {
+                var t = $.trim($(this).text());
+                if (t !== '') texts.push(t);
+            });
+            return texts.join(', ');
+        }
+        return $.trim($el.val() || '');
+    }
+
+    function renderFilterChips() {
+        var $box = $('#active_filters');
+        var html = '<span class="wf-chips-label"><i class="fa fa-filter"></i> Filtros</span>';
+
+        // Modo (type) - chip nao removivel
+        var type = $('#filters_form input[name="type"]:checked').val();
+        if (type !== undefined && WF_TYPE_LABELS[type]) {
+            html += '<span class="wf-chip wf-chip-mode"><span class="wf-chip-text">' + WF_TYPE_LABELS[type] + '</span></span>';
+        }
+
+        var count = 0;
+
+        // Busca geral (type 0) usa apenas o ID
+        var fields = (type === '0') ? ['id'] : ['categoria_id', 'departments', 'status', 'period', 'concluido', 'workflow_id', 'protocolo', 'client', 'carteirinha', 'phase', 'goal'];
+
+        fields.forEach(function(name) {
+            var val = wfFieldText(name);
+            if (val === '' || val === '-') return;
+            count++;
+            html += '<span class="wf-chip"><b>' + WF_FILTER_LABELS[name] + ':</b>' +
+                '<span class="wf-chip-text">' + wfEscapeHtml(val) + '</span>' +
+                '<button type="button" class="wf-chip-x" title="Remover" onclick="removeFilter(\'' + name + '\')">&times;</button></span>';
+        });
+
+        // Intervalo de datas (de / ate) como um chip unico
+        if (type !== '0') {
+            var de = $.trim($('#filters_form [name="de"]').val() || '');
+            var ate = $.trim($('#filters_form [name="ate"]').val() || '');
+            if (de || ate) {
+                var rangeTxt = (de ? de.split('-').reverse().join('/') : '...') + ' a ' + (ate ? ate.split('-').reverse().join('/') : '...');
+                html += '<span class="wf-chip"><b>Data:</b><span class="wf-chip-text">' + rangeTxt + '</span>' +
+                    '<button type="button" class="wf-chip-x" title="Remover" onclick="removeFilter(\'__range\')">&times;</button></span>';
+            }
+        }
+
+        html += '<a class="wf-chips-edit text-info" onclick="filters();"><i class="fa fa-pencil"></i> Editar filtros</a>';
+
+        $box.html(html).show();
+    }
+
+    function removeFilter(name) {
+        if (name === '__range') {
+            $('#filters_form [name="de"]').val('');
+            $('#filters_form [name="ate"]').val('');
+        } else {
+            var $el = $('#filters_form [name="' + name + '"], #filters_form [name="' + name + '[]"]').first();
+            if ($el.is('select')) {
+                $el.val($el.prop('multiple') ? [] : '');
+                if (typeof $el.selectpicker === 'function') {
+                    $el.selectpicker('refresh');
+                }
+            } else {
+                $el.val('');
+            }
+        }
+        // Re-executa a busca com o filtro removido
+        $('#filters_form').submit();
+    }
 </script>
 </body>
 
