@@ -5,68 +5,41 @@
 <?php $this->load->view('gestao_corporativa/css_background'); ?>
 
 <style>
-    .wf-active-filters {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 6px;
-        margin: 10px 0;
-        padding: 8px 10px;
-        background: #f7f8fa;
+    /* Painel de filtros fixo acima da listagem (ex-modal) */
+    #filters_holder {
+        margin-bottom: 12px;
+    }
+    .wf-filter-inline {
+        background: #fff;
         border: 1px solid #e4e7eb;
         border-radius: 6px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
     }
-    .wf-active-filters .wf-chips-label {
-        font-size: 11px;
+    .wf-filter-inline .wf-filter-header {
+        padding: 10px 15px;
+        border-bottom: 1px solid #eef1f4;
+        background: #eafaf5;
+        border-left: 4px solid #16a085;
+        border-radius: 6px 6px 0 0;
+    }
+    .wf-filter-inline .wf-filter-header .modal-title {
+        font-size: 13px;
         font-weight: bold;
-        color: #84909b;
-        margin-right: 4px;
-        text-transform: uppercase;
+        margin: 0 0 6px 0;
+        display: inline-block;
     }
-    .wf-chip {
-        display: inline-flex;
-        align-items: center;
-        font-size: 12px;
-        line-height: 1;
-        background: #fff;
-        border: 1px solid #cfd6dd;
-        border-radius: 14px;
-        padding: 5px 8px 5px 10px;
-        color: #34495e;
-        white-space: nowrap;
-        max-width: 320px;
+    .wf-filter-inline .wf-filter-body {
+        padding: 12px 15px;
     }
-    .wf-chip.wf-chip-mode {
-        background: #2c3e50;
-        border-color: #2c3e50;
-        color: #fff;
+    .wf-filter-inline .wf-filter-footer {
+        padding: 10px 15px;
+        border-top: 1px solid #eef1f4;
+        text-align: right;
     }
-    .wf-chip b {
-        font-weight: 600;
-        margin-right: 4px;
-    }
-    .wf-chip .wf-chip-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .wf-chip .wf-chip-x {
-        margin-left: 7px;
-        cursor: pointer;
-        color: #b0461f;
-        font-weight: bold;
-        border: 0;
-        background: transparent;
-        font-size: 14px;
-        line-height: 1;
-        padding: 0;
-    }
-    .wf-chip .wf-chip-x:hover {
-        color: #e74c3c;
-    }
-    .wf-active-filters .wf-chips-edit {
-        font-size: 11px;
-        margin-left: auto;
-        cursor: pointer;
+    /* quando recolhido, esconde corpo e rodape, mantem o cabecalho */
+    .wf-filter-inline.wf-collapsed .wf-filter-body,
+    .wf-filter-inline.wf-collapsed .wf-filter-footer {
+        display: none;
     }
 </style>
 
@@ -75,7 +48,9 @@
 <div class="content">
     <div class="row">
         <div class="col-md-12">
-            <h5 style="font-weight: bold;">INTRANET - WORKFLOW</h5>
+            <h5 style="font-weight: bold; color:#16a085;">INTRANET - WORKFLOW
+                <span style="background:#16a085;color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;vertical-align:middle;">⚡ otimizado</span>
+            </h5>
             <div>
                 <ol class="breadcrumb" style="background-color: white;">
                     <li><a href="<?= base_url('gestao_corporativa/intranet'); ?>"><i class="fa fa-home"></i> Home </a></li>
@@ -141,8 +116,8 @@
                                 <a href="#" data-toggle="modal" data-target="#tickets_bulk_actions" class="bulk-actions-btn table-btn hide" data-table=".table-tickets"><?php echo _l('bulk_actions'); ?></a>
                                 <div class="clearfix"></div>
 
-                                <!-- BARRA DE FILTROS ATIVOS (chips) -->
-                                <div id="active_filters" class="wf-active-filters" style="display:none;"></div>
+                                <!-- PAINEL DE FILTROS FIXO (preenchido via JS a partir do antigo modal) -->
+                                <div id="filters_holder"></div>
 
                                 <?php
                                 $table_data = [];
@@ -627,19 +602,30 @@
         });
     });
 
+    // Converte o antigo modal de filtros num PAINEL FIXO acima da listagem
     $(function() {
-        filters();
+        var $f = $('#filters');
+        if (!$f.length) return;
+        $f.removeClass('modal fade').removeAttr('tabindex role aria-labelledby aria-hidden');
+        $f.find('.modal-dialog').removeClass('modal-dialog modal-lg');
+        $f.find('.modal-content').removeClass('modal-content').addClass('wf-filter-inline');
+        $f.find('.modal-header').removeClass('modal-header').addClass('wf-filter-header');
+        $f.find('.modal-header .close, .wf-filter-header .close').remove();
+        $f.find('.modal-body').removeClass('modal-body').addClass('wf-filter-body');
+        $f.find('.modal-footer').removeClass('modal-footer').addClass('wf-filter-footer');
+        $('#filters_holder').append($f);
+        $f.show();
+        if (typeof $.fn.selectpicker === 'function') {
+            $f.find('.selectpicker').selectpicker('refresh');
+        }
     });
 
+    // Botao de filtro agora recolhe/expande o painel fixo (nao e mais modal)
     function filters() {
-        if ($('#filters').is(':hidden')) {
-            // Se estiver oculto, exiba-o
-            $('#filters').modal({
-                show: true,
-                backdrop: 'static'
-            });
+        $('#filters .wf-filter-inline').toggleClass('wf-collapsed');
+        if ($('#filters_holder').length) {
+            $('html, body').animate({ scrollTop: $('#filters_holder').offset().top - 70 }, 200);
         }
-
     }
 
     function change_status(value) {
@@ -999,114 +985,11 @@
 
             initDataTable('.table-workflow', '<?php echo base_url(); ?>' + 'gestao_corporativa/workflow/table', [let], [let], Params, <?php echo hooks()->apply_filters('customers_table_default_order', json_encode(array(1, 'desc'))); ?>);
 
-            renderFilterChips();
-
-            $('#filters').modal('hide');
+            // recolhe o painel apos buscar pra dar espaco a listagem (cabecalho continua visivel)
+            $('#filters .wf-filter-inline').addClass('wf-collapsed');
             document.getElementById('btn_submit').disabled = false;
         });
     });
-
-    // ===== Barra de filtros ativos (chips) =====
-    var WF_FILTER_LABELS = {
-        categoria_id: 'Categoria',
-        departments: 'Setor',
-        status: 'Status',
-        period: 'Período',
-        concluido: 'Objetivo',
-        workflow_id: 'ID',
-        id: 'ID',
-        protocolo: 'Protocolo',
-        client: 'Cliente',
-        carteirinha: 'Carteirinha',
-        phase: 'Fase',
-        goal: 'Objetivo'
-    };
-
-    var WF_TYPE_LABELS = {
-        '0': 'Busca Geral',
-        '1': 'Meus (Cadastrados)',
-        '2': 'Objetivos Assumidos',
-        '3': 'Objetivos (Setor)'
-    };
-
-    function wfEscapeHtml(str) {
-        return String(str).replace(/[&<>"']/g, function(c) {
-            return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
-        });
-    }
-
-    function wfFieldText(name) {
-        var $el = $('#filters_form [name="' + name + '"], #filters_form [name="' + name + '[]"]').first();
-        if (!$el.length) return '';
-        if ($el.is('select')) {
-            var texts = [];
-            $el.find('option:selected').each(function() {
-                var t = $.trim($(this).text());
-                if (t !== '') texts.push(t);
-            });
-            return texts.join(', ');
-        }
-        return $.trim($el.val() || '');
-    }
-
-    function renderFilterChips() {
-        var $box = $('#active_filters');
-        var html = '<span class="wf-chips-label"><i class="fa fa-filter"></i> Filtros</span>';
-
-        // Modo (type) - chip nao removivel
-        var type = $('#filters_form input[name="type"]:checked').val();
-        if (type !== undefined && WF_TYPE_LABELS[type]) {
-            html += '<span class="wf-chip wf-chip-mode"><span class="wf-chip-text">' + WF_TYPE_LABELS[type] + '</span></span>';
-        }
-
-        var count = 0;
-
-        // Busca geral (type 0) usa apenas o ID
-        var fields = (type === '0') ? ['id'] : ['categoria_id', 'departments', 'status', 'period', 'concluido', 'workflow_id', 'protocolo', 'client', 'carteirinha', 'phase', 'goal'];
-
-        fields.forEach(function(name) {
-            var val = wfFieldText(name);
-            if (val === '' || val === '-') return;
-            count++;
-            html += '<span class="wf-chip"><b>' + WF_FILTER_LABELS[name] + ':</b>' +
-                '<span class="wf-chip-text">' + wfEscapeHtml(val) + '</span>' +
-                '<button type="button" class="wf-chip-x" title="Remover" onclick="removeFilter(\'' + name + '\')">&times;</button></span>';
-        });
-
-        // Intervalo de datas (de / ate) como um chip unico
-        if (type !== '0') {
-            var de = $.trim($('#filters_form [name="de"]').val() || '');
-            var ate = $.trim($('#filters_form [name="ate"]').val() || '');
-            if (de || ate) {
-                var rangeTxt = (de ? de.split('-').reverse().join('/') : '...') + ' a ' + (ate ? ate.split('-').reverse().join('/') : '...');
-                html += '<span class="wf-chip"><b>Data:</b><span class="wf-chip-text">' + rangeTxt + '</span>' +
-                    '<button type="button" class="wf-chip-x" title="Remover" onclick="removeFilter(\'__range\')">&times;</button></span>';
-            }
-        }
-
-        html += '<a class="wf-chips-edit text-info" onclick="filters();"><i class="fa fa-pencil"></i> Editar filtros</a>';
-
-        $box.html(html).show();
-    }
-
-    function removeFilter(name) {
-        if (name === '__range') {
-            $('#filters_form [name="de"]').val('');
-            $('#filters_form [name="ate"]').val('');
-        } else {
-            var $el = $('#filters_form [name="' + name + '"], #filters_form [name="' + name + '[]"]').first();
-            if ($el.is('select')) {
-                $el.val($el.prop('multiple') ? [] : '');
-                if (typeof $el.selectpicker === 'function') {
-                    $el.selectpicker('refresh');
-                }
-            } else {
-                $el.val('');
-            }
-        }
-        // Re-executa a busca com o filtro removido
-        $('#filters_form').submit();
-    }
 </script>
 </body>
 
