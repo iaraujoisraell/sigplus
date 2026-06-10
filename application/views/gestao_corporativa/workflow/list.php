@@ -4,53 +4,12 @@
 
 <?php $this->load->view('gestao_corporativa/css_background'); ?>
 
-<style>
-    /* Painel de filtros fixo acima da listagem (ex-modal) */
-    #filters_holder {
-        margin-bottom: 12px;
-    }
-    .wf-filter-inline {
-        background: #fff;
-        border: 1px solid #e4e7eb;
-        border-radius: 6px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-    }
-    .wf-filter-inline .wf-filter-header {
-        padding: 10px 15px;
-        border-bottom: 1px solid #eef1f4;
-        background: #eafaf5;
-        border-left: 4px solid #16a085;
-        border-radius: 6px 6px 0 0;
-    }
-    .wf-filter-inline .wf-filter-header .modal-title {
-        font-size: 13px;
-        font-weight: bold;
-        margin: 0 0 6px 0;
-        display: inline-block;
-    }
-    .wf-filter-inline .wf-filter-body {
-        padding: 12px 15px;
-    }
-    .wf-filter-inline .wf-filter-footer {
-        padding: 10px 15px;
-        border-top: 1px solid #eef1f4;
-        text-align: right;
-    }
-    /* quando recolhido, esconde corpo e rodape, mantem o cabecalho */
-    .wf-filter-inline.wf-collapsed .wf-filter-body,
-    .wf-filter-inline.wf-collapsed .wf-filter-footer {
-        display: none;
-    }
-</style>
-
 
 
 <div class="content">
     <div class="row">
         <div class="col-md-12">
-            <h5 style="font-weight: bold; color:#16a085;">INTRANET - WORKFLOW
-                <span style="background:#16a085;color:#fff;font-size:10px;padding:2px 7px;border-radius:10px;vertical-align:middle;">⚡ otimizado</span>
-            </h5>
+            <h5 style="font-weight: bold;">INTRANET - WORKFLOW</h5>
             <div>
                 <ol class="breadcrumb" style="background-color: white;">
                     <li><a href="<?= base_url('gestao_corporativa/intranet'); ?>"><i class="fa fa-home"></i> Home </a></li>
@@ -115,10 +74,6 @@
                                 ?>
                                 <a href="#" data-toggle="modal" data-target="#tickets_bulk_actions" class="bulk-actions-btn table-btn hide" data-table=".table-tickets"><?php echo _l('bulk_actions'); ?></a>
                                 <div class="clearfix"></div>
-
-                                <!-- PAINEL DE FILTROS FIXO (preenchido via JS a partir do antigo modal) -->
-                                <div id="filters_holder"></div>
-
                                 <?php
                                 $table_data = [];
 
@@ -602,30 +557,19 @@
         });
     });
 
-    // Converte o antigo modal de filtros num PAINEL FIXO acima da listagem
     $(function() {
-        var $f = $('#filters');
-        if (!$f.length) return;
-        $f.removeClass('modal fade').removeAttr('tabindex role aria-labelledby aria-hidden');
-        $f.find('.modal-dialog').removeClass('modal-dialog modal-lg');
-        $f.find('.modal-content').removeClass('modal-content').addClass('wf-filter-inline');
-        $f.find('.modal-header').removeClass('modal-header').addClass('wf-filter-header');
-        $f.find('.modal-header .close, .wf-filter-header .close').remove();
-        $f.find('.modal-body').removeClass('modal-body').addClass('wf-filter-body');
-        $f.find('.modal-footer').removeClass('modal-footer').addClass('wf-filter-footer');
-        $('#filters_holder').append($f);
-        $f.show();
-        if (typeof $.fn.selectpicker === 'function') {
-            $f.find('.selectpicker').selectpicker('refresh');
-        }
+        filters();
     });
 
-    // Botao de filtro agora recolhe/expande o painel fixo (nao e mais modal)
     function filters() {
-        $('#filters .wf-filter-inline').toggleClass('wf-collapsed');
-        if ($('#filters_holder').length) {
-            $('html, body').animate({ scrollTop: $('#filters_holder').offset().top - 70 }, 200);
+        if ($('#filters').is(':hidden')) {
+            // Se estiver oculto, exiba-o
+            $('#filters').modal({
+                show: true,
+                backdrop: 'static'
+            });
         }
+
     }
 
     function change_status(value) {
@@ -985,8 +929,7 @@
 
             initDataTable('.table-workflow', '<?php echo base_url(); ?>' + 'gestao_corporativa/workflow/table', [let], [let], Params, <?php echo hooks()->apply_filters('customers_table_default_order', json_encode(array(1, 'desc'))); ?>);
 
-            // recolhe o painel apos buscar pra dar espaco a listagem (cabecalho continua visivel)
-            $('#filters .wf-filter-inline').addClass('wf-collapsed');
+            $('#filters').modal('hide');
             document.getElementById('btn_submit').disabled = false;
         });
     });
